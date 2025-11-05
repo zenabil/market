@@ -12,6 +12,8 @@ export type Product = {
   barcode: string;
   sold: number;
   discount: number; // Percentage
+  averageRating?: number;
+  reviewCount?: number;
 };
 
 export type Category = {
@@ -63,6 +65,16 @@ export type Coupon = {
   discountPercentage: number;
   expiryDate: string; // ISO string
   isActive: boolean;
+};
+
+export type Review = {
+    id: string;
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    rating: number;
+    comment: string;
+    createdAt: string; // ISO string
 };
 
 

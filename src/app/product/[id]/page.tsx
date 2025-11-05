@@ -10,12 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
-import { ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where, limit, documentId } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import StarRating from '@/components/product/star-rating';
+import ProductReviews from '@/components/product/product-reviews';
 
 
 function ProductDetails({ productId }: { productId: string }) {
@@ -100,6 +102,7 @@ function ProductDetails({ productId }: { productId: string }) {
   };
 
   return (
+    <>
     <div className="container py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div>
@@ -133,6 +136,12 @@ function ProductDetails({ productId }: { productId: string }) {
         </div>
         <div className="flex flex-col">
           <h1 className="font-headline text-3xl md:text-4xl lg:text-5xl">{product.name[locale]}</h1>
+          <div className="mt-2 flex items-center gap-2">
+            <StarRating rating={product.averageRating || 0} />
+            <span className="text-sm text-muted-foreground">
+                ({product.reviewCount || 0} {t('product.reviews.count')})
+            </span>
+          </div>
           <div className="mt-4 flex items-baseline gap-3">
             <p className="text-3xl font-bold text-primary">{formatCurrency(discountedPrice)}</p>
             {product.discount > 0 && (
@@ -181,13 +190,16 @@ function ProductDetails({ productId }: { productId: string }) {
            </p>
         </div>
       </div>
-
-      {relatedProducts && relatedProducts.length > 0 && (
-        <div className="mt-16 md:mt-24">
-          <ProductGrid title={t('product.related_products')} products={relatedProducts} />
-        </div>
-      )}
     </div>
+    
+    <ProductReviews productId={productId} />
+
+    {relatedProducts && relatedProducts.length > 0 && (
+    <div className="container mt-16 md:mt-24 pb-12">
+        <ProductGrid title={t('product.related_products')} products={relatedProducts} />
+    </div>
+    )}
+    </>
   );
 }
 

@@ -9,6 +9,7 @@
  *
  * Data Structure:
  * - `/products/{productId}`: Publicly readable product information.
+ * - `/products/{productId}/reviews/{reviewId}`: Publicly readable, owner-writable reviews.
  * - `/categories/{categoryId}`: Publicly readable category information.
  * - `/users/{userId}`: User profile data, accessible only to the user and admins.
  * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
@@ -17,7 +18,7 @@
  * - `/settings/site`: Global site settings, publicly readable.
  *
  * Key Security Decisions:
- * - Products and Categories are publicly readable.
+ * - Products, Categories, and Reviews are publicly readable.
  * - User listing is disallowed for regular users, but allowed for admins.
  * - Default security posture for ambiguous relationships is strict owner-only access.
  *
@@ -31,14 +32,32 @@ service cloud.firestore {
 
     /**
      * @description Allows anyone to read product information, but restricts creation, updates, and deletion to admins.
+     * Calculated fields like averageRating and reviewCount should only be updated by backend functions.
      * @path /products/{productId}
      * @allow get, list: if true;
-     * @allow create, update, delete: if isAdmin();
-     * @principle Public read, admin write for products.
+     * @allow create, delete: if isAdmin();
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+     * @principle Public read, admin write for products. Protect calculated fields.
      */
     match /products/{productId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+
+      /**
+       * @description Allows anyone to read reviews, but only signed-in users can create/update their own.
+       * @path /products/{productId}/reviews/{reviewId}
+       * @allow get, list: if true;
+       * @allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+       * @allow update: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @allow delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @principle Public read, owner-only write for reviews.
+       */
+      match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+        allow update, delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+      }
     }
 
     /**
@@ -155,6 +174,10 @@ service cloud.firestore {
   function isOwner(userId) {
     return request.auth.uid == userId;
   }
+  
+  function isReviewOwner(userId) {
+    return isOwner(userId) && request.resource.data.userId == request.auth.uid;
+  }
 
   function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
@@ -167,7 +190,7 @@ service cloud.firestore {
   function isFirstUser() {
     // This function is now only used for creating the first admin role.
     // It checks if there are NO documents in the 'users' collection at all.
-    return get(/databases/$(database)/documents/users).size == 0;
+    return !exists(/databases/$(database)/documents/users);
   }
   
   function isUpdatingOwnData() {
@@ -200,5 +223,15 @@ service cloud.firestore {
       request.resource.data.registrationDate == resource.data.registrationDate &&
       request.resource.data.orderCount == resource.data.orderCount &&
       request.resource.data.totalSpent == resource.data.totalSpent;
+  }
+
+  function isNotUpdatingCalculatedFields() {
+    // Prevent client-side updates to calculated fields on products.
+    let disallowedFields = ['averageRating', 'reviewCount'];
+    let incomingKeys = request.resource.data.keys();
+
+    return incomingKeys.hasAll(disallowedFields) == false ||
+           (request.resource.data.averageRating == resource.data.averageRating &&
+            request.resource.data.reviewCount == resource.data.reviewCount);
   }
 }

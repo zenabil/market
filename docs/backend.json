@@ -59,6 +59,14 @@
         "discount": {
           "type": "number",
           "description": "Discount percentage for the product."
+        },
+        "averageRating": {
+            "type": "number",
+            "description": "The average rating of the product, from 0 to 5."
+        },
+        "reviewCount": {
+            "type": "number",
+            "description": "The total number of reviews for the product."
         }
       },
       "required": [
@@ -345,6 +353,42 @@
             "expiryDate",
             "isActive"
         ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a user review for a product.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who wrote the review."
+        },
+        "userName": {
+          "type": "string",
+          "description": "Name of the user who wrote the review (denormalized)."
+        },
+        "userAvatar": {
+          "type": "string",
+          "description": "Avatar URL of the user (denormalized)."
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating from 1 to 5.",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "comment": {
+          "type": "string",
+          "description": "The user's comment."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the review was created."
+        }
+      },
+      "required": ["userId", "userName", "rating", "createdAt"]
     }
   },
   "auth": {
@@ -357,6 +401,10 @@
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },
       "description": "Stores product information. No denormalized authorization fields are included because all products are publicly readable."
+    },
+    "/products/{productId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews for a specific product. Writable by the user who owns the review."
     },
     "/categories/{categoryId}": {
       "schema": { "$ref": "#/entities/Category" },
