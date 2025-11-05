@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useLanguage } from '@/hooks/use-language';
 import { useFirestore, useCollectionGroup, useMemoFirebase } from '@/firebase';
-import { collectionGroup, query, orderBy } from 'firebase/firestore';
+import { collectionGroup, query, orderBy, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/placeholder-data';
@@ -14,10 +14,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { updateDocumentNonBlocking } from '@/firebase';
-import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
@@ -91,7 +92,7 @@ export default function AdminOrdersPage() {
                   <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                   <TableCell className="text-right"><Skeleton className="h-5 w-24 ml-auto" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
               ))}
               {orders && orders.map(order => (
@@ -103,7 +104,7 @@ export default function AdminOrdersPage() {
                     <Badge variant={getStatusVariant(order.status)}>{t(`orders.status_types.${order.status.toLowerCase()}`)}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -112,7 +113,10 @@ export default function AdminOrdersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>{t('dashboard.orders.actions')}</DropdownMenuLabel>
                           <DropdownMenuItem>{t('dashboard.orders.view_details')}</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>{t('dashboard.orders.change_status')}</DropdownMenuLabel>
                           {orderStatuses.map(status => (
                             <DropdownMenuItem 
                               key={status} 
