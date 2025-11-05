@@ -302,7 +302,9 @@
         }
       },
       "required": [
-        "siteName"
+        "siteName",
+        "phone",
+        "address"
       ]
     }
   },
