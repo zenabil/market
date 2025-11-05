@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Gem } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins: { id: string }[] | null, setAdmins: React.Dispatch<React.SetStateAction<{ id: string; }[] | null>> }) {
   const { t } = useLanguage();
@@ -68,7 +69,7 @@ function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins:
             aria-label={`Toggle admin status for ${user.name}`}
             disabled={isLoading}
         />
-        <span>{isAdmin ? t('dashboard.users.admin') : t('dashboard.users.user_role')}</span>
+        <span>{isAdmin ? <Badge variant="secondary">{t('dashboard.users.admin')}</Badge> : t('dashboard.users.user_role')}</span>
     </div>
   );
 }
