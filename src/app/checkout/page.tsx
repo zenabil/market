@@ -163,17 +163,15 @@ export default function CheckoutPage() {
       router.push('/dashboard/orders');
 
     } catch (error: any) {
-      // Errors from placeOrder (like stock issues) will be caught here.
-      // Permission errors are handled by the emitter in placeOrder.
+      // Errors from placeOrder (like stock issues or permission errors that were re-thrown) will be caught here.
+      // The error emitter in placeOrder handles the detailed debug view for permission errors.
       toast({
         variant: "destructive",
         title: t('checkout.order_failed_title'),
         description: error.message || t('checkout.order_failed_desc'),
       });
     } finally {
-      if (!isProcessing) { // Only set to false if it wasn't already set by an error
-        setIsProcessing(false);
-      }
+      setIsProcessing(false);
     }
   }
   

@@ -100,7 +100,7 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
     transaction.update(userRef, userUpdateData);
   }).catch((e) => {
     // Check if the error is likely a permission error.
-    if (e.code === 'permission-denied' || e.name === 'FirebaseError' && e.message.includes('permission')) {
+    if (e.code === 'permission-denied' || (e.name === 'FirebaseError' && e.message.includes('permission'))) {
       const permissionError = new FirestorePermissionError({
         path: `users/${userId}/orders`, // Primary path
         operation: 'create',
