@@ -56,7 +56,7 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
   const couponFormSchema = z.object({
     code: z.string().min(4, { message: 'Code must be at least 4 characters.' }).max(20),
     discountPercentage: z.coerce.number().min(1).max(100),
-    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date" }),
+    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: t('dashboard.coupons.invalid_date') }),
   });
 
   const form = useForm<z.infer<typeof couponFormSchema>>({
