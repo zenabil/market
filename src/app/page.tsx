@@ -15,6 +15,12 @@ function HomeProducts() {
   const firestore = useFirestore();
   const { t } = useLanguage();
 
+  const allProductsQuery = useMemoFirebase(
+    () => query(collection(firestore, 'products')),
+    [firestore]
+  );
+  const { data: allProducts, isLoading: isLoadingAllProducts } = useCollection<Product>(allProductsQuery);
+
   const bestSellersQuery = useMemoFirebase(
     () => query(collection(firestore, 'products'), orderBy('sold', 'desc'), limit(8)),
     [firestore]
@@ -29,7 +35,9 @@ function HomeProducts() {
   
   const categories = getCategories();
 
-  if (isLoadingBestSellers || isLoadingOffers) {
+  const isLoading = isLoadingAllProducts || isLoadingBestSellers || isLoadingOffers;
+
+  if (isLoading) {
     return (
        <div className="container py-8 md:py-12">
           <div className="mt-12 md:mt-16">
@@ -53,6 +61,7 @@ function HomeProducts() {
       categories={categories}
       bestSellers={bestSellers || []}
       exclusiveOffers={exclusiveOffers || []}
+      allProducts={allProducts || []}
     />
   );
 }
