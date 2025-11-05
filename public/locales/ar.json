@@ -1,32 +1,17 @@
-
 {
   "site_name": "سوبر ماركت تلمسان الذكي",
   "nav": {
     "home": "الرئيسية",
     "products": "المنتجات",
-    "about": "عنا",
+    "about": "من نحن",
     "contact": "اتصل بنا",
     "dashboard": "لوحة التحكم"
   },
   "header": {
-    "search_placeholder": "ابحث عن المنتجات..."
-  },
-  "hero": {
-    "slide1_heading": "منتجات طازجة تصل إلى باب منزلك",
-    "slide1_subheading": "أفضل أنواع الفواكه والخضروات والمزيد، يتم توصيلها يوميًا.",
-    "slide2_heading": "عروض لا تقاوم",
-    "slide2_subheading": "استمتع بخصومات حصرية على المنتجات التي تحبها.",
-    "slide3_heading": "من مخبزنا إلى مائدتك",
-    "slide3_subheading": "خبز وحلويات طازجة ومخبوزة بحب.",
-    "shop_now": "تسوق الآن"
-  },
-  "homepage": {
-    "categories": "تصفح حسب الفئة",
-    "best_sellers": "الأكثر مبيعًا",
-    "exclusive_offers": "عروض حصرية"
+    "search_placeholder": "ابحث عن منتجات..."
   },
   "footer": {
-    "slogan": "تجربة تسوق ذكية ومريحة لسكان تلمسان.",
+    "slogan": "بقالتك المحلية في تلمسان، الآن على الإنترنت بميزات ذكية.",
     "quick_links": "روابط سريعة",
     "legal": "قانوني",
     "follow_us": "تابعنا",
@@ -34,14 +19,36 @@
     "terms_of_service": "شروط الخدمة",
     "copyright": "جميع الحقوق محفوظة."
   },
+  "hero": {
+    "shop_now": "تسوق الآن",
+    "slide1_heading": "منتجات طازجة وعالية الجودة",
+    "slide1_subheading": "احصل على أفضل الفواكه والخضروات واللحوم الطازجة التي يتم توصيلها إلى باب منزلك.",
+    "slide2_heading": "عروض أسبوعية لا تقاوم",
+    "slide2_subheading": "اكتشف خصومات مذهلة على منتجاتك المفضلة كل أسبوع.",
+    "slide3_heading": "مخبوزات طازجة يومياً",
+    "slide3_subheading": "استمتع بمجموعة متنوعة من الخبز والمعجنات الطازجة من مخبزنا."
+  },
+  "homepage": {
+    "categories": "تصفح حسب الفئة",
+    "best_sellers": "الأكثر مبيعاً",
+    "exclusive_offers": "عروض حصرية"
+  },
   "cart": {
-    "shopping_cart": "سلة التسوق",
-    "empty_cart": "سلتك فارغة حاليًا.",
     "add_to_cart": "أضف إلى السلة",
     "added_to_cart_title": "تمت الإضافة إلى السلة",
-    "added_to_cart_desc": "تمت إضافته إلى سلتك.",
+    "added_to_cart_desc": "تمت إضافته إلى سلة التسوق الخاصة بك.",
+    "shopping_cart": "سلة التسوق",
+    "empty_cart": "سلة التسوق الخاصة بك فارغة.",
     "subtotal": "المجموع الفرعي",
     "checkout": "الدفع"
+  },
+  "product": {
+    "stock_available": "{{count}} متوفر في المخزون",
+    "related_products": "منتجات ذات صلة"
+  },
+  "products": {
+    "title": "جميع المنتجات",
+    "subtitle": "تصفح مجموعتنا الكاملة من المنتجات عالية الجودة."
   },
   "dashboard": {
     "overview": "نظرة عامة",
@@ -50,43 +57,6 @@
     "products_in_stock": "المنتجات في المخزن",
     "top_selling_products": "المنتجات الأكثر مبيعاً",
     "units_sold": "الوحدات المباعة",
-    "manage_products": "إدارة المنتجات",
-    "product": "المنتج",
-    "price": "السعر",
-    "stock": "المخزون",
-    "sold": "مباع",
-    "actions": "الإجراءات",
-    "edit": "تعديل",
-    "delete": "حذف",
-    "toggle_menu": "تبديل القائمة",
-    "add_product": "إضافة منتج",
-    "add_new_product": "إضافة منتج جديد",
-    "product_details": "تفاصيل المنتج",
-    "product_name_placeholder": "مثال: طماطم طازجة",
-    "product_name_ar": "اسم المنتج (العربية)",
-    "product_name_en": "اسم المنتج (الإنجليزية)",
-    "product_name_fr": "اسم المنتج (الفرنسية)",
-    "product_description": "وصف المنتج",
-    "generate_with_ai": "إنشاء باستخدام الذكاء الاصطناعي",
-    "generating_description": "جارٍ الإنشاء...",
-    "description_generated_success": "تم إنشاء الوصف بنجاح!",
-    "generation_error_title": "خطأ في الإنشاء",
-    "generation_error_desc": "يرجى ملء أسماء المنتجات والفئة أولاً.",
-    "generation_failed_title": "فشل الإنشاء",
-    "generation_failed_desc": "حدث خطأ أثناء إنشاء الوصف. يرجى المحاولة مرة أخرى.",
-    "description_ar": "الوصف (العربية)",
-    "description_en": "الوصف (الإنجليزية)",
-    "description_fr": "الوصف (الفرنسية)",
-    "description_placeholder": "وصف المنتج هنا...",
-    "organization": "التنظيم",
-    "category": "الفئة",
-    "select_category_placeholder": "اختر فئة",
-    "pricing_stock": "التسعير والمخزون",
-    "discount_percentage": "نسبة الخصم (%)",
-    "cancel": "إلغاء",
-    "save_product": "حفظ المنتج",
-    "product_created_success": "تم إنشاء المنتج بنجاح!",
-    "product_created_desc": "تمت إضافة {{productName}} إلى متجرك.",
     "nav": {
       "overview": "نظرة عامة",
       "products": "المنتجات",
@@ -97,8 +67,45 @@
       "settings": "الإعدادات",
       "logout": "تسجيل الخروج"
     },
-    "coming_soon": "قريبا...",
-    "settings_desc": "قم بإدارة إعدادات متجرك وتفضيلاتك.",
+    "coming_soon": "قريباً...",
+    "manage_products": "إدارة المنتجات",
+    "add_product": "إضافة منتج",
+    "product": "المنتج",
+    "price": "السعر",
+    "stock": "المخزون",
+    "sold": "مباع",
+    "actions": "إجراءات",
+    "toggle_menu": "تبديل القائمة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "add_new_product": "إضافة منتج جديد",
+    "product_details": "تفاصيل المنتج",
+    "product_name_ar": "اسم المنتج (العربية)",
+    "product_name_en": "اسم المنتج (الإنجليزية)",
+    "product_name_fr": "اسم المنتج (الفرنسية)",
+    "product_name_placeholder": "مثال: طماطم طازجة",
+    "product_description": "وصف المنتج",
+    "generate_with_ai": "إنشاء باستخدام الذكاء الاصطناعي",
+    "generating_description": "جاري الإنشاء...",
+    "description_ar": "الوصف (العربية)",
+    "description_en": "الوصف (الإنجليزية)",
+    "description_fr": "الوصف (الفرنسية)",
+    "description_placeholder": "صف المنتج...",
+    "organization": "التنظيم",
+    "category": "الفئة",
+    "select_category_placeholder": "اختر فئة",
+    "pricing_stock": "التسعير والمخزون",
+    "discount_percentage": "نسبة الخصم (%)",
+    "cancel": "إلغاء",
+    "save_product": "حفظ المنتج",
+    "product_created_success": "تم إنشاء المنتج بنجاح!",
+    "product_created_desc": "تمت إضافة {{productName}} إلى متجرك.",
+    "generation_error_title": "معلومات ناقصة",
+    "generation_error_desc": "يرجى إدخال أسماء المنتج والفئة لإنشاء وصف.",
+    "description_generated_success": "تم إنشاء الأوصاف بنجاح!",
+    "generation_failed_title": "فشل الإنشاء",
+    "generation_failed_desc": "حدث خطأ أثناء إنشاء الوصف. يرجى المحاولة مرة أخرى.",
+    "settings_desc": "إدارة إعدادات متجerk.",
     "settings": {
       "site_name": "اسم الموقع",
       "logo": "الشعار",
@@ -107,6 +114,19 @@
     },
     "save_changes": "حفظ التغييرات",
     "settings_updated_title": "تم تحديث الإعدادات",
-    "settings_updated_desc": "تم حفظ معلومات متجرك بنجاح."
+    "settings_updated_desc": "تم حفظ إعدادات متجerk بنجاح.",
+    "users": {
+      "user": "المستخدم",
+      "registration_date": "تاريخ التسجيل",
+      "orders": "الطلبات",
+      "total_spent": "إجمالي الإنفاق"
+    }
+  },
+  "chatbot": {
+    "open": "افتح الدردشة",
+    "title": "مساعد الذكاء الاصطناعي",
+    "placeholder": "اسأل عن أي شيء...",
+    "send": "إرسال",
+    "error": "آسف، لقد واجهت خطأ. حاول مرة أخرى."
   }
 }

@@ -1,4 +1,3 @@
-
 {
   "site_name": "Tlemcen Smart Supermarché",
   "nav": {
@@ -11,37 +10,45 @@
   "header": {
     "search_placeholder": "Rechercher des produits..."
   },
+  "footer": {
+    "slogan": "Votre supermarché local à Tlemcen, maintenant en ligne avec des fonctionnalités intelligentes.",
+    "quick_links": "Liens rapides",
+    "legal": "Légal",
+    "follow_us": "Suivez-nous",
+    "privacy_policy": "Politique de confidentialité",
+    "terms_of_service": "Conditions d'utilisation",
+    "copyright": "Tous droits réservés."
+  },
   "hero": {
-    "slide1_heading": "Produits Frais Livrés à Votre Porte",
-    "slide1_subheading": "Les meilleurs fruits, légumes et plus encore, livrés quotidiennement.",
-    "slide2_heading": "Offres Irrésistibles",
-    "slide2_subheading": "Profitez de réductions exclusives sur les produits que vous aimez.",
-    "slide3_heading": "De Notre Boulangerie à Votre Table",
-    "slide3_subheading": "Du pain et des pâtisseries frais, préparés avec amour.",
-    "shop_now": "Acheter Maintenant"
+    "shop_now": "Acheter maintenant",
+    "slide1_heading": "Produits Frais et de Qualité",
+    "slide1_subheading": "Recevez les meilleurs fruits, légumes et viandes frais livrés à votre porte.",
+    "slide2_heading": "Offres Hebdomadaires Irrésistibles",
+    "slide2_subheading": "Découvrez des réductions incroyables sur vos produits préférés chaque semaine.",
+    "slide3_heading": "Fraîchement Cuit Chaque Jour",
+    "slide3_subheading": "Profitez d'une variété de pains et de pâtisseries frais de notre boulangerie."
   },
   "homepage": {
     "categories": "Parcourir par Catégorie",
     "best_sellers": "Meilleures Ventes",
     "exclusive_offers": "Offres Exclusives"
   },
-  "footer": {
-    "slogan": "Une expérience d'achat intelligente et pratique pour les habitants de Tlemcen.",
-    "quick_links": "Liens Rapides",
-    "legal": "Légal",
-    "follow_us": "Suivez-nous",
-    "privacy_policy": "Politique de Confidentialité",
-    "terms_of_service": "Conditions d'Utilisation",
-    "copyright": "Tous droits réservés."
-  },
   "cart": {
-    "shopping_cart": "Panier d'Achat",
-    "empty_cart": "Votre panier est actuellement vide.",
-    "add_to_cart": "Ajouter au Panier",
-    "added_to_cart_title": "Ajouté au Panier",
+    "add_to_cart": "Ajouter au panier",
+    "added_to_cart_title": "Ajouté au panier",
     "added_to_cart_desc": "a été ajouté à votre panier.",
+    "shopping_cart": "Panier d'achats",
+    "empty_cart": "Votre panier est vide.",
     "subtotal": "Sous-total",
-    "checkout": "Passer à la caisse"
+    "checkout": "Paiement"
+  },
+  "product": {
+    "stock_available": "{{count}} en stock",
+    "related_products": "Produits similaires"
+  },
+  "products": {
+    "title": "Tous les Produits",
+    "subtitle": "Parcourez notre collection complète de produits de haute qualité."
   },
   "dashboard": {
     "overview": "Aperçu",
@@ -50,43 +57,6 @@
     "products_in_stock": "Produits en Stock",
     "top_selling_products": "Produits les Plus Vendus",
     "units_sold": "Unités Vendues",
-    "manage_products": "Gérer les Produits",
-    "product": "Produit",
-    "price": "Prix",
-    "stock": "Stock",
-    "sold": "Vendu",
-    "actions": "Actions",
-    "edit": "Modifier",
-    "delete": "Supprimer",
-    "toggle_menu": "Basculer le menu",
-    "add_product": "Ajouter un Produit",
-    "add_new_product": "Ajouter un Nouveau Produit",
-    "product_details": "Détails du Produit",
-    "product_name_placeholder": "Ex: Tomates Fraîches",
-    "product_name_ar": "Nom du Produit (Arabe)",
-    "product_name_en": "Nom du Produit (Anglais)",
-    "product_name_fr": "Nom du Produit (Français)",
-    "product_description": "Description du Produit",
-    "generate_with_ai": "Générer avec l'IA",
-    "generating_description": "Génération en cours...",
-    "description_generated_success": "Description générée avec succès !",
-    "generation_error_title": "Erreur de Génération",
-    "generation_error_desc": "Veuillez d'abord remplir les noms de produits et la catégorie.",
-    "generation_failed_title": "Échec de la Génération",
-    "generation_failed_desc": "Une erreur s'est produite lors de la génération de la description. Veuillez réessayer.",
-    "description_ar": "Description (Arabe)",
-    "description_en": "Description (Anglais)",
-    "description_fr": "Description (Français)",
-    "description_placeholder": "Description du produit ici...",
-    "organization": "Organisation",
-    "category": "Catégorie",
-    "select_category_placeholder": "Sélectionnez une catégorie",
-    "pricing_stock": "Tarification et Stock",
-    "discount_percentage": "Pourcentage de Réduction (%)",
-    "cancel": "Annuler",
-    "save_product": "Enregistrer le Produit",
-    "product_created_success": "Produit créé avec succès !",
-    "product_created_desc": "{{productName}} a été ajouté à votre boutique.",
     "nav": {
       "overview": "Aperçu",
       "products": "Produits",
@@ -98,15 +68,65 @@
       "logout": "Déconnexion"
     },
     "coming_soon": "Bientôt disponible...",
-    "settings_desc": "Gérez les paramètres et les préférences de votre boutique.",
+    "manage_products": "Gérer les Produits",
+    "add_product": "Ajouter un produit",
+    "product": "Produit",
+    "price": "Prix",
+    "stock": "Stock",
+    "sold": "Vendu",
+    "actions": "Actions",
+    "toggle_menu": "Basculer le menu",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "add_new_product": "Ajouter un nouveau produit",
+    "product_details": "Détails du produit",
+    "product_name_ar": "Nom du produit (Arabe)",
+    "product_name_en": "Nom du produit (Anglais)",
+    "product_name_fr": "Nom du produit (Français)",
+    "product_name_placeholder": "Ex: Tomates Fraîches",
+    "product_description": "Description du produit",
+    "generate_with_ai": "Générer avec l'IA",
+    "generating_description": "Génération en cours...",
+    "description_ar": "Description (Arabe)",
+    "description_en": "Description (Anglais)",
+    "description_fr": "Description (Français)",
+    "description_placeholder": "Décrivez le produit...",
+    "organization": "Organisation",
+    "category": "Catégorie",
+    "select_category_placeholder": "Sélectionnez une catégorie",
+    "pricing_stock": "Tarification et Stock",
+    "discount_percentage": "Remise (%)",
+    "cancel": "Annuler",
+    "save_product": "Enregistrer le produit",
+    "product_created_success": "Produit créé avec succès !",
+    "product_created_desc": "{{productName}} a été ajouté à votre boutique.",
+    "generation_error_title": "Informations manquantes",
+    "generation_error_desc": "Veuillez saisir les noms de produit et la catégorie pour générer une description.",
+    "description_generated_success": "Descriptions générées avec succès !",
+    "generation_failed_title": "Échec de la génération",
+    "generation_failed_desc": "Une erreur s'est produite lors de la génération de la description. Veuillez réessayer.",
+    "settings_desc": "Gérez les paramètres de votre boutique.",
     "settings": {
-      "site_name": "Nom du Site",
+      "site_name": "Nom du site",
       "logo": "Logo",
-      "phone": "Numéro de Téléphone",
+      "phone": "Numéro de téléphone",
       "address": "Adresse"
     },
-    "save_changes": "Enregistrer les Modifications",
-    "settings_updated_title": "Paramètres Mis à Jour",
-    "settings_updated_desc": "Les informations de votre boutique ont été enregistrées avec succès."
+    "save_changes": "Enregistrer les modifications",
+    "settings_updated_title": "Paramètres mis à jour",
+    "settings_updated_desc": "Les paramètres de votre boutique ont été enregistrés.",
+    "users": {
+      "user": "Utilisateur",
+      "registration_date": "Date d'inscription",
+      "orders": "Commandes",
+      "total_spent": "Total dépensé"
+    }
+  },
+  "chatbot": {
+    "open": "Ouvrir le chat",
+    "title": "Assistant IA",
+    "placeholder": "Demandez n'importe quoi...",
+    "send": "Envoyer",
+    "error": "Désolé, j'ai rencontré une erreur. Veuillez réessayer."
   }
 }
