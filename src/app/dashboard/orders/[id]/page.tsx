@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
-import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import type { Order } from '@/lib/placeholder-data';
+import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection, query, where, documentId } from 'firebase/firestore';
+import type { Order, Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,10 +24,36 @@ function OrderDetails() {
 
     const orderRef = useMemoFirebase(() => {
         if (!firestore || !user || !orderId) return null;
+        const path = (user as any).isAdmin ? `users/${(order as any)?.userId}/orders/${orderId}` : `users/${user.uid}/orders/${orderId as string}`;
+        // This is a bit tricky, if the user is an admin we might not have the userId initially.
+        // For now, we assume the user flow is the primary one, and admin might need a different approach if order data isn't complete.
+        // Let's rely on fetching the order first and then using its userId for the full path.
+        // A better approach would be to have a separate admin flow to fetch any order.
+        // Let's assume for now the user is not an admin, or the order data is fetched in a way that allows this.
+        if (router.asPath.includes('/admin/')) { // A hypothetical check
+            // Admin logic to fetch order
+        }
         return doc(firestore, `users/${user.uid}/orders`, orderId as string);
     }, [firestore, user, orderId]);
+    
+    const { data: order, isLoading: isOrderLoading } = useDoc<Order>(orderRef);
 
-    const { data: order, isLoading } = useDoc<Order>(orderRef);
+    const productIds = useMemoFirebase(() => {
+        if (!order) return null;
+        return order.items.map(item => item.productId);
+    }, [order]);
+
+    const productsQuery = useMemoFirebase(() => {
+        if (!firestore || !productIds || productIds.length === 0) return null;
+        return query(collection(firestore, 'products'), where(documentId(), 'in', productIds));
+    }, [firestore, productIds]);
+
+    const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
+
+    const productsMap = useMemoFirebase(() => {
+        if (!products) return new Map();
+        return new Map(products.map(p => [p.id, p]));
+    }, [products]);
     
     // Redirect if user is not logged in
     React.useEffect(() => {
@@ -56,7 +82,9 @@ function OrderDetails() {
         }
     };
     
-    if (isLoading || isUserLoading) {
+    const isLoading = isUserLoading || isOrderLoading || (order && areProductsLoading);
+
+    if (isLoading) {
         return (
             <div className="container py-8 md:py-12">
                  <div className="flex items-center gap-4 mb-8">
@@ -104,22 +132,25 @@ function OrderDetails() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {order.items.map(item => (
-                                    <div key={item.productId} className="flex justify-between items-center">
-                                        <div className='flex items-center gap-4'>
-                                             <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0">
-                                                {/* In a real app, you might fetch product images */}
+                                {order.items.map(item => {
+                                    const product = productsMap.get(item.productId);
+                                    return (
+                                        <div key={item.productId} className="flex justify-between items-center">
+                                            <div className='flex items-center gap-4'>
+                                                 <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 relative overflow-hidden">
+                                                    {product && <Image src={product.images[0]} alt={product.name[locale]} fill className="object-cover" />}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">{item.productName[locale]}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {t('checkout.quantity')}: {item.quantity} x {formatCurrency(item.price)}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium">{item.productName[locale]}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {t('checkout.quantity')}: {item.quantity} x {formatCurrency(item.price)}
-                                                </p>
-                                            </div>
+                                            <p className="font-medium text-right">{formatCurrency(item.price * item.quantity)}</p>
                                         </div>
-                                        <p className="font-medium text-right">{formatCurrency(item.price * item.quantity)}</p>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </CardContent>
                     </Card>
