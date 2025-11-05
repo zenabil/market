@@ -30,6 +30,21 @@ export type User = {
   totalSpent: number;
 };
 
+export type Order = {
+    id: string;
+    userId: string;
+    orderDate: string;
+    totalAmount: number;
+    status: string;
+    shippingAddress: string;
+    items: {
+        productId: string;
+        productName: { ar: string, fr: string, en: string };
+        quantity: number;
+        price: number;
+    }[];
+};
+
 
 const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || '';
 

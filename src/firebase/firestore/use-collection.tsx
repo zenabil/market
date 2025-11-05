@@ -8,6 +8,7 @@ import {
   FirestoreError,
   QuerySnapshot,
   CollectionReference,
+  collectionGroup,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -16,7 +17,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 export type WithId<T> = T & { id: string };
 
 /**
- * Interface for the return value of the useCollection hook.
+ * Interface for the return value of the useCollection and useCollectionGroup hooks.
  * @template T Type of the document data.
  */
 export interface UseCollectionResult<T> {
@@ -111,4 +112,22 @@ export function useCollection<T = any>(
     throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
   }
   return { data, isLoading, error };
+}
+
+
+/**
+ * React hook to subscribe to a Firestore collection group query in real-time.
+ *
+ * IMPORTANT! YOU MUST MEMOIZE the inputted memoizedQuery or BAD THINGS WILL HAPPEN
+ * Use useMemoFirebase to memoize it.
+ *
+ * @template T Optional type for document data. Defaults to any.
+ * @param {Query<DocumentData> | null | undefined} memoizedQuery - The Firestore Query for a collection group. Waits if null/undefined.
+ * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
+ */
+export function useCollectionGroup<T = any>(
+    memoizedQuery: (Query<DocumentData> & {__memo?: boolean})  | null | undefined,
+): UseCollectionResult<T> {
+    // This hook is essentially a wrapper around useCollection, but is explicit about collection group
+    return useCollection<T>(memoizedQuery);
 }

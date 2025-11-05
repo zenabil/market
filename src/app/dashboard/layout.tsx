@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   Package,
   Users,
+  ShoppingBasket,
   Ticket,
   Percent,
   Gem,
@@ -39,6 +40,11 @@ const menuItems = [
     key: 'dashboard.nav.overview',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    key: 'dashboard.nav.orders',
+    href: '/dashboard/orders',
+    icon: ShoppingBasket,
   },
   {
     key: 'dashboard.nav.products',
