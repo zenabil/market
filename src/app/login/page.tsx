@@ -117,21 +117,22 @@ export default function LoginPage() {
           addresses: [],
         };
   
-        // Use setDoc instead of a batch for simplicity. Security rules will handle the logic.
-        // The `isFirstUser()` rule will determine if the admin role can be created.
+        // Set user document. Security rules will handle the logic.
         await setDoc(userDocRef, userData);
         
         // Try to create the admin role. This will only succeed if the user is the first one.
+        // This is a "fire-and-forget" attempt; failure is expected for non-first users.
         const adminRoleRef = doc(firestore, 'roles_admin', newUser.uid);
         setDoc(adminRoleRef, { role: 'admin' })
           .then(() => {
-            // If this succeeds, update the user's role to Admin
+            // If admin role creation succeeds, update the user's role to Admin.
             return setDoc(userDocRef, { role: 'Admin' }, { merge: true });
           })
           .catch((error) => {
             // This is expected to fail with a permission error if the user is not the first one.
-            // We can safely ignore this error.
+            // We can safely ignore this specific error.
             if (error.code !== 'permission-denied') {
+               // Log any other unexpected errors during admin role setting.
                console.error("An unexpected error occurred while trying to set admin role:", error);
             }
           });
@@ -140,8 +141,7 @@ export default function LoginPage() {
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
-      console.error(error);
-  
+      // Handle specific errors for better UX and DX
       if (error.code === 'permission-denied') {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ 
           path: `users/${error.customData?.uid || 'unknown'}`, 
@@ -149,6 +149,7 @@ export default function LoginPage() {
           requestResourceData: { email: values.email } 
         }));
       } else {
+          // For other errors (like auth/email-already-in-use), show a toast to the user.
           toast({
               variant: 'destructive',
               title: t('auth.error_title'),
