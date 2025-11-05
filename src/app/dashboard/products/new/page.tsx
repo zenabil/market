@@ -24,9 +24,8 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import React from 'react';
-import { useFirestore } from '@/firebase';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection } from 'firebase/firestore';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { addDoc, collection } from 'firebase/firestore';
 
 
 const formSchema = z.object({
@@ -89,10 +88,9 @@ export default function NewProductPage() {
         sold: 0,
     };
 
-    try {
-        const productsCollection = collection(firestore, 'products');
-        await addDocumentNonBlocking(productsCollection, productData);
-
+    const productsCollection = collection(firestore, 'products');
+    addDoc(productsCollection, productData)
+      .then(() => {
         toast({
             title: t('dashboard.product_created_success'),
             description: t('dashboard.product_created_desc', { productName: values.nameEn }),
@@ -109,16 +107,20 @@ export default function NewProductPage() {
             discount: 0,
             categoryId: undefined,
         });
-    } catch (error) {
-        console.error("Error adding document: ", error);
-        toast({
-            variant: "destructive",
-            title: t('dashboard.generation_failed_title'),
-            description: "Could not save the product. Please try again.",
-        });
-    } finally {
+      })
+      .catch(error => {
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: productsCollection.path,
+                operation: 'create',
+                requestResourceData: productData,
+            })
+        );
+      })
+      .finally(() => {
         setIsSaving(false);
-    }
+      });
   }
 
   const handleGenerateDescription = async () => {

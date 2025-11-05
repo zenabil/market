@@ -18,14 +18,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/hooks/use-language';
-import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useUser, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
-import { doc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -109,8 +109,17 @@ export default function LoginPage() {
           loyaltyPoints: 0,
           avatar: `https://picsum.photos/seed/${user.uid}/100/100`,
         };
-        // This is a non-blocking write
-        setDocumentNonBlocking(userDocRef, userData, { merge: true });
+        
+        setDoc(userDocRef, userData, { merge: true }).catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'create',
+                    requestResourceData: userData,
+                })
+            );
+        });
       }
 
       toast({ title: t('auth.signup_success_title') });

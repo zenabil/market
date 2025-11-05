@@ -14,15 +14,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/componentsui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Image as ImageIcon, X, ArrowLeft, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
@@ -83,22 +83,26 @@ export default function SettingsPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSaving(true);
-    try {
-        setDocumentNonBlocking(settingsRef, values, { merge: true });
-        toast({
-            title: t('dashboard.settings_updated_title'),
-            description: t('dashboard.settings_updated_desc'),
+    setDoc(settingsRef, values, { merge: true })
+        .then(() => {
+            toast({
+                title: t('dashboard.settings_updated_title'),
+                description: t('dashboard.settings_updated_desc'),
+            });
+        })
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: settingsRef.path,
+                    operation: 'write',
+                    requestResourceData: values,
+                })
+            );
+        })
+        .finally(() => {
+            setIsSaving(false);
         });
-    } catch (error) {
-        console.error("Failed to save settings: ", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save settings. Please try again.",
-        });
-    } finally {
-        setIsSaving(false);
-    }
   }
 
   if (isLoadingSettings) {

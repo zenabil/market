@@ -4,8 +4,8 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useLanguage } from '@/hooks/use-language';
-import { useFirestore, useCollection, useCollectionGroup, useMemoFirebase, useUser } from '@/firebase';
-import { collectionGroup, query, orderBy, doc, collection } from 'firebase/firestore';
+import { useFirestore, useCollection, useCollectionGroup, useMemoFirebase, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collectionGroup, query, orderBy, doc, collection, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/placeholder-data';
@@ -18,7 +18,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -58,13 +57,25 @@ function AdminOrdersView() {
 
     const handleStatusChange = (order: Order, newStatus: string) => {
         if (!firestore) return;
-        // The path to an order is inside a user's collection
         const orderRef = doc(firestore, `users/${order.userId}/orders`, order.id);
-        updateDocumentNonBlocking(orderRef, { status: newStatus });
-        toast({
-            title: t('dashboard.orders.status_updated_title'),
-            description: t('dashboard.orders.status_updated_desc', { orderId: order.id.slice(-6), status: t(`orders.status_types.${newStatus.toLowerCase()}`) }),
-        });
+        const updateData = { status: newStatus };
+        updateDoc(orderRef, updateData)
+            .then(() => {
+                toast({
+                    title: t('dashboard.orders.status_updated_title'),
+                    description: t('dashboard.orders.status_updated_desc', { orderId: order.id.slice(-6), status: t(`orders.status_types.${newStatus.toLowerCase()}`) }),
+                });
+            })
+            .catch(error => {
+                errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: orderRef.path,
+                        operation: 'update',
+                        requestResourceData: updateData,
+                    })
+                );
+            });
     };
 
     return (

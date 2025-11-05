@@ -19,8 +19,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from '@/firebase';
-import { doc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, arrayUnion, arrayRemove, updateDoc } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2, Pencil, Trash2, Gem } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -116,10 +116,21 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
-        // In a real app, upload this to Firebase Storage and get a URL.
-        // For now, we'll just update Firestore with the data URL (not recommended for production).
-        updateDocumentNonBlocking(userDocRef, { avatar: dataUrl });
-        toast({ title: t('dashboard.profile.avatar_updated_title') });
+        const updateData = { avatar: dataUrl };
+        updateDoc(userDocRef, updateData)
+            .then(() => {
+                toast({ title: t('dashboard.profile.avatar_updated_title') });
+            })
+            .catch(error => {
+                 errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: userDocRef.path,
+                        operation: 'update',
+                        requestResourceData: updateData,
+                    })
+                );
+            });
       };
       reader.readAsDataURL(file);
     }
@@ -130,24 +141,27 @@ export default function ProfilePage() {
     if (!userDocRef) return;
 
     setIsSaving(true);
-    try {
-      await updateDocumentNonBlocking(userDocRef, { name: values.name, phone: values.phone });
-      // Note: Email updates require re-authentication and are more complex.
-      // We are only allowing name and phone updates here.
-      toast({
-        title: t('dashboard.profile.update_success_title'),
-        description: t('dashboard.profile.update_success_desc'),
-      });
-    } catch (error) {
-      console.error("Error updating profile: ", error);
-      toast({
-        variant: "destructive",
-        title: t('dashboard.generation_failed_title'),
-        description: "Could not update your profile. Please try again.",
-      });
-    } finally {
-        setIsSaving(false);
-    }
+    const updateData = { name: values.name, phone: values.phone };
+    updateDoc(userDocRef, updateData)
+        .then(() => {
+            toast({
+                title: t('dashboard.profile.update_success_title'),
+                description: t('dashboard.profile.update_success_desc'),
+            });
+        })
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: updateData,
+                })
+            );
+        })
+        .finally(() => {
+            setIsSaving(false);
+        });
   }
 
   async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
@@ -177,54 +191,59 @@ export default function ProfilePage() {
   
     try {
       if (addressToEdit) {
-        // Handle update
         const currentAddresses = firestoreUser?.addresses || [];
         const updatedAddresses = currentAddresses.map(addr =>
           addr.id === addressToEdit.id ? { ...addr, ...values } : addr
         );
         
-        await updateDocumentNonBlocking(userDocRef, { addresses: updatedAddresses });
+        await updateDoc(userDocRef, { addresses: updatedAddresses });
         toast({ title: t('dashboard.profile.address_updated_title') });
-        setAddressToEdit(null); // Close the dialog
+        setAddressToEdit(null);
   
       } else {
-        // Handle add new
         const newAddress: Address = {
-            id: `addr_${Date.now()}`, // Simple unique ID
+            id: `addr_${Date.now()}`,
             ...values
         };
-        await updateDocumentNonBlocking(userDocRef, {
-            addresses: arrayUnion(newAddress)
-        });
+        await updateDoc(userDocRef, { addresses: arrayUnion(newAddress) });
         toast({ title: t('dashboard.profile.address_added_title') });
         addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
       }
     } catch (error) {
         const action = addressToEdit ? 'update' : 'add';
-        toast({ variant: 'destructive', title: "Error", description: `Could not ${action} address.` });
-        console.error(`Error ${action}ing address:`, error);
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'update',
+                requestResourceData: { addresses: '...' }
+            })
+        );
     } finally {
       setIsAddressSaving(false);
     }
   }
 
   async function deleteAddress(address: Address) {
-        if (!userDocRef) return;
-        try {
-            // To delete an item from an array, we need to provide the exact object to remove.
-            // We need to find the full address object from the user's data to ensure it matches.
-            const addressToDelete = firestoreUser?.addresses?.find(a => a.id === address.id);
-            if (!addressToDelete) {
-                throw new Error("Address not found in user's profile.");
-            }
-            await updateDocumentNonBlocking(userDocRef, {
-                addresses: arrayRemove(addressToDelete)
-            });
-            toast({ title: t('dashboard.profile.address_removed_title') });
-        } catch (error) {
-            toast({ variant: 'destructive', title: "Error", description: "Could not remove address." });
+    if (!userDocRef) return;
+    try {
+        const addressToDelete = firestoreUser?.addresses?.find(a => a.id === address.id);
+        if (!addressToDelete) {
+            throw new Error("Address not found in user's profile.");
         }
+        await updateDoc(userDocRef, { addresses: arrayRemove(addressToDelete) });
+        toast({ title: t('dashboard.profile.address_removed_title') });
+    } catch (error) {
+         errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'update',
+                requestResourceData: { addresses: '...' }
+            })
+        );
     }
+  }
 
 
   const isLoading = isUserLoading || isFirestoreUserLoading;

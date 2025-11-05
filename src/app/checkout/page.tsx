@@ -152,34 +152,24 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    try {
-        await placeOrder(firestore, user.uid, {
-            shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
-            phone: values.phone,
-            items,
-            totalAmount: finalTotalPrice,
-        });
-        
-        // Since placeOrder is now non-blocking, we can give immediate UI feedback.
-        toast({
-            title: t('checkout.order_placed_title'),
-            description: t('checkout.order_placed_desc'),
-        });
-        
-        clearCart();
-        router.push('/dashboard/orders');
-    } catch (error) {
-        // This will now primarily catch client-side errors (e.g., validation)
-        // as Firestore permission errors are handled by the global error emitter.
-        console.error("Error initiating order placement: ", error);
-        toast({
-            variant: "destructive",
-            title: t('checkout.order_failed_title'),
-            description: (error instanceof Error) ? error.message : t('checkout.order_failed_desc'),
-        });
-        setIsProcessing(false); // Only set to false on client-side error
-    }
-    // No finally block needed as we want the user to navigate away immediately
+    // The placeOrder function is designed to be non-blocking. It returns a Promise<void>
+    // that resolves immediately, and it handles its own errors internally by emitting them.
+    // We don't need a try/catch block here for Firestore errors.
+    placeOrder(firestore, user.uid, {
+        shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
+        phone: values.phone,
+        items,
+        totalAmount: finalTotalPrice,
+    });
+    
+    // Since placeOrder is now non-blocking, we can give immediate UI feedback.
+    toast({
+        title: t('checkout.order_placed_title'),
+        description: t('checkout.order_placed_desc'),
+    });
+    
+    clearCart();
+    router.push('/dashboard/orders');
   }
   
   if (totalItems === 0) {

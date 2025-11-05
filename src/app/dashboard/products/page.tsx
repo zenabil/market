@@ -8,8 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, query, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collection, query, doc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/lib/placeholder-data';
 import {
@@ -41,7 +41,16 @@ export default function ProductsPage() {
   const handleDeleteProduct = () => {
     if (productToDelete && firestore) {
       const productDocRef = doc(firestore, 'products', productToDelete.id);
-      deleteDocumentNonBlocking(productDocRef);
+      deleteDoc(productDocRef)
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: productDocRef.path,
+                    operation: 'delete',
+                })
+            );
+        });
       setProductToDelete(null);
     }
   };

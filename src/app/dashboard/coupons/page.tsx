@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, query, doc, serverTimestamp } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collection, query, doc, addDoc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -82,18 +82,27 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
         expiryDate: new Date(values.expiryDate).toISOString()
     };
     
-    try {
-        const couponsCollection = collection(firestore, 'coupons');
-        await addDocumentNonBlocking(couponsCollection, couponData);
-        toast({ title: t('dashboard.coupons.created_title') });
-        form.reset();
-        setIsOpen(false);
-        onCouponCreated();
-    } catch(e) {
-        toast({ variant: 'destructive', title: t('dashboard.generation_failed_title') });
-    } finally {
-        setIsSaving(false);
-    }
+    const couponsCollection = collection(firestore, 'coupons');
+    addDoc(couponsCollection, couponData)
+      .then(() => {
+          toast({ title: t('dashboard.coupons.created_title') });
+          form.reset();
+          setIsOpen(false);
+          onCouponCreated();
+      })
+      .catch(error => {
+          errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+              path: couponsCollection.path,
+              operation: 'create',
+              requestResourceData: couponData,
+            })
+          );
+      })
+      .finally(() => {
+          setIsSaving(false);
+      });
   }
 
   return (
@@ -160,7 +169,16 @@ export default function CouponsPage() {
   const handleDeleteCoupon = () => {
     if (couponToDelete && firestore) {
       const couponDocRef = doc(firestore, 'coupons', couponToDelete.id);
-      deleteDocumentNonBlocking(couponDocRef);
+      deleteDoc(couponDocRef)
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: couponDocRef.path,
+                    operation: 'delete',
+                })
+            );
+        });
       setCouponToDelete(null);
     }
     setIsAlertOpen(false);

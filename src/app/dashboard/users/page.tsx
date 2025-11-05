@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCollection, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, query, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collection, query, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
@@ -36,12 +36,32 @@ function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins:
 
     try {
       if (newAdminStatus) {
-        setDocumentNonBlocking(adminRoleRef, { role: 'admin' }, {});
-        // Update local state for immediate feedback
+        const roleData = { role: 'admin' };
+        await setDoc(adminRoleRef, roleData)
+            .catch(error => {
+                setIsAdmin(false); // Revert optimistic update
+                errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: adminRoleRef.path,
+                        operation: 'create',
+                        requestResourceData: roleData
+                    })
+                )
+            });
         setAdmins(prevAdmins => [...(prevAdmins || []), { id: user.id }]);
       } else {
-        deleteDocumentNonBlocking(adminRoleRef);
-         // Update local state for immediate feedback
+        await deleteDoc(adminRoleRef)
+            .catch(error => {
+                setIsAdmin(true); // Revert optimistic update
+                 errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: adminRoleRef.path,
+                        operation: 'delete'
+                    })
+                )
+            });
         setAdmins(prevAdmins => prevAdmins?.filter(admin => admin.id !== user.id) || null);
       }
       toast({
@@ -49,13 +69,7 @@ function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins:
         description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
       });
     } catch (error) {
-      console.error('Failed to update admin status', error);
-      setIsAdmin(!newAdminStatus); // Revert on error
-      toast({
-        variant: 'destructive',
-        title: t('dashboard.generation_failed_title'),
-        description: t('dashboard.users.role_update_failed_desc')
-      });
+      // Errors are now handled in the catch blocks of the firestore operations
     } finally {
       setIsLoading(false);
     }

@@ -5,8 +5,8 @@ import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { collection, query, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collection, query, doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/lib/placeholder-data';
 import { Input } from '@/components/ui/input';
@@ -37,21 +37,48 @@ function DiscountRow({ product }: { product: Product }) {
             return;
         }
         setIsUpdating(true);
-        updateDocumentNonBlocking(productRef, { discount });
-        toast({
-            title: t('dashboard.discounts.discount_updated_title'),
-            description: t('dashboard.discounts.discount_updated_desc', { productName: product.name[locale], discount: discount }),
-        });
-        // We let the useEffect handle setting isUpdating to false when the new prop comes in.
+        const updateData = { discount };
+        updateDoc(productRef, updateData)
+            .then(() => {
+                toast({
+                    title: t('dashboard.discounts.discount_updated_title'),
+                    description: t('dashboard.discounts.discount_updated_desc', { productName: product.name[locale], discount: discount }),
+                });
+            })
+            .catch(error => {
+                errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: productRef.path,
+                        operation: 'update',
+                        requestResourceData: updateData,
+                    })
+                );
+            })
+            .finally(() => {
+                // Let useEffect handle this based on prop changes
+            });
     };
 
     const handleRemoveDiscount = () => {
         setDiscount(0);
-        updateDocumentNonBlocking(productRef, { discount: 0 });
-        toast({
-            title: t('dashboard.discounts.discount_removed_title'),
-            description: t('dashboard.discounts.discount_removed_desc', { productName: product.name[locale] }),
-        });
+        updateDoc(productRef, { discount: 0 })
+          .then(() => {
+            toast({
+                title: t('dashboard.discounts.discount_removed_title'),
+                description: t('dashboard.discounts.discount_removed_desc', { productName: product.name[locale] }),
+            });
+          })
+          .catch(error => {
+             errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: productRef.path,
+                    operation: 'update',
+                    requestResourceData: { discount: 0 },
+                })
+             )
+          });
     }
 
     const formatCurrency = (amount: number) => {

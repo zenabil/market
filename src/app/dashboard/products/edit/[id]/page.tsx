@@ -23,8 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
-import { useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { notFound } from 'next/navigation';
 
@@ -92,22 +92,26 @@ function EditProductForm({ productId }: { productId: string }) {
       discount: values.discount,
     };
 
-    try {
-      updateDocumentNonBlocking(productRef, productData);
-      toast({
-        title: t('dashboard.product_updated_success'),
-        description: t('dashboard.product_updated_desc', { productName: values.nameEn }),
-      });
-    } catch (error) {
-      console.error("Error updating document: ", error);
-      toast({
-        variant: "destructive",
-        title: t('dashboard.generation_failed_title'),
-        description: "Could not update the product. Please try again.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    updateDoc(productRef, productData)
+        .then(() => {
+            toast({
+                title: t('dashboard.product_updated_success'),
+                description: t('dashboard.product_updated_desc', { productName: values.nameEn }),
+            });
+        })
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: productRef.path,
+                    operation: 'update',
+                    requestResourceData: productData,
+                })
+            );
+        })
+        .finally(() => {
+            setIsSaving(false);
+        });
   }
 
   const handleGenerateDescription = async () => {
