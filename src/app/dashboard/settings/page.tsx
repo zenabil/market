@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,51 +18,110 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image as ImageIcon, X, ArrowLeft } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, ArrowLeft, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   siteName: z.string().min(2, { message: 'Site name must be at least 2 characters.' }),
-  logo: z.any().optional(),
+  logoUrl: z.string().url().optional().or(z.literal('')),
   phone: z.string().min(10, { message: 'Phone number must be at least 10 digits.' }),
   address: z.string().min(10, { message: 'Address must be at least 10 characters.' }),
 });
+
+type SiteSettings = z.infer<typeof formSchema>;
 
 export default function SettingsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const firestore = useFirestore();
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      siteName: 'Tlemcen Smart Supermarket',
-      phone: '+213 123 456 789',
-      address: '123 Rue de la Liberté, Tlemcen, Algérie',
+      siteName: '',
+      phone: '',
+      address: '',
+      logoUrl: '',
     },
   });
+
+  useEffect(() => {
+    if (settings) {
+      form.reset(settings);
+      if (settings.logoUrl) {
+        setLogoPreview(settings.logoUrl);
+      }
+    }
+  }, [settings, form]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      form.setValue('logo', file);
+      // In a real app, you would upload this file to Firebase Storage
+      // and get a URL, then call form.setValue('logoUrl', url).
+      // For this prototype, we'll just use a local data URL for preview.
       const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
+        const dataUrl = reader.result as string;
+        setLogoPreview(dataUrl);
+        form.setValue('logoUrl', dataUrl);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Here you would typically handle the upload and saving of settings
-    toast({
-      title: t('dashboard.settings_updated_title'),
-      description: t('dashboard.settings_updated_desc'),
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSaving(true);
+    try {
+        setDocumentNonBlocking(settingsRef, values, { merge: true });
+        toast({
+            title: t('dashboard.settings_updated_title'),
+            description: t('dashboard.settings_updated_desc'),
+        });
+    } catch (error) {
+        console.error("Failed to save settings: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save settings. Please try again.",
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  }
+
+  if (isLoadingSettings) {
+      return (
+        <div className="container py-8 md:py-12">
+            <div className="flex items-center gap-4 mb-8">
+                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-64" />
+            </div>
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-8 w-40" />
+                    <Skeleton className="h-4 w-80" />
+                </CardHeader>
+                <CardContent className='space-y-8 max-w-2xl'>
+                     <Skeleton className="h-14 w-full" />
+                     <Skeleton className="h-20 w-full" />
+                     <Skeleton className="h-14 w-full" />
+                     <Skeleton className="h-14 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+      )
   }
 
   return (
@@ -99,7 +158,7 @@ export default function SettingsPage() {
 
               <FormField
                 control={form.control}
-                name="logo"
+                name="logoUrl"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('dashboard.settings.logo')}</FormLabel>
@@ -115,7 +174,7 @@ export default function SettingsPage() {
                                 className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={() => {
                                     setLogoPreview(null);
-                                    form.setValue('logo', null);
+                                    form.setValue('logoUrl', '');
                                     if(fileInputRef.current) fileInputRef.current.value = '';
                                 }}
                                 >
@@ -176,7 +235,10 @@ export default function SettingsPage() {
                 )}
               />
               <div className="flex justify-end">
-                <Button type="submit">{t('dashboard.save_changes')}</Button>
+                <Button type="submit" disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('dashboard.save_changes')}
+                </Button>
               </div>
             </form>
           </Form>

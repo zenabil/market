@@ -277,6 +277,33 @@
         "zipCode",
         "country"
       ]
+    },
+    "SiteSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SiteSettings",
+      "type": "object",
+      "description": "Global settings for the website.",
+      "properties": {
+        "siteName": {
+          "type": "string",
+          "description": "The name of the website."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL for the site logo."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number for the business."
+        },
+        "address": {
+          "type": "string",
+          "description": "Physical address of the business."
+        }
+      },
+      "required": [
+        "siteName"
+      ]
     }
   },
   "auth": {
@@ -315,6 +342,10 @@
         "required": ["role"]
        },
       "description": "Collection to store admin user IDs. Presence of a document with role 'admin' indicates admin privileges."
+    },
+    "/settings/site": {
+        "schema": { "$ref": "#/entities/SiteSettings" },
+        "description": "Stores global site settings in a single document."
     }
   }
 }
