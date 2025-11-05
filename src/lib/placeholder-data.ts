@@ -83,6 +83,18 @@ export type WishlistItem = {
     addedAt: string; // ISO string
 };
 
+export type Recipe = {
+  id: string;
+  title: { ar: string; fr: string; en: string };
+  description: { ar: string; fr: string; en: string };
+  image: string;
+  prepTime: number;
+  cookTime: number;
+  servings: number;
+  ingredients: string[];
+  instructions: string[];
+}
+
 
 // Placeholder data is no longer the source of truth for products, categories, or users.
 // It will be fetched from Firestore. This array can be kept for reference or removed.
@@ -92,3 +104,5 @@ const users: User[] = [];
 export const getProducts = () => products;
 export const getUsers = () => users;
 export const getProductById = (id: string) => products.find(p => p.id === id);
+
+    

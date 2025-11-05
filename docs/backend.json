@@ -407,6 +407,56 @@
           }
         },
         "required": ["productId", "addedAt"]
+    },
+    "Recipe": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Recipe",
+        "type": "object",
+        "description": "Represents a cooking recipe.",
+        "properties": {
+            "title": {
+                "type": "object",
+                "properties": {
+                    "ar": { "type": "string" },
+                    "fr": { "type": "string" },
+                    "en": { "type": "string" }
+                },
+                "required": ["ar", "fr", "en"]
+            },
+            "description": {
+                "type": "object",
+                "properties": {
+                    "ar": { "type": "string" },
+                    "fr": { "type": "string" },
+                    "en": { "type": "string" }
+                }
+            },
+            "image": {
+                "type": "string",
+                "description": "URL of the recipe image."
+            },
+            "prepTime": {
+                "type": "number",
+                "description": "Preparation time in minutes."
+            },
+            "cookTime": {
+                "type": "number",
+                "description": "Cooking time in minutes."
+            },
+            "servings": {
+                "type": "number",
+                "description": "Number of servings."
+            },
+            "ingredients": {
+                "type": "array",
+                "items": { "type": "string" }
+            },
+            "instructions": {
+                "type": "array",
+                "items": { "type": "string" }
+            }
+        },
+        "required": ["title", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
     }
   },
   "auth": {
@@ -461,6 +511,12 @@
     "/coupons/{couponId}": {
         "schema": { "$ref": "#/entities/Coupon" },
         "description": "Stores discount coupons. Readable by all users, writable only by admins."
+    },
+    "/recipes/{recipeId}": {
+        "schema": { "$ref": "#/entities/Recipe" },
+        "description": "Stores cooking recipes. Publicly readable, writable only by admins."
     }
   }
 }
+
+    

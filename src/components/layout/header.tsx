@@ -33,6 +33,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 const navLinks = [
   { key: 'nav.home', href: '/' },
   { key: 'nav.products', href: '/products' },
+  { key: 'nav.recipes', href: '/recipes' },
   { key: 'nav.about', href: '/about' },
   { key: 'nav.contact', href: '/contact' },
 ];
@@ -214,3 +215,5 @@ export default function Header() {
     </header>
   );
 }
+
+    

@@ -72,6 +72,18 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
+    
+    /**
+     * @description Allows public read access to recipes, but write access only to admins.
+     * @path /recipes/{recipeId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for recipes.
+     */
+    match /recipes/{recipeId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
 
     /**
      * @description Allows a user to read their own document, and admins to read any.
@@ -248,3 +260,5 @@ service cloud.firestore {
             request.resource.data.reviewCount == resource.data.reviewCount);
   }
 }
+
+    

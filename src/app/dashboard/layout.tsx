@@ -29,6 +29,7 @@ import {
   User,
   LayoutGrid,
   Heart,
+  BookOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -54,6 +55,11 @@ const adminMenuItems = [
     key: 'dashboard.nav.products',
     href: '/dashboard/products',
     icon: Package,
+  },
+  {
+    key: 'dashboard.nav.recipes',
+    href: '/dashboard/recipes',
+    icon: BookOpen,
   },
   {
     key: 'dashboard.nav.categories',
@@ -192,3 +198,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    
