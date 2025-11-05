@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-import { updateDocumentNonBlocking } from '@/firebase';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -239,8 +239,13 @@ export default function OrdersPage() {
     React.useEffect(() => {
         const checkAdminStatus = async () => {
             if (user) {
-                const tokenResult = await user.getIdTokenResult();
-                setIsAdmin(!!tokenResult.claims.admin);
+                try {
+                    const tokenResult = await user.getIdTokenResult();
+                    setIsAdmin(!!tokenResult.claims.admin);
+                } catch (error) {
+                    console.error("Error getting user token:", error);
+                    setIsAdmin(false);
+                }
             } else if (!isUserLoading) {
                 setIsAdmin(false);
             }
