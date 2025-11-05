@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import AiChatbot from '@/components/chatbot/ai-chatbot';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Tlemcen Smart Supermarket',
@@ -27,17 +28,19 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LanguageProvider>
-            <CartProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <Toaster />
-              <AiChatbot />
-            </CartProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <FirebaseClientProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <LanguageProvider>
+              <CartProvider>
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+                <Toaster />
+                <AiChatbot />
+              </CartProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
