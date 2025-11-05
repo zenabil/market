@@ -26,38 +26,35 @@ function AdminSwitch({ user, initialIsAdmin }: { user: FirestoreUser, initialIsA
     setIsAdmin(initialIsAdmin);
   }, [initialIsAdmin]);
 
-  const handleAdminChange = async (newAdminStatus: boolean) => {
+  const handleAdminChange = (newAdminStatus: boolean) => {
     if (!firestore) return;
     setIsLoading(true);
     
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
 
-    try {
-      if (newAdminStatus) {
-        const roleData = { role: 'admin' };
-        // This setDoc operation triggers the Cloud Function to set custom claims.
-        await setDoc(adminRoleRef, roleData);
-      } else {
-        // This deleteDoc operation triggers the Cloud Function to remove custom claims.
-        await deleteDoc(adminRoleRef);
-      }
-       // After the function is triggered, we optimistically update the UI.
-      setIsAdmin(newAdminStatus);
-      toast({
-        title: t('dashboard.users.role_updated_title'),
-        description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
+    const operation = newAdminStatus 
+      ? setDoc(adminRoleRef, { role: 'admin' }) 
+      : deleteDoc(adminRoleRef);
+
+    operation
+      .then(() => {
+        setIsAdmin(newAdminStatus);
+        toast({
+          title: t('dashboard.users.role_updated_title'),
+          description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
+        });
+      })
+      .catch(error => {
+        const permissionError = new FirestorePermissionError({
+            path: adminRoleRef.path,
+            operation: newAdminStatus ? 'create' : 'delete',
+            requestResourceData: newAdminStatus ? { role: 'admin' } : undefined
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } catch (error) {
-      const permissionError = new FirestorePermissionError({
-          path: adminRoleRef.path,
-          operation: newAdminStatus ? 'create' : 'delete',
-          requestResourceData: newAdminStatus ? { role: 'admin' } : undefined
-      });
-      errorEmitter.emit('permission-error', permissionError);
-      // Don't need to revert UI here as component will re-render with fresh `initialIsAdmin` prop
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
