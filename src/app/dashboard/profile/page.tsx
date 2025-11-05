@@ -27,6 +27,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -58,6 +60,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = React.useState(false);
   const [isAddressSaving, setIsAddressSaving] = React.useState(false);
+  const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,6 +101,14 @@ export default function ProfilePage() {
         });
     }
   }, [firestoreUser, authUser, profileForm]);
+
+  useEffect(() => {
+    if (addressToEdit) {
+      addressForm.reset(addressToEdit);
+    } else {
+      addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+    }
+  }, [addressToEdit, addressForm]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -163,21 +174,39 @@ export default function ProfilePage() {
   async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
       if (!userDocRef) return;
       setIsAddressSaving(true);
-      const newAddress: Address = {
-          id: `addr_${Date.now()}`, // Simple unique ID
-          ...values
-      };
-      try {
-          await updateDocumentNonBlocking(userDocRef, {
-              addresses: arrayUnion(newAddress)
-          });
-          toast({ title: t('dashboard.profile.address_added_title') });
-          addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
-      } catch (error) {
-           toast({ variant: 'destructive', title: "Error", description: "Could not add address." });
-      } finally {
-            setIsAddressSaving(false);
+
+      if (addressToEdit) {
+        // Handle update
+        const updatedAddresses = firestoreUser?.addresses?.map(addr => 
+            addr.id === addressToEdit.id ? { ...addressToEdit, ...values } : addr
+        ) || [];
+
+        try {
+            await updateDocumentNonBlocking(userDocRef, { addresses: updatedAddresses });
+            toast({ title: t('dashboard.profile.address_updated_title') });
+            setAddressToEdit(null);
+        } catch (error) {
+            toast({ variant: 'destructive', title: "Error", description: "Could not update address." });
+        }
+
+      } else {
+        // Handle add new
+        const newAddress: Address = {
+            id: `addr_${Date.now()}`, // Simple unique ID
+            ...values
+        };
+        try {
+            await updateDocumentNonBlocking(userDocRef, {
+                addresses: arrayUnion(newAddress)
+            });
+            toast({ title: t('dashboard.profile.address_added_title') });
+            addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: "Error", description: "Could not add address." });
+        }
       }
+
+      setIsAddressSaving(false);
   }
 
   async function deleteAddress(address: Address) {
@@ -361,21 +390,24 @@ export default function ProfilePage() {
                 firestoreUser.addresses.map(addr => (
                     <div key={addr.id} className="flex justify-between items-center p-3 border rounded-md">
                         <p className="text-sm text-muted-foreground">{addr.street}, {addr.city}, {addr.zipCode}, {addr.country}</p>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                            </AlertDialogTrigger>
-                             <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>{t('dashboard.profile.delete_address_confirm_title')}</AlertDialogTitle>
-                                    <AlertDialogDescription>{t('dashboard.profile.delete_address_confirm_desc')}</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>{t('dashboard.cancel')}</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => deleteAddress(addr)}>{t('dashboard.delete')}</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <div className="flex items-center">
+                            <Button variant="ghost" size="icon" onClick={() => setAddressToEdit(addr)}><Pencil className="h-4 w-4 text-muted-foreground" /></Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                </AlertDialogTrigger>
+                                 <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>{t('dashboard.profile.delete_address_confirm_title')}</AlertDialogTitle>
+                                        <AlertDialogDescription>{t('dashboard.profile.delete_address_confirm_desc')}</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>{t('dashboard.cancel')}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteAddress(addr)}>{t('dashboard.delete')}</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </div>
                 ))
             ) : (
@@ -385,7 +417,7 @@ export default function ProfilePage() {
            <Separator className="my-6" />
             <h4 className="font-semibold mb-4">{t('dashboard.profile.add_new_address')}</h4>
              <Form {...addressForm}>
-                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4">
+                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-form">
                     <FormField control={addressForm.control} name="street" render={({ field }) => (
                         <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -400,16 +432,52 @@ export default function ProfilePage() {
                             <FormItem><FormLabel>{t('dashboard.profile.country')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                      </div>
-                     <div className="flex justify-end">
-                        <Button type="submit" disabled={isAddressSaving}>
-                            {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {t('dashboard.profile.add_address_button')}
-                        </Button>
-                    </div>
                 </form>
             </Form>
+             <div className="flex justify-end mt-4">
+                <Button type="submit" form="address-form" disabled={isAddressSaving || !!addressToEdit}>
+                    {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('dashboard.profile.add_address_button')}
+                </Button>
+            </div>
         </CardContent>
     </Card>
+
+    <Dialog open={!!addressToEdit} onOpenChange={(isOpen) => !isOpen && setAddressToEdit(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t('dashboard.profile.edit_address_title')}</DialogTitle>
+                <DialogDescription>{t('dashboard.profile.edit_address_desc')}</DialogDescription>
+            </DialogHeader>
+            <Form {...addressForm}>
+                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="edit-address-form">
+                     <FormField control={addressForm.control} name="street" render={({ field }) => (
+                        <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField control={addressForm.control} name="city" render={({ field }) => (
+                            <FormItem><FormLabel>{t('checkout.city')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={addressForm.control} name="zipCode" render={({ field }) => (
+                            <FormItem><FormLabel>{t('dashboard.profile.zip_code')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={addressForm.control} name="country" render={({ field }) => (
+                            <FormItem><FormLabel>{t('dashboard.profile.country')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                     </div>
+                </form>
+            </Form>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+                </DialogClose>
+                <Button type="submit" form="edit-address-form" disabled={isAddressSaving}>
+                    {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('dashboard.save_changes')}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 
     </div>
   );
