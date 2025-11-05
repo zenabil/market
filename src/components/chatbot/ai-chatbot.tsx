@@ -64,7 +64,7 @@ export default function AiChatbot() {
     }
   };
   
-  if (pathname.startsWith('/dashboard')) {
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
   }
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Menu } from 'lucide-react';
+import { Search, Menu, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,16 @@ import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
+import { useUser, useAuth } from '@/firebase';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navLinks = [
   { key: 'nav.home', href: '/' },
@@ -24,13 +34,64 @@ const navLinks = [
   { key: 'nav.dashboard', href: '/dashboard' },
 ];
 
+function UserNav() {
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const { t } = useLanguage();
+
+  const handleLogout = async () => {
+    await auth.signOut();
+  };
+
+  if (isUserLoading) {
+    return null;
+  }
+
+  if (!user) {
+    return (
+      <Button asChild variant="ghost">
+        <Link href="/login">{t('auth.login')}</Link>
+      </Button>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`} alt={user.displayName || 'User'} />
+            <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.displayName || 'Welcome'}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>{t('auth.logout')}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+
 export default function Header() {
   const { t } = useLanguage();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const isMobile = useIsMobile();
   const pathname = usePathname();
 
-  if (pathname.startsWith('/dashboard')) {
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
   }
   
@@ -100,6 +161,7 @@ export default function Header() {
           </div>
           <LanguageSwitcher />
           <ThemeSwitcher />
+          <UserNav />
           <CartIcon onClick={() => setIsCartOpen(true)} />
         </div>
       </div>

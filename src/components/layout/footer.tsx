@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import Logo from '../icons/logo';
+import { usePathname } from 'next/navigation';
+
 
 const navLinks = [
   { key: 'nav.home', href: '/' },
@@ -21,6 +23,11 @@ const legalLinks = [
 export default function Footer() {
   const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
+    return null;
+  }
 
   return (
     <footer className="border-t bg-background">
