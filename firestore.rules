@@ -169,30 +169,33 @@ service cloud.firestore {
   
   function isUpdatingOwnData() {
     // Users can't change their own role, order count, total spent, or loyalty points directly.
-    let disallowedFields = ['role', 'orderCount', 'totalSpent', 'loyaltyPoints'];
-    return request.resource.data.keys().diff(resource.data.keys()).hasOnly(disallowedFields) == false;
+    let disallowedFields = ['role', 'orderCount', 'totalSpent', 'loyaltyPoints', 'id', 'registrationDate'];
+    let incomingKeys = request.resource.data.keys();
+    
+    // Ensure no disallowed fields are being modified, unless they are being set to their existing value (which is a no-op).
+    return incomingKeys.hasAll(disallowedFields) == false &&
+           (request.resource.data.role == resource.data.role) &&
+           (request.resource.data.orderCount == resource.data.orderCount) &&
+           (request.resource.data.totalSpent == resource.data.totalSpent) &&
+           (request.resource.data.loyaltyPoints == resource.data.loyaltyPoints);
   }
   
   function isUpdatingAllowedAdminFields() {
-    // Admins can only update the role and loyaltyPoints.
+    // Admins can ONLY update the 'role' and 'loyaltyPoints' fields.
+    // All other fields must remain unchanged.
     let allowedFields = ['role', 'loyaltyPoints'];
-    let receivedKeys = request.resource.data.keys();
-    let unchangedKeys = receivedKeys.removeAll(allowedFields);
-    // Check if any fields other than the allowed ones are being changed.
-    // This logic is complex because we need to ensure that no OTHER field is being changed.
-    // We iterate through all keys that are NOT 'role' or 'loyaltyPoints' and ensure their values haven't changed.
-    let isChangingDisallowedKey = false;
-    let allKeys = resource.data.keys().concat(receivedKeys).toSet();
+    let allKeys = resource.data.keys().concat(request.resource.data.keys()).toSet();
     
-    for (let key in allKeys) {
-      if (!(key in allowedFields) && resource.data[key] != request.resource.data[key]) {
-        isChangingDisallowedKey = true;
-        break;
-      }
-    }
-    
-    // Ensure that only fields in `allowedFields` are being modified
-    let modifiedKeys = request.resource.data.keys().diff(resource.data.keys()).toSet();
-    return modifiedKeys.hasOnly(allowedFields);
+    return allKeys.size() > 0 && allKeys.hasOnly(allowedFields.concat(resource.data.keys())) &&
+      request.resource.data.id == resource.data.id &&
+      request.resource.data.name == resource.data.name &&
+      request.resource.data.email == resource.data.email &&
+      request.resource.data.phone == resource.data.phone &&
+      request.resource.data.addresses == resource.data.addresses &&
+      request.resource.data.preferredLanguage == resource.data.preferredLanguage &&
+      request.resource.data.avatar == resource.data.avatar &&
+      request.resource.data.registrationDate == resource.data.registrationDate &&
+      request.resource.data.orderCount == resource.data.orderCount &&
+      request.resource.data.totalSpent == resource.data.totalSpent;
   }
 }
