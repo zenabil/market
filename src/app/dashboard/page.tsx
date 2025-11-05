@@ -4,13 +4,14 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Toolti
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import type { Product } from '@/lib/placeholder-data';
+import { useRouter } from 'next/navigation';
 
-export default function DashboardPage() {
+function AdminDashboard() {
   const { t, locale, direction } = useLanguage();
   const firestore = useFirestore();
   const productsQuery = useMemoFirebase(() => {
@@ -179,4 +180,45 @@ export default function DashboardPage() {
   );
 }
 
-    
+export default function DashboardPage() {
+    const { user, isUserLoading } = useUser();
+    const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
+    const router = useRouter();
+
+    React.useEffect(() => {
+        const checkAdminStatus = async () => {
+            if (user) {
+                try {
+                    const tokenResult = await user.getIdTokenResult();
+                    const isAdminClaim = !!tokenResult.claims.admin;
+                    setIsAdmin(isAdminClaim);
+                    if (!isAdminClaim) {
+                        router.replace('/dashboard/orders');
+                    }
+                } catch (error) {
+                    console.error("Error getting user token:", error);
+                    setIsAdmin(false);
+                    router.replace('/dashboard/orders');
+                }
+            } else if (!isUserLoading) {
+                setIsAdmin(false);
+                router.replace('/login');
+            }
+        };
+        checkAdminStatus();
+    }, [user, isUserLoading, router]);
+
+    if (isUserLoading || isAdmin === null || !isAdmin) {
+        return (
+            <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+                <div className="space-y-4 text-center">
+                     <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+                     <Skeleton className="h-8 w-48 mx-auto" />
+                     <Skeleton className="h-4 w-64 mx-auto" />
+                </div>
+            </div>
+        );
+    }
+
+    return <AdminDashboard />;
+}
