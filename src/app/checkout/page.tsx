@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2, TicketPercent } from 'lucide-react';
@@ -108,38 +108,39 @@ export default function CheckoutPage() {
     if (!couponCode.trim() || !firestore) return;
     setIsApplyingCoupon(true);
 
-    try {
-      const couponsRef = collection(firestore, 'coupons');
-      const q = query(couponsRef, where('code', '==', couponCode.trim()));
-      const querySnapshot = await getDocs(q);
+    const couponsRef = collection(firestore, 'coupons');
+    const q = query(couponsRef, where('code', '==', couponCode.trim()));
 
-      if (querySnapshot.empty) {
-        toast({ variant: 'destructive', title: t('checkout.coupon.invalid') });
-        setAppliedCoupon(null);
-        return;
-      }
+    getDocs(q).then(querySnapshot => {
+        if (querySnapshot.empty) {
+            toast({ variant: 'destructive', title: t('checkout.coupon.invalid') });
+            setAppliedCoupon(null);
+            return;
+        }
 
-      const couponDoc = querySnapshot.docs[0];
-      const couponData = { id: couponDoc.id, ...couponDoc.data() } as Coupon;
-      
-      const now = new Date();
-      const expiry = new Date(couponData.expiryDate);
+        const couponDoc = querySnapshot.docs[0];
+        const couponData = { id: couponDoc.id, ...couponDoc.data() } as Coupon;
+        
+        const now = new Date();
+        const expiry = new Date(couponData.expiryDate);
 
-      if (!couponData.isActive || now > expiry) {
-         toast({ variant: 'destructive', title: t('checkout.coupon.expired') });
-         setAppliedCoupon(null);
-         return;
-      }
-      
-      setAppliedCoupon(couponData);
-      toast({ title: t('checkout.coupon.applied', { code: couponData.code }) });
-
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('checkout.coupon.error_applying') });
-      console.error("Error applying coupon: ", error);
-    } finally {
-      setIsApplyingCoupon(false);
-    }
+        if (!couponData.isActive || now > expiry) {
+            toast({ variant: 'destructive', title: t('checkout.coupon.expired') });
+            setAppliedCoupon(null);
+            return;
+        }
+        
+        setAppliedCoupon(couponData);
+        toast({ title: t('checkout.coupon.applied', { code: couponData.code }) });
+    }).catch(error => {
+        const contextualError = new FirestorePermissionError({
+            operation: 'list',
+            path: 'coupons'
+        });
+        errorEmitter.emit('permission-error', contextualError);
+    }).finally(() => {
+        setIsApplyingCoupon(false);
+    });
   };
 
 
