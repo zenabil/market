@@ -14,6 +14,7 @@
  * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
  * - `/users/{userId}/orders/{orderId}`: User orders, accessible only to the user and admins. The `userId` field is denormalized to match the path.
  * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
+ * - `/settings/site`: Global site settings, publicly readable.
  *
  * Key Security Decisions:
  * - Products and Categories are publicly readable.
@@ -131,6 +132,18 @@ service cloud.firestore {
         allow get, list: if true;
         allow create, update, delete: if isAdmin();
     }
+
+    /**
+     * @description Allows public read access to site settings, but write access only to admins.
+     * @path /settings/site
+     * @allow get: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for site settings.
+     */
+    match /settings/site {
+        allow get: if true;
+        allow create, update, delete: if isAdmin();
+    }
   }
 
   // Helper functions
@@ -150,5 +163,3 @@ service cloud.firestore {
     return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
   }
 }
-
-    
