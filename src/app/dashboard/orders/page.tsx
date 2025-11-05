@@ -4,8 +4,8 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useLanguage } from '@/hooks/use-language';
-import { useFirestore, useCollection, useCollectionGroup, useMemoFirebase, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collectionGroup, query, orderBy, doc, collection, updateDoc } from 'firebase/firestore';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/placeholder-data';
@@ -21,20 +21,14 @@ import { MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useOrders } from '@/hooks/use-orders';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
-function AdminOrdersView() {
+function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoading: boolean }) {
     const { t, locale } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
-
-    const ordersQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc'));
-    }, [firestore]);
-
-    const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
@@ -158,17 +152,8 @@ function AdminOrdersView() {
     )
 }
 
-function UserOrdersView() {
+function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoading: boolean }) {
     const { t, locale } = useLanguage();
-    const firestore = useFirestore();
-    const { user } = useUser();
-
-    const ordersQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        return query(collection(firestore, `users/${user.uid}/orders`), orderBy('orderDate', 'desc'));
-    }, [firestore, user]);
-
-    const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
     
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
@@ -247,8 +232,11 @@ function UserOrdersView() {
 
 export default function OrdersPage() {
     const { isAdmin, isRoleLoading } = useUserRole();
+    const { orders, isLoading } = useOrders();
 
-    if (isRoleLoading) {
+    const effectiveIsLoading = isRoleLoading || isLoading;
+
+    if (effectiveIsLoading && !orders) {
         return (
             <div className="container py-8 md:py-12">
                 <Card>
@@ -266,7 +254,7 @@ export default function OrdersPage() {
 
     return (
         <div className="container py-8 md:py-12">
-            {isAdmin ? <AdminOrdersView /> : <UserOrdersView />}
+            {isAdmin ? <AdminOrdersView orders={orders} isLoading={effectiveIsLoading} /> : <UserOrdersView orders={orders} isLoading={effectiveIsLoading} />}
         </div>
     );
 }
