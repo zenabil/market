@@ -25,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useUserRole } from '@/hooks/use-user-role';
 
 function LoyaltyDialog({ user }: { user: FirestoreUser }) {
   const { t } = useLanguage();
@@ -165,8 +166,15 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
 export default function UsersPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
-  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
-  const { data: users, isLoading } = useCollection<FirestoreUser>(usersQuery);
+  const { isAdmin, isRoleLoading } = useUserRole();
+
+  // Only attempt to query users if the current user is an admin.
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore || isRoleLoading || !isAdmin) return null;
+    return query(collection(firestore, 'users'));
+  }, [firestore, isRoleLoading, isAdmin]);
+
+  const { data: users, isLoading: areUsersLoading } = useCollection<FirestoreUser>(usersQuery);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
@@ -183,6 +191,8 @@ export default function UsersPage() {
       day: 'numeric',
     });
   };
+  
+  const isLoading = isRoleLoading || areUsersLoading;
 
   return (
     <div className="container py-8 md:py-12">
@@ -224,7 +234,7 @@ export default function UsersPage() {
                     <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))}
-                {users && users.map((user) => (
+                {!isLoading && users && users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
