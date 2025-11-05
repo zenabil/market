@@ -27,6 +27,7 @@ import {
   LogOut,
   ChevronLeft,
   User,
+  LayoutGrid,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -51,6 +52,11 @@ const adminMenuItems = [
     key: 'dashboard.nav.products',
     href: '/dashboard/products',
     icon: Package,
+  },
+  {
+    key: 'dashboard.nav.categories',
+    href: '/dashboard/categories',
+    icon: LayoutGrid,
   },
   {
     key: 'dashboard.nav.users',
@@ -169,7 +175,7 @@ function DashboardSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} className={cn(isCollapsed && 'justify-center')}>
                     <LogOut />
-                    <span className={cn(isCollapsed && 'hidden')}>{t('dashboard.nav.logout')}</span>
+                    <span className={cn(isCollapsed && 'hidden')}>{t('auth.logout')}</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

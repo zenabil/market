@@ -365,7 +365,7 @@
     },
     "/categories/{categoryId}": {
       "schema": { "$ref": "#/entities/Category" },
-      "description": "Stores category information. No denormalized authorization fields are included because all categories are publicly readable."
+      "description": "Stores category information. Readable by all users, writable only by admins."
     },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
