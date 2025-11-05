@@ -57,6 +57,15 @@ export type Order = {
     }[];
 };
 
+export type Coupon = {
+  id: string;
+  code: string;
+  discountPercentage: number;
+  expiryDate: string; // ISO string
+  isActive: boolean;
+};
+
+
 // Placeholder data is no longer the source of truth for products, categories, or users.
 // It will be fetched from Firestore. This array can be kept for reference or removed.
 const products: Product[] = [];

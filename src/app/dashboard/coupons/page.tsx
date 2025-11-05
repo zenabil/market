@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, doc, addDoc, deleteDoc } from 'firebase/firestore';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, addDoc, deleteDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -42,20 +42,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCoupons } from '@/hooks/use-coupons';
+import type { Coupon } from '@/lib/placeholder-data';
 
-type Coupon = {
-  id: string;
-  code: string;
-  discountPercentage: number;
-  expiryDate: string; // ISO string
-  isActive: boolean;
-};
-
-const couponFormSchema = z.object({
-  code: z.string().min(4, { message: 'Code must be at least 4 characters.' }).max(20),
-  discountPercentage: z.coerce.number().min(1).max(100),
-  expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date" }),
-});
 
 function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
   const { t } = useLanguage();
@@ -63,6 +52,12 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
+
+  const couponFormSchema = z.object({
+    code: z.string().min(4, { message: 'Code must be at least 4 characters.' }).max(20),
+    discountPercentage: z.coerce.number().min(1).max(100),
+    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date" }),
+  });
 
   const form = useForm<z.infer<typeof couponFormSchema>>({
     resolver: zodResolver(couponFormSchema),
@@ -153,8 +148,7 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
 export default function CouponsPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
-  const couponsQuery = useMemoFirebase(() => query(collection(firestore, 'coupons')), [firestore]);
-  const { data: coupons, isLoading, error } = useCollection<Coupon>(couponsQuery);
+  const { coupons, isLoading, refetchCoupons } = useCoupons();
   const [couponToDelete, setCouponToDelete] = React.useState<Coupon | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
@@ -170,6 +164,9 @@ export default function CouponsPage() {
     if (couponToDelete && firestore) {
       const couponDocRef = doc(firestore, 'coupons', couponToDelete.id);
       deleteDoc(couponDocRef)
+        .then(() => {
+          refetchCoupons();
+        })
         .catch(error => {
             errorEmitter.emit(
                 'permission-error',
@@ -191,86 +188,86 @@ export default function CouponsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>{t('dashboard.nav.coupons')}</CardTitle>
-                <CardDescription>{t('dashboard.coupons.description')}</CardDescription>
-              </div>
-              <NewCouponDialog onCouponCreated={() => { /* Could trigger a refetch if needed */ }} />
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('dashboard.coupons.code')}</TableHead>
-                    <TableHead>{t('dashboard.coupons.discount')}</TableHead>
-                    <TableHead>{t('dashboard.coupons.expiry_date')}</TableHead>
-                    <TableHead>{t('dashboard.coupons.status')}</TableHead>
-                    <TableHead><span className="sr-only">{t('dashboard.actions')}</span></TableHead>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>{t('dashboard.nav.coupons')}</CardTitle>
+              <CardDescription>{t('dashboard.coupons.description')}</CardDescription>
+            </div>
+            <NewCouponDialog onCouponCreated={refetchCoupons} />
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('dashboard.coupons.code')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.discount')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.expiry_date')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.status')}</TableHead>
+                  <TableHead><span className="sr-only">{t('dashboard.actions')}</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading && Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoading && Array.from({ length: 3 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                      <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                    </TableRow>
-                  ))}
-                  {coupons && coupons.map(coupon => (
-                    <TableRow key={coupon.id}>
-                      <TableCell className="font-mono">{coupon.code}</TableCell>
-                      <TableCell>{coupon.discountPercentage}%</TableCell>
-                      <TableCell>{formatDate(coupon.expiryDate)}</TableCell>
-                      <TableCell>
-                        <Badge variant={coupon.isActive ? 'default' : 'destructive'}>
-                          {coupon.isActive ? t('dashboard.coupons.active') : t('dashboard.coupons.expired')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">{t('dashboard.toggle_menu')}</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {t('dashboard.delete')}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {!isLoading && coupons?.length === 0 && (
-                <div className="text-center p-8 text-muted-foreground">
-                  {t('dashboard.coupons.no_coupons')}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('dashboard.coupons.delete_confirmation_title')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('dashboard.coupons.delete_confirmation_desc', { couponCode: couponToDelete?.code || '' })}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteCoupon}>{t('dashboard.delete')}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                ))}
+                {coupons && coupons.map(coupon => (
+                  <TableRow key={coupon.id}>
+                    <TableCell className="font-mono">{coupon.code}</TableCell>
+                    <TableCell>{coupon.discountPercentage}%</TableCell>
+                    <TableCell>{formatDate(coupon.expiryDate)}</TableCell>
+                    <TableCell>
+                      <Badge variant={coupon.isActive ? 'default' : 'destructive'}>
+                        {coupon.isActive ? t('dashboard.coupons.active') : t('dashboard.coupons.expired')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                       <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">{t('dashboard.toggle_menu')}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t('dashboard.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {!isLoading && coupons?.length === 0 && (
+              <div className="text-center p-8 text-muted-foreground">
+                {t('dashboard.coupons.no_coupons')}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('dashboard.coupons.delete_confirmation_title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('dashboard.coupons.delete_confirmation_desc', { couponCode: couponToDelete?.code || '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCoupon}>{t('dashboard.delete')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
