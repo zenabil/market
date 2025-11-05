@@ -3,7 +3,7 @@
   "nav": {
     "home": "Home",
     "products": "Products",
-    "about": "About",
+    "about": "About Us",
     "contact": "Contact",
     "dashboard": "Dashboard"
   },
@@ -11,7 +11,7 @@
     "search_placeholder": "Search for products..."
   },
   "footer": {
-    "slogan": "Your local supermarket in Tlemcen, now online with smart features.",
+    "slogan": "A smart shopping experience, in the heart of Tlemcen.",
     "quick_links": "Quick Links",
     "legal": "Legal",
     "follow_us": "Follow Us",
@@ -20,12 +20,12 @@
     "copyright": "All rights reserved."
   },
   "hero": {
-    "slide1_heading": "Fresh Groceries to Your Doorstep",
-    "slide1_subheading": "The best fruits, vegetables, and more, delivered daily.",
+    "slide1_heading": "Fresh Produce Delivered Daily",
+    "slide1_subheading": "The best fruits and vegetables from local farms.",
     "slide2_heading": "Exclusive Online Offers",
-    "slide2_subheading": "Shop our weekly deals and save big on your groceries.",
-    "slide3_heading": "Discover Our Artisan Bakery",
-    "slide3_subheading": "Fresh bread and pastries, baked with love.",
+    "slide2_subheading": "Unbeatable discounts on your favorite products.",
+    "slide3_heading": "Delicious Baked Goods Every Morning",
+    "slide3_subheading": "Start your day with our selection of fresh bread and pastries.",
     "shop_now": "Shop Now"
   },
   "homepage": {
@@ -36,18 +36,57 @@
   "cart": {
     "shopping_cart": "Shopping Cart",
     "empty_cart": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
     "add_to_cart": "Add to Cart",
     "added_to_cart_title": "Added to Cart!",
-    "added_to_cart_desc": "has been added to your cart.",
-    "subtotal": "Subtotal",
-    "checkout": "Checkout"
+    "added_to_cart_desc": "has been added to your cart."
   },
   "dashboard": {
-    "title": "Admin Dashboard",
+    "title": "Dashboard",
     "total_revenue": "Total Revenue",
     "products_sold": "Products Sold",
     "products_in_stock": "Products in Stock",
     "top_selling_products": "Top Selling Products",
-    "units_sold": "Units Sold"
+    "units_sold": "Units Sold",
+    "manage_products": "Manage Products",
+    "add_product": "Add Product",
+    "product": "Product",
+    "price": "Price",
+    "stock": "Stock",
+    "sold": "Sold",
+    "actions": "Actions",
+    "toggle_menu": "Toggle menu",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add_new_product": "Add New Product",
+    "product_details": "Product Details",
+    "product_name_ar": "Product Name (Arabic)",
+    "product_name_en": "Product Name (English)",
+    "product_name_fr": "Product Name (French)",
+    "product_name_placeholder": "e.g. Fresh Tomatoes",
+    "product_description": "Product Description",
+    "generate_with_ai": "Generate with AI",
+    "generating_description": "Generating...",
+    "description_ar": "Description (Arabic)",
+    "description_en": "Description (English)",
+    "description_fr": "Description (French)",
+    "description_placeholder": "Product description here...",
+    "organization": "Organization",
+    "category": "Category",
+    "select_category_placeholder": "Select a category",
+    "pricing_stock": "Pricing & Stock",
+    "discount_percentage": "Discount (%)",
+    "cancel": "Cancel",
+    "save_product": "Save Product",
+    "product_created_success": "Product Created Successfully!",
+    "product_created_desc": "{{productName}} has been added to your store.",
+    "generation_error_title": "Insufficient Information",
+    "generation_error_desc": "Please enter product names and category first.",
+    "description_generated_success": "Description generated successfully!",
+    "generation_failed_title": "Generation Failed",
+    "generation_failed_desc": "An error occurred while generating the description."
   }
 }
+
+    

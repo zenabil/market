@@ -3,7 +3,7 @@
   "nav": {
     "home": "الرئيسية",
     "products": "المنتجات",
-    "about": "حولنا",
+    "about": "من نحن",
     "contact": "اتصل بنا",
     "dashboard": "لوحة التحكم"
   },
@@ -11,43 +11,82 @@
     "search_placeholder": "ابحث عن منتجات..."
   },
   "footer": {
-    "slogan": "بقالتك المحلية في تلمسان، الآن عبر الإنترنت بميزات ذكية.",
+    "slogan": "تجربة تسوق ذكية، في قلب تلمسان.",
     "quick_links": "روابط سريعة",
     "legal": "قانوني",
     "follow_us": "تابعنا",
     "privacy_policy": "سياسة الخصوصية",
     "terms_of_service": "شروط الخدمة",
-    "copyright": "كل الحقوق محفوظة."
+    "copyright": "جميع الحقوق محفوظة."
   },
   "hero": {
-    "slide1_heading": "منتجات طازجة تصل إلى باب منزلك",
-    "slide1_subheading": "أفضل الفواكه والخضروات والمزيد، يتم توصيلها يوميًا.",
+    "slide1_heading": "منتجات طازجة تصلك يومياً",
+    "slide1_subheading": "أفضل الفواكه والخضروات من المزارع المحلية.",
     "slide2_heading": "عروض حصرية عبر الإنترنت",
-    "slide2_subheading": "تسوق أسبوعيًا ووفر الكثير على مشترياتك.",
-    "slide3_heading": "اكتشف مخبوزاتنا الحرفية",
-    "slide3_subheading": "خبز ومعجنات طازجة ومخبوزة بحب.",
+    "slide2_subheading": "خصومات لا مثيل لها على منتجاتك المفضلة.",
+    "slide3_heading": "مخبوزات شهية كل صباح",
+    "slide3_subheading": "ابدأ يومك مع تشكيلتنا من الخبز والمعجنات الطازجة.",
     "shop_now": "تسوق الآن"
   },
   "homepage": {
-    "categories": "تسوق حسب الفئة",
-    "best_sellers": "الأكثر مبيعًا",
+    "categories": "تسوق حسب الفئات",
+    "best_sellers": "الأكثر مبيعاً",
     "exclusive_offers": "عروض حصرية"
   },
   "cart": {
-    "shopping_cart": "عربة التسوق",
-    "empty_cart": "عربة التسوق فارغة.",
+    "shopping_cart": "سلة التسوق",
+    "empty_cart": "سلة التسوق الخاصة بك فارغة.",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "إتمام الشراء",
     "add_to_cart": "أضف إلى السلة",
     "added_to_cart_title": "تمت الإضافة إلى السلة!",
-    "added_to_cart_desc": "تمت إضافته إلى عربة التسوق الخاصة بك.",
-    "subtotal": "المجموع الفرعي",
-    "checkout": "الدفع"
+    "added_to_cart_desc": "تمت إضافته إلى سلتك."
   },
   "dashboard": {
-    "title": "لوحة تحكم المشرف",
+    "title": "لوحة التحكم",
     "total_revenue": "إجمالي الإيرادات",
     "products_sold": "المنتجات المباعة",
-    "products_in_stock": "المنتجات في المخزون",
-    "top_selling_products": "المنتجات الأكثر مبيعًا",
-    "units_sold": "الوحدات المباعة"
+    "products_in_stock": "المنتجات في المخزن",
+    "top_selling_products": "المنتجات الأكثر مبيعاً",
+    "units_sold": "الوحدات المباعة",
+    "manage_products": "إدارة المنتجات",
+    "add_product": "إضافة منتج",
+    "product": "المنتج",
+    "price": "السعر",
+    "stock": "المخزون",
+    "sold": "مباع",
+    "actions": "الإجراءات",
+    "toggle_menu": "تبديل القائمة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "add_new_product": "إضافة منتج جديد",
+    "product_details": "تفاصيل المنتج",
+    "product_name_ar": "اسم المنتج (العربية)",
+    "product_name_en": "اسم المنتج (الإنجليزية)",
+    "product_name_fr": "اسم المنتج (الفرنسية)",
+    "product_name_placeholder": "مثال: طماطم طازجة",
+    "product_description": "وصف المنتج",
+    "generate_with_ai": "إنشاء باستخدام الذكاء الاصطناعي",
+    "generating_description": "جاري الإنشاء...",
+    "description_ar": "الوصف (العربية)",
+    "description_en": "الوصف (الإنجليزية)",
+    "description_fr": "الوصف (الفرنسية)",
+    "description_placeholder": "وصف المنتج هنا...",
+    "organization": "التنظيم",
+    "category": "الفئة",
+    "select_category_placeholder": "اختر فئة",
+    "pricing_stock": "التسعير والمخزون",
+    "discount_percentage": "نسبة الخصم (%)",
+    "cancel": "إلغاء",
+    "save_product": "حفظ المنتج",
+    "product_created_success": "تم إنشاء المنتج بنجاح!",
+    "product_created_desc": "تمت إضافة {{productName}} إلى متجرك.",
+    "generation_error_title": "معلومات غير كافية",
+    "generation_error_desc": "يرجى إدخال أسماء المنتج والفئة أولاً.",
+    "description_generated_success": "تم إنشاء الوصف بنجاح!",
+    "generation_failed_title": "فشل الإنشاء",
+    "generation_failed_desc": "حدث خطأ أثناء إنشاء الوصف."
   }
 }
+
+    

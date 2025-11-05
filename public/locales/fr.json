@@ -11,7 +11,7 @@
     "search_placeholder": "Rechercher des produits..."
   },
   "footer": {
-    "slogan": "Votre supermarché local à Tlemcen, maintenant en ligne avec des fonctionnalités intelligentes.",
+    "slogan": "Une expérience d'achat intelligente, au cœur de Tlemcen.",
     "quick_links": "Liens Rapides",
     "legal": "Légal",
     "follow_us": "Suivez-nous",
@@ -20,12 +20,12 @@
     "copyright": "Tous droits réservés."
   },
   "hero": {
-    "slide1_heading": "Des Produits Frais à Votre Porte",
-    "slide1_subheading": "Les meilleurs fruits, légumes et plus encore, livrés quotidiennement.",
+    "slide1_heading": "Produits Frais Livrés Chaque Jour",
+    "slide1_subheading": "Les meilleurs fruits et légumes des fermes locales.",
     "slide2_heading": "Offres Exclusives en Ligne",
-    "slide2_subheading": "Profitez de nos offres hebdomadaires et économisez gros sur vos courses.",
-    "slide3_heading": "Découvrez Notre Boulangerie Artisanale",
-    "slide3_subheading": "Du pain et des pâtisseries frais, faits avec amour.",
+    "slide2_subheading": "Des réductions imbattables sur vos produits préférés.",
+    "slide3_heading": "Boulangerie Délicieuse Chaque Matin",
+    "slide3_subheading": "Commencez votre journée avec notre sélection de pains et viennoiseries frais.",
     "shop_now": "Acheter Maintenant"
   },
   "homepage": {
@@ -34,20 +34,59 @@
     "exclusive_offers": "Offres Exclusives"
   },
   "cart": {
-    "shopping_cart": "Panier d'achat",
+    "shopping_cart": "Panier d'Achat",
     "empty_cart": "Votre panier est vide.",
-    "add_to_cart": "Ajouter au Panier",
-    "added_to_cart_title": "Ajouté au panier!",
-    "added_to_cart_desc": "a été ajouté à votre panier.",
     "subtotal": "Sous-total",
-    "checkout": "Passer à la caisse"
+    "checkout": "Passer à la caisse",
+    "add_to_cart": "Ajouter au Panier",
+    "added_to_cart_title": "Ajouté au panier !",
+    "added_to_cart_desc": "a été ajouté à votre panier."
   },
   "dashboard": {
-    "title": "Tableau de Bord Administrateur",
+    "title": "Tableau de Bord",
     "total_revenue": "Revenu Total",
     "products_sold": "Produits Vendus",
     "products_in_stock": "Produits en Stock",
     "top_selling_products": "Meilleures Ventes de Produits",
-    "units_sold": "Unités Vendues"
+    "units_sold": "Unités Vendues",
+    "manage_products": "Gérer les Produits",
+    "add_product": "Ajouter un Produit",
+    "product": "Produit",
+    "price": "Prix",
+    "stock": "Stock",
+    "sold": "Vendu",
+    "actions": "Actions",
+    "toggle_menu": "Basculer le menu",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "add_new_product": "Ajouter un nouveau produit",
+    "product_details": "Détails du produit",
+    "product_name_ar": "Nom du produit (Arabe)",
+    "product_name_en": "Nom du produit (Anglais)",
+    "product_name_fr": "Nom du produit (Français)",
+    "product_name_placeholder": "Ex : Tomates Fraîches",
+    "product_description": "Description du produit",
+    "generate_with_ai": "Générer avec l'IA",
+    "generating_description": "Génération en cours...",
+    "description_ar": "Description (Arabe)",
+    "description_en": "Description (Anglais)",
+    "description_fr": "Description (Français)",
+    "description_placeholder": "Description du produit ici...",
+    "organization": "Organisation",
+    "category": "Catégorie",
+    "select_category_placeholder": "Sélectionnez une catégorie",
+    "pricing_stock": "Tarification et Stock",
+    "discount_percentage": "Pourcentage de remise (%)",
+    "cancel": "Annuler",
+    "save_product": "Enregistrer le produit",
+    "product_created_success": "Produit créé avec succès !",
+    "product_created_desc": "{{productName}} a été ajouté à votre boutique.",
+    "generation_error_title": "Informations insuffisantes",
+    "generation_error_desc": "Veuillez d'abord saisir les noms de produit et la catégorie.",
+    "description_generated_success": "Description générée avec succès !",
+    "generation_failed_title": "Échec de la génération",
+    "generation_failed_desc": "Une erreur est survenue lors de la génération de la description."
   }
 }
+
+    
