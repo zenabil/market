@@ -104,49 +104,44 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const [isAdmin, setIsAdmin] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  // Check initial admin status
+  // Use local state to manage the visual state of the switch immediately.
+  const [isAdmin, setIsAdmin] = React.useState(user.role === 'Admin');
+  const [isLoading, setIsLoading] = React.useState(false);
+  
   React.useEffect(() => {
-    if (!firestore) return;
-    const adminRoleRef = doc(firestore, 'roles_admin', user.id);
-    // This is a one-time check. For real-time, you might use useDoc.
-    const checkStatus = async () => {
-        try {
-            const docSnap = await doc(firestore, 'roles_admin', user.id).get();
-            setIsAdmin(docSnap.exists());
-        } catch(e) {
-            // ignore, probably permissions
-        } finally {
-            setIsLoading(false);
-        }
-    }
-    checkStatus();
-  }, [firestore, user.id]);
+    setIsAdmin(user.role === 'Admin');
+  }, [user.role]);
 
   const handleAdminChange = (newAdminStatus: boolean) => {
     if (!firestore) return;
 
     setIsLoading(true);
+    setIsAdmin(newAdminStatus); // Optimistically update UI
+
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
+    const userRef = doc(firestore, 'users', user.id);
+
     const operation = newAdminStatus 
       ? setDoc(adminRoleRef, { role: 'admin' }) 
       : deleteDoc(adminRoleRef);
 
     operation
       .then(() => {
-        setIsAdmin(newAdminStatus);
+        // Also update the user document itself
+        return updateDoc(userRef, { role: newAdminStatus ? 'Admin' : 'User' });
+      })
+      .then(() => {
         toast({
           title: t('dashboard.users.role_updated_title'),
           description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
         });
       })
       .catch(error => {
+        setIsAdmin(!newAdminStatus); // Revert UI on error
         const permissionError = new FirestorePermissionError({
-            path: adminRoleRef.path,
-            operation: newAdminStatus ? 'create' : 'delete',
-            requestResourceData: newAdminStatus ? { role: 'admin' } : undefined
+            path: newAdminStatus ? adminRoleRef.path : userRef.path,
+            operation: newAdminStatus ? 'create' : 'delete', // This is a simplification
+            requestResourceData: newAdminStatus ? { role: 'admin' } : { role: 'User' }
         });
         errorEmitter.emit('permission-error', permissionError);
       })
@@ -173,14 +168,7 @@ export default function UsersPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
   const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
-  const { data: users, isLoading: isLoadingUsers } = useCollection<FirestoreUser>(usersQuery);
-
-  const adminsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'roles_admin')) : null, [firestore]);
-  const { data: admins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
-
-  const adminIds = React.useMemo(() => new Set(admins?.map(admin => admin.id) || []), [admins]);
-
-  const isLoading = isLoadingUsers || isLoadingAdmins;
+  const { data: users, isLoading } = useCollection<FirestoreUser>(usersQuery);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
