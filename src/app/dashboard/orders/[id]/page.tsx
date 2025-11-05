@@ -22,15 +22,17 @@ function OrderDetails() {
     const firestore = useFirestore();
     const router = useRouter();
 
-    // Query across all 'orders' collections to find the one with the matching ID.
-    // This works for both admins (who can read all) and users (who can only read their own).
     const orderQuery = useMemoFirebase(() => {
         if (!firestore || !orderId) return null;
         return query(collectionGroup(firestore, 'orders'), where(documentId(), '==', orderId as string));
     }, [firestore, orderId]);
     
     const { data: orders, isLoading: isOrderLoading } = useCollection<Order>(orderQuery);
-    const order = orders?.[0];
+    
+    const order = useMemo(() => {
+        return orders && orders.length === 1 ? orders[0] : null;
+    }, [orders]);
+
 
     const productIds = useMemo(() => {
         if (!order) return null;
@@ -39,8 +41,6 @@ function OrderDetails() {
 
     const productsQuery = useMemoFirebase(() => {
         if (!firestore || !productIds || productIds.length === 0) return null;
-        // Firestore 'in' queries are limited to 30 elements. If an order has more, this will fail.
-        // For this app's scale, it's an acceptable limitation.
         return query(collection(firestore, 'products'), where(documentId(), 'in', productIds));
     }, [firestore, productIds]);
 
