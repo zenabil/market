@@ -113,7 +113,7 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
           <DialogTitle>{t('dashboard.coupons.add_coupon')}</DialogTitle>
           <DialogDescription>{t('dashboard.coupons.add_coupon_desc')}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="coupon-dialog-form">
           <div className="space-y-2">
             <Label htmlFor="code">{t('dashboard.coupons.code')}</Label>
             <Input id="code" {...form.register('code')} />
@@ -129,16 +129,16 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
             <Input id="expiryDate" type="date" {...form.register('expiryDate')} />
             {form.formState.errors.expiryDate && <p className="text-sm text-destructive">{form.formState.errors.expiryDate.message}</p>}
           </div>
-           <DialogFooter>
-             <DialogClose asChild>
-              <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
-             </DialogClose>
-            <Button type="submit" disabled={isSaving}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('dashboard.coupons.save_coupon')}
-            </Button>
-          </DialogFooter>
         </form>
+         <DialogFooter>
+           <DialogClose asChild>
+            <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+           </DialogClose>
+          <Button type="submit" disabled={isSaving} form="coupon-dialog-form">
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('dashboard.coupons.save_coupon')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
