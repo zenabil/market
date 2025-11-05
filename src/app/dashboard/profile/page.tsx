@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { doc, arrayUnion, arrayRemove, updateDoc, runTransaction } from 'firebase/firestore';
+import { doc, arrayUnion, arrayRemove, updateDoc, runTransaction, getDoc } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2, Pencil, Trash2, Gem, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -242,30 +242,30 @@ export default function ProfilePage() {
     }
   }
 
-  async function deleteAddress(address: Address) {
-    if (!userDocRef || !firestoreUser) return;
-    
-    const addressToDelete = firestoreUser.addresses?.find(a => a.id === address.id);
-    if (!addressToDelete) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not find address to delete.' });
-      return;
-    }
+  async function deleteAddress(addressToDelete: Address) {
+    if (!userDocRef) return;
 
-    updateDoc(userDocRef, { addresses: arrayRemove(addressToDelete) })
-        .then(() => {
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const userData = userDoc.data() as FirestoreUser;
+            const currentAddresses = userData.addresses || [];
+            const updatedAddresses = currentAddresses.filter(addr => addr.id !== addressToDelete.id);
+            
+            await updateDoc(userDocRef, { addresses: updatedAddresses });
             toast({ title: t('dashboard.profile.address_removed_title') });
-        })
-        .catch(() => {
-             errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: userDocRef.path,
-                    operation: 'update',
-                    requestResourceData: { addresses: `arrayRemove with ${addressToDelete.id}` }
-                })
-            );
-        });
-  }
+        }
+    } catch (error) {
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'update',
+                requestResourceData: { addresses: '...filtered array...' }
+            })
+        );
+    }
+}
 
   const openAddressDialog = (address: Address | null) => {
     setAddressToEdit(address);
