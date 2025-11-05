@@ -60,17 +60,17 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-muted/40')}>
-        <FirebaseClientProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <CartProvider>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <Toaster />
-                <AiChatbot />
-              </CartProvider>
-          </ThemeProvider>
-        </FirebaseClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <CartProvider>
+            <FirebaseClientProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster />
+              <AiChatbot />
+            </FirebaseClientProvider>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
