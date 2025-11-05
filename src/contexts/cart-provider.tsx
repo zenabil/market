@@ -15,12 +15,14 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: Product }
   | { type: 'REMOVE_ITEM'; payload: { id: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id:string; quantity: number } }
+  | { type: 'CLEAR_CART' }
   | { type: 'SET_STATE'; payload: CartState };
 
 export interface CartContextType extends CartState {
   addItem: (item: Product) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
   totalItems: number;
   totalPrice: number;
 }
@@ -62,6 +64,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item
         ),
       };
+    case 'CLEAR_CART':
+      return { items: [] };
     case 'SET_STATE':
         return action.payload;
     default:
@@ -88,6 +92,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (state.items.length === 0 && localStorage.getItem('cart') === '{"items":[]}') return;
     try {
       localStorage.setItem('cart', JSON.stringify(state));
     } catch (error) {
@@ -98,16 +103,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const addItem = (item: Product) => dispatch({ type: 'ADD_ITEM', payload: item });
   const removeItem = (id: string) => dispatch({ type: 'REMOVE_ITEM', payload: { id } });
   const updateQuantity = (id: string, quantity: number) => dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+  const clearCart = () => dispatch({ type: 'CLEAR_CART' });
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce((sum, item) => {
-      const discountedPrice = item.price * (1 - item.discount / 100);
+      const discountedPrice = item.price * (1 - (item.discount || 0) / 100);
       return sum + discountedPrice * item.quantity;
   }, 0);
 
 
   return (
-    <CartContext.Provider value={{ ...state, addItem, removeItem, updateQuantity, totalItems, totalPrice }}>
+    <CartContext.Provider value={{ ...state, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }}>
       {children}
     </CartContext.Provider>
   );

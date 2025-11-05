@@ -16,14 +16,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useFirestore, addDocumentNonBlocking } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import { placeOrder } from '@/lib/services/order';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -34,7 +34,7 @@ const formSchema = z.object({
 
 export default function CheckoutPage() {
   const { t, locale } = useLanguage();
-  const { items, totalPrice, totalItems } = useCart();
+  const { items, totalPrice, totalItems, clearCart } = useCart();
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -70,39 +70,27 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    const orderData = {
-        userId: user.uid,
-        orderDate: new Date().toISOString(),
-        totalAmount: totalPrice,
-        status: 'Pending',
-        shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
-        items: items.map(item => ({
-            productId: item.id,
-            productName: item.name,
-            quantity: item.quantity,
-            price: item.price * (1 - item.discount / 100),
-        })),
-        itemCount: totalItems,
-    };
-
     try {
-        const ordersCollection = collection(firestore, 'users', user.uid, 'orders');
-        await addDocumentNonBlocking(ordersCollection, orderData);
+        await placeOrder(firestore, user.uid, {
+            shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
+            items,
+            totalAmount: totalPrice,
+            itemCount: totalItems,
+        });
         
         toast({
             title: t('checkout.order_placed_title'),
             description: t('checkout.order_placed_desc'),
         });
         
-        // Here you would typically clear the cart
-        // cart.clear();
+        clearCart();
         router.push('/dashboard/orders');
     } catch (error) {
         console.error("Error placing order: ", error);
         toast({
             variant: "destructive",
             title: t('checkout.order_failed_title'),
-            description: t('checkout.order_failed_desc'),
+            description: (error instanceof Error) ? error.message : t('checkout.order_failed_desc'),
         });
     } finally {
         setIsProcessing(false);
