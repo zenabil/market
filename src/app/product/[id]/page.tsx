@@ -13,7 +13,7 @@ import ProductGrid from '@/components/product/product-grid';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, limit } from 'firebase/firestore';
+import { doc, collection, query, where, limit, documentId } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -24,15 +24,18 @@ function ProductDetails({ productId }: { productId: string }) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
+  const productRef = useMemoFirebase(() => {
+      if (!firestore || !productId) return null;
+      return doc(firestore, 'products', productId);
+  }, [firestore, productId]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const relatedProductsQuery = useMemoFirebase(() => {
-    if (!product) return null;
+    if (!firestore || !product?.categoryId) return null;
     return query(
       collection(firestore, 'products'),
       where('categoryId', '==', product.categoryId),
-      where('id', '!=', product.id),
+      where(documentId(), '!=', product.id),
       limit(4)
     );
   }, [firestore, product]);
