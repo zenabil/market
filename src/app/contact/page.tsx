@@ -17,6 +17,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/use-language';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -25,9 +28,20 @@ const formSchema = z.object({
   message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
 });
 
+type SiteSettings = {
+  address?: string;
+  phone?: string;
+};
+
+
 export default function ContactPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings, isLoading } = useDoc<SiteSettings>(settingsRef);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -124,14 +138,14 @@ export default function ContactPage() {
                         <MapPin className="h-6 w-6 mt-1 text-primary"/>
                         <div>
                             <h3 className="font-semibold text-foreground">{t('contact.info.address_title')}</h3>
-                            <p>123 Rue de la Liberté, Tlemcen, Algérie</p>
+                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || '123 Rue de la Liberté, Tlemcen, Algérie'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Phone className="h-6 w-6 mt-1 text-primary"/>
                         <div>
                             <h3 className="font-semibold text-foreground">{t('contact.info.phone_title')}</h3>
-                            <p>+213 123 456 789</p>
+                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || '+213 123 456 789'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">

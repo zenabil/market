@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/contexts/theme-provider';
@@ -9,11 +9,41 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import AiChatbot from '@/components/chatbot/ai-chatbot';
 import { FirebaseClientProvider } from '@/firebase';
+import { initializeApp, getApps } from 'firebase/app';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { firebaseConfig } from '@/firebase/config';
 
-export const metadata: Metadata = {
-  title: 'Tlemcen Smart Supermarket',
-  description: 'Your local supermarket in Tlemcen, now online with smart features.',
-};
+// Initialize a temporary Firebase app instance for server-side data fetching
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+export async function generateMetadata(
+  {},
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  let siteName = 'Tlemcen Smart Supermarket';
+  let siteDescription = 'Your local supermarket in Tlemcen, now online with smart features.';
+
+  try {
+    const db = getFirestore();
+    const settingsRef = doc(db, 'settings', 'site');
+    const settingsSnap = await getDoc(settingsRef);
+
+    if (settingsSnap.exists()) {
+      const settingsData = settingsSnap.data();
+      siteName = settingsData.siteName || siteName;
+    }
+  } catch (error) {
+    console.error("Could not fetch site settings for metadata:", error);
+  }
+
+  return {
+    title: siteName,
+    description: siteDescription,
+  }
+}
+
 
 export default function RootLayout({
   children,

@@ -6,6 +6,8 @@ import { Facebook, Instagram, Twitter } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import Logo from '../icons/logo';
 import { usePathname } from 'next/navigation';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 
 const navLinks = [
@@ -20,10 +22,19 @@ const legalLinks = [
   { key: 'footer.terms_of_service', href: '/terms' },
 ];
 
+type SiteSettings = {
+  siteName?: string;
+}
+
 export default function Footer() {
   const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
+  const firestore = useFirestore();
+
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings } = useDoc<SiteSettings>(settingsRef);
+
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
@@ -82,7 +93,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} {t('site_name')}. {t('footer.copyright')}
+            &copy; {currentYear} {settings?.siteName || t('site_name')}. {t('footer.copyright')}
           </p>
         </div>
       </div>
