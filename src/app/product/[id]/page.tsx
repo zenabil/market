@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
@@ -37,6 +37,23 @@ function ProductDetails({ productId }: { productId: string }) {
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const isWishlisted = !!wishlist?.find(item => item.id === productId);
+
+  useEffect(() => {
+    if (product) {
+      try {
+        const viewedProductsRaw = localStorage.getItem('viewedProducts');
+        const viewedProducts = viewedProductsRaw ? JSON.parse(viewedProductsRaw) : [];
+        if (!viewedProducts.includes(product.name[locale])) {
+          const updatedViewed = [product.name[locale], ...viewedProducts].slice(0, 10);
+          localStorage.setItem('viewedProducts', JSON.stringify(updatedViewed));
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch (e) {
+        console.error("Failed to update viewed products in localStorage", e);
+      }
+    }
+  }, [product, locale]);
+
 
   const relatedProductsQuery = useMemoFirebase(() => {
     if (!firestore || !product?.categoryId) return null;
