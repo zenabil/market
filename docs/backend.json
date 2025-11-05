@@ -436,46 +436,6 @@
         }
       },
       {
-        "path": "/orders/{orderId}/orderItems/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Stores order items.  Accessible only to admins.",
-          "params": [
-            {
-              "name": "orderId",
-              "description": "Unique identifier for the order."
-            },
-            {
-              "name": "orderItemId",
-              "description": "Unique identifier for the order item."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/recommendations/{recommendationId}",
-        "definition": {
-          "entityName": "Recommendation",
-          "schema": {
-            "$ref": "#/backend/entities/Recommendation"
-          },
-          "description": "Stores product recommendations for a user. Only accessible by the user themselves.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user."
-            },
-            {
-              "name": "recommendationId",
-              "description": "Unique identifier for the recommendation."
-            }
-          ]
-        }
-      },
-      {
         "path": "/roles_admin/{userId}",
         "definition": {
           "entityName": "User",
@@ -495,3 +455,5 @@
     "reasoning": "The Firestore data structure is designed to support the Tlemcen Smart Supermarket application, focusing on authorization independence, clarity, and scalability. It leverages denormalization to avoid hierarchical authorization dependencies and supports secure list operations. The structure is segregated into collections with homogeneous security postures.  \n\n*   **Authorization Independence**: Achieved through denormalization. For instance, if the `Order` entity needed access control based on user roles or other user-specific data, those attributes would be copied into the `Order` documents. This eliminates the need for `get()` calls in security rules, enabling atomic operations.\n*   **QAPs (Rules Are Not Filters)**: Supported by structural segregation and membership models. Path-based ownership (`/users/{userId}/orders/{orderId}`) ensures that listing operations can be secured based on the user ID in the path, preventing unauthorized access to orders. For admin operations, a separate `/roles_admin/{userId}` collection can be used to grant admin privileges without needing to filter based on document content."
   }
 }
+
+    

@@ -98,7 +98,7 @@ export default function AdminOrdersPage() {
               {orders && orders.map(order => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm text-muted-foreground">...{order.id.slice(-12)}</TableCell>
-                  <TableCell>{order.userId.slice(0, 15)}...</TableCell>
+                  <TableCell>{order.shippingAddress.split(',')[0]}</TableCell>
                   <TableCell>{formatDate(order.orderDate)}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(order.status)}>{t(`orders.status_types.${order.status.toLowerCase()}`)}</Badge>
@@ -143,3 +143,5 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+
+    
