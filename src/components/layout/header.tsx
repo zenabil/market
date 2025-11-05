@@ -16,7 +16,7 @@ import LanguageSwitcher from './language-switcher';
 import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
@@ -122,11 +122,21 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const isMobile = useIsMobile();
   const pathname = usePathname();
+  const router = useRouter();
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
   }
   
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const searchQuery = formData.get('search') as string;
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   const NavLinks = ({ className }: { className?: string }) => (
     <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
       {navLinks.map((link) => (
@@ -180,11 +190,12 @@ export default function Header() {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
-            <form>
+            <form onSubmit={handleSearch}>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
+                  name="search"
                   placeholder={t('header.search_placeholder')}
                   className="w-full bg-secondary md:w-[200px] lg:w-[300px] pl-9"
                 />
