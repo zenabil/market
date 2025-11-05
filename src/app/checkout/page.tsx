@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -24,6 +24,8 @@ import React from 'react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { placeOrder } from '@/lib/services/order';
+import { doc } from 'firebase/firestore';
+import type { User as FirestoreUser } from '@/lib/placeholder-data';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -40,6 +42,13 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = React.useState(false);
+  
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  
+  const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,6 +68,24 @@ export default function CheckoutPage() {
       router.push('/');
     }
   }, [user, totalItems, router]);
+
+  React.useEffect(() => {
+    if (firestoreUser) {
+        form.reset({
+            name: firestoreUser.name || '',
+            address: firestoreUser.addresses?.[0]?.street || '',
+            city: firestoreUser.addresses?.[0]?.city || 'Tlemcen',
+            phone: '', // Phone is not stored in user data yet
+        });
+    } else if (user) {
+        form.reset({
+            name: user.displayName || '',
+            address: '',
+            city: 'Tlemcen',
+            phone: user.phoneNumber || '',
+        })
+    }
+  }, [firestoreUser, user, form]);
 
 
   const formatCurrency = (amount: number) => {
