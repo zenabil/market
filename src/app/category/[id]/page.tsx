@@ -15,6 +15,11 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
 
   const category = useMemoFirebase(() => getCategoryById(categoryId), [categoryId]);
 
+  // This should not happen if we check in the parent component, but as a safeguard.
+  if (!category) {
+    notFound();
+  }
+
   const productsQuery = useMemoFirebase(() => {
     if (!firestore || !categoryId) return null;
     return query(collection(firestore, 'products'), where('categoryId', '==', categoryId));
@@ -22,9 +27,6 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
   
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
-  if (!category) {
-    notFound();
-  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -55,5 +57,11 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
 
 
 export default function CategoryPage({ params }: { params: { id: string } }) {
+    const category = getCategoryById(params.id);
+
+    if (!category) {
+        notFound();
+    }
+    
     return <CategoryDetails categoryId={params.id} />
 }
