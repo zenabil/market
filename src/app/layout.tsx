@@ -7,6 +7,7 @@ import { CartProvider } from '@/contexts/cart-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import AiChatbot from '@/components/chatbot/ai-chatbot';
 
 export const metadata: Metadata = {
   title: 'Tlemcen Smart Supermarket',
@@ -33,6 +34,7 @@ export default function RootLayout({
               <main className="flex-grow">{children}</main>
               <Footer />
               <Toaster />
+              <AiChatbot />
             </CartProvider>
           </LanguageProvider>
         </ThemeProvider>
