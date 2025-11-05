@@ -75,7 +75,6 @@ export default function CheckoutPage() {
             shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
             items,
             totalAmount: totalPrice,
-            itemCount: totalItems,
         });
         
         // Since placeOrder is now non-blocking, we can give immediate UI feedback.

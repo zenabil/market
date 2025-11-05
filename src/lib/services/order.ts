@@ -15,7 +15,6 @@ interface PlaceOrderParams {
   shippingAddress: string;
   items: CartItem[];
   totalAmount: number;
-  itemCount: number;
 }
 
 /**
@@ -31,7 +30,7 @@ interface PlaceOrderParams {
  * @returns {Promise<void>} A promise that resolves when the transaction is initiated. The UI should not wait for it to complete.
  */
 export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrderParams): Promise<void> {
-  const { shippingAddress, items, totalAmount, itemCount } = orderDetails;
+  const { shippingAddress, items, totalAmount } = orderDetails;
 
   const userRef = doc(db, 'users', userId);
   const newOrderRef = doc(collection(db, `users/${userId}/orders`));
@@ -68,7 +67,6 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
           quantity: item.quantity,
           price: item.price * (1 - (item.discount || 0) / 100),
       })),
-      itemCount,
     };
 
     // 3. Create the new order
