@@ -18,7 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
-import { getCategories, type Product } from '@/lib/placeholder-data';
+import { useCategories } from '@/hooks/use-categories';
+import type { Product } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -43,7 +44,7 @@ const formSchema = z.object({
 
 function EditProductForm({ productId }: { productId: string }) {
   const { t, locale } = useLanguage();
-  const categories = getCategories();
+  const { categories, areCategoriesLoading } = useCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -127,7 +128,7 @@ function EditProductForm({ productId }: { productId: string }) {
     
     setIsGenerating(true);
     try {
-      const category = categories.find(c => c.id === categoryId);
+      const category = categories?.find(c => c.id === categoryId);
       const result = await generateProductDescription({
         productNameAr: nameAr,
         productNameEn: nameEn,
@@ -156,7 +157,7 @@ function EditProductForm({ productId }: { productId: string }) {
     }
   }
 
-  if (isLoadingProduct) {
+  if (isLoadingProduct || areCategoriesLoading) {
     return (
       <div className="container py-8 md:py-12">
         <div className="flex items-center gap-4 mb-8">
@@ -307,7 +308,7 @@ function EditProductForm({ productId }: { productId: string }) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories.map((category) => (
+                            {categories?.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name[locale]}
                               </SelectItem>

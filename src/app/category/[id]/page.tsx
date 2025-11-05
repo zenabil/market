@@ -3,36 +3,45 @@
 import { notFound } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
 import { useLanguage } from '@/hooks/use-language';
+import { useCategories } from '@/hooks/use-categories';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
-import { getCategoryById } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function CategoryDetails({ categoryId }: { categoryId: string }) {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
+  const { categories, areCategoriesLoading } = useCategories();
 
-  const category = useMemoFirebase(() => getCategoryById(categoryId), [categoryId]);
-
-  // This should not happen if we check in the parent component, but as a safeguard.
-  if (!category) {
-    notFound();
-  }
+  const category = useMemoFirebase(() => categories?.find(c => c.id === categoryId), [categories, categoryId]);
 
   const productsQuery = useMemoFirebase(() => {
     if (!firestore || !categoryId) return null;
     return query(collection(firestore, 'products'), where('categoryId', '==', categoryId));
   }, [firestore, categoryId]);
   
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
 
+  const isLoading = areCategoriesLoading || areProductsLoading;
+
+  if (!isLoading && !category) {
+    notFound();
+  }
 
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
-        <h1 className="font-headline text-4xl md:text-5xl">{category.name[locale]}</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{t('products.subtitle_category', { categoryName: category.name[locale] })}</p>
+        {isLoading || !category ? (
+            <Skeleton className="h-14 w-1/2 mx-auto" />
+        ) : (
+            <h1 className="font-headline text-4xl md:text-5xl">{category.name[locale]}</h1>
+        )}
+        {isLoading || !category ? (
+            <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
+        ) : (
+            <p className="mt-2 text-lg text-muted-foreground">{t('products.subtitle_category', { categoryName: category.name[locale] })}</p>
+        )}
       </div>
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -57,11 +66,6 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
 
 
 export default function CategoryPage({ params }: { params: { id: string } }) {
-    const category = getCategoryById(params.id);
-
-    if (!category) {
-        notFound();
-    }
-    
+    // We validate the category exists inside the CategoryDetails component now
     return <CategoryDetails categoryId={params.id} />
 }

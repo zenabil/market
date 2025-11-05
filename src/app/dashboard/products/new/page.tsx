@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
-import { getCategories } from '@/lib/placeholder-data';
+import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -43,7 +43,7 @@ const formSchema = z.object({
 
 export default function NewProductPage() {
   const { t, locale } = useLanguage();
-  const categories = getCategories();
+  const { categories, areCategoriesLoading } = useCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -136,7 +136,7 @@ export default function NewProductPage() {
     
     setIsGenerating(true);
     try {
-      const category = categories.find(c => c.id === categoryId);
+      const category = categories?.find(c => c.id === categoryId);
       const result = await generateProductDescription({
         productNameAr: nameAr,
         productNameEn: nameEn,
@@ -290,14 +290,18 @@ export default function NewProductPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('dashboard.category')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={areCategoriesLoading}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={t('dashboard.select_category_placeholder')} />
+                              <SelectValue placeholder={
+                                areCategoriesLoading 
+                                  ? t('dashboard.loading_categories') 
+                                  : t('dashboard.select_category_placeholder')
+                              } />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categories.map((category) => (
+                            {categories?.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name[locale]}
                               </SelectItem>

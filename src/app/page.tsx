@@ -4,11 +4,9 @@ import HeroCarousel from '@/components/product/hero-carousel';
 import HomePageClient from '@/components/layout/home-page-client';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, limit, orderBy } from 'firebase/firestore';
-import type { Product, Category } from '@/lib/placeholder-data';
-import { getCategories } from '@/lib/placeholder-data';
+import type { Product } from '@/lib/placeholder-data';
+import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
-import ProductGrid from '@/components/product/product-grid';
-import CategoryShowcase from '@/components/product/category-showcase';
 import { useLanguage } from '@/hooks/use-language';
 
 function HomeProducts() {
@@ -33,9 +31,9 @@ function HomeProducts() {
   );
   const { data: exclusiveOffers, isLoading: isLoadingOffers } = useCollection<Product>(exclusiveOffersQuery);
   
-  const categories = getCategories();
+  const { categories, areCategoriesLoading } = useCategories();
 
-  const isLoading = isLoadingAllProducts || isLoadingBestSellers || isLoadingOffers;
+  const isLoading = isLoadingAllProducts || isLoadingBestSellers || isLoadingOffers || areCategoriesLoading;
 
   if (isLoading) {
     return (
@@ -58,7 +56,7 @@ function HomeProducts() {
 
   return (
     <HomePageClient
-      categories={categories}
+      categories={categories || []}
       bestSellers={bestSellers || []}
       exclusiveOffers={exclusiveOffers || []}
       allProducts={allProducts || []}
