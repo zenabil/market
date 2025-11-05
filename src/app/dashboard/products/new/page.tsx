@@ -21,7 +21,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { getCategories } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import React from 'react';
 import { useFirestore } from '@/firebase';
@@ -47,6 +47,7 @@ export default function NewProductPage() {
   const categories = getCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -62,6 +63,8 @@ export default function NewProductPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore) return;
+    setIsSaving(true);
     const productData = {
         name: {
             ar: values.nameAr,
@@ -77,7 +80,7 @@ export default function NewProductPage() {
         stock: values.stock,
         categoryId: values.categoryId,
         discount: values.discount,
-        images: ['https://picsum.photos/seed/1/600/600'], // Placeholder image
+        images: ['https://picsum.photos/seed/' + Date.now() + '/600/600'], // Placeholder image
         sku: `SKU-${Date.now()}`,
         barcode: `${Date.now()}`,
         sold: 0,
@@ -99,6 +102,8 @@ export default function NewProductPage() {
             title: t('dashboard.generation_failed_title'),
             description: "Could not save the product. Please try again.",
         });
+    } finally {
+        setIsSaving(false);
     }
   }
 
@@ -210,6 +215,7 @@ export default function NewProductPage() {
                     <div className='flex justify-between items-center'>
                       <h3 className='text-sm font-medium'>{t('dashboard.product_description')}</h3>
                       <Button type="button" size="sm" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating}>
+                        {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isGenerating ? t('dashboard.generating_description') : t('dashboard.generate_with_ai')}
                       </Button>
                     </div>
@@ -337,8 +343,13 @@ export default function NewProductPage() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
-            <Button type="submit">{t('dashboard.save_product')}</Button>
+            <Button type="button" variant="outline" asChild>
+                <Link href="/dashboard/products">{t('dashboard.cancel')}</Link>
+            </Button>
+            <Button type="submit" disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('dashboard.save_product')}
+            </Button>
           </div>
         </form>
       </Form>

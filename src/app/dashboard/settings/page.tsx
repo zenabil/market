@@ -18,8 +18,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const formSchema = z.object({
   siteName: z.string().min(2, { message: 'Site name must be at least 2 characters.' }),
@@ -66,6 +67,14 @@ export default function SettingsPage() {
 
   return (
     <div className="container py-8 md:py-12">
+        <div className="flex items-center gap-4 mb-8">
+            <Button asChild variant="outline" size="icon">
+            <Link href="/dashboard">
+                <ArrowLeft className="h-4 w-4" />
+            </Link>
+            </Button>
+            <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.nav.settings')}</h1>
+        </div>
       <Card>
         <CardHeader>
           <CardTitle>{t('dashboard.nav.settings')}</CardTitle>
@@ -115,13 +124,13 @@ export default function SettingsPage() {
                           </div>
                         ) : (
                            <div 
-                                className="w-32 h-16 border-2 border-dashed rounded-md flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted"
+                                className="w-32 aspect-[16/5] border-2 border-dashed rounded-md flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <ImageIcon className="h-8 w-8" />
                            </div>
                         )}
-                        <Button type="button" variant="outline" onClick={() => fileInputHttpRef.current?.click()}>
+                        <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
                            <Upload className="mr-2 h-4 w-4" />
                             {t('dashboard.settings.upload_logo')}
                         </Button>
