@@ -27,14 +27,7 @@ import { placeOrder } from '@/lib/services/order';
 import { collection, doc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
-
-type Coupon = {
-  id: string;
-  code: string;
-  discountPercentage: number;
-  expiryDate: string; // ISO string
-  isActive: boolean;
-};
+import type { Coupon } from '@/lib/placeholder-data';
 
 
 const formSchema = z.object({
@@ -135,7 +128,7 @@ export default function CheckoutPage() {
     }).catch(error => {
         const contextualError = new FirestorePermissionError({
             operation: 'list',
-            path: 'coupons'
+            path: couponsRef.path,
         });
         errorEmitter.emit('permission-error', contextualError);
     }).finally(() => {
@@ -177,7 +170,10 @@ export default function CheckoutPage() {
         title: t('checkout.order_failed_title'),
         description: error.message || t('checkout.order_failed_desc'),
       });
-      setIsProcessing(false);
+    } finally {
+      if (!isProcessing) { // Only set to false if it wasn't already set by an error
+        setIsProcessing(false);
+      }
     }
   }
   
