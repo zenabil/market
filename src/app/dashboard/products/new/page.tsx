@@ -24,6 +24,10 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import React from 'react';
+import { useFirestore } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection } from 'firebase/firestore';
+
 
 const formSchema = z.object({
   nameAr: z.string().min(2, { message: 'Arabic name must be at least 2 characters.' }),
@@ -43,6 +47,7 @@ export default function NewProductPage() {
   const categories = getCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,12 +61,45 @@ export default function NewProductPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: t('dashboard.product_created_success'),
-      description: t('dashboard.product_created_desc', { productName: values.nameEn }),
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const productData = {
+        name: {
+            ar: values.nameAr,
+            en: values.nameEn,
+            fr: values.nameFr,
+        },
+        description: {
+            ar: values.descriptionAr || '',
+            en: values.descriptionEn || '',
+            fr: values.descriptionFr || '',
+        },
+        price: values.price,
+        stock: values.stock,
+        categoryId: values.categoryId,
+        discount: values.discount,
+        images: ['https://picsum.photos/seed/1/600/600'], // Placeholder image
+        sku: `SKU-${Date.now()}`,
+        barcode: `${Date.now()}`,
+        sold: 0,
+    };
+
+    try {
+        const productsCollection = collection(firestore, 'products');
+        await addDocumentNonBlocking(productsCollection, productData);
+
+        toast({
+            title: t('dashboard.product_created_success'),
+            description: t('dashboard.product_created_desc', { productName: values.nameEn }),
+        });
+        form.reset();
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        toast({
+            variant: "destructive",
+            title: t('dashboard.generation_failed_title'),
+            description: "Could not save the product. Please try again.",
+        });
+    }
   }
 
   const handleGenerateDescription = async () => {
