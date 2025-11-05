@@ -5,7 +5,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -23,10 +23,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
   const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
@@ -38,19 +40,27 @@ export default function ProductsPage() {
     }).format(amount);
   };
 
-  const handleDeleteProduct = () => {
-    if (productToDelete && firestore) {
-      const productDocRef = doc(firestore, 'products', productToDelete.id);
-      deleteDoc(productDocRef)
-        .catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: productDocRef.path,
-                    operation: 'delete',
-                })
-            );
-        });
+  const handleDeleteProduct = async () => {
+    if (!productToDelete || !firestore) return;
+    
+    const productDocRef = doc(firestore, 'products', productToDelete.id);
+    try {
+      await deleteDoc(productDocRef);
+      toast({ title: t('dashboard.product_deleted_success') });
+    } catch (error) {
+      errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+              path: productDocRef.path,
+              operation: 'delete',
+          })
+      );
+      toast({
+        variant: 'destructive',
+        title: t('dashboard.error_deleting_title'),
+        description: t('dashboard.error_deleting_desc'),
+      });
+    } finally {
       setProductToDelete(null);
     }
   };
@@ -111,7 +121,8 @@ export default function ProductsPage() {
                           </DropdownMenuItem>
                           <AlertDialogTrigger asChild>
                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive" onClick={() => setProductToDelete(product)}>
-                              {t('dashboard.delete')}
+                               <Trash2 className="mr-2 h-4 w-4" />
+                               {t('dashboard.delete')}
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
                         </DropdownMenuContent>
