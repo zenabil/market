@@ -18,13 +18,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/hooks/use-language';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
+import { doc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -33,6 +34,7 @@ const loginSchema = z.object({
 });
 
 const signupSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters."}),
   email: z.string().email(),
   password: z.string().min(6),
   confirmPassword: z.string().min(6),
@@ -49,6 +51,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const firestore = useFirestore();
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -57,7 +60,7 @@ export default function LoginPage() {
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { email: '', password: '', confirmPassword: '' },
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   });
 
   useEffect(() => {
@@ -87,7 +90,25 @@ export default function LoginPage() {
   const handleSignup = async (values: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      if (user) {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userData = {
+          id: user.uid,
+          name: values.name,
+          email: user.email,
+          role: 'User',
+          preferredLanguage: 'ar',
+          registrationDate: new Date().toISOString(),
+          orderCount: 0,
+          totalSpent: 0,
+        };
+        // This is a non-blocking write
+        setDocumentNonBlocking(userDocRef, userData, { merge: true });
+      }
+
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
@@ -166,6 +187,19 @@ export default function LoginPage() {
             <CardContent>
               <Form {...signupForm}>
                 <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                   <FormField
+                    control={signupForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('auth.name')}</FormLabel>
+                        <FormControl>
+                          <Input type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={signupForm.control}
                     name="email"

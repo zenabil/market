@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Firestore Security Rules for Tlemcen Smart Supermarket.
  *
@@ -18,7 +19,7 @@
  *
  * Key Security Decisions:
  * - Products and Categories are publicly readable.
- * - User listing is disallowed.
+ * - User listing is disallowed for regular users, but allowed for admins.
  * - Default security posture for ambiguous relationships is strict owner-only access.
  *
  * Denormalization for Authorization:
@@ -30,49 +31,47 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows anyone to read product information, but restricts creation, updates, and deletion.
+     * @description Allows anyone to read product information, but restricts creation, updates, and deletion to admins.
      * @path /products/{productId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Allows public read access for product information.
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for products.
      */
     match /products/{productId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Allows anyone to read category information, but restricts creation, updates, and deletion.
+     * @description Allows anyone to read category information, but restricts creation, updates, and deletion to admins.
      * @path /categories/{categoryId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Allows public read access for category information.
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for categories.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Allows a user to read and write their own user document.
+     * @description Allows a user to read their own document, and admins to read any.
+     * Creation is allowed for any signed-in user for their own document.
+     * Updates are restricted to the owner. Deletion is disallowed.
      * @path /users/{userId}
-     * @allow get: if isSignedIn() && isOwner(userId);
-     * @allow list: if false;
+     * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+     * @allow list: if isAdmin();
      * @allow create: if isSignedIn() && isOwner(userId);
      * @allow update: if isSignedIn() && isOwner(userId);
-     * @allow delete: if isSignedIn() && isExistingOwner(userId);
-     * @principle Enforces document ownership for reads and writes.
+     * @allow delete: if false;
+     * @principle Enforces document ownership and admin read access.
      */
     match /users/{userId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if false;
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
       allow create: if isSignedIn() && isOwner(userId);
       allow update: if isSignedIn() && isOwner(userId);
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if false; // Generally don't want users to delete their own account record
     }
 
     /**

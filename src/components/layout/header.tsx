@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -15,7 +16,7 @@ import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
@@ -25,19 +26,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { User as FirestoreUser } from '@/lib/placeholder-data';
+import { doc } from 'firebase/firestore';
+
 
 const navLinks = [
   { key: 'nav.home', href: '/' },
   { key: 'nav.products', href: '/products' },
   { key: 'nav.about', href: '/about' },
   { key: 'nav.contact', href: '/contact' },
-  { key: 'nav.dashboard', href: '/dashboard' },
 ];
 
 function UserNav() {
-  const { user, isUserLoading } = useUser();
+  const { user: authUser, isUserLoading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !authUser) return null;
+    return doc(firestore, 'users', authUser.uid);
+  }, [firestore, authUser]);
+
+  const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
+
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -47,11 +59,16 @@ function UserNav() {
     return null;
   }
 
-  if (!user) {
+  if (!authUser) {
     return (
-      <Button asChild variant="ghost">
-        <Link href="/login">{t('auth.login')}</Link>
-      </Button>
+       <div className='flex items-center gap-2'>
+        <Button asChild variant="ghost">
+          <Link href="/login">{t('auth.login')}</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/login">{t('auth.signup')}</Link>
+        </Button>
+      </div>
     );
   }
 
@@ -60,20 +77,26 @@ function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`} alt={user.displayName || 'User'} />
-            <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={authUser.photoURL || `https://picsum.photos/seed/${authUser.uid}/100/100`} alt={firestoreUser?.name || 'User'} />
+            <AvatarFallback>{firestoreUser?.name?.charAt(0).toUpperCase() || authUser.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Welcome'}</p>
+            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'Welcome'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {authUser.email}
             </p>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard">
+                {t('nav.dashboard')}
+            </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
