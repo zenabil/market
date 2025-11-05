@@ -105,12 +105,14 @@ export default function ProfilePage() {
   }, [firestoreUser, authUser, profileForm]);
 
   useEffect(() => {
-    if (addressToEdit) {
-      addressForm.reset(addressToEdit);
-    } else {
-      addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+    if (isAddressDialogOpen) {
+        if (addressToEdit) {
+            addressForm.reset(addressToEdit);
+        } else {
+            addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+        }
     }
-  }, [addressToEdit, addressForm]);
+  }, [addressToEdit, isAddressDialogOpen, addressForm]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -194,7 +196,7 @@ export default function ProfilePage() {
     if (addressToEdit) {
       const currentAddresses = firestoreUser?.addresses || [];
       const updatedAddresses = currentAddresses.map(addr =>
-        addr.id === addressToEdit.id ? { ...addr, ...values } : addr
+        addr.id === addressToEdit.id ? { ...addr, ...values, id: addr.id } : addr
       );
       
       updateDoc(userDocRef, { addresses: updatedAddresses })
