@@ -92,7 +92,13 @@ function EditProductForm({ productId }: { productId: string }) {
       stock: values.stock,
       categoryId: values.categoryId,
       discount: values.discount,
-      images: product.images, // Preserve existing images
+      // Preserve existing non-form fields
+      images: product.images,
+      sku: product.sku,
+      barcode: product.barcode,
+      sold: product.sold,
+      averageRating: product.averageRating || 0,
+      reviewCount: product.reviewCount || 0,
     };
 
     updateDoc(productRef, productData)
