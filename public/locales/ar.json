@@ -1,0 +1,50 @@
+{
+  "site_name": "سوبر ماركت تلمسان الذكي",
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "about": "من نحن",
+    "contact": "اتصل بنا"
+  },
+  "header": {
+    "search_placeholder": "ابحث عن منتجات...",
+    "login": "تسجيل الدخول",
+    "account": "حسابي"
+  },
+  "hero": {
+    "slide1_heading": "نضارة لا تضاهى، تصلك حتى بابك",
+    "slide1_subheading": "أفضل المنتجات المحلية والمستوردة مباشرة إلى عتبة داركم.",
+    "slide2_heading": "عروض وصفقات أسبوعية",
+    "slide2_subheading": "وفّر الكثير على منتجاتك المفضلة كل أسبوع.",
+    "slide3_heading": "نكهات تلمسان الأصيلة",
+    "slide3_subheading": "اكتشف وادعم الحرفيين والمنتجين المحليين.",
+    "shop_now": "تسوّق الآن"
+  },
+  "homepage": {
+    "categories": "تسوّق حسب الفئة",
+    "best_sellers": "الأكثر مبيعاً",
+    "exclusive_offers": "عروض حصرية"
+  },
+  "cart": {
+    "add_to_cart": "أضف إلى السلة",
+    "added_to_cart_title": "أُضيف المنتج",
+    "added_to_cart_desc": "تمت إضافته إلى سلتك.",
+    "shopping_cart": "سلة المشتريات",
+    "empty_cart": "سلتك فارغة حالياً.",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "متابعة للدفع",
+    "view_cart": "عرض السلة"
+  },
+  "footer": {
+    "slogan": "نضارتك اليومية، بنقرة واحدة.",
+    "quick_links": "روابط سريعة",
+    "legal": "قانوني",
+    "privacy_policy": "سياسة الخصوصية",
+    "terms_of_service": "شروط الخدمة",
+    "follow_us": "تابعنا",
+    "copyright": "جميع الحقوق محفوظة."
+  },
+  "product": {
+    "sold": "مباع"
+  }
+}

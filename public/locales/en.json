@@ -1,0 +1,50 @@
+{
+  "site_name": "Tlemcen Smart Supermarket",
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About Us",
+    "contact": "Contact"
+  },
+  "header": {
+    "search_placeholder": "Search for products...",
+    "login": "Log In",
+    "account": "My Account"
+  },
+  "hero": {
+    "slide1_heading": "Unbeatable Freshness, Delivered",
+    "slide1_subheading": "The best local and imported products right to your doorstep.",
+    "slide2_heading": "Weekly Deals & Offers",
+    "slide2_subheading": "Save big on your favorite items every single week.",
+    "slide3_heading": "Authentic Tlemcen Flavors",
+    "slide3_subheading": "Discover and support local artisans and producers.",
+    "shop_now": "Shop Now"
+  },
+  "homepage": {
+    "categories": "Shop by Category",
+    "best_sellers": "Our Best Sellers",
+    "exclusive_offers": "Exclusive Offers"
+  },
+  "cart": {
+    "add_to_cart": "Add to Cart",
+    "added_to_cart_title": "Product Added",
+    "added_to_cart_desc": "has been added to your cart.",
+    "shopping_cart": "Shopping Cart",
+    "empty_cart": "Your cart is currently empty.",
+    "subtotal": "Subtotal",
+    "checkout": "Proceed to Checkout",
+    "view_cart": "View Cart"
+  },
+  "footer": {
+    "slogan": "Your daily freshness, just a click away.",
+    "quick_links": "Quick Links",
+    "legal": "Legal",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "follow_us": "Follow Us",
+    "copyright": "All rights reserved."
+  },
+  "product": {
+    "sold": "sold"
+  }
+}

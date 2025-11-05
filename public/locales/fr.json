@@ -1,0 +1,50 @@
+{
+  "site_name": "Supermarché Intelligent de Tlemcen",
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "about": "À propos",
+    "contact": "Contact"
+  },
+  "header": {
+    "search_placeholder": "Rechercher des produits...",
+    "login": "Connexion",
+    "account": "Mon Compte"
+  },
+  "hero": {
+    "slide1_heading": "Fraîcheur Inégalée, Livrée",
+    "slide1_subheading": "Les meilleurs produits locaux et importés directement chez vous.",
+    "slide2_heading": "Promotions et Offres Hebdomadaires",
+    "slide2_subheading": "Économisez gros sur vos articles préférés chaque semaine.",
+    "slide3_heading": "Saveurs Authentiques de Tlemcen",
+    "slide3_subheading": "Découvrez et soutenez les artisans et producteurs locaux.",
+    "shop_now": "Acheter Maintenant"
+  },
+  "homepage": {
+    "categories": "Acheter par Catégorie",
+    "best_sellers": "Nos Meilleures Ventes",
+    "exclusive_offers": "Offres Exclusives"
+  },
+  "cart": {
+    "add_to_cart": "Ajouter au Panier",
+    "added_to_cart_title": "Produit Ajouté",
+    "added_to_cart_desc": "a été ajouté à votre panier.",
+    "shopping_cart": "Panier d'Achat",
+    "empty_cart": "Votre panier est actuellement vide.",
+    "subtotal": "Sous-total",
+    "checkout": "Passer à la Caisse",
+    "view_cart": "Voir le Panier"
+  },
+  "footer": {
+    "slogan": "Votre fraîcheur quotidienne, à portée de clic.",
+    "quick_links": "Liens Rapides",
+    "legal": "Légal",
+    "privacy_policy": "Politique de Confidentialité",
+    "terms_of_service": "Conditions d'Utilisation",
+    "follow_us": "Suivez-nous",
+    "copyright": "Tous droits réservés."
+  },
+  "product": {
+    "sold": "vendu"
+  }
+}
