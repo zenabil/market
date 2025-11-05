@@ -49,7 +49,11 @@ export default function GenerateRecipePage() {
                 images: ['https://picsum.photos/seed/' + productName + '/400/400'],
                 discount: 0,
                 stock: 99,
-                categoryId: 'ai-generated'
+                categoryId: 'ai-generated',
+                description: { ar: '', fr: '', en: '' },
+                sku: '',
+                barcode: '',
+                sold: 0,
             };
             addItem(mockProduct);
         });
