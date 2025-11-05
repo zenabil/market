@@ -91,9 +91,9 @@ service cloud.firestore {
     /**
      * @description Allows a user to manage their own orders.
      * @path /users/{userId}/orders/{orderId}
-     * @allow get, list: if isSignedIn() && isOwner(userId);
+     * @allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-     * @allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+     * @allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
      * @allow delete: if isSignedIn() && isExistingOwner(userId);
      * @principle Restricts access to a user's own orders, validates userId on create/update.
      */
@@ -119,7 +119,18 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isAdmin();
     }
-
+    
+    /**
+     * @description Allows public read access to coupons, but write access only to admins.
+     * @path /coupons/{couponId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for coupons.
+     */
+    match /coupons/{couponId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
   }
 
   // Helper functions

@@ -171,7 +171,8 @@
         "role",
         "registrationDate",
         "orderCount",
-        "totalSpent"
+        "totalSpent",
+        "avatar"
       ]
     },
     "Order": {
@@ -309,6 +310,37 @@
         "phone",
         "address"
       ]
+    },
+    "Coupon": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Coupon",
+        "type": "object",
+        "description": "Represents a discount coupon.",
+        "properties": {
+            "code": {
+                "type": "string",
+                "description": "The unique coupon code."
+            },
+            "discountPercentage": {
+                "type": "number",
+                "description": "The discount percentage (e.g., 10 for 10%)."
+            },
+            "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The date and time when the coupon expires."
+            },
+            "isActive": {
+                "type": "boolean",
+                "description": "Whether the coupon is currently active."
+            }
+        },
+        "required": [
+            "code",
+            "discountPercentage",
+            "expiryDate",
+            "isActive"
+        ]
     }
   },
   "auth": {
@@ -351,6 +383,10 @@
     "/settings/site": {
         "schema": { "$ref": "#/entities/SiteSettings" },
         "description": "Stores global site settings in a single document."
+    },
+    "/coupons/{couponId}": {
+        "schema": { "$ref": "#/entities/Coupon" },
+        "description": "Stores discount coupons. Readable by all users, writable only by admins."
     }
   }
 }
