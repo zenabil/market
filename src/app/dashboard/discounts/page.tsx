@@ -12,6 +12,7 @@ import type { Product } from '@/lib/placeholder-data';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 function DiscountRow({ product }: { product: Product }) {
     const { locale, t } = useLanguage();
@@ -21,6 +22,10 @@ function DiscountRow({ product }: { product: Product }) {
     const [isUpdating, setIsUpdating] = React.useState(false);
 
     const productRef = doc(firestore, 'products', product.id);
+    
+    React.useEffect(() => {
+        setDiscount(product.discount || 0);
+    }, [product.discount]);
 
     const handleUpdateDiscount = () => {
         if (discount < 0 || discount > 100) {
@@ -37,7 +42,7 @@ function DiscountRow({ product }: { product: Product }) {
             title: t('dashboard.discounts.discount_updated_title'),
             description: t('dashboard.discounts.discount_updated_desc', { productName: product.name[locale], discount: discount }),
         });
-        setIsUpdating(false);
+        // We let the useEffect handle setting isUpdating to false when the new prop comes in.
     };
 
     const handleRemoveDiscount = () => {
@@ -60,9 +65,9 @@ function DiscountRow({ product }: { product: Product }) {
         <TableRow>
             <TableCell className="font-medium">{product.name[locale]}</TableCell>
             <TableCell>
-                <span className={cn("text-muted-foreground", discount > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
+                <span className={cn("text-muted-foreground", product.discount > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
             </TableCell>
-            <TableCell className={cn("font-semibold", discount > 0 && "text-primary")}>
+            <TableCell className={cn("font-semibold", product.discount > 0 && "text-primary")}>
                 {formatCurrency(discountedPrice)}
             </TableCell>
             <TableCell>
@@ -79,10 +84,10 @@ function DiscountRow({ product }: { product: Product }) {
                 </div>
             </TableCell>
             <TableCell className="text-right space-x-2">
-                <Button size="sm" onClick={handleUpdateDiscount} disabled={isUpdating || discount === product.discount}>
+                <Button size="sm" onClick={handleUpdateDiscount} disabled={discount === (product.discount || 0)}>
                     {t('dashboard.discounts.update')}
                 </Button>
-                 {discount > 0 && (
+                 {product.discount > 0 && (
                     <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
                         <Trash2 className="h-4 w-4" />
                     </Button>
