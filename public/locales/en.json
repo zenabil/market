@@ -10,8 +10,22 @@
   "header": {
     "search_placeholder": "Search for products..."
   },
+  "hero": {
+    "slide1_heading": "Fresh Produce, Fast Delivery",
+    "slide1_subheading": "Get the finest farm-fresh products delivered right to your doorstep.",
+    "slide2_heading": "Irresistible Offers Await",
+    "slide2_subheading": "Browse our wide range of products and enjoy exclusive discounts.",
+    "slide3_heading": "Deliciously Baked Every Day",
+    "slide3_subheading": "Treat yourself to a variety of freshly baked bread and pastries.",
+    "shop_now": "Shop Now"
+  },
+  "homepage": {
+    "categories": "Shop by Category",
+    "best_sellers": "Best Sellers",
+    "exclusive_offers": "Exclusive Offers"
+  },
   "footer": {
-    "slogan": "Your local supermarket in Tlemcen, now online with smart features.",
+    "slogan": "Your smart supermarket in Tlemcen, now online.",
     "quick_links": "Quick Links",
     "legal": "Legal",
     "follow_us": "Follow Us",
@@ -19,23 +33,9 @@
     "terms_of_service": "Terms of Service",
     "copyright": "All rights reserved."
   },
-  "hero": {
-    "shop_now": "Shop Now",
-    "slide1_heading": "Fresh & Quality Produce",
-    "slide1_subheading": "Get the best fresh fruits, vegetables, and meats delivered to your doorstep.",
-    "slide2_heading": "Irresistible Weekly Deals",
-    "slide2_subheading": "Discover amazing discounts on your favorite products every week.",
-    "slide3_heading": "Freshly Baked Daily",
-    "slide3_subheading": "Enjoy a variety of fresh bread and pastries from our bakery."
-  },
-  "homepage": {
-    "categories": "Browse by Category",
-    "best_sellers": "Best Sellers",
-    "exclusive_offers": "Exclusive Offers"
-  },
   "cart": {
     "add_to_cart": "Add to Cart",
-    "added_to_cart_title": "Added to Cart",
+    "added_to_cart_title": "Added to Cart!",
     "added_to_cart_desc": "has been added to your cart.",
     "shopping_cart": "Shopping Cart",
     "empty_cart": "Your cart is empty.",
@@ -43,30 +43,106 @@
     "checkout": "Checkout"
   },
   "product": {
-    "stock_available": "{{count}} in stock",
+    "out_of_stock": "Out of Stock",
+    "out_of_stock_long": "This product is currently out of stock.",
+    "stock_available": "{count} items available in stock",
     "related_products": "Related Products"
   },
   "products": {
     "title": "All Products",
-    "subtitle": "Browse our complete collection of high-quality products."
+    "subtitle": "Browse our complete collection of high-quality products",
+    "subtitle_category": "Browsing products in the {categoryName} category",
+    "no_products_in_category": "There are no products in this category yet."
+  },
+  "about": {
+    "title": "About Tlemcen Smart Supermarket",
+    "subtitle": "Your trusted destination for quality and convenience in Tlemcen.",
+    "p1": "At Tlemcen Smart Supermarket, we are dedicated to providing our community with the finest shopping experience. Our journey began with a simple vision: to create a modern, convenient, and smart grocery store that caters to the needs of modern life in Tlemcen.",
+    "p2": "We carefully select every item on our shelves, prioritizing fresh, local produce to ensure you get the best quality while supporting local farmers and producers. From vibrant fruits and vegetables to premium dairy, tender meats, and fresh bakery items, we offer a wide selection to meet all your needs.",
+    "p3": "With our online platform, we're taking convenience to the next level. Shop from the comfort of your home and enjoy fast, reliable delivery to your doorstep. Our mission is to make grocery shopping a seamless and enjoyable experience for our valued customers."
+  },
+  "contact": {
+    "title": "Get In Touch",
+    "subtitle": "We're here to help! Send us a message or stop by for a visit.",
+    "form": {
+      "title": "Send us a Message",
+      "name": "Name",
+      "name_placeholder": "Your full name",
+      "email": "Email",
+      "email_placeholder": "you@example.com",
+      "subject": "Subject",
+      "subject_placeholder": "How can we help you?",
+      "message": "Message",
+      "message_placeholder": "Type your message here...",
+      "send": "Send Message",
+      "success_title": "Message Sent!",
+      "success_desc": "Thanks for reaching out. We'll get back to you soon."
+    },
+    "info": {
+      "title": "Contact Information",
+      "address_title": "Address",
+      "phone_title": "Phone",
+      "email_title": "Email"
+    }
+  },
+  "legal": {
+    "last_updated": "Last updated: July 2024",
+    "p1_title": "Introduction",
+    "p1_text": "Welcome to Tlemcen Smart Supermarket. This Privacy Policy governs your access to and use of our services.",
+    "p2_title": "Information We Collect",
+    "p2_text": "We collect various types of information in connection with our services, including:",
+    "p2_l1": "Information you provide directly to us (e.g., account information).",
+    "p2_l2": "Information we collect automatically (e.g., usage data).",
+    "p2_l3": "Information from third-party sources.",
+    "p3_title": "How We Use Your Information",
+    "p3_text": "We use the information we collect to operate, improve, personalize, and develop our services.",
+    "p4_title": "Sharing Your Information",
+    "p4_text": "We may share your information with third parties in limited circumstances, including: with your consent, with our service providers, or for legal reasons.",
+    "p5_title": "Data Security",
+    "p5_text": "We take reasonable measures to help protect information about you from loss, theft, misuse, and unauthorized access.",
+    "contact_title": "Contact Us",
+    "contact_text": "If you have any questions about this Privacy Policy, please contact us at:",
+    "t1_title": "Acceptance of Terms",
+    "t1_text": "By accessing or using our Service, you agree to be bound by these Terms.",
+    "t2_title": "Use of the Service",
+    "t2_text": "You must follow any policies made available to you within the Service. Don't misuse our Services.",
+    "t3_title": "Your Account",
+    "t3_text": "You may need an account to use some of our Services. You are responsible for safeguarding your account.",
+    "t4_title": "Modifications and Termination",
+    "t4_text": "We are constantly changing and improving our Services. We may add or remove functionalities or features.",
+    "t5_title": "Limitation of Liability",
+    "t5_text": "To the extent permitted by law, Tlemcen Smart Supermarket will not be responsible for lost profits, revenues, or data."
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "login_title": "Welcome Back!",
+    "login_desc": "Sign in to your account to access your dashboard.",
+    "signup_title": "Create an Account",
+    "signup_desc": "Fill out the form below to create a new account.",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "name": "Name",
+    "login_success_title": "Login Successful!",
+    "signup_success_title": "Account Created!",
+    "error_title": "An Error Occurred",
+    "logout": "Log Out"
+  },
+  "chatbot": {
+    "open": "Open Chat",
+    "title": "AI Assistant",
+    "placeholder": "Ask about anything...",
+    "send": "Send",
+    "error": "Sorry, something went wrong. Please try again."
   },
   "dashboard": {
     "overview": "Overview",
     "total_revenue": "Total Revenue",
     "products_sold": "Products Sold",
-    "products_in_stock": "Products in Stock",
+    "products_in_stock": "Products In Stock",
     "top_selling_products": "Top Selling Products",
     "units_sold": "Units Sold",
-    "nav": {
-      "overview": "Overview",
-      "products": "Products",
-      "users": "Users",
-      "coupons": "Coupons",
-      "discounts": "Discounts",
-      "loyalty": "Loyalty",
-      "settings": "Settings",
-      "logout": "Logout"
-    },
     "coming_soon": "Coming soon...",
     "manage_products": "Manage Products",
     "add_product": "Add Product",
@@ -78,55 +154,70 @@
     "toggle_menu": "Toggle menu",
     "edit": "Edit",
     "delete": "Delete",
+    "delete_confirmation_title": "Are you sure?",
+    "delete_confirmation_desc": "This action will permanently delete the product '{productName}'. This cannot be undone.",
+    "cancel": "Cancel",
     "add_new_product": "Add New Product",
     "product_details": "Product Details",
     "product_name_ar": "Product Name (Arabic)",
     "product_name_en": "Product Name (English)",
     "product_name_fr": "Product Name (French)",
-    "product_name_placeholder": "e.g. Fresh Tomatoes",
+    "product_name_placeholder": "Product name",
     "product_description": "Product Description",
     "generate_with_ai": "Generate with AI",
     "generating_description": "Generating...",
     "description_ar": "Description (Arabic)",
     "description_en": "Description (English)",
     "description_fr": "Description (French)",
-    "description_placeholder": "Describe the product...",
+    "description_placeholder": "Write an engaging product description here...",
     "organization": "Organization",
     "category": "Category",
     "select_category_placeholder": "Select a category",
     "pricing_stock": "Pricing & Stock",
     "discount_percentage": "Discount (%)",
-    "cancel": "Cancel",
     "save_product": "Save Product",
-    "product_created_success": "Product created successfully!",
-    "product_created_desc": "{{productName}} has been added to your store.",
-    "generation_error_title": "Missing Information",
-    "generation_error_desc": "Please enter product names and category to generate a description.",
-    "description_generated_success": "Descriptions generated successfully!",
+    "save_changes": "Save Changes",
+    
+    "generation_error_title": "Incomplete Data",
+    "generation_error_desc": "Please fill in product names and category before generating a description.",
+    "description_generated_success": "Description generated successfully!",
     "generation_failed_title": "Generation Failed",
-    "generation_failed_desc": "An error occurred while generating the description. Please try again.",
-    "settings_desc": "Manage your store's settings.",
+    "generation_failed_desc": "We couldn't generate the description. Please try again.",
+    "product_created_success": "Product Created!",
+    "product_created_desc": "{productName} has been added to your store.",
+    "no_products_found": "No products found. Get started by adding a new product.",
+    "no_users_found": "No registered users found yet.",
+    
+    "edit_product": "Edit Product",
+    "product_updated_success": "Product Updated!",
+    "product_updated_desc": "{productName} has been successfully updated.",
+
+    "users": {
+      "user": "User",
+      "registration_date": "Registration Date",
+      "orders": "Orders",
+      "total_spent": "Total Spent"
+    },
+
+    "settings_desc": "Manage your store settings and preferences.",
+    "settings_updated_title": "Settings Saved",
+    "settings_updated_desc": "Your store settings have been updated.",
     "settings": {
       "site_name": "Site Name",
       "logo": "Logo",
       "phone": "Phone Number",
       "address": "Address"
     },
-    "save_changes": "Save Changes",
-    "settings_updated_title": "Settings Updated",
-    "settings_updated_desc": "Your store settings have been saved.",
-    "users": {
-      "user": "User",
-      "registration_date": "Registration Date",
-      "orders": "Orders",
-      "total_spent": "Total Spent"
+
+    "nav": {
+      "overview": "Overview",
+      "products": "Products",
+      "users": "Users",
+      "coupons": "Coupons",
+      "discounts": "Discounts",
+      "loyalty": "Loyalty",
+      "settings": "Settings",
+      "logout": "Log Out"
     }
-  },
-  "chatbot": {
-    "open": "Open Chat",
-    "title": "AI Assistant",
-    "placeholder": "Ask anything...",
-    "send": "Send",
-    "error": "Sorry, I encountered an error. Please try again."
   }
 }
