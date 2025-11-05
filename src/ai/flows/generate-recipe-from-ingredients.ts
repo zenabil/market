@@ -13,19 +13,18 @@ import { z } from 'genkit';
 
 const GenerateRecipeFromIngredientsInputSchema = z.object({
   ingredients: z.string().describe('A comma-separated list of ingredients the user has.'),
-  language: z.enum(['ar', 'en', 'fr']).describe('The desired output language for the recipe.'),
 });
 export type GenerateRecipeFromIngredientsInput = z.infer<typeof GenerateRecipeFromIngredientsInputSchema>;
 
 const GenerateRecipeFromIngredientsOutputSchema = z.object({
-  title: z.string().describe('The creative and appealing title of the generated recipe.'),
-  description: z.string().describe('A brief, enticing description of the recipe.'),
+  title: z.string().describe('The creative and appealing title of the generated recipe in French.'),
+  description: z.string().describe('A brief, enticing description of the recipe in French.'),
   imagePrompt: z.string().describe('A prompt for an image generation model to create a picture of the final dish.'),
   prepTime: z.number().describe('The estimated preparation time in minutes.'),
   cookTime: z.number().describe('The estimated cooking time in minutes.'),
   servings: z.number().describe('The number of servings the recipe yields.'),
-  ingredients: z.array(z.string()).describe('The full list of ingredients required for the recipe.'),
-  instructions: z.array(z.string()).describe('The step-by-step instructions to prepare the dish.'),
+  ingredients: z.array(z.string()).describe('The full list of ingredients required for the recipe in French.'),
+  instructions: z.array(z.string()).describe('The step-by-step instructions to prepare the dish in French.'),
   missingProducts: z.array(z.string()).describe('A list of products the user might need to buy for this recipe.'),
 });
 export type GenerateRecipeFromIngredientsOutput = z.infer<typeof GenerateRecipeFromIngredientsOutputSchema>;
@@ -42,19 +41,19 @@ const prompt = ai.definePrompt({
   name: 'generateRecipeFromIngredientsPrompt',
   input: { schema: GenerateRecipeFromIngredientsInputSchema },
   output: { schema: GenerateRecipeFromIngredientsOutputSchema },
-  prompt: `You are an expert chef for "Tlemcen Smart Supermarket", specializing in Algerian and Mediterranean cuisine. A user has the following ingredients: {{{ingredients}}}.
+  prompt: `Vous êtes un chef expert pour le "Supermarché Intelligent de Tlemcen", spécialisé dans la cuisine algérienne et méditerranéenne. Un utilisateur dispose des ingrédients suivants: {{{ingredients}}}.
 
-Your task is to create a delicious and creative recipe based on these ingredients. The recipe should be in {{language}}.
+Votre tâche est de créer une recette délicieuse et créative à partir de ces ingrédients. La recette doit être en français.
 
-1.  **Analyze the ingredients:** Identify a suitable dish. If the ingredients are sparse, create a simple but elegant recipe. Feel free to add common pantry staples (like oil, salt, pepper, spices) and suggest a few additional key ingredients to make the dish complete.
-2.  **Create a Title and Description:** Give the recipe a creative and appealing title and a short, enticing description.
-3.  **List all ingredients:** Provide a complete list of all ingredients needed for the recipe, including the ones the user already has and any you've added.
-4.  **Write Instructions:** Provide clear, step-by-step instructions.
-5.  **Estimate Times and Servings:** Provide realistic estimates for prep time, cook time, and servings.
-6.  **Identify Missing Products:** List the key ingredients you added that the user likely needs to buy. This list should only contain the names of products, e.g., ["Chicken breast", "Olive oil", "Tomatoes"].
-7.  **Generate Image Prompt:** Create a descriptive prompt for an image generation model to create a picture of the final dish. Example: "A beautifully plated dish of Algerian Chicken Tagine with olives and preserved lemons, steam rising, on a rustic wooden table."
+1.  **Analysez les ingrédients:** Identifiez un plat approprié. Si les ingrédients sont rares, créez une recette simple mais élégante. N'hésitez pas à ajouter des produits de base courants (comme l'huile, le sel, le poivre, les épices) et à suggérer quelques ingrédients clés supplémentaires pour compléter le plat.
+2.  **Créez un titre et une description:** Donnez à la recette un titre créatif et attrayant ainsi qu'une description courte et alléchante.
+3.  **Listez tous les ingrédients:** Fournissez une liste complète de tous les ingrédients nécessaires pour la recette, y compris ceux que l'utilisateur possède déjà et ceux que vous avez ajoutés.
+4.  **Rédigez les instructions:** Fournissez des instructions claires, étape par étape.
+5.  **Estimez les temps et les portions:** Fournissez des estimations réalistes pour le temps de préparation, le temps de cuisson et le nombre de portions.
+6.  **Identifiez les produits manquants:** Listez les ingrédients clés que vous avez ajoutés et que l'utilisateur devra probablement acheter. Cette liste ne doit contenir que les noms des produits, par exemple : ["Poitrine de poulet", "Huile d'olive", "Tomates"].
+7.  **Générez une invite d'image:** Créez une invite descriptive pour qu'un modèle de génération d'images puisse créer une image du plat final. Exemple : "Un plat de tajine de poulet algérien magnifiquement présenté avec des olives et des citrons confits, de la vapeur s'en dégageant, sur une table en bois rustique."
 
-Respond in a structured JSON format. The response must be in {{language}}.`,
+Répondez dans un format JSON structuré. La réponse doit être en français.`,
 });
 
 

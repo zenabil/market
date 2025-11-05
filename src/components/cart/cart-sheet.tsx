@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { useLanguage } from '@/hooks/use-language';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Minus, Trash2 } from 'lucide-react';
@@ -25,11 +24,10 @@ interface CartSheetProps {
 }
 
 export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
-  const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
-  const { t, locale } = useLanguage();
+  const { items, removeItem, updateQuantity, totalPrice } = useCart();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -39,12 +37,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle className="font-headline text-2xl">{t('cart.shopping_cart')}</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">Panier</SheetTitle>
         </SheetHeader>
         <Separator />
         {items.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">{t('cart.empty_cart')}</p>
+            <p className="text-muted-foreground">Votre panier est vide.</p>
           </div>
         ) : (
           <>
@@ -54,13 +52,13 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
                   <div key={item.id} className="flex items-center gap-4">
                     <Image
                       src={item.images[0]}
-                      alt={item.name[locale]}
+                      alt={item.name}
                       width={64}
                       height={64}
                       className="rounded-md border object-cover"
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-sm">{item.name[locale]}</p>
+                      <p className="font-semibold text-sm">{item.name}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Button
                           variant="outline"
@@ -104,12 +102,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
             <Separator />
             <SheetFooter className="mt-4 sm:flex-col sm:space-x-0 space-y-2">
               <div className="flex justify-between font-bold text-lg">
-                <span>{t('cart.subtotal')}</span>
+                <span>Sous-total</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <SheetClose asChild>
                 <Button asChild className="w-full font-bold text-base py-6">
-                  <Link href="/checkout">{t('cart.checkout')}</Link>
+                  <Link href="/checkout">Paiement</Link>
                 </Button>
               </SheetClose>
             </SheetFooter>

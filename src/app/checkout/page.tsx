@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
@@ -31,14 +30,13 @@ import type { Coupon } from '@/lib/placeholder-data';
 
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  address: z.string().min(10, { message: 'Address must be at least 10 characters.' }),
-  city: z.string().min(2, { message: 'City must be at least 2 characters.' }),
-  phone: z.string().min(10, { message: 'Phone must be at least 10 characters.' }),
+  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
+  address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
+  city: z.string().min(2, { message: 'La ville doit comporter au moins 2 caractères.' }),
+  phone: z.string().min(10, { message: 'Le téléphone doit comporter au moins 10 caractères.' }),
 });
 
 export default function CheckoutPage() {
-  const { t, locale } = useLanguage();
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { user } = useUser();
   const firestore = useFirestore();
@@ -106,7 +104,7 @@ export default function CheckoutPage() {
 
     getDocs(q).then(querySnapshot => {
         if (querySnapshot.empty) {
-            toast({ variant: 'destructive', title: t('checkout.coupon.invalid') });
+            toast({ variant: 'destructive', title: 'Coupon invalide' });
             setAppliedCoupon(null);
             return;
         }
@@ -118,13 +116,13 @@ export default function CheckoutPage() {
         const expiry = new Date(couponData.expiryDate);
 
         if (!couponData.isActive || now > expiry) {
-            toast({ variant: 'destructive', title: t('checkout.coupon.expired') });
+            toast({ variant: 'destructive', title: 'Coupon expiré' });
             setAppliedCoupon(null);
             return;
         }
         
         setAppliedCoupon(couponData);
-        toast({ title: `${t('checkout.coupon.applied')} ${couponData.code}` });
+        toast({ title: `Coupon appliqué : ${couponData.code}` });
     }).catch(error => {
         const contextualError = new FirestorePermissionError({
             operation: 'list',
@@ -138,7 +136,7 @@ export default function CheckoutPage() {
 
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -155,8 +153,8 @@ export default function CheckoutPage() {
       });
 
       toast({
-        title: t('checkout.order_placed_title'),
-        description: t('checkout.order_placed_desc'),
+        title: 'Commande passée !',
+        description: 'Votre commande a été enregistrée avec succès.',
       });
       
       clearCart();
@@ -167,8 +165,8 @@ export default function CheckoutPage() {
       // The error emitter in placeOrder handles the detailed debug view for permission errors.
       toast({
         variant: "destructive",
-        title: t('checkout.order_failed_title'),
-        description: error.message || t('checkout.order_failed_desc'),
+        title: 'Échec de la commande',
+        description: error.message || 'Nous n\'avons pas pu traiter votre commande.',
       });
     } finally {
       setIsProcessing(false);
@@ -182,14 +180,14 @@ export default function CheckoutPage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('checkout.title')}</h1>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">Paiement</h1>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid lg:grid-cols-2 gap-12" id="checkout-form">
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>{t('checkout.shipping_info')}</CardTitle>
+                <CardTitle>Informations de livraison</CardTitle>
               </CardHeader>
               <CardContent>
                   <div className="space-y-6">
@@ -198,7 +196,7 @@ export default function CheckoutPage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('checkout.full_name')}</FormLabel>
+                          <FormLabel>Nom complet</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -211,7 +209,7 @@ export default function CheckoutPage() {
                       name="address"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('checkout.address')}</FormLabel>
+                          <FormLabel>Adresse</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -224,7 +222,7 @@ export default function CheckoutPage() {
                       name="city"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('checkout.city')}</FormLabel>
+                          <FormLabel>Ville</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -237,7 +235,7 @@ export default function CheckoutPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('checkout.phone')}</FormLabel>
+                          <FormLabel>Téléphone</FormLabel>
                           <FormControl>
                             <Input type="tel" {...field} />
                           </FormControl>
@@ -252,8 +250,8 @@ export default function CheckoutPage() {
           <div>
               <Card>
                   <CardHeader>
-                      <CardTitle>{t('checkout.order_summary')}</CardTitle>
-                      <CardDescription>{`${totalItems} ${t('checkout.item_count')}`}</CardDescription>
+                      <CardTitle>Résumé de la commande</CardTitle>
+                      <CardDescription>{`${totalItems} article(s) dans votre panier`}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                      <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
@@ -261,11 +259,11 @@ export default function CheckoutPage() {
                            <div key={item.id} className="flex justify-between items-center">
                               <div className='flex items-center gap-4'>
                                   <div className="relative h-12 w-12 flex-shrink-0">
-                                    <Image src={item.images[0]} alt={item.name[locale]} fill className="rounded-md object-cover" />
+                                    <Image src={item.images[0]} alt={item.name} fill className="rounded-md object-cover" />
                                   </div>
                                   <div>
-                                      <p className="font-medium text-sm">{item.name[locale]}</p>
-                                      <p className="text-sm text-muted-foreground">{t('checkout.quantity')}: {item.quantity}</p>
+                                      <p className="font-medium text-sm">{item.name}</p>
+                                      <p className="text-sm text-muted-foreground">Quantité: {item.quantity}</p>
                                   </div>
                               </div>
                               <p className="font-medium text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
@@ -276,7 +274,7 @@ export default function CheckoutPage() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Input 
-                            placeholder={t('checkout.coupon.placeholder')}
+                            placeholder="Code promo"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value)}
                             className='flex-grow'
@@ -288,34 +286,34 @@ export default function CheckoutPage() {
                             disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
                           >
                             {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                            {t('checkout.coupon.apply')}
+                            Appliquer
                           </Button>
                         </div>
                         {appliedCoupon && (
                           <p className="text-sm text-primary flex items-center gap-2">
                             <TicketPercent className="h-4 w-4" />
-                            <span>{`${t('checkout.coupon.discount_applied')} ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
+                            <span>{`Réduction appliquée : ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
                           </p>
                         )}
                       </div>
                      <Separator />
                      <div className="flex justify-between font-semibold">
-                         <span>{t('checkout.subtotal')}</span>
+                         <span>Sous-total</span>
                          <span>{formatCurrency(totalPrice)}</span>
                      </div>
                       {appliedCoupon && (
                         <div className="flex justify-between font-semibold text-primary">
-                          <span>{t('checkout.coupon.discount_label')}</span>
+                          <span>Réduction</span>
                           <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-semibold">
-                         <span>{t('checkout.shipping')}</span>
-                         <span>{t('checkout.shipping_cost')}</span>
+                         <span>Livraison</span>
+                         <span>Gratuit</span>
                      </div>
                      <Separator />
                       <div className="flex justify-between font-bold text-lg">
-                         <span>{t('checkout.total')}</span>
+                         <span>Total</span>
                          <span>{formatCurrency(finalTotalPrice)}</span>
                      </div>
                   </CardContent>
@@ -328,7 +326,7 @@ export default function CheckoutPage() {
                   disabled={isProcessing}
               >
                   {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {t('checkout.place_order')}
+                  Passer la commande
               </Button>
           </div>
         </form>

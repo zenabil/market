@@ -7,11 +7,9 @@ import { collection, query, limit, orderBy } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLanguage } from '@/hooks/use-language';
 
 function HomeProducts() {
   const firestore = useFirestore();
-  const { t } = useLanguage();
 
   const bestSellersQuery = useMemoFirebase(
     () => query(collection(firestore, 'products'), orderBy('sold', 'desc'), limit(8)),

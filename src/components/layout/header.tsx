@@ -4,13 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import Logo from '@/components/icons/logo';
 import { ThemeSwitcher } from './theme-switcher';
-import LanguageSwitcher from './language-switcher';
 import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -31,18 +29,17 @@ import { useUserRole } from '@/hooks/use-user-role';
 
 
 const navLinks = [
-  { key: 'nav.home', href: '/' },
-  { key: 'nav.products', href: '/products' },
-  { key: 'nav.recipes', href: '/recipes' },
-  { key: 'nav.generate_recipe', href: '/generate-recipe', icon: Wand2 },
-  { key: 'nav.about', href: '/about' },
-  { key: 'nav.contact', href: '/contact' },
+  { key: 'Accueil', href: '/' },
+  { key: 'Produits', href: '/products' },
+  { key: 'Recettes', href: '/recipes' },
+  { key: 'Générer une recette', href: '/generate-recipe', icon: Wand2 },
+  { key: 'À Propos', href: '/about' },
+  { key: 'Contact', href: '/contact' },
 ];
 
 function UserNav() {
   const { user: authUser, isUserLoading } = useUser();
   const auth = useAuth();
-  const { t } = useLanguage();
   const firestore = useFirestore();
   const { isAdmin } = useUserRole();
 
@@ -67,10 +64,10 @@ function UserNav() {
     return (
        <div className='flex items-center gap-2'>
         <Button asChild variant="ghost">
-          <Link href="/login">{t('auth.login')}</Link>
+          <Link href="/login">Connexion</Link>
         </Button>
         <Button asChild>
-          <Link href="/login">{t('auth.signup')}</Link>
+          <Link href="/login">Inscription</Link>
         </Button>
       </div>
     );
@@ -89,7 +86,7 @@ function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'Welcome'}</p>
+            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'Bienvenue'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {authUser.email}
             </p>
@@ -99,21 +96,21 @@ function UserNav() {
         <DropdownMenuItem asChild>
             <Link href="/dashboard/orders">
                 <ShoppingBasket className="mr-2 h-4 w-4" />
-                <span>{t('nav.my_orders')}</span>
+                <span>Mes commandes</span>
             </Link>
         </DropdownMenuItem>
         {isAdmin && (
             <DropdownMenuItem asChild>
                 <Link href="/dashboard">
                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>{t('nav.dashboard')}</span>
+                    <span>Tableau de bord</span>
                 </Link>
             </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>{t('auth.logout')}</span>
+          <span>Déconnexion</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -122,7 +119,6 @@ function UserNav() {
 
 
 export default function Header() {
-  const { t } = useLanguage();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const isMobile = useIsMobile();
   const pathname = usePathname();
@@ -153,7 +149,7 @@ export default function Header() {
             )}
         >
           {link.icon && <link.icon className="h-4 w-4" />}
-          {t(link.key)}
+          {link.key}
         </Link>
       ))}
     </nav>
@@ -167,7 +163,7 @@ export default function Header() {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-4">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">Ouvrir le menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -185,7 +181,7 @@ export default function Header() {
                         )}
                     >
                        {link.icon && <link.icon className="h-5 w-5" />}
-                       {t(link.key)}
+                       {link.key}
                     </Link>
                   </SheetClose>
                 ))}
@@ -208,13 +204,12 @@ export default function Header() {
                 <Input
                   type="search"
                   name="search"
-                  placeholder={t('header.search_placeholder')}
+                  placeholder="Rechercher des produits..."
                   className="w-full bg-secondary md:w-[200px] lg:w-[300px] pl-9"
                 />
               </div>
             </form>
           </div>
-          <LanguageSwitcher />
           <ThemeSwitcher />
           <UserNav />
           <CartIcon onClick={() => setIsCartOpen(true)} />

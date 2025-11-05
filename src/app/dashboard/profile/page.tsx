@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +17,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, arrayRemove, updateDoc } from 'firebase/firestore';
@@ -31,21 +29,20 @@ import { AddressDialog } from '@/components/dashboard/address-dialog';
 
 
 const profileFormSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
   email: z.string().email(),
   phone: z.string().optional(),
 });
 
-const getPasswordFormSchema = (t: (key: string, options?: any) => string) => z.object({
-    newPassword: z.string().min(6, { message: t('auth.password_min_length') }),
+const passwordFormSchema = z.object({
+    newPassword: z.string().min(6, { message: 'Le mot de passe doit comporter au moins 6 caractères.' }),
     confirmPassword: z.string().min(6),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-    message: t('auth.passwords_dont_match'),
+    message: 'Les mots de passe ne correspondent pas.',
     path: ["confirmPassword"],
 });
 
 export default function ProfilePage() {
-  const { t } = useLanguage();
   const { toast } = useToast();
   const { user: authUser, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -64,8 +61,6 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: { name: '', email: '', phone: '' },
   });
-  
-  const passwordFormSchema = getPasswordFormSchema(t);
 
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
       resolver: zodResolver(passwordFormSchema),
@@ -98,7 +93,7 @@ export default function ProfilePage() {
         const updateData = { avatar: dataUrl };
         updateDoc(userDocRef, updateData)
             .then(() => {
-                toast({ title: t('dashboard.profile.avatar_updated_title') });
+                toast({ title: 'Avatar mis à jour' });
             })
             .catch(error => {
                  errorEmitter.emit(
@@ -125,8 +120,8 @@ export default function ProfilePage() {
     updateDoc(userDocRef, updateData)
       .then(() => {
         toast({
-            title: t('dashboard.profile.update_success_title'),
-            description: t('dashboard.profile.update_success_desc'),
+            title: 'Profil mis à jour',
+            description: 'Vos informations ont été enregistrées.',
         });
       })
       .catch(error => {
@@ -150,14 +145,14 @@ export default function ProfilePage() {
       try {
           await updatePassword(authUser, values.newPassword);
           toast({
-              title: t('dashboard.profile.password_update_success_title'),
-              description: t('dashboard.profile.password_update_success_desc'),
+              title: 'Mot de passe mis à jour',
+              description: 'Votre mot de passe a été modifié avec succès.',
           });
           passwordForm.reset();
       } catch (error: any) {
           toast({
               variant: "destructive",
-              title: "Error",
+              title: "Erreur",
               description: error.message,
           });
       } finally {
@@ -177,7 +172,7 @@ export default function ProfilePage() {
 
     updateDoc(userDocRef, updateData)
     .then(() => {
-      toast({ title: t('dashboard.profile.address_removed_title') });
+      toast({ title: 'Adresse supprimée' });
     })
     .catch((error) => {
       errorEmitter.emit(
@@ -197,8 +192,8 @@ export default function ProfilePage() {
     <div className="container py-8 md:py-12 space-y-8">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>{t('nav.my_profile')}</CardTitle>
-          <CardDescription>{t('dashboard.profile.description')}</CardDescription>
+          <CardTitle>Mon Profil</CardTitle>
+          <CardDescription>Gérez les informations de votre profil.</CardDescription>
         </CardHeader>
         <CardContent>
             {isLoading ? (
@@ -245,7 +240,7 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-2 pt-2">
                                 <Gem className="h-5 w-5 text-accent"/>
                                 <span className="font-bold text-lg">{firestoreUser?.loyaltyPoints || 0}</span>
-                                <span className="text-sm text-muted-foreground">{t('dashboard.loyalty.points')}</span>
+                                <span className="text-sm text-muted-foreground">Points de fidélité</span>
                             </div>
                         </div>
                     </div>
@@ -254,7 +249,7 @@ export default function ProfilePage() {
                         name="name"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('auth.name')}</FormLabel>
+                            <FormLabel>Nom</FormLabel>
                             <FormControl>
                             <Input {...field} />
                             </FormControl>
@@ -268,7 +263,7 @@ export default function ProfilePage() {
                         name="email"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('auth.email')}</FormLabel>
+                            <FormLabel>Email</FormLabel>
                             <FormControl>
                             <Input {...field} disabled />
                             </FormControl>
@@ -282,7 +277,7 @@ export default function ProfilePage() {
                         name="phone"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('checkout.phone')}</FormLabel>
+                            <FormLabel>Téléphone</FormLabel>
                             <FormControl>
                             <Input type="tel" {...field} />
                             </FormControl>
@@ -294,7 +289,7 @@ export default function ProfilePage() {
                     <div className="flex justify-end">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {t('dashboard.save_changes')}
+                            Enregistrer les modifications
                         </Button>
                     </div>
                     </form>
@@ -305,8 +300,8 @@ export default function ProfilePage() {
 
     <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>{t('dashboard.profile.change_password_title')}</CardTitle>
-          <CardDescription>{t('dashboard.profile.change_password_desc')}</CardDescription>
+          <CardTitle>Changer le mot de passe</CardTitle>
+          <CardDescription>Mettez à jour votre mot de passe pour des raisons de sécurité.</CardDescription>
         </CardHeader>
         <CardContent>
              <Form {...passwordForm}>
@@ -316,7 +311,7 @@ export default function ProfilePage() {
                         name="newPassword"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('dashboard.profile.new_password')}</FormLabel>
+                            <FormLabel>Nouveau mot de passe</FormLabel>
                             <FormControl>
                             <Input type="password" {...field} />
                             </FormControl>
@@ -329,7 +324,7 @@ export default function ProfilePage() {
                         name="confirmPassword"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('dashboard.profile.confirm_new_password')}</FormLabel>
+                            <FormLabel>Confirmer le nouveau mot de passe</FormLabel>
                             <FormControl>
                             <Input type="password" {...field} />
                             </FormControl>
@@ -340,7 +335,7 @@ export default function ProfilePage() {
                      <div className="flex justify-end">
                         <Button type="submit" disabled={isPasswordSaving}>
                             {isPasswordSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {t('dashboard.profile.update_password_button')}
+                            Mettre à jour le mot de passe
                         </Button>
                     </div>
                 </form>
@@ -351,13 +346,13 @@ export default function ProfilePage() {
     <Card className="max-w-4xl mx-auto">
         <CardHeader className="flex-row items-center justify-between">
           <div>
-            <CardTitle>{t('dashboard.profile.manage_addresses_title')}</CardTitle>
-            <CardDescription>{t('dashboard.profile.manage_addresses_desc')}</CardDescription>
+            <CardTitle>Gérer les adresses</CardTitle>
+            <CardDescription>Ajoutez ou supprimez vos adresses de livraison.</CardDescription>
           </div>
           <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser}>
             <Button size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                {t('dashboard.profile.add_address_button')}
+                Ajouter une adresse
             </Button>
           </AddressDialog>
         </CardHeader>
@@ -377,12 +372,12 @@ export default function ProfilePage() {
                                 </AlertDialogTrigger>
                                  <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>{t('dashboard.profile.delete_address_confirm_title')}</AlertDialogTitle>
-                                        <AlertDialogDescription>{t('dashboard.profile.delete_address_confirm_desc')}</AlertDialogDescription>
+                                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                        <AlertDialogDescription>Voulez-vous vraiment supprimer cette adresse ?</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>{t('dashboard.cancel')}</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => deleteAddress(addr)}>{t('dashboard.delete')}</AlertDialogAction>
+                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteAddress(addr)}>Supprimer</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -390,7 +385,7 @@ export default function ProfilePage() {
                     </div>
                 ))
             ) : (
-                <p className="text-sm text-center text-muted-foreground py-4">{t('dashboard.profile.no_addresses')}</p>
+                <p className="text-sm text-center text-muted-foreground py-4">Aucune adresse enregistrée.</p>
             )}
            </div>
         </CardContent>

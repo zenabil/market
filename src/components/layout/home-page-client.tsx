@@ -1,7 +1,6 @@
 "use client"
 
 import type { Category, Product } from "@/lib/placeholder-data";
-import { useLanguage } from "@/hooks/use-language";
 import CategoryShowcase from "../product/category-showcase";
 import ProductGrid from "../product/product-grid";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
@@ -34,7 +33,6 @@ const useRecentProducts = () => {
 };
 
 function RecommendedProducts() {
-    const { t, locale } = useLanguage();
     const { user } = useUser();
     const viewedProducts = useRecentProducts();
     const [recommendedProductNames, setRecommendedProductNames] = useState<string[]>([]);
@@ -70,9 +68,7 @@ function RecommendedProducts() {
         const lowercasedRecNames = recommendedProductNames.map(name => name.toLowerCase());
         
         return allProducts.filter(product => 
-            lowercasedRecNames.includes(product.name.en.toLowerCase()) ||
-            lowercasedRecNames.includes(product.name.fr.toLowerCase()) ||
-            lowercasedRecNames.includes(product.name.ar.toLowerCase())
+            lowercasedRecNames.includes(product.name.toLowerCase())
         ).slice(0, 4); // Limit to 4 recommendations
 
     }, [allProducts, recommendedProductNames]);
@@ -87,7 +83,7 @@ function RecommendedProducts() {
     if (finalIsLoading) {
          return (
             <div className="mt-12 md:mt-16">
-                <h2 className="font-headline text-3xl md:text-4xl mb-8">{t('homepage.recommended_for_you')}</h2>
+                <h2 className="font-headline text-3xl md:text-4xl mb-8">Recommandé pour vous</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                 </div>
@@ -97,23 +93,22 @@ function RecommendedProducts() {
 
     return (
         <div className="mt-12 md:mt-16">
-            <ProductGrid title={t('homepage.recommended_for_you')} products={recommendedProducts} />
+            <ProductGrid title="Recommandé pour vous" products={recommendedProducts} />
         </div>
     );
 }
 
 export default function HomePageClient({ categories, bestSellers, exclusiveOffers }: HomePageClientProps) {
-  const { t } = useLanguage();
 
   return (
     <div className="container py-8 md:py-12">
-      <CategoryShowcase title={t('homepage.categories')} categories={categories} />
+      <CategoryShowcase title="Parcourir les catégories" categories={categories} />
       <RecommendedProducts />
       <div className="mt-12 md:mt-16">
-        <ProductGrid title={t('homepage.best_sellers')} products={bestSellers} />
+        <ProductGrid title="Meilleures ventes" products={bestSellers} />
       </div>
       <div className="mt-12 md:mt-16">
-        <ProductGrid title={t('homepage.exclusive_offers')} products={exclusiveOffers} />
+        <ProductGrid title="Offres exclusives" products={exclusiveOffers} />
       </div>
     </div>
   );

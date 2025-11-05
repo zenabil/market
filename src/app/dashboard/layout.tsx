@@ -33,7 +33,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -42,47 +41,47 @@ import { useUserRole } from '@/hooks/use-user-role';
 
 const adminMenuItems = [
   {
-    key: 'dashboard.nav.overview',
+    key: 'Tableau de bord',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    key: 'dashboard.nav.orders',
+    key: 'Commandes',
     href: '/dashboard/orders',
     icon: ShoppingBasket,
   },
   {
-    key: 'dashboard.nav.products',
+    key: 'Produits',
     href: '/dashboard/products',
     icon: Package,
   },
   {
-    key: 'dashboard.nav.recipes',
+    key: 'Recettes',
     href: '/dashboard/recipes',
     icon: BookOpen,
   },
   {
-    key: 'dashboard.nav.categories',
+    key: 'Catégories',
     href: '/dashboard/categories',
     icon: LayoutGrid,
   },
   {
-    key: 'dashboard.nav.users',
+    key: 'Utilisateurs',
     href: '/dashboard/users',
     icon: Users,
   },
   {
-    key: 'dashboard.nav.coupons',
+    key: 'Coupons',
     href: '/dashboard/coupons',
     icon: Ticket,
   },
   {
-    key: 'dashboard.nav.discounts',
+    key: 'Réductions',
     href: '/dashboard/discounts',
     icon: Percent,
   },
   {
-    key: 'dashboard.nav.settings',
+    key: 'Paramètres',
     href: '/dashboard/settings',
     icon: Settings,
   },
@@ -90,17 +89,17 @@ const adminMenuItems = [
 
 const userMenuItems = [
     {
-        key: 'nav.my_orders',
+        key: 'Mes commandes',
         href: '/dashboard/orders',
         icon: ShoppingBasket,
     },
     {
-        key: 'nav.my_wishlist',
+        key: 'Ma liste de souhaits',
         href: '/dashboard/wishlist',
         icon: Heart,
     },
     {
-        key: 'nav.my_profile',
+        key: 'Mon profil',
         href: '/dashboard/profile',
         icon: User,
     }
@@ -109,7 +108,6 @@ const userMenuItems = [
 
 function DashboardSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
   const { state, setOpen } = useSidebar();
   const { user } = useUser();
   const auth = useAuth();
@@ -145,11 +143,11 @@ function DashboardSidebar() {
               <Link href={item.href}>
                 <SidebarMenuButton
                   isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}
-                  tooltip={{ content: t(item.key) }}
+                  tooltip={{ content: item.key }}
                   className={cn(isCollapsed && 'justify-center')}
                 >
                   <item.icon />
-                  <span className={cn(isCollapsed && 'hidden')}>{t(item.key)}</span>
+                  <span className={cn(isCollapsed && 'hidden')}>{item.key}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -171,7 +169,7 @@ function DashboardSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} className={cn(isCollapsed && 'justify-center')}>
                     <LogOut />
-                    <span className={cn(isCollapsed && 'hidden')}>{t('auth.logout')}</span>
+                    <span className={cn(isCollapsed && 'hidden')}>Déconnexion</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
@@ -198,5 +196,3 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
-
-    

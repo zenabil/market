@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ import { cn } from '@/lib/utils';
 
 
 function ProductDetails({ productId }: { productId: string }) {
-  const { t, locale } = useLanguage();
   const { addItem, updateQuantity: updateCartQuantity } = useCart();
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -43,8 +41,8 @@ function ProductDetails({ productId }: { productId: string }) {
       try {
         const viewedProductsRaw = localStorage.getItem('viewedProducts');
         const viewedProducts = viewedProductsRaw ? JSON.parse(viewedProductsRaw) : [];
-        if (!viewedProducts.includes(product.name[locale])) {
-          const updatedViewed = [product.name[locale], ...viewedProducts].slice(0, 10);
+        if (!viewedProducts.includes(product.name)) {
+          const updatedViewed = [product.name, ...viewedProducts].slice(0, 10);
           localStorage.setItem('viewedProducts', JSON.stringify(updatedViewed));
           window.dispatchEvent(new Event('storage'));
         }
@@ -52,7 +50,7 @@ function ProductDetails({ productId }: { productId: string }) {
         console.error("Failed to update viewed products in localStorage", e);
       }
     }
-  }, [product, locale]);
+  }, [product]);
 
 
   const relatedProductsQuery = useMemoFirebase(() => {
@@ -106,15 +104,15 @@ function ProductDetails({ productId }: { productId: string }) {
   const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   const handleAddToCart = () => {
     addItem(product);
     updateCartQuantity(product.id, quantity);
     toast({
-      title: t('cart.added_to_cart_title'),
-      description: `${product.name[locale]} (${quantity}) ${t('cart.added_to_cart_desc')}`,
+      title: 'Ajouté au panier',
+      description: `${quantity} x ${product.name} a été ajouté à votre panier.`,
     });
   };
 
@@ -122,8 +120,8 @@ function ProductDetails({ productId }: { productId: string }) {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: t('wishlist.login_required_title'),
-        description: t('wishlist.login_required_desc'),
+        title: 'Connexion requise',
+        description: 'Vous devez être connecté pour ajouter des articles à votre liste de souhaits.',
       });
       return;
     }
@@ -144,7 +142,7 @@ function ProductDetails({ productId }: { productId: string }) {
           <div className="aspect-square relative rounded-lg border overflow-hidden mb-4">
             <Image
               src={product.images[selectedImage]}
-              alt={product.name[locale]}
+              alt={product.name}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -163,18 +161,18 @@ function ProductDetails({ productId }: { productId: string }) {
                   onClick={() => setSelectedImage(index)}
                   className={`w-20 h-20 relative rounded-md border overflow-hidden ${selectedImage === index ? 'ring-2 ring-primary' : ''}`}
                 >
-                  <Image src={img} alt={`${product.name[locale]} thumbnail ${index + 1}`} fill className="object-cover" />
+                  <Image src={img} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
           )}
         </div>
         <div className="flex flex-col">
-          <h1 className="font-headline text-3xl md:text-4xl lg:text-5xl">{product.name[locale]}</h1>
+          <h1 className="font-headline text-3xl md:text-4xl lg:text-5xl">{product.name}</h1>
           <div className="mt-2 flex items-center gap-2">
             <StarRating rating={product.averageRating || 0} />
             <span className="text-sm text-muted-foreground">
-                ({product.reviewCount || 0} {t('product.reviews.count')})
+                ({product.reviewCount || 0} avis)
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-3">
@@ -184,7 +182,7 @@ function ProductDetails({ productId }: { productId: string }) {
             )}
           </div>
           <Separator className="my-6" />
-          <p className="text-muted-foreground leading-relaxed">{product.description[locale]}</p>
+          <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           <div className="mt-8 flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Button
@@ -214,7 +212,7 @@ function ProductDetails({ productId }: { productId: string }) {
             </div>
             <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {product.stock === 0 ? t('product.out_of_stock') : t('cart.add_to_cart')}
+              {product.stock === 0 ? 'En rupture de stock' : 'Ajouter au panier'}
             </Button>
              <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
                 <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
@@ -222,8 +220,8 @@ function ProductDetails({ productId }: { productId: string }) {
           </div>
            <p className="text-sm text-muted-foreground mt-2">
             {product.stock > 0 
-                ? `${t('product.stock_available')} ${product.stock}`
-                : t('product.out_of_stock_long')
+                ? `En stock: ${product.stock} unités disponibles`
+                : 'Ce produit est actuellement en rupture de stock.'
             }
            </p>
         </div>
@@ -234,7 +232,7 @@ function ProductDetails({ productId }: { productId: string }) {
 
     {relatedProducts && relatedProducts.length > 0 && (
     <div className="container mt-16 md:mt-24 pb-12">
-        <ProductGrid title={t('product.related_products')} products={relatedProducts} />
+        <ProductGrid title="Produits similaires" products={relatedProducts} />
     </div>
     )}
     </>

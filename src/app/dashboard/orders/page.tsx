@@ -3,7 +3,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useLanguage } from '@/hooks/use-language';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,18 +24,33 @@ import { useOrders } from '@/hooks/use-orders';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
+const statusTranslations: { [key: string]: string } = {
+    pending: 'En attente',
+    confirmed: 'Confirmée',
+    shipped: 'Expédiée',
+    delivered: 'Livrée',
+    cancelled: 'Annulée',
+};
+const markAsTranslations: { [key: string]: string } = {
+    pending: 'Marquer comme En attente',
+    confirmed: 'Marquer como Confirmée',
+    shipped: 'Marquer comme Expédiée',
+    delivered: 'Marquer comme Livrée',
+    cancelled: 'Marquer comme Annulée',
+};
+
+
 function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoading: boolean }) {
-    const { t, locale } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+        return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
 
     const getStatusVariant = (status: string) => {
@@ -57,8 +71,8 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
         updateDoc(orderRef, updateData)
             .then(() => {
                 toast({
-                    title: t('dashboard.orders.status_updated_title'),
-                    description: `${t('dashboard.orders.status_updated_desc_1')} ${order.id.slice(-6)} ${t('dashboard.orders.status_updated_desc_2')} ${t(`orders.status_types.${newStatus.toLowerCase()}`)}`,
+                    title: 'Statut de la commande mis à jour',
+                    description: `La commande ...${order.id.slice(-6)} est maintenant ${statusTranslations[newStatus.toLowerCase()]}.`,
                 });
             })
             .catch(error => {
@@ -76,18 +90,18 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
     return (
         <Card>
             <CardHeader>
-                <CardTitle className='font-headline text-3xl'>{t('dashboard.nav.orders')}</CardTitle>
-                <CardDescription>{t('dashboard.orders.description')}</CardDescription>
+                <CardTitle className='font-headline text-3xl'>Commandes</CardTitle>
+                <CardDescription>Gérez toutes les commandes des clients.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>{t('orders.order_id')}</TableHead>
-                            <TableHead>{t('dashboard.orders.customer')}</TableHead>
-                            <TableHead>{t('orders.date')}</TableHead>
-                            <TableHead>{t('orders.status')}</TableHead>
-                            <TableHead className="text-right">{t('orders.total')}</TableHead>
+                            <TableHead>ID de commande</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
                             <TableHead><span className="sr-only">Actions</span></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -108,7 +122,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                                 <TableCell>{order.shippingAddress.split(',')[0]}</TableCell>
                                 <TableCell>{formatDate(order.orderDate)}</TableCell>
                                 <TableCell>
-                                    <Badge variant={getStatusVariant(order.status)}>{t(`orders.status_types.${order.status.toLowerCase()}`)}</Badge>
+                                    <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                                 <TableCell className="text-right">
@@ -116,23 +130,23 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                                         <DropdownMenuTrigger asChild>
                                             <Button aria-haspopup="true" size="icon" variant="ghost">
                                                 <MoreHorizontal className="h-4 w-4" />
-                                                <span className="sr-only">{t('dashboard.toggle_menu')}</span>
+                                                <span className="sr-only">Ouvrir le menu</span>
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>{t('dashboard.orders.actions')}</DropdownMenuLabel>
+                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                             <DropdownMenuItem asChild>
-                                                <Link href={`/dashboard/orders/${order.id}`}>{t('dashboard.orders.view_details')}</Link>
+                                                <Link href={`/dashboard/orders/${order.id}`}>Voir les détails</Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuLabel>{t('dashboard.orders.change_status')}</DropdownMenuLabel>
+                                            <DropdownMenuLabel>Changer le statut</DropdownMenuLabel>
                                             {orderStatuses.map(status => (
                                                 <DropdownMenuItem
                                                     key={status}
                                                     disabled={order.status === status}
                                                     onClick={() => handleStatusChange(order, status)}
                                                 >
-                                                    {t('dashboard.orders.mark_as')} {t(`orders.status_types.${status.toLowerCase()}`)}
+                                                    {markAsTranslations[status.toLowerCase()]}
                                                 </DropdownMenuItem>
                                             ))}
                                         </DropdownMenuContent>
@@ -144,7 +158,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                 </Table>
                 {!isLoading && orders?.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        {t('orders.no_orders_found')}
+                        Aucune commande trouvée.
                     </div>
                 )}
             </CardContent>
@@ -153,15 +167,13 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
 }
 
 function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoading: boolean }) {
-    const { t, locale } = useLanguage();
-    
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+        return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
 
      const getStatusVariant = (status: string) => {
@@ -178,17 +190,17 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
     return (
          <Card>
             <CardHeader>
-                <CardTitle className='font-headline text-3xl'>{t('nav.my_orders')}</CardTitle>
-                <CardDescription>{t('orders.my_orders_desc')}</CardDescription>
+                <CardTitle className='font-headline text-3xl'>Mes commandes</CardTitle>
+                <CardDescription>Consultez l'historique de vos commandes.</CardDescription>
             </CardHeader>
             <CardContent>
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>{t('orders.order_id')}</TableHead>
-                            <TableHead>{t('orders.date')}</TableHead>
-                            <TableHead>{t('orders.status')}</TableHead>
-                            <TableHead className="text-right">{t('orders.total')}</TableHead>
+                            <TableHead>ID de commande</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
                             <TableHead><span className="sr-only">Actions</span></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -207,12 +219,12 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
                                 <TableCell className="font-mono text-sm text-muted-foreground">...{order.id.slice(-12)}</TableCell>
                                 <TableCell>{formatDate(order.orderDate)}</TableCell>
                                 <TableCell>
-                                     <Badge variant={getStatusVariant(order.status)}>{t(`orders.status_types.${order.status.toLowerCase()}`)}</Badge>
+                                     <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                                 <TableCell className="text-right">
                                     <Button asChild variant="outline" size="sm">
-                                        <Link href={`/dashboard/orders/${order.id}`}>{t('dashboard.orders.view_details')}</Link>
+                                        <Link href={`/dashboard/orders/${order.id}`}>Voir les détails</Link>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -221,7 +233,7 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
                 </Table>
                 {!isLoading && orders?.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        {t('orders.no_orders_yet')}
+                        Vous n'avez pas encore passé de commande.
                     </div>
                 )}
             </CardContent>

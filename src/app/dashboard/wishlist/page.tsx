@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/placeholder-data';
@@ -12,7 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HeartCrack } from 'lucide-react';
 
 export default function WishlistPage() {
-    const { t } = useLanguage();
     const firestore = useFirestore();
     const { wishlist, isWishlistLoading } = useWishlist();
 
@@ -35,8 +33,8 @@ export default function WishlistPage() {
         <div className="container py-8 md:py-12">
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline text-3xl'>{t('nav.my_wishlist')}</CardTitle>
-                    <CardDescription>{t('wishlist.description')}</CardDescription>
+                    <CardTitle className='font-headline text-3xl'>Ma liste de souhaits</CardTitle>
+                    <CardDescription>Vos produits préférés, tous au même endroit.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -52,8 +50,8 @@ export default function WishlistPage() {
                             ) : (
                                 <div className="text-center p-16 text-muted-foreground flex flex-col items-center gap-4">
                                     <HeartCrack className="h-16 w-16" />
-                                    <p className="text-lg font-medium">{t('wishlist.empty_title')}</p>
-                                    <p>{t('wishlist.empty_desc')}</p>
+                                    <p className="text-lg font-medium">Votre liste de souhaits est vide</p>
+                                    <p>Ajoutez des produits que vous aimez pour les retrouver facilement plus tard.</p>
                                 </div>
                             )}
                         </>

@@ -17,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -29,20 +28,15 @@ import { addDoc, collection } from 'firebase/firestore';
 
 
 const formSchema = z.object({
-  nameAr: z.string().min(2, { message: 'Arabic name must be at least 2 characters.' }),
-  nameEn: z.string().min(2, { message: 'English name must be at least 2 characters.' }),
-  nameFr: z.string().min(2, { message: 'French name must be at least 2 characters.' }),
-  descriptionAr: z.string().optional(),
-  descriptionEn: z.string().optional(),
-  descriptionFr: z.string().optional(),
-  price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
-  stock: z.coerce.number().int().min(0, { message: 'Stock cannot be negative.' }),
-  categoryId: z.string({ required_error: 'Please select a category.' }),
+  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
+  description: z.string().optional(),
+  price: z.coerce.number().positive({ message: 'Le prix doit être un nombre positif.' }),
+  stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
+  categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
   discount: z.coerce.number().int().min(0).max(100).optional().default(0),
 });
 
 export default function NewProductPage() {
-  const { t, locale } = useLanguage();
   const { categories, areCategoriesLoading } = useCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -52,12 +46,8 @@ export default function NewProductPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nameAr: '',
-      nameEn: '',
-      nameFr: '',
-      descriptionAr: '',
-      descriptionEn: '',
-      descriptionFr: '',
+      name: '',
+      description: '',
       price: 0,
       stock: 0,
       discount: 0,
@@ -68,16 +58,8 @@ export default function NewProductPage() {
     if (!firestore) return;
     setIsSaving(true);
     const productData = {
-        name: {
-            ar: values.nameAr,
-            en: values.nameEn,
-            fr: values.nameFr,
-        },
-        description: {
-            ar: values.descriptionAr || '',
-            en: values.descriptionEn || '',
-            fr: values.descriptionFr || '',
-        },
+        name: values.name,
+        description: values.description || '',
         price: values.price,
         stock: values.stock,
         categoryId: values.categoryId,
@@ -92,16 +74,12 @@ export default function NewProductPage() {
     addDoc(productsCollection, productData)
       .then(() => {
         toast({
-            title: t('dashboard.product_created_success'),
-            description: `${t('dashboard.product_created_desc')} ${values.nameEn}`,
+            title: 'Produit créé',
+            description: `Le produit "${values.name}" a été ajouté avec succès.`,
         });
         form.reset({
-            nameAr: '',
-            nameEn: '',
-            nameFr: '',
-            descriptionAr: '',
-            descriptionEn: '',
-            descriptionFr: '',
+            name: '',
+            description: '',
             price: 0,
             stock: 0,
             discount: 0,
@@ -124,12 +102,12 @@ export default function NewProductPage() {
   }
 
   const handleGenerateDescription = async () => {
-    const { nameAr, nameEn, nameFr, categoryId } = form.getValues();
-    if (!nameAr || !nameEn || !nameFr || !categoryId) {
+    const { name, categoryId } = form.getValues();
+    if (!name || !categoryId) {
       toast({
         variant: 'destructive',
-        title: t('dashboard.generation_error_title'),
-        description: t('dashboard.generation_error_desc'),
+        title: 'Erreur de génération',
+        description: 'Veuillez renseigner le nom et la catégorie du produit.',
       });
       return;
     }
@@ -138,27 +116,23 @@ export default function NewProductPage() {
     try {
       const category = categories?.find(c => c.id === categoryId);
       const result = await generateProductDescription({
-        productNameAr: nameAr,
-        productNameEn: nameEn,
-        productNameFr: nameFr,
-        productCategory: category?.name[locale] || '',
+        productName: name,
+        productCategory: category?.name || '',
         productDetails: '',
       });
       
-      if(result.descriptionAr) form.setValue('descriptionAr', result.descriptionAr);
-      if(result.descriptionEn) form.setValue('descriptionEn', result.descriptionEn);
-      if(result.descriptionFr) form.setValue('descriptionFr', result.descriptionFr);
+      if(result.description) form.setValue('description', result.description);
 
       toast({
-        title: t('dashboard.description_generated_success'),
+        title: 'Description générée avec succès',
       });
 
     } catch(error) {
       console.error("Failed to generate description:", error);
       toast({
         variant: 'destructive',
-        title: t('dashboard.generation_failed_title'),
-        description: t('dashboard.generation_failed_desc'),
+        title: 'Échec de la génération',
+        description: 'Impossible de générer une description pour le moment.',
       });
     } finally {
       setIsGenerating(false);
@@ -173,7 +147,7 @@ export default function NewProductPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.add_new_product')}</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">Ajouter un nouveau produit</h1>
       </div>
 
       <Form {...form}>
@@ -182,93 +156,38 @@ export default function NewProductPage() {
             <div className="lg:col-span-2 space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('dashboard.product_details')}</CardTitle>
+                  <CardTitle>Détails du produit</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="nameAr"
+                      name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('dashboard.product_name_ar')}</FormLabel>
+                          <FormLabel>Nom du produit</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('dashboard.product_name_placeholder')} {...field} />
+                            <Input placeholder="Nom du produit" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="nameEn"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('dashboard.product_name_en')}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t('dashboard.product_name_placeholder')} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nameFr"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('dashboard.product_name_fr')}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t('dashboard.product_name_placeholder')} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                   
                   <div className="space-y-2">
                     <div className='flex justify-between items-center'>
-                      <h3 className='text-sm font-medium'>{t('dashboard.product_description')}</h3>
+                      <h3 className='text-sm font-medium'>Description du produit</h3>
                       <Button type="button" size="sm" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating}>
                         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isGenerating ? t('dashboard.generating_description') : t('dashboard.generate_with_ai')}
+                        {isGenerating ? 'Génération...' : 'Générer avec l\'IA'}
                       </Button>
                     </div>
                      <FormField
                       control={form.control}
-                      name="descriptionAr"
+                      name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs text-muted-foreground">{t('dashboard.description_ar')}</FormLabel>
                           <FormControl>
-                            <Textarea placeholder={t('dashboard.description_placeholder')} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name="descriptionEn"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs text-muted-foreground">{t('dashboard.description_en')}</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder={t('dashboard.description_placeholder')} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name="descriptionFr"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs text-muted-foreground">{t('dashboard.description_fr')}</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder={t('dashboard.description_placeholder')} {...field} />
+                            <Textarea placeholder="Description du produit" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -281,7 +200,7 @@ export default function NewProductPage() {
             <div className="space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('dashboard.organization')}</CardTitle>
+                  <CardTitle>Organisation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
@@ -289,21 +208,21 @@ export default function NewProductPage() {
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('dashboard.category')}</FormLabel>
+                        <FormLabel>Catégorie</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={areCategoriesLoading}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={
                                 areCategoriesLoading 
-                                  ? t('dashboard.loading_categories') 
-                                  : t('dashboard.select_category_placeholder')
+                                  ? 'Chargement...' 
+                                  : 'Sélectionnez une catégorie'
                               } />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {categories?.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
-                                {category.name[locale]}
+                                {category.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -316,7 +235,7 @@ export default function NewProductPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('dashboard.pricing_stock')}</CardTitle>
+                  <CardTitle>Tarification & Stock</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <FormField
@@ -324,7 +243,7 @@ export default function NewProductPage() {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('dashboard.price')}</FormLabel>
+                        <FormLabel>Prix</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="100.00" {...field} />
                         </FormControl>
@@ -337,7 +256,7 @@ export default function NewProductPage() {
                     name="discount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('dashboard.discount_percentage')}</FormLabel>
+                        <FormLabel>Réduction (%)</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="10" {...field} />
                         </FormControl>
@@ -350,7 +269,7 @@ export default function NewProductPage() {
                     name="stock"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('dashboard.stock')}</FormLabel>
+                        <FormLabel>Stock</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="50" {...field} />
                         </FormControl>
@@ -364,11 +283,11 @@ export default function NewProductPage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/products">{t('dashboard.cancel')}</Link>
+                <Link href="/dashboard/products">Annuler</Link>
             </Button>
             <Button type="submit" disabled={isSaving} form='new-product-form'>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('dashboard.save_product')}
+                Enregistrer le produit
             </Button>
           </div>
         </form>

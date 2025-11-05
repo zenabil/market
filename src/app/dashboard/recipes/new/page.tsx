@@ -15,7 +15,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, PlusCircle, Trash2 } from 'lucide-react';
@@ -25,18 +24,14 @@ import { addDoc, collection } from 'firebase/firestore';
 
 
 const formSchema = z.object({
-  titleAr: z.string().min(2),
-  titleEn: z.string().min(2),
-  titleFr: z.string().min(2),
-  descriptionAr: z.string().optional(),
-  descriptionEn: z.string().optional(),
-  descriptionFr: z.string().optional(),
+  title: z.string().min(2),
+  description: z.string().optional(),
   image: z.string().url(),
   prepTime: z.coerce.number().int().min(0),
   cookTime: z.coerce.number().int().min(0),
   servings: z.coerce.number().int().min(1),
-  ingredients: z.array(z.object({ value: z.string().min(1, { message: "Ingredient can't be empty."}) })),
-  instructions: z.array(z.object({ value: z.string().min(1, { message: "Instruction can't be empty."}) })),
+  ingredients: z.array(z.object({ value: z.string().min(1, { message: "L'ingrédient ne peut pas être vide."}) })),
+  instructions: z.array(z.object({ value: z.string().min(1, { message: "L'instruction ne peut pas être vide."}) })),
 });
 
 function DynamicFieldArray({ control, name, label, buttonText }: { control: any, name: 'ingredients' | 'instructions', label: string, buttonText: string }) {
@@ -78,7 +73,6 @@ function DynamicFieldArray({ control, name, label, buttonText }: { control: any,
 }
 
 export default function NewRecipePage() {
-  const { t } = useLanguage();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
@@ -86,8 +80,8 @@ export default function NewRecipePage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      titleAr: '', titleEn: '', titleFr: '',
-      descriptionAr: '', descriptionEn: '', descriptionFr: '',
+      title: '',
+      description: '',
       image: 'https://picsum.photos/seed/' + Date.now() + '/1280/720',
       prepTime: 10, cookTime: 20, servings: 4,
       ingredients: [{ value: '' }],
@@ -99,8 +93,8 @@ export default function NewRecipePage() {
     if (!firestore) return;
     setIsSaving(true);
     const recipeData = {
-        title: { ar: values.titleAr, en: values.titleEn, fr: values.titleFr },
-        description: { ar: values.descriptionAr, en: values.descriptionEn, fr: values.descriptionFr },
+        title: values.title,
+        description: values.description,
         image: values.image,
         prepTime: values.prepTime,
         cookTime: values.cookTime,
@@ -112,7 +106,7 @@ export default function NewRecipePage() {
     const recipesCollection = collection(firestore, 'recipes');
     addDoc(recipesCollection, recipeData)
       .then(() => {
-        toast({ title: t('dashboard.recipes.created_success') });
+        toast({ title: 'Recette créée' });
         form.reset();
       })
       .catch(error => {
@@ -138,48 +132,32 @@ export default function NewRecipePage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.recipes.add_recipe')}</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">Ajouter une nouvelle recette</h1>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
-                <CardHeader><CardTitle>{t('dashboard.recipes.recipe_details')}</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Détails de la recette</CardTitle></CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField control={form.control} name="titleAr" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.recipes.title_ar')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="titleEn" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.recipes.title_en')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="titleFr" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.recipes.title_fr')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField control={form.control} name="descriptionAr" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.description_ar')}</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="descriptionEn" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.description_en')}</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="descriptionFr" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.description_fr')}</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
+                    <FormField control={form.control} name="title" render={({ field }) => (
+                        <FormItem><FormLabel>Titre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="description" render={({ field }) => (
+                        <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
                     <FormField control={form.control} name="image" render={({ field }) => (
-                        <FormItem><FormLabel>{t('dashboard.recipes.image_url')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>URL de l'image</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FormField control={form.control} name="prepTime" render={({ field }) => (
-                            <FormItem><FormLabel>{t('recipes.prep_time')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Temps de préparation (min)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="cookTime" render={({ field }) => (
-                            <FormItem><FormLabel>{t('recipes.cook_time')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Temps de cuisson (min)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="servings" render={({ field }) => (
-                            <FormItem><FormLabel>{t('recipes.servings')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Portions</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                 </CardContent>
@@ -187,15 +165,15 @@ export default function NewRecipePage() {
 
              <div className="grid md:grid-cols-2 gap-8">
                 <Card>
-                    <CardHeader><CardTitle>{t('recipes.ingredients')}</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Ingrédients</CardTitle></CardHeader>
                     <CardContent>
-                        <DynamicFieldArray control={form.control} name="ingredients" label={t('recipes.ingredients')} buttonText={t('dashboard.recipes.add_ingredient')} />
+                        <DynamicFieldArray control={form.control} name="ingredients" label="Ingrédients" buttonText="Ajouter un ingrédient" />
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader><CardTitle>{t('recipes.instructions')}</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Instructions</CardTitle></CardHeader>
                     <CardContent>
-                        <DynamicFieldArray control={form.control} name="instructions" label={t('recipes.instructions')} buttonText={t('dashboard.recipes.add_instruction')} />
+                        <DynamicFieldArray control={form.control} name="instructions" label="Instructions" buttonText="Ajouter une instruction" />
                     </CardContent>
                 </Card>
             </div>
@@ -203,11 +181,11 @@ export default function NewRecipePage() {
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/recipes">{t('dashboard.cancel')}</Link>
+                <Link href="/dashboard/recipes">Annuler</Link>
             </Button>
             <Button type="submit" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('dashboard.save_recipe')}
+                Enregistrer la recette
             </Button>
           </div>
         </form>
@@ -215,5 +193,3 @@ export default function NewRecipePage() {
     </div>
   );
 }
-
-    

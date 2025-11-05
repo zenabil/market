@@ -11,29 +11,28 @@ import {
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useLanguage } from '@/hooks/use-language';
 import Autoplay from "embla-carousel-autoplay";
+import Link from 'next/link';
 
 const slides = [
   {
     id: 'hero-1',
-    headingKey: 'hero.slide1_heading',
-    subheadingKey: 'hero.slide1_subheading',
+    heading: 'Produits Frais, Directement à Votre Porte',
+    subheading: 'Découvrez notre sélection de fruits, légumes et produits locaux de première qualité.',
   },
   {
     id: 'hero-2',
-    headingKey: 'hero.slide2_heading',
-    subheadingKey: 'hero.slide2_subheading',
+    heading: 'Des Offres Incontournables Chaque Semaine',
+    subheading: 'Économisez sur vos marques préférées avec nos promotions exclusives.',
   },
   {
     id: 'hero-3',
-    headingKey: 'hero.slide3_heading',
-    subheadingKey: 'hero.slide3_subheading',
+    heading: 'La Boulangerie, Comme à la Maison',
+    subheading: 'Goûtez à nos pains et pâtisseries artisanales, préparés chaque jour.',
   },
 ];
 
 export default function HeroCarousel() {
-  const { t } = useLanguage();
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
@@ -66,13 +65,13 @@ export default function HeroCarousel() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
                   <div className="container">
                     <h1 className="font-headline text-3xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg">
-                      {t(slide.headingKey)}
+                      {slide.heading}
                     </h1>
                     <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-neutral-200 drop-shadow">
-                      {t(slide.subheadingKey)}
+                      {slide.subheading}
                     </p>
-                    <Button size="lg" className="mt-8 font-bold text-base">
-                      {t('hero.shop_now')}
+                    <Button size="lg" className="mt-8 font-bold text-base" asChild>
+                      <Link href="/products">Acheter maintenant</Link>
                     </Button>
                   </div>
                 </div>

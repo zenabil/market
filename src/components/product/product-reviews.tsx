@@ -7,7 +7,6 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -20,12 +19,11 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 const reviewSchema = z.object({
-  comment: z.string().min(10, 'Comment must be at least 10 characters.'),
-  rating: z.number().min(1, 'Rating is required.').max(5),
+  comment: z.string().min(10, 'Le commentaire doit comporter au moins 10 caractères.'),
+  rating: z.number().min(1, 'Une note est requise.').max(5),
 });
 
 const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewAdded: () => void }) => {
-  const { t } = useLanguage();
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -43,7 +41,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
     
     const reviewData = {
         userId: user.uid,
-        userName: user.displayName || 'Anonymous',
+        userName: user.displayName || 'Anonyme',
         userAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`,
         rating: values.rating,
         comment: values.comment,
@@ -53,7 +51,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
     const reviewsCollection = collection(firestore, 'products', productId, 'reviews');
     addDoc(reviewsCollection, reviewData)
       .then(() => {
-        toast({ title: t('product.reviews.submit_success_title') });
+        toast({ title: 'Avis soumis avec succès' });
         form.reset({ comment: '', rating: 0 });
         onReviewAdded();
       })
@@ -72,8 +70,8 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   if (!user) {
     return (
         <div className="p-4 border-dashed border-2 rounded-lg text-center bg-muted/50">
-            <p className="text-muted-foreground">{t('product.reviews.login_prompt')}</p>
-            <Button asChild variant="link"><Link href="/login">{t('auth.login')}</Link></Button>
+            <p className="text-muted-foreground">Veuillez vous connecter pour laisser un avis.</p>
+            <Button asChild variant="link"><Link href="/login">Se connecter</Link></Button>
         </div>
     )
   }
@@ -97,7 +95,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Textarea placeholder={t('product.reviews.comment_placeholder')} {...field} />
+                <Textarea placeholder="Partagez votre avis sur le produit..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,7 +103,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
         />
         <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('product.reviews.submit_button')}
+            Soumettre l'avis
         </Button>
       </form>
     </Form>
@@ -113,9 +111,8 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
 };
 
 const ReviewItem = ({ review }: { review: Review }) => {
-    const { t, locale } = useLanguage();
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     return (
@@ -137,7 +134,6 @@ const ReviewItem = ({ review }: { review: Review }) => {
 }
 
 export default function ProductReviews({ productId }: { productId: string }) {
-  const { t } = useLanguage();
   const firestore = useFirestore();
   const [key, setKey] = useState(0);
 
@@ -158,11 +154,11 @@ export default function ProductReviews({ productId }: { productId: string }) {
     <div className="bg-muted/40 py-12 md:py-16">
       <div className="container grid md:grid-cols-2 gap-12">
         <div>
-          <h3 className="font-headline text-2xl md:text-3xl mb-6">{t('product.reviews.write_review_title')}</h3>
+          <h3 className="font-headline text-2xl md:text-3xl mb-6">Laisser un avis</h3>
           <ReviewForm productId={productId} onReviewAdded={handleReviewAdded} />
         </div>
         <div>
-          <h3 className="font-headline text-2xl md:text-3xl mb-6">{t('product.reviews.customer_reviews_title')}</h3>
+          <h3 className="font-headline text-2xl md:text-3xl mb-6">Avis des clients</h3>
           <div className="space-y-6">
             {isLoading && Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="flex gap-4">
@@ -177,7 +173,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
             {!isLoading && reviews && reviews.length > 0 ? (
               reviews.map((review) => <ReviewItem key={review.id} review={review} />)
             ) : (
-              <p className="text-muted-foreground">{t('product.reviews.no_reviews')}</p>
+              <p className="text-muted-foreground">Aucun avis pour ce produit pour le moment.</p>
             )}
           </div>
         </div>

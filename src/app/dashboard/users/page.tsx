@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -28,7 +27,6 @@ import { Label } from '@/components/ui/label';
 import { useUserRole } from '@/hooks/use-user-role';
 
 function LoyaltyDialog({ user }: { user: FirestoreUser }) {
-  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -45,8 +43,8 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
     updateDoc(userRef, updateData)
       .then(() => {
         toast({
-          title: t('dashboard.users.loyalty_updated_title'),
-          description: `${user.name} ${t('dashboard.users.loyalty_updated_desc')} ${points}`,
+          title: 'Points de fidélité mis à jour',
+          description: `${user.name} a maintenant ${points} points.`,
         });
         setIsOpen(false);
       })
@@ -74,10 +72,10 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{`${t('dashboard.users.edit_loyalty_title')} ${user.name}`}</DialogTitle>
+          <DialogTitle>{`Modifier les points de fidélité de ${user.name}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="loyaltyPoints">{t('dashboard.loyalty.points')}</Label>
+          <Label htmlFor="loyaltyPoints">Points de fidélité</Label>
           <Input 
             id="loyaltyPoints"
             type="number"
@@ -87,11 +85,11 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+            <Button type="button" variant="outline">Annuler</Button>
           </DialogClose>
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('dashboard.save_changes')}
+            Enregistrer les modifications
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -101,7 +99,6 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
 
 
 function AdminSwitch({ user }: { user: FirestoreUser }) {
-  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   
@@ -131,8 +128,8 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
       })
       .then(() => {
         toast({
-          title: t('dashboard.users.role_updated_title'),
-          description: `${user.name} ${t('dashboard.users.role_updated_desc_1')} ${newAdminStatus ? t('dashboard.users.admin') : t('dashboard.users.user_role')}`,
+          title: 'Rôle mis à jour',
+          description: `${user.name} est maintenant ${newAdminStatus ? 'Admin' : 'Utilisateur'}.`,
         });
       })
       .catch(error => {
@@ -157,14 +154,13 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
             aria-label={`Toggle admin status for ${user.name}`}
             disabled={isLoading}
         />
-        <span>{isAdmin ? <Badge variant="secondary">{t('dashboard.users.admin')}</Badge> : t('dashboard.users.user_role')}</span>
+        <span>{isAdmin ? <Badge variant="secondary">Admin</Badge> : 'Utilisateur'}</span>
     </div>
   );
 }
 
 
 export default function UsersPage() {
-  const { t, locale } = useLanguage();
   const firestore = useFirestore();
   const { isAdmin, isRoleLoading } = useUserRole();
 
@@ -177,7 +173,7 @@ export default function UsersPage() {
   const { data: users, isLoading: areUsersLoading } = useCollection<FirestoreUser>(usersQuery);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -185,7 +181,7 @@ export default function UsersPage() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString(locale, {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -198,20 +194,20 @@ export default function UsersPage() {
     <div className="container py-8 md:py-12">
       <Card>
         <CardHeader>
-          <CardTitle className='font-headline text-3xl'>{t('dashboard.nav.users')}</CardTitle>
-          <CardDescription>{t('dashboard.users.description')}</CardDescription>
+          <CardTitle className='font-headline text-3xl'>Utilisateurs</CardTitle>
+          <CardDescription>Gérez les utilisateurs et leurs permissions.</CardDescription>
         </CardHeader>
         <CardContent>
            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('dashboard.users.user')}</TableHead>
-                  <TableHead>{t('dashboard.users.role')}</TableHead>
-                  <TableHead>{t('dashboard.users.registration_date')}</TableHead>
-                  <TableHead>{t('dashboard.users.orders')}</TableHead>
-                  <TableHead>{t('dashboard.users.total_spent')}</TableHead>
-                  <TableHead>{t('dashboard.loyalty.points')}</TableHead>
-                   <TableHead className="text-right">{t('dashboard.actions')}</TableHead>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead>Rôle</TableHead>
+                  <TableHead>Date d'inscription</TableHead>
+                  <TableHead>Commandes</TableHead>
+                  <TableHead>Total dépensé</TableHead>
+                  <TableHead>Points de fidélité</TableHead>
+                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -269,7 +265,7 @@ export default function UsersPage() {
             </Table>
             {!isLoading && users?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
-                    {t('dashboard.no_users_found')}
+                    Aucun utilisateur trouvé.
                 </div>
             )}
         </CardContent>

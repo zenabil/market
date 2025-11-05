@@ -2,7 +2,6 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/contexts/theme-provider';
-import { LanguageProvider } from '@/contexts/language-provider';
 import { CartProvider } from '@/contexts/cart-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
@@ -23,7 +22,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   let siteName = 'Tlemcen Smart Supermarket';
-  let siteDescription = 'Your local supermarket in Tlemcen, now online with smart features.';
+  let siteDescription = 'Votre supermarché local à Tlemcen, maintenant en ligne avec des fonctionnalités intelligentes.';
 
   try {
     const db = getFirestore();
@@ -54,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" dir="ltr" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -63,7 +62,6 @@ export default function RootLayout({
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-muted/40')}>
         <FirebaseClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <LanguageProvider>
               <CartProvider>
                 <Header />
                 <main className="flex-grow">{children}</main>
@@ -71,7 +69,6 @@ export default function RootLayout({
                 <Toaster />
                 <AiChatbot />
               </CartProvider>
-            </LanguageProvider>
           </ThemeProvider>
         </FirebaseClientProvider>
       </body>

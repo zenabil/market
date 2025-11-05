@@ -52,11 +52,11 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
       const productRef = doc(db, 'products', item.id);
       const productDoc = await transaction.get(productRef);
       if (!productDoc.exists()) {
-        throw new Error(`Product ${item.name.en} not found.`);
+        throw new Error(`Product ${item.name} not found.`);
       }
       const currentStock = productDoc.data().stock;
       if (currentStock < item.quantity) {
-        throw new Error(`Not enough stock for ${item.name.en}. Available: ${currentStock}, Requested: ${item.quantity}`);
+        throw new Error(`Not enough stock for ${item.name}. Available: ${currentStock}, Requested: ${item.quantity}`);
       }
     }
     

@@ -7,14 +7,8 @@
       "description": "Represents a product available in the Tlemcen Smart Supermarket.",
       "properties": {
         "name": {
-          "type": "object",
-          "description": "Product name in multiple languages.",
-          "properties": {
-            "ar": { "type": "string" },
-            "fr": { "type": "string" },
-            "en": { "type": "string" }
-          },
-          "required": ["ar", "fr", "en"]
+          "type": "string",
+          "description": "Product name in French."
         },
         "price": {
           "type": "number",
@@ -44,13 +38,8 @@
           "description": "Barcode for the product."
         },
         "description": {
-          "type": "object",
-          "description": "Product description in multiple languages.",
-          "properties": {
-            "ar": { "type": "string" },
-            "fr": { "type": "string" },
-            "en": { "type": "string" }
-          }
+          "type": "string",
+          "description": "Product description in French."
         },
         "sold": {
           "type": "number",
@@ -87,22 +76,8 @@
       "description": "Represents a category of products. The document ID is the category's unique identifier.",
       "properties": {
         "name": {
-          "type": "object",
-          "properties": {
-             "ar": {
-              "type": "string",
-              "description": "Category name in Arabic."
-            },
-            "fr": {
-              "type": "string",
-              "description": "Category name in French."
-            },
-            "en": {
-              "type": "string",
-              "description": "Category name in English."
-            }
-          },
-          "required": ["ar", "fr", "en"]
+          "type": "string",
+          "description": "Category name in French."
         },
         "image": {
           "type": "string",
@@ -146,7 +121,7 @@
         },
         "preferredLanguage": {
           "type": "string",
-          "description": "User's preferred language (ar, fr, en)."
+          "description": "User's preferred language (fr)."
         },
         "role": {
           "type": "string",
@@ -225,13 +200,8 @@
                 "description": "Reference to the Product."
               },
               "productName": {
-                "type": "object",
-                "description": "Denormalized product name for display purposes.",
-                "properties": {
-                  "ar": { "type": "string" },
-                  "fr": { "type": "string" },
-                  "en": { "type": "string" }
-                }
+                "type": "string",
+                "description": "Denormalized product name for display purposes."
               },
               "quantity": {
                 "type": "number",
@@ -415,21 +385,10 @@
         "description": "Represents a cooking recipe.",
         "properties": {
             "title": {
-                "type": "object",
-                "properties": {
-                    "ar": { "type": "string" },
-                    "fr": { "type": "string" },
-                    "en": { "type": "string" }
-                },
-                "required": ["ar", "fr", "en"]
+                "type": "string"
             },
             "description": {
-                "type": "object",
-                "properties": {
-                    "ar": { "type": "string" },
-                    "fr": { "type": "string" },
-                    "en": { "type": "string" }
-                }
+                "type": "string"
             },
             "image": {
                 "type": "string",

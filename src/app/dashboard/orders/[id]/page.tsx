@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { notFound, useParams, useRouter } from 'next/navigation';
-import { useLanguage } from '@/hooks/use-language';
 import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection, useCollectionGroup } from '@/firebase';
 import { doc, collection, query, where, documentId, collectionGroup } from 'firebase/firestore';
 import type { Order, Product } from '@/lib/placeholder-data';
@@ -17,7 +16,6 @@ import Image from 'next/image';
 
 function OrderDetails() {
     const { id: orderId } = useParams();
-    const { t, locale } = useLanguage();
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
@@ -58,12 +56,20 @@ function OrderDetails() {
     }, [user, isUserLoading, router]);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+        return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    };
+    
+    const statusTranslations: { [key: string]: string } = {
+        pending: 'En attente',
+        confirmed: 'Confirmée',
+        shipped: 'Expédiée',
+        delivered: 'Livrée',
+        cancelled: 'Annulée',
     };
 
     const getStatusVariant = (status: string) => {
@@ -112,9 +118,9 @@ function OrderDetails() {
                 </Link>
                 </Button>
                 <div>
-                    <h1 className="font-headline text-3xl md:text-4xl">{t('orders.order_details')}</h1>
+                    <h1 className="font-headline text-3xl md:text-4xl">Détails de la commande</h1>
                      <p className="text-muted-foreground font-mono text-sm">
-                        {t('orders.order_id')}: {order.id}
+                        ID de commande: {order.id}
                     </p>
                 </div>
             </div>
@@ -123,7 +129,7 @@ function OrderDetails() {
                 <div className="md:col-span-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><Package /> {t('orders.order_items')}</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><Package /> Articles de la commande</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -133,12 +139,12 @@ function OrderDetails() {
                                         <div key={item.productId} className="flex justify-between items-center">
                                             <div className='flex items-center gap-4'>
                                                  <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 relative overflow-hidden">
-                                                    {product && <Image src={product.images[0]} alt={product.name[locale]} fill className="object-cover" />}
+                                                    {product && <Image src={product.images[0]} alt={product.name} fill className="object-cover" />}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">{item.productName[locale]}</p>
+                                                    <p className="font-medium">{item.productName}</p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        {t('checkout.quantity')}: {item.quantity} x {formatCurrency(item.price)}
+                                                        Quantité: {item.quantity} x {formatCurrency(item.price)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -153,29 +159,29 @@ function OrderDetails() {
                 <div>
                      <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><FileText/> {t('checkout.order_summary')}</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><FileText/> Résumé de la commande</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">{t('orders.order_id')}</span>
+                                <span className="text-muted-foreground">ID de commande</span>
                                 <span className="font-mono text-sm">...{order.id.slice(-12)}</span>
                             </div>
                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">{t('orders.date')}</span>
+                                <span className="text-muted-foreground">Date</span>
                                 <span>{formatDate(order.orderDate)}</span>
                             </div>
                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">{t('orders.status')}</span>
-                                <Badge variant={getStatusVariant(order.status)}>{t(`orders.status_types.${order.status.toLowerCase()}`)}</Badge>
+                                <span className="text-muted-foreground">Statut</span>
+                                <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
                             </div>
                             <Separator />
                             <div className="flex justify-between font-bold text-lg">
-                                <span>{t('checkout.total')}</span>
+                                <span>Total</span>
                                 <span>{formatCurrency(order.totalAmount)}</span>
                             </div>
                              <Separator />
                              <div>
-                                 <h4 className="font-semibold mb-2">{t('checkout.shipping_info')}</h4>
+                                 <h4 className="font-semibold mb-2">Informations de livraison</h4>
                                  <p className='text-sm text-muted-foreground'>{order.shippingAddress}</p>
                              </div>
                         </CardContent>

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,7 +14,6 @@ import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function DiscountRow({ product }: { product: Product }) {
-    const { locale, t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [discount, setDiscount] = React.useState(product.discount || 0);
@@ -31,8 +29,8 @@ function DiscountRow({ product }: { product: Product }) {
         if (discount < 0 || discount > 100) {
             toast({
                 variant: 'destructive',
-                title: t('dashboard.discounts.invalid_discount_title'),
-                description: t('dashboard.discounts.invalid_discount_desc'),
+                title: 'Réduction invalide',
+                description: 'Le pourcentage de réduction doit être compris entre 0 et 100.',
             });
             return;
         }
@@ -41,8 +39,8 @@ function DiscountRow({ product }: { product: Product }) {
         updateDoc(productRef, updateData)
             .then(() => {
                 toast({
-                    title: t('dashboard.discounts.discount_updated_title'),
-                    description: t('dashboard.discounts.discount_updated_desc', { productName: product.name[locale], discount: discount }),
+                    title: 'Réduction mise à jour',
+                    description: `La réduction pour ${product.name} est maintenant de ${discount}%.`,
                 });
             })
             .catch(error => {
@@ -66,8 +64,8 @@ function DiscountRow({ product }: { product: Product }) {
         updateDoc(productRef, updateData)
           .then(() => {
             toast({
-                title: t('dashboard.discounts.discount_removed_title'),
-                description: t('dashboard.discounts.discount_removed_desc', { productName: product.name[locale] }),
+                title: 'Réduction supprimée',
+                description: `La réduction pour ${product.name} a été supprimée.`,
             });
           })
           .catch(error => {
@@ -83,7 +81,7 @@ function DiscountRow({ product }: { product: Product }) {
     }
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const originalPrice = product.price;
@@ -91,7 +89,7 @@ function DiscountRow({ product }: { product: Product }) {
 
     return (
         <TableRow>
-            <TableCell className="font-medium">{product.name[locale]}</TableCell>
+            <TableCell className="font-medium">{product.name}</TableCell>
             <TableCell>
                 <span className={cn("text-muted-foreground", product.discount > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
             </TableCell>
@@ -113,7 +111,7 @@ function DiscountRow({ product }: { product: Product }) {
             </TableCell>
             <TableCell className="text-right space-x-2">
                 <Button size="sm" onClick={handleUpdateDiscount} disabled={discount === (product.discount || 0)}>
-                    {t('dashboard.discounts.update')}
+                    Mettre à jour
                 </Button>
                  {product.discount > 0 && (
                     <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
@@ -126,7 +124,6 @@ function DiscountRow({ product }: { product: Product }) {
 }
 
 export default function DiscountsPage() {
-    const { t } = useLanguage();
     const firestore = useFirestore();
 
     const allProductsQuery = useMemoFirebase(() => {
@@ -140,18 +137,18 @@ export default function DiscountsPage() {
         <div className="container py-8 md:py-12">
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline text-3xl'>{t('dashboard.nav.discounts')}</CardTitle>
-                    <CardDescription>{t('dashboard.discounts.description')}</CardDescription>
+                    <CardTitle className='font-headline text-3xl'>Réductions</CardTitle>
+                    <CardDescription>Gérez les réductions pour chaque produit.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>{t('dashboard.product')}</TableHead>
-                                <TableHead>{t('dashboard.discounts.original_price')}</TableHead>
-                                <TableHead>{t('dashboard.discounts.discounted_price')}</TableHead>
-                                <TableHead>{t('dashboard.discount_percentage')}</TableHead>
-                                <TableHead className="text-right">{t('dashboard.actions')}</TableHead>
+                                <TableHead>Produit</TableHead>
+                                <TableHead>Prix original</TableHead>
+                                <TableHead>Prix réduit</TableHead>
+                                <TableHead>Réduction (%)</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -171,7 +168,7 @@ export default function DiscountsPage() {
                     </Table>
                     {!isLoading && products?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
-                            {t('dashboard.no_products_found')}
+                            Aucun produit trouvé.
                         </div>
                     )}
                 </CardContent>

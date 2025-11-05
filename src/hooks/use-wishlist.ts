@@ -5,10 +5,8 @@ import type { WishlistItem } from "@/lib/placeholder-data";
 import { collection, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { useCallback } from "react";
 import { useToast } from "./use-toast";
-import { useLanguage } from "./use-language";
 
 export function useWishlist() {
-    const { t } = useLanguage();
     const { toast } = useToast();
     const { user } = useUser();
     const firestore = useFirestore();
@@ -30,7 +28,7 @@ export function useWishlist() {
             deleteDoc(wishlistItemRef)
                 .then(() => {
                     toast({
-                        title: t('wishlist.removed_title'),
+                        title: 'Retiré de la liste de souhaits',
                     });
                 })
                 .catch(err => {
@@ -47,7 +45,7 @@ export function useWishlist() {
             setDoc(wishlistItemRef, newItem)
                 .then(() => {
                     toast({
-                        title: t('wishlist.added_title'),
+                        title: 'Ajouté à la liste de souhaits',
                     });
                 })
                 .catch(err => {
@@ -58,7 +56,7 @@ export function useWishlist() {
                     }));
                 });
         }
-    }, [user, firestore, wishlist, t, toast]);
+    }, [user, firestore, wishlist, toast]);
     
     return { wishlist, isWishlistLoading, error, toggleWishlist };
 }

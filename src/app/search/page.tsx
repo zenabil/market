@@ -3,14 +3,12 @@
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense } from 'react';
 import ProductGrid from '@/components/product/product-grid';
-import { useLanguage } from '@/hooks/use-language';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function SearchResults() {
-  const { t, locale } = useLanguage();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const firestore = useFirestore();
@@ -28,12 +26,8 @@ function SearchResults() {
 
     const lowercasedQuery = searchQuery.toLowerCase();
     return products.filter(product => 
-      product.name.en.toLowerCase().includes(lowercasedQuery) ||
-      product.name.ar.toLowerCase().includes(lowercasedQuery) ||
-      product.name.fr.toLowerCase().includes(lowercasedQuery) ||
-      product.description.en?.toLowerCase().includes(lowercasedQuery) ||
-      product.description.ar?.toLowerCase().includes(lowercasedQuery) ||
-      product.description.fr?.toLowerCase().includes(lowercasedQuery)
+      product.name.toLowerCase().includes(lowercasedQuery) ||
+      product.description?.toLowerCase().includes(lowercasedQuery)
     );
   }, [products, searchQuery]);
 
@@ -42,11 +36,11 @@ function SearchResults() {
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">
-          {searchQuery ? `${t('search.results_for')} "${searchQuery}"` : t('search.title')}
+          {searchQuery ? `Résultats pour "${searchQuery}"` : 'Recherche de produits'}
         </h1>
         {filteredProducts && (
             <p className="mt-2 text-lg text-muted-foreground">
-                {`${filteredProducts.length} ${t('search.products_found')}`}
+                {`${filteredProducts.length} produits trouvés`}
             </p>
         )}
       </div>
@@ -62,7 +56,7 @@ function SearchResults() {
                  <ProductGrid title="" products={filteredProducts} />
             ) : (
                 <div className="text-center p-8 text-muted-foreground">
-                    {t('search.no_results')}
+                    Aucun résultat trouvé.
                 </div>
             )}
         </>
@@ -74,7 +68,7 @@ function SearchResults() {
 
 export default function SearchPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Chargement...</div>}>
             <SearchResults />
         </Suspense>
     )

@@ -3,7 +3,7 @@
 /**
  * @fileOverview AI flow to generate product descriptions for the Tlemcen Smart Supermarket.
  *
- * - generateProductDescription - A function that generates product descriptions.
+ * - generateProductDescription - A function that generates a product description.
  * - GenerateProductDescriptionInput - The input type for the generateProductDescription function.
  * - GenerateProductDescriptionOutput - The return type for the generateProductDescription function.
  */
@@ -12,18 +12,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateProductDescriptionInputSchema = z.object({
-  productNameAr: z.string().describe('The name of the product in Arabic.'),
-  productNameFr: z.string().describe('The name of the product in French.'),
-  productNameEn: z.string().describe('The name of the product in English.'),
+  productName: z.string().describe('The name of the product in French.'),
   productCategory: z.string().describe('The category of the product.'),
   productDetails: z.string().describe('Additional details about the product.'),
 });
 export type GenerateProductDescriptionInput = z.infer<typeof GenerateProductDescriptionInputSchema>;
 
 const GenerateProductDescriptionOutputSchema = z.object({
-  descriptionAr: z.string().describe('The generated product description in Arabic.'),
-  descriptionFr: z.string().describe('The generated product description in French.'),
-  descriptionEn: z.string().describe('The generated product description in English.'),
+  description: z.string().describe('The generated product description in French.'),
 });
 export type GenerateProductDescriptionOutput = z.infer<typeof GenerateProductDescriptionOutputSchema>;
 
@@ -37,20 +33,16 @@ const prompt = ai.definePrompt({
   name: 'generateProductDescriptionPrompt',
   input: {schema: GenerateProductDescriptionInputSchema},
   output: {schema: GenerateProductDescriptionOutputSchema},
-  prompt: `You are an expert copywriter for an online supermarket in Tlemcen, Algeria. Your task is to generate compelling and informative product descriptions in Arabic, French, and English.
+  prompt: `Vous êtes un expert en rédaction pour un supermarché en ligne à Tlemcen, en Algérie. Votre tâche est de générer une description de produit convaincante et informative en français.
 
-  Product Name (Arabic): {{productNameAr}}
-  Product Name (French): {{productNameFr}}
-  Product Name (English): {{productNameEn}}
-  Product Category: {{productCategory}}
-  Product Details: {{productDetails}}
+  Nom du produit: {{productName}}
+  Catégorie de produit: {{productCategory}}
+  Détails du produit: {{productDetails}}
 
-  Write a product description that highlights the key features and benefits of the product, tailored to customers in Tlemcen. Ensure the descriptions are engaging and optimized for online sales.
-  Respond in JSON format.
+  Rédigez une description de produit qui met en évidence les principales caractéristiques et avantages du produit, adaptée aux clients de Tlemcen. Assurez-vous que la description est attrayante et optimisée pour les ventes en ligne.
+  Répondez au format JSON.
   {
-    "descriptionAr": "",
-    "descriptionFr": "",
-    "descriptionEn": ""
+    "description": ""
   }`,
 });
 

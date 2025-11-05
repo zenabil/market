@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
@@ -12,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, Send, Bot, User, Loader2 } from 'lucide-react';
-import { useLanguage } from '@/hooks/use-language';
 import { aiSupportChatbot } from '@/ai/flows/ai-support-chatbot';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
@@ -24,7 +22,6 @@ type Message = {
 };
 
 export default function AiChatbot() {
-  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -55,7 +52,7 @@ export default function AiChatbot() {
       console.error("Chatbot error:", error);
       const errorMessage: Message = {
         id: `${Date.now()}-error`,
-        text: t('chatbot.error'),
+        text: 'Désolé, une erreur est survenue.',
         sender: 'bot',
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -73,15 +70,13 @@ export default function AiChatbot() {
       <DialogTrigger asChild>
         <Button className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg" size="icon">
           <MessageSquare className="h-8 w-8" />
-          <span className="sr-only">{t('chatbot.open')}</span>
+          <span className="sr-only">Ouvrir le chatbot</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] h-[70vh] flex flex-col p-0">
-        <DialogHeader className='p-6 pb-2'>
-          <DialogTitle className="font-headline text-2xl flex items-center gap-2">
-            <Bot /> {t('chatbot.title')}
-          </DialogTitle>
-        </DialogHeader>
+        <DialogTitle className="font-headline text-2xl flex items-center gap-2 p-6 pb-2">
+            <Bot /> Assistant IA
+        </DialogTitle>
         <ScrollArea className="flex-1 px-6">
           <div className="space-y-4">
             {messages.map(message => (
@@ -121,13 +116,13 @@ export default function AiChatbot() {
             <Input
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={t('chatbot.placeholder')}
+              placeholder="Posez une question..."
               className="flex-1"
               disabled={isLoading}
             />
             <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
               <Send className="h-4 w-4" />
-              <span className="sr-only">{t('chatbot.send')}</span>
+              <span className="sr-only">Envoyer</span>
             </Button>
           </form>
         </div>

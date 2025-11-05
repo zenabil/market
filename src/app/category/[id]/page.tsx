@@ -2,7 +2,6 @@
 
 import { notFound } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
-import { useLanguage } from '@/hooks/use-language';
 import { useCategories } from '@/hooks/use-categories';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
@@ -10,7 +9,6 @@ import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function CategoryDetails({ categoryId }: { categoryId: string }) {
-  const { t, locale } = useLanguage();
   const firestore = useFirestore();
   const { categories, areCategoriesLoading } = useCategories();
 
@@ -35,12 +33,12 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
         {isLoading || !category ? (
             <Skeleton className="h-14 w-1/2 mx-auto" />
         ) : (
-            <h1 className="font-headline text-4xl md:text-5xl">{category.name[locale]}</h1>
+            <h1 className="font-headline text-4xl md:text-5xl">{category.name}</h1>
         )}
         {isLoading || !category ? (
             <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
         ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{`${t('products.subtitle_category')} ${category.name[locale]}`}</p>
+            <p className="mt-2 text-lg text-muted-foreground">{`Découvrez nos produits dans la catégorie ${category.name}`}</p>
         )}
       </div>
       {isLoading ? (
@@ -55,7 +53,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
             <ProductGrid title="" products={products} />
           ) : (
              <div className="text-center p-8 text-muted-foreground">
-                {t('products.no_products_in_category')}
+                Aucun produit trouvé dans cette catégorie.
             </div>
           )}
         </>

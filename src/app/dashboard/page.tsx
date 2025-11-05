@@ -3,7 +3,6 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { useLanguage } from '@/hooks/use-language';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +13,6 @@ import { Loader2 } from 'lucide-react';
 import { useUserRole } from '@/hooks/use-user-role';
 
 function AdminDashboard() {
-  const { t, locale, direction } = useLanguage();
   const firestore = useFirestore();
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -43,16 +41,16 @@ function AdminDashboard() {
       .sort((a, b) => (b.sold || 0) - (a.sold || 0))
       .slice(0, 5)
       .map(p => ({
-        name: p.name[locale] || p.name.en,
+        name: p.name || '',
         sold: p.sold,
       }));
     
     return { totalRevenue, totalProductsSold, topSellingProducts, productsInStock: products.length };
-  }, [products, locale]);
+  }, [products]);
 
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -60,18 +58,18 @@ function AdminDashboard() {
   
   const chartConfig = {
     sold: {
-      label: t('dashboard.units_sold'),
+      label: 'Unités vendues',
       color: 'hsl(var(--primary))',
     },
   };
 
   return (
     <div className="container py-8 md:py-12">
-      <h1 className="font-headline text-3xl md:text-4xl mb-8">{t('dashboard.overview')}</h1>
+      <h1 className="font-headline text-3xl md:text-4xl mb-8">Aperçu</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.total_revenue')}</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenu total</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -91,7 +89,7 @@ function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.products_sold')}</CardTitle>
+            <CardTitle className="text-sm font-medium">Produits vendus</CardTitle>
              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -115,7 +113,7 @@ function AdminDashboard() {
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.products_in_stock')}</CardTitle>
+            <CardTitle className="text-sm font-medium">Produits en stock</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -143,7 +141,7 @@ function AdminDashboard() {
       <div className="mt-8">
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.top_selling_products')}</CardTitle>
+            <CardTitle>Meilleures ventes de produits</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -153,7 +151,7 @@ function AdminDashboard() {
             ) : stats.topSellingProducts.length > 0 ? (
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={stats.topSellingProducts} layout="vertical" dir={direction} margin={{ right: 20, left: 20 }}>
+                    <BarChart data={stats.topSellingProducts} layout="vertical" margin={{ right: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" allowDecimals={false} />
                     <YAxis
@@ -162,7 +160,7 @@ function AdminDashboard() {
                         width={150}
                         tickLine={false}
                         axisLine={false}
-                        tick={{ dx: direction === 'rtl' ? 5 : -5, fontSize: '12px' }}
+                        tick={{ dx: -5, fontSize: '12px' }}
                         interval={0}
                     />
                     <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
@@ -172,7 +170,7 @@ function AdminDashboard() {
                 </ChartContainer>
             ) : (
               <div className="text-center p-8 text-muted-foreground">
-                {t('dashboard.no_sales_data')}
+                Aucune donnée de vente disponible.
               </div>
             )}
           </CardContent>
@@ -183,7 +181,6 @@ function AdminDashboard() {
 }
 
 export default function DashboardPage() {
-    const { t } = useLanguage();
     const { user, isUserLoading } = useUser();
     const { isAdmin, isRoleLoading } = useUserRole();
     const router = useRouter();
@@ -205,7 +202,7 @@ export default function DashboardPage() {
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
                 <div className="flex items-center gap-2 text-muted-foreground">
                      <Loader2 className="h-6 w-6 animate-spin" />
-                     <p>{t('dashboard.loading_user_data')}</p>
+                     <p>Chargement des données utilisateur...</p>
                 </div>
             </div>
         );

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLanguage } from '@/hooks/use-language';
 import { useAuth, useUser, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -33,19 +31,18 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-const getSignupSchema = (t: (key: string) => string) => z.object({
-  name: z.string().min(2, { message: t('auth.name_min_length') }),
+const signupSchema = z.object({
+  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
   email: z.string().email(),
   password: z.string().min(6),
   confirmPassword: z.string().min(6),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: t('auth.passwords_dont_match'),
+  message: 'Les mots de passe ne correspondent pas.',
   path: ["confirmPassword"],
 });
 
 
 export default function LoginPage() {
-  const { t } = useLanguage();
   const auth = useAuth();
   const { user } = useUser();
   const router = useRouter();
@@ -58,7 +55,6 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
   
-  const signupSchema = getSignupSchema(t);
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -76,12 +72,12 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({ title: t('auth.login_success_title') });
+      toast({ title: 'Connexion réussie !' });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: t('auth.error_title'),
+        title: 'Erreur',
         description: error.message,
       });
       // Clear password field on failed login attempt
@@ -94,7 +90,7 @@ export default function LoginPage() {
   const handleSignup = async (values: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
     if (!firestore) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Firestore not available' });
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Firestore non disponible' });
       setIsLoading(false);
       return;
     }
@@ -110,7 +106,7 @@ export default function LoginPage() {
           name: values.name,
           email: newUser.email,
           role: 'User', // Default role is User
-          preferredLanguage: 'ar',
+          preferredLanguage: 'fr',
           registrationDate: new Date().toISOString(),
           orderCount: 0,
           totalSpent: 0,
@@ -138,7 +134,7 @@ export default function LoginPage() {
         }
       }
   
-      toast({ title: t('auth.signup_success_title') });
+      toast({ title: 'Inscription réussie !' });
       router.push('/dashboard');
     } catch (error: any) {
       // Handle primary account creation errors
@@ -151,14 +147,14 @@ export default function LoginPage() {
         errorEmitter.emit('permission-error', permissionError);
         toast({
             variant: 'destructive',
-            title: t('auth.error_title'),
-            description: t('auth.signup_profile_error'),
+            title: 'Erreur',
+            description: 'Erreur lors de la création du profil utilisateur.',
         });
       } else {
           // For other auth errors (like email-already-in-use), show a toast to the user.
           toast({
               variant: 'destructive',
-              title: t('auth.error_title'),
+              title: 'Erreur',
               description: error.message,
           });
       }
@@ -176,14 +172,14 @@ export default function LoginPage() {
         </div>
       <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-          <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
+          <TabsTrigger value="login">Connexion</TabsTrigger>
+          <TabsTrigger value="signup">Inscription</TabsTrigger>
         </TabsList>
         <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>{t('auth.login_title')}</CardTitle>
-              <CardDescription>{t('auth.login_desc')}</CardDescription>
+              <CardTitle>Connexion</CardTitle>
+              <CardDescription>Connectez-vous à votre compte pour continuer.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...loginForm}>
@@ -193,7 +189,7 @@ export default function LoginPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.email')}</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input type="email" {...field} />
                         </FormControl>
@@ -206,7 +202,7 @@ export default function LoginPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.password')}</FormLabel>
+                        <FormLabel>Mot de passe</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -216,7 +212,7 @@ export default function LoginPage() {
                   />
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {t('auth.login')}
+                    Se connecter
                     </Button>
                 </form>
               </Form>
@@ -226,8 +222,8 @@ export default function LoginPage() {
         <TabsContent value="signup">
           <Card>
             <CardHeader>
-              <CardTitle>{t('auth.signup_title')}</CardTitle>
-              <CardDescription>{t('auth.signup_desc')}</CardDescription>
+              <CardTitle>Créer un compte</CardTitle>
+              <CardDescription>Rejoignez-nous dès aujourd'hui !</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...signupForm}>
@@ -237,7 +233,7 @@ export default function LoginPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.name')}</FormLabel>
+                        <FormLabel>Nom</FormLabel>
                         <FormControl>
                           <Input type="text" {...field} />
                         </FormControl>
@@ -250,7 +246,7 @@ export default function LoginPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.email')}</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input type="email" {...field} />
                         </FormControl>
@@ -263,7 +259,7 @@ export default function LoginPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.password')}</FormLabel>
+                        <FormLabel>Mot de passe</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -274,7 +270,7 @@ export default function LoginPage() {
                   <FormField control={signupForm.control} name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.confirm_password')}</FormLabel>
+                        <FormLabel>Confirmer le mot de passe</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -284,7 +280,7 @@ export default function LoginPage() {
                   />
                   <Button type="submit" className="w-full" disabled={isLoading}>
                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {t('auth.signup')}
+                    S'inscrire
                   </Button>
                 </form>
               </Form>

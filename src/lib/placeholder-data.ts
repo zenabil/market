@@ -2,8 +2,8 @@ import { PlaceHolderImages } from './placeholder-images';
 
 export type Product = {
   id: string;
-  name: { ar: string; fr: string; en: string };
-  description: { ar: string; fr: string; en: string };
+  name: string;
+  description: string;
   price: number;
   stock: number;
   categoryId: string;
@@ -18,7 +18,7 @@ export type Product = {
 
 export type Category = {
   id: string; // This is the Firestore document ID
-  name: { ar: string; fr: string; en: string };
+  name: string;
   image: string;
 };
 
@@ -53,7 +53,7 @@ export type Order = {
     shippingAddress: string;
     items: {
         productId: string;
-        productName: { ar: string, fr: string, en: string };
+        productName: string;
         quantity: number;
         price: number;
     }[];
@@ -85,8 +85,8 @@ export type WishlistItem = {
 
 export type Recipe = {
   id: string;
-  title: { ar: string; fr: string; en: string };
-  description: { ar: string; fr: string; en: string };
+  title: string;
+  description: string;
   image: string;
   prepTime: number;
   cookTime: number;
@@ -104,5 +104,3 @@ const users: User[] = [];
 export const getProducts = () => products;
 export const getUsers = () => users;
 export const getProductById = (id: string) => products.find(p => p.id === id);
-
-    

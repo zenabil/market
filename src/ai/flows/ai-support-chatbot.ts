@@ -17,7 +17,7 @@ const AISupportChatbotInputSchema = z.object({
 export type AISupportChatbotInput = z.infer<typeof AISupportChatbotInputSchema>;
 
 const AISupportChatbotOutputSchema = z.object({
-  answer: z.string().describe('The chatbot\s answer to the user\s question.'),
+  answer: z.string().describe('The chatbot\s answer to the user\s question in French.'),
 });
 export type AISupportChatbotOutput = z.infer<typeof AISupportChatbotOutputSchema>;
 
@@ -29,11 +29,11 @@ const prompt = ai.definePrompt({
   name: 'aiSupportChatbotPrompt',
   input: {schema: AISupportChatbotInputSchema},
   output: {schema: AISupportChatbotOutputSchema},
-  prompt: `You are a chatbot for Tlemcen Smart Supermarket. Answer the following question about the supermarket:
+  prompt: `Vous êtes un chatbot pour le Supermarché Intelligent de Tlemcen. Répondez à la question suivante sur le supermarché en français:
 
 {{question}}
 
-Keep your answers concise and helpful.`,
+Gardez vos réponses concises et utiles.`,
 });
 
 const aiSupportChatbotFlow = ai.defineFlow(

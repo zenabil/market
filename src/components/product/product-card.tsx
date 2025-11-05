@@ -8,7 +8,6 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Product } from '@/lib/placeholder-data';
-import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/hooks/use-wishlist';
@@ -20,7 +19,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { locale, t } = useLanguage();
   const { addItem } = useCart();
   const { toast } = useToast();
   const { user } = useUser();
@@ -33,8 +31,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     addItem(product);
     toast({
-      title: t('cart.added_to_cart_title'),
-      description: `${product.name[locale]} ${t('cart.added_to_cart_desc')}`,
+      title: 'Ajouté au panier',
+      description: `${product.name} a été ajouté à votre panier.`,
     });
   };
 
@@ -44,8 +42,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: t('wishlist.login_required_title'),
-        description: t('wishlist.login_required_desc'),
+        title: 'Connexion requise',
+        description: 'Vous devez être connecté pour ajouter des articles à votre liste de souhaits.',
       });
       return;
     }
@@ -53,7 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
   };
   
   const discountedPrice = product.price * (1 - product.discount / 100);
@@ -65,7 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="aspect-square relative">
             <Image
               src={product.images[0]}
-              alt={product.name[locale]}
+              alt={product.name}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -86,7 +84,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
           <div className="p-4">
-            <h3 className="font-semibold text-base truncate">{product.name[locale]}</h3>
+            <h3 className="font-semibold text-base truncate">{product.name}</h3>
             <div className="flex items-baseline gap-2 mt-2">
               <p className="text-lg font-bold text-primary">{formatCurrency(discountedPrice)}</p>
               {product.discount > 0 && (
@@ -98,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <CardFooter className="p-2 md:p-4 mt-auto">
           <Button className="w-full font-bold" onClick={handleAddToCart}>
             <ShoppingCart className="mr-2 h-4 w-4" />
-            {t('cart.add_to_cart')}
+            Ajouter au panier
           </Button>
         </CardFooter>
       </Link>

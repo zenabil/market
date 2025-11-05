@@ -4,7 +4,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
-import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, addDoc, deleteDoc, collection } from 'firebase/firestore';
@@ -47,16 +46,15 @@ import type { Coupon } from '@/lib/placeholder-data';
 
 
 function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
-  const { t } = useLanguage();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
 
   const couponFormSchema = z.object({
-    code: z.string().min(4, { message: 'Code must be at least 4 characters.' }).max(20),
+    code: z.string().min(4, { message: 'Le code doit comporter au moins 4 caractères.' }).max(20),
     discountPercentage: z.coerce.number().min(1).max(100),
-    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: t('dashboard.coupons.invalid_date') }),
+    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'Date invalide' }),
   });
 
   const form = useForm<z.infer<typeof couponFormSchema>>({
@@ -80,7 +78,7 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
     const couponsCollection = collection(firestore, 'coupons');
     addDoc(couponsCollection, couponData)
       .then(() => {
-          toast({ title: t('dashboard.coupons.created_title') });
+          toast({ title: 'Coupon créé' });
           form.reset();
           setIsOpen(false);
           onCouponCreated();
@@ -105,38 +103,38 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-4 w-4" />
-          {t('dashboard.coupons.add_coupon')}
+          Ajouter un coupon
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('dashboard.coupons.add_coupon')}</DialogTitle>
-          <DialogDescription>{t('dashboard.coupons.add_coupon_desc')}</DialogDescription>
+          <DialogTitle>Ajouter un nouveau coupon</DialogTitle>
+          <DialogDescription>Créez un nouveau code de réduction pour vos clients.</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="coupon-dialog-form">
           <div className="space-y-2">
-            <Label htmlFor="code">{t('dashboard.coupons.code')}</Label>
+            <Label htmlFor="code">Code</Label>
             <Input id="code" {...form.register('code')} />
             {form.formState.errors.code && <p className="text-sm text-destructive">{form.formState.errors.code.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="discountPercentage">{t('dashboard.coupons.discount')}</Label>
+            <Label htmlFor="discountPercentage">Pourcentage de réduction</Label>
             <Input id="discountPercentage" type="number" {...form.register('discountPercentage')} />
             {form.formState.errors.discountPercentage && <p className="text-sm text-destructive">{form.formState.errors.discountPercentage.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="expiryDate">{t('dashboard.coupons.expiry_date')}</Label>
+            <Label htmlFor="expiryDate">Date d'expiration</Label>
             <Input id="expiryDate" type="date" {...form.register('expiryDate')} />
             {form.formState.errors.expiryDate && <p className="text-sm text-destructive">{form.formState.errors.expiryDate.message}</p>}
           </div>
         </form>
          <DialogFooter>
            <DialogClose asChild>
-            <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+            <Button type="button" variant="outline">Annuler</Button>
            </DialogClose>
           <Button type="submit" disabled={isSaving} form="coupon-dialog-form">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('dashboard.coupons.save_coupon')}
+              Enregistrer le coupon
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -146,7 +144,6 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
 
 
 export default function CouponsPage() {
-  const { t, locale } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { coupons, isLoading, refetchCoupons } = useCoupons();
@@ -155,7 +152,7 @@ export default function CouponsPage() {
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale, {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -171,7 +168,7 @@ export default function CouponsPage() {
     try {
         await deleteDoc(couponDocRef);
         refetchCoupons();
-        toast({ title: t('dashboard.coupons.deleted_title') });
+        toast({ title: 'Coupon supprimé' });
     } catch (error) {
         errorEmitter.emit(
             'permission-error',
@@ -182,8 +179,8 @@ export default function CouponsPage() {
         );
         toast({
             variant: 'destructive',
-            title: t('dashboard.error_deleting_title'),
-            description: t('dashboard.error_deleting_desc'),
+            title: 'Erreur de suppression',
+            description: 'Vous n\'avez peut-être pas la permission de faire cela.',
         });
     } finally {
         setIsDeleting(false);
@@ -202,8 +199,8 @@ export default function CouponsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>{t('dashboard.nav.coupons')}</CardTitle>
-              <CardDescription>{t('dashboard.coupons.description')}</CardDescription>
+              <CardTitle>Coupons</CardTitle>
+              <CardDescription>Gérez vos codes de réduction.</CardDescription>
             </div>
             <NewCouponDialog onCouponCreated={refetchCoupons} />
           </CardHeader>
@@ -211,11 +208,11 @@ export default function CouponsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('dashboard.coupons.code')}</TableHead>
-                  <TableHead>{t('dashboard.coupons.discount')}</TableHead>
-                  <TableHead>{t('dashboard.coupons.expiry_date')}</TableHead>
-                  <TableHead>{t('dashboard.coupons.status')}</TableHead>
-                  <TableHead><span className="sr-only">{t('dashboard.actions')}</span></TableHead>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Réduction</TableHead>
+                  <TableHead>Date d'expiration</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -235,7 +232,7 @@ export default function CouponsPage() {
                     <TableCell>{formatDate(coupon.expiryDate)}</TableCell>
                     <TableCell>
                       <Badge variant={coupon.isActive ? 'default' : 'destructive'}>
-                        {coupon.isActive ? t('dashboard.coupons.active') : t('dashboard.coupons.expired')}
+                        {coupon.isActive ? 'Actif' : 'Expiré'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -243,13 +240,13 @@ export default function CouponsPage() {
                           <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                               <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">{t('dashboard.toggle_menu')}</span>
+                              <span className="sr-only">Ouvrir le menu</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
                               <Trash2 className="mr-2 h-4 w-4" />
-                              {t('dashboard.delete')}
+                              Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -260,7 +257,7 @@ export default function CouponsPage() {
             </Table>
             {!isLoading && coupons?.length === 0 && (
               <div className="text-center p-8 text-muted-foreground">
-                {t('dashboard.coupons.no_coupons')}
+                Aucun coupon trouvé.
               </div>
             )}
           </CardContent>
@@ -268,16 +265,16 @@ export default function CouponsPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>{t('dashboard.coupons.delete_confirmation_title')}</AlertDialogTitle>
+                <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                {t('dashboard.coupons.delete_confirmation_desc', { couponCode: couponToDelete?.code || '' })}
+                Cette action ne peut pas être annulée. Cela supprimera définitivement le coupon "{couponToDelete?.code || ''}".
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>Annuler</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCoupon} disabled={isDeleting}>
                   {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {t('dashboard.delete')}
+                  Supprimer
                 </AlertDialogAction>
             </AlertDialogFooter>
             </AlertDialogContent>
