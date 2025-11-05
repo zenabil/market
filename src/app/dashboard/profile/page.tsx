@@ -36,7 +36,7 @@ const profileFormSchema = z.object({
   phone: z.string().optional(),
 });
 
-const getPasswordFormSchema = (t: (key: string) => string) => z.object({
+const getPasswordFormSchema = (t: (key: string, options?: any) => string) => z.object({
     newPassword: z.string().min(6, { message: t('auth.password_min_length') }),
     confirmPassword: z.string().min(6),
 }).refine((data) => data.newPassword === data.confirmPassword, {
