@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
-function AdminSwitch({ user, admins }: { user: FirestoreUser, admins: { id: string }[] | null }) {
+function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins: { id: string }[] | null, setAdmins: React.Dispatch<React.SetStateAction<{ id: string; }[] | null>> }) {
   const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -28,17 +28,19 @@ function AdminSwitch({ user, admins }: { user: FirestoreUser, admins: { id: stri
   const handleAdminChange = async (newAdminStatus: boolean) => {
     if (!firestore) return;
     setIsLoading(true);
-    setIsAdmin(newAdminStatus);
+    setIsAdmin(newAdminStatus); // Optimistic update
 
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
 
     try {
       if (newAdminStatus) {
-        // To make a user an admin, create a document in roles_admin collection
         setDocumentNonBlocking(adminRoleRef, { role: 'admin' }, {});
+        // Update local state for immediate feedback
+        setAdmins(prevAdmins => [...(prevAdmins || []), { id: user.id }]);
       } else {
-        // To remove admin role, delete the document
         deleteDocumentNonBlocking(adminRoleRef);
+         // Update local state for immediate feedback
+        setAdmins(prevAdmins => prevAdmins?.filter(admin => admin.id !== user.id) || null);
       }
       toast({
         title: t('dashboard.users.role_updated_title'),
@@ -78,7 +80,13 @@ export default function UsersPage() {
   const { data: users, isLoading } = useCollection<FirestoreUser>(usersQuery);
 
   const adminsQuery = useMemoFirebase(() => query(collection(firestore, 'roles_admin')), [firestore]);
-  const { data: admins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
+  const { data: initialAdmins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
+
+  const [admins, setAdmins] = React.useState(initialAdmins);
+
+  React.useEffect(() => {
+    setAdmins(initialAdmins);
+  }, [initialAdmins]);
 
 
   const formatCurrency = (amount: number) => {
@@ -147,7 +155,7 @@ export default function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <AdminSwitch user={user} admins={admins} />
+                      <AdminSwitch user={user} admins={admins} setAdmins={setAdmins} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{user.orderCount || 0}</TableCell>
