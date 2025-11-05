@@ -28,6 +28,7 @@ export type User = {
   registrationDate: string;
   orderCount: number;
   totalSpent: number;
+  role: 'User' | 'Admin';
 };
 
 export type Order = {
@@ -61,14 +62,7 @@ const categories: Category[] = [
 // It will be fetched from Firestore. This array can be kept for reference or removed.
 const products: Product[] = [];
 
-const users: User[] = [
-    { id: '1', name: 'أحمد بن علي', email: 'ahmed.benali@example.com', avatar: 'https://picsum.photos/seed/user1/100/100', registrationDate: '2023-01-15', orderCount: 5, totalSpent: 12500 },
-    { id: '2', name: 'فاطمة الزهراء', email: 'fatima.zahra@example.com', avatar: 'https://picsum.photos/seed/user2/100/100', registrationDate: '2023-03-22', orderCount: 12, totalSpent: 34800 },
-    { id: '3', name: 'يوسف شريف', email: 'youssef.cherif@example.com', avatar: 'https://picsum.photos/seed/user3/100/100', registrationDate: '2023-05-10', orderCount: 2, totalSpent: 4500 },
-    { id: '4', name: 'أمينة حداد', email: 'amina.haddad@example.com', avatar: 'https://picsum.photos/seed/user4/100/100', registrationDate: '2023-06-01', orderCount: 8, totalSpent: 21000 },
-    { id: '5', name: 'محمد إبراهيم', email: 'mohamed.ibrahim@example.com', avatar: 'https://picsum.photos/seed/user5/100/100', registrationDate: '2023-08-19', orderCount: 1, totalSpent: 950 },
-];
-
+const users: User[] = [];
 
 export const getProducts = () => products;
 export const getCategories = () => categories;
