@@ -58,6 +58,7 @@ function AdminOrdersView() {
 
     const handleStatusChange = (order: Order, newStatus: string) => {
         if (!firestore) return;
+        // The path to an order is inside a user's collection
         const orderRef = doc(firestore, `users/${order.userId}/orders`, order.id);
         updateDocumentNonBlocking(orderRef, { status: newStatus });
         toast({
