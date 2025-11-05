@@ -20,6 +20,7 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -245,27 +246,9 @@ function UserOrdersView() {
 
 
 export default function OrdersPage() {
-    const { user, isUserLoading } = useUser();
-    const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
+    const { isAdmin, isRoleLoading } = useUserRole();
 
-    React.useEffect(() => {
-        const checkAdminStatus = async () => {
-            if (user) {
-                try {
-                    const tokenResult = await user.getIdTokenResult();
-                    setIsAdmin(!!tokenResult.claims.admin);
-                } catch (error) {
-                    console.error("Error getting user token:", error);
-                    setIsAdmin(false);
-                }
-            } else if (!isUserLoading) {
-                setIsAdmin(false);
-            }
-        };
-        checkAdminStatus();
-    }, [user, isUserLoading]);
-
-    if (isUserLoading || isAdmin === null) {
+    if (isRoleLoading) {
         return (
             <div className="container py-8 md:py-12">
                 <Card>

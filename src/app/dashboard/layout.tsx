@@ -36,6 +36,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser } from '@/firebase';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const adminMenuItems = [
   {
@@ -98,22 +99,10 @@ function DashboardSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
   const { state, setOpen } = useSidebar();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const auth = useAuth();
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const { isAdmin } = useUserRole();
 
-  React.useEffect(() => {
-    const checkAdmin = async () => {
-        if (user) {
-            const token = await user.getIdTokenResult();
-            setIsAdmin(!!token.claims.admin);
-        }
-    }
-    if(!isUserLoading){
-        checkAdmin();
-    }
-  }, [user, isUserLoading]);
-  
   const handleLogout = async () => {
     if (auth) {
         await auth.signOut();

@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { doc } from 'firebase/firestore';
+import { useUserRole } from '@/hooks/use-user-role';
 
 
 const navLinks = [
@@ -41,7 +42,7 @@ function UserNav() {
   const auth = useAuth();
   const { t } = useLanguage();
   const firestore = useFirestore();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin } = useUserRole();
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !authUser) return null;
@@ -49,17 +50,6 @@ function UserNav() {
   }, [firestore, authUser]);
 
   const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-        if(authUser){
-            const token = await authUser.getIdTokenResult();
-            setIsAdmin(!!token.claims.admin);
-        }
-    };
-    checkAdmin();
-  }, [authUser]);
-
 
   const handleLogout = async () => {
     if (auth) {
