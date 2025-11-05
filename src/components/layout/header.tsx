@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard } from 'lucide-react';
+import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ const navLinks = [
   { key: 'nav.home', href: '/' },
   { key: 'nav.products', href: '/products' },
   { key: 'nav.recipes', href: '/recipes' },
+  { key: 'nav.generate_recipe', href: '/generate-recipe', icon: Wand2 },
   { key: 'nav.about', href: '/about' },
   { key: 'nav.contact', href: '/contact' },
 ];
@@ -146,8 +147,12 @@ export default function Header() {
         <Link
           key={link.key}
           href={link.href}
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className={cn(
+              "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
+              link.icon && "text-primary hover:text-primary/80 font-bold"
+            )}
         >
+          {link.icon && <link.icon className="h-4 w-4" />}
           {t(link.key)}
         </Link>
       ))}
@@ -174,9 +179,13 @@ export default function Header() {
                    <SheetClose asChild key={link.key}>
                     <Link
                       href={link.href}
-                      className="text-lg font-medium text-foreground"
+                      className={cn(
+                        "text-lg font-medium text-foreground flex items-center gap-2",
+                         link.icon && "text-primary"
+                        )}
                     >
-                      {t(link.key)}
+                       {link.icon && <link.icon className="h-5 w-5" />}
+                       {t(link.key)}
                     </Link>
                   </SheetClose>
                 ))}
@@ -215,5 +224,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
