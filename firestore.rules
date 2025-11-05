@@ -1,0 +1,176 @@
+/**
+ * @fileoverview Firestore Security Rules for Tlemcen Smart Supermarket.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data (users, addresses, orders, recommendations)
+ * and provides public read access for product and category information. Administrative privileges are managed
+ * via a dedicated `/roles_admin/{userId}` collection.
+ *
+ * Data Structure:
+ * - `/products/{productId}`: Publicly readable product information.
+ * - `/categories/{categoryId}`: Publicly readable category information.
+ * - `/users/{userId}`: User profile data, accessible only to the user and admins.
+ * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
+ * - `/users/{userId}/orders/{orderId}`: User orders, accessible only to the user and admins. The `userId` field is denormalized to match the path.
+ * - `/orders/{orderId}/orderItems/{orderItemId}`: Order items, accessible only to admins.
+ * - `/users/{userId}/recommendations/{recommendationId}`: Product recommendations for a user, accessible only to the user.
+ * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
+ *
+ * Key Security Decisions:
+ * - Products and Categories are publicly readable.
+ * - User listing is disallowed.
+ * - Default security posture for ambiguous relationships is strict owner-only access.
+ *
+ * Denormalization for Authorization:
+ * - The `Order` entity should contain a denormalized `userId` field to match the path `/users/{userId}/orders/{orderId}`.
+ *   This ensures that rules can validate the relationship between the order and the user without additional reads.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows anyone to read product information, but restricts creation, updates, and deletion.
+     * @path /products/{productId}
+     * @allow get, list: if true;
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Allows public read access for product information.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows anyone to read category information, but restricts creation, updates, and deletion.
+     * @path /categories/{categoryId}
+     * @allow get, list: if true;
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Allows public read access for category information.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows a user to read and write their own user document.
+     * @path /users/{userId}
+     * @allow get: if isSignedIn() && isOwner(userId);
+     * @allow list: if false;
+     * @allow create: if isSignedIn() && isOwner(userId);
+     * @allow update: if isSignedIn() && isOwner(userId);
+     * @allow delete: if isSignedIn() && isExistingOwner(userId);
+     * @principle Enforces document ownership for reads and writes.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows a user to manage their own addresses.
+     * @path /users/{userId}/addresses/{addressId}
+     * @allow get, list: if isSignedIn() && isOwner(userId);
+     * @allow create: if isSignedIn() && isOwner(userId);
+     * @allow update: if isSignedIn() && isExistingOwner(userId);
+     * @allow delete: if isSignedIn() && isExistingOwner(userId);
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId}/addresses/{addressId} {
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows a user to manage their own orders.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow get, list: if isSignedIn() && isOwner(userId);
+     * @allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+     * @allow delete: if isSignedIn() && isExistingOwner(userId);
+     * @principle Restricts access to a user's own orders, validates userId on create/update.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows admins to manage order items.
+     * @path /orders/{orderId}/orderItems/{orderItemId}
+     * @allow get, list: if isAdmin();
+     * @allow create: if isAdmin();
+     * @allow update: if isAdmin() && resource != null;
+     * @allow delete: if isAdmin() && resource != null;
+     * @principle Restricts access to admins only.
+     */
+    match /orders/{orderId}/orderItems/{orderItemId} {
+      allow get, list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Allows a user to manage their own recommendations.
+     * @path /users/{userId}/recommendations/{recommendationId}
+     * @allow get, list: if isSignedIn() && isOwner(userId);
+     * @allow create: if isSignedIn() && isOwner(userId);
+     * @allow update: if isSignedIn() && isExistingOwner(userId);
+     * @allow delete: if isSignedIn() && isExistingOwner(userId);
+     * @principle Restricts access to a user's own recommendations.
+     */
+    match /users/{userId}/recommendations/{recommendationId} {
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows admins to manage admin roles.
+     * @path /roles_admin/{userId}
+     * @allow get, list: if isAdmin();
+     * @allow create: if isAdmin();
+     * @allow update: if false;
+     * @allow delete: if isAdmin();
+     * @principle Restricts access to admins only.
+     */
+    match /roles_admin/{userId} {
+      allow get, list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+  }
+
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+  function isAdmin() {
+    return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+  }
+}

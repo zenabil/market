@@ -1,0 +1,472 @@
+{
+  "entities": {
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product available in the Tlemcen Smart Supermarket.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product."
+        },
+        "nameAr": {
+          "type": "string",
+          "description": "Product name in Arabic."
+        },
+        "nameFr": {
+          "type": "string",
+          "description": "Product name in French."
+        },
+        "nameEn": {
+          "type": "string",
+          "description": "Product name in English."
+        },
+        "price": {
+          "type": "number",
+          "description": "Product price."
+        },
+        "stock": {
+          "type": "number",
+          "description": "Current stock quantity of the product."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Product)"
+        },
+        "images": {
+          "type": "array",
+          "description": "Array of image URLs for the product.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sku": {
+          "type": "string",
+          "description": "Stock Keeping Unit (SKU) for the product."
+        },
+        "barcode": {
+          "type": "string",
+          "description": "Barcode for the product."
+        },
+        "descriptionAr": {
+          "type": "string",
+          "description": "Product description in Arabic."
+        },
+        "descriptionFr": {
+          "type": "string",
+          "description": "Product description in French."
+        },
+        "descriptionEn": {
+          "type": "string",
+          "description": "Product description in English."
+        }
+      },
+      "required": [
+        "id",
+        "nameAr",
+        "nameFr",
+        "nameEn",
+        "price",
+        "stock",
+        "categoryId",
+        "images",
+        "sku",
+        "barcode"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category of products.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category."
+        },
+        "nameAr": {
+          "type": "string",
+          "description": "Category name in Arabic."
+        },
+        "nameFr": {
+          "type": "string",
+          "description": "Category name in French."
+        },
+        "nameEn": {
+          "type": "string",
+          "description": "Category name in English."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the category image."
+        }
+      },
+      "required": [
+        "id",
+        "nameAr",
+        "nameFr",
+        "nameEn",
+        "imageUrl"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Tlemcen Smart Supermarket.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user (from Firebase Auth)."
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "addresses": {
+          "type": "array",
+          "description": "Array of user's addresses.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "description": "User's preferred language (ar, fr, en)."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (Admin or User)."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "preferredLanguage",
+        "role"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Date and time when the order was placed.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total amount of the order."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the order (e.g., Pending, Confirmed, Shipped, Delivered, Cancelled)."
+        },
+        "shippingAddress": {
+          "type": "string",
+          "description": "Reference to Address. (Relationship: Address 1:N Order)"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of order items.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "orderDate",
+        "totalAmount",
+        "status",
+        "shippingAddress",
+        "items"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents an item within an order.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order item."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of the product in the order item."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the product at the time of the order."
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "productId",
+        "quantity",
+        "price"
+      ]
+    },
+    "Address": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Address",
+      "type": "object",
+      "description": "Represents a user's address.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the address."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Address)"
+        },
+        "street": {
+          "type": "string",
+          "description": "Street address."
+        },
+        "city": {
+          "type": "string",
+          "description": "City."
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "Zip code."
+        },
+        "country": {
+          "type": "string",
+          "description": "Country."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "street",
+        "city",
+        "zipCode",
+        "country"
+      ]
+    },
+    "Recommendation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Recommendation",
+      "type": "object",
+      "description": "Represents a product recommendation for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the recommendation."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Recommendation)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N Recommendation)"
+        },
+        "score": {
+          "type": "number",
+          "description": "Recommendation score (e.g., based on AI analysis)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the recommendation was generated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "productId",
+        "score",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information.  No denormalized authorization fields are included because all products are publicly readable.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "Unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores category information. No denormalized authorization fields are included because all categories are publicly readable.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "Unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Accessible only by the user and admins.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user (from Firebase Auth)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/addresses/{addressId}",
+        "definition": {
+          "entityName": "Address",
+          "schema": {
+            "$ref": "#/backend/entities/Address"
+          },
+          "description": "Stores user addresses. Only accessible by the user and admins.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "addressId",
+              "description": "Unique identifier for the address."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores user orders. Only accessible by the user who created the order and admins. Includes denormalized `userId` for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "orderId",
+              "description": "Unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores order items.  Accessible only to admins.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "Unique identifier for the order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "Unique identifier for the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/recommendations/{recommendationId}",
+        "definition": {
+          "entityName": "Recommendation",
+          "schema": {
+            "$ref": "#/backend/entities/Recommendation"
+          },
+          "description": "Stores product recommendations for a user. Only accessible by the user themselves.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "recommendationId",
+              "description": "Unique identifier for the recommendation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Collection to store admin user IDs. Presence of a document indicates admin privileges. Existence over content.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user (from Firebase Auth)."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the Tlemcen Smart Supermarket application, focusing on authorization independence, clarity, and scalability. It leverages denormalization to avoid hierarchical authorization dependencies and supports secure list operations. The structure is segregated into collections with homogeneous security postures.  \n\n*   **Authorization Independence**: Achieved through denormalization. For instance, if the `Order` entity needed access control based on user roles or other user-specific data, those attributes would be copied into the `Order` documents. This eliminates the need for `get()` calls in security rules, enabling atomic operations.\n*   **QAPs (Rules Are Not Filters)**: Supported by structural segregation and membership models. Path-based ownership (`/users/{userId}/orders/{orderId}`) ensures that listing operations can be secured based on the user ID in the path, preventing unauthorized access to orders. For admin operations, a separate `/roles_admin/{userId}` collection can be used to grant admin privileges without needing to filter based on document content."
+  }
+}
