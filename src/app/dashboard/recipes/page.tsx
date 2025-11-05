@@ -24,27 +24,37 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 export default function RecipesDashboardPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const recipesQuery = useMemoFirebase(() => query(collection(firestore, 'recipes')), [firestore]);
   const { data: recipes, isLoading } = useCollection<Recipe>(recipesQuery);
   const [recipeToDelete, setRecipeToDelete] = React.useState<Recipe | null>(null);
 
-  const handleDeleteRecipe = () => {
-    if (recipeToDelete && firestore) {
-      const recipeDocRef = doc(firestore, 'recipes', recipeToDelete.id);
-      deleteDoc(recipeDocRef)
-        .catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: recipeDocRef.path,
-                    operation: 'delete',
-                })
-            );
-        });
+  const handleDeleteRecipe = async () => {
+    if (!recipeToDelete || !firestore) return;
+    
+    const recipeDocRef = doc(firestore, 'recipes', recipeToDelete.id);
+    try {
+      await deleteDoc(recipeDocRef);
+      toast({ title: t('dashboard.recipes.deleted_success') });
+    } catch (error) {
+      errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+              path: recipeDocRef.path,
+              operation: 'delete',
+          })
+      );
+      toast({
+        variant: 'destructive',
+        title: t('dashboard.error_deleting_title'),
+        description: t('dashboard.error_deleting_desc'),
+      });
+    } finally {
       setRecipeToDelete(null);
     }
   };
