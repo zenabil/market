@@ -146,7 +146,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
         <DialogHeader>
           <DialogTitle>{category ? t('dashboard.categories.edit_category') : t('dashboard.categories.add_category')}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="category-dialog-form">
           <div className="space-y-2">
             <Label>{t('dashboard.product_name_ar')}</Label>
             <Input {...form.register('nameAr')} />
@@ -167,16 +167,16 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
             <Input {...form.register('image')} />
             {form.formState.errors.image && <p className="text-sm text-destructive">{form.formState.errors.image.message}</p>}
           </div>
+        </form>
            <DialogFooter>
              <DialogClose asChild>
               <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
              </DialogClose>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving} form="category-dialog-form">
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('dashboard.save')}
             </Button>
           </DialogFooter>
-        </form>
       </DialogContent>
     </Dialog>
   );
