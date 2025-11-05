@@ -110,7 +110,7 @@ export default function NewProductPage() {
     <div className="container py-8 md:py-12">
        <div className="flex items-center gap-4 mb-8">
         <Button asChild variant="outline" size="icon">
-          <Link href="/dashboard">
+          <Link href="/dashboard/products">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
@@ -307,5 +307,3 @@ export default function NewProductPage() {
     </div>
   );
 }
-
-    

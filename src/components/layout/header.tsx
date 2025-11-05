@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LayoutDashboard } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import LanguageSwitcher from './language-switcher';
 import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePathname } from 'next/navigation';
 
 const navLinks = [
   { key: 'nav.home', href: '/' },
@@ -27,6 +28,11 @@ export default function Header() {
   const { t } = useLanguage();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const isMobile = useIsMobile();
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/dashboard')) {
+    return null;
+  }
   
   const NavLinks = ({ className }: { className?: string }) => (
     <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
