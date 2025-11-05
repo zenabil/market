@@ -68,7 +68,8 @@
         "categoryId",
         "images",
         "sku",
-        "barcode"
+        "barcode",
+        "sold"
       ]
     },
     "Category": {
