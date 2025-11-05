@@ -30,7 +30,7 @@ interface PlaceOrderParams {
  * @param {Firestore} db - The Firestore database instance.
  * @param {string} userId - The ID of the user placing the order.
  * @param {PlaceOrderParams} orderDetails - The details of the order.
- * @returns {Promise<void>} A promise that resolves when the transaction is initiated. The UI should not wait for it to complete.
+ * @returns {Promise<void>} A promise that resolves when the transaction completes successfully, or rejects on failure.
  */
 export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrderParams): Promise<void> {
   const { shippingAddress, phone, items, totalAmount } = orderDetails;
@@ -39,7 +39,8 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
   const newOrderRef = doc(collection(db, `users/${userId}/orders`));
   const loyaltyPointsEarned = Math.floor(totalAmount / 100);
 
-  const transactionPromise = runTransaction(db, async (transaction) => {
+  // The transaction promise is now returned to the caller.
+  return runTransaction(db, async (transaction) => {
     // 1. Get current user data to ensure it exists
     const userDoc = await transaction.get(userRef);
     if (!userDoc.exists()) {
@@ -97,30 +98,17 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
     }
     
     transaction.update(userRef, userUpdateData);
-  });
-
-  // Attach a catch block to handle transaction failures, especially permission errors.
-  // This is a non-blocking operation from the UI's perspective.
-  transactionPromise.catch((e) => {
-    // Check if the error is likely a permission error. Firestore throws 'FirebaseError' for this.
-    // We emit our custom, more detailed error for better debugging.
-    if (e.code === 'permission-denied' || e.name === 'FirebaseError') {
+  }).catch((e) => {
+    // Check if the error is likely a permission error.
+    if (e.code === 'permission-denied' || e.name === 'FirebaseError' && e.message.includes('permission')) {
       const permissionError = new FirestorePermissionError({
-        path: `users/${userId}/orders`, // The primary path being written to
-        operation: 'create', // The core operation is creating an order
-        requestResourceData: { 
-          order: 'details withheld for brevity', 
-          updates: `${items.length} products`,
-          user_stats: 'increment' 
-        },
+        path: `users/${userId}/orders`, // Primary path
+        operation: 'create',
+        requestResourceData: { order: 'details withheld' },
       });
       errorEmitter.emit('permission-error', permissionError);
-    } else {
-        // For other types of transaction errors (e.g., stock issue), log them.
-        console.error("Transaction failed: ", e);
     }
-    // We don't re-throw here because the error is handled globally.
+    // Re-throw the original error to be caught by the caller
+    throw e;
   });
-
-  return Promise.resolve();
 }

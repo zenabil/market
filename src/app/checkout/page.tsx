@@ -153,24 +153,32 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // The placeOrder function is designed to be non-blocking. It returns a Promise<void>
-    // that resolves immediately, and it handles its own errors internally by emitting them.
-    // We don't need a try/catch block here for Firestore errors.
-    placeOrder(firestore, user.uid, {
+    try {
+      await placeOrder(firestore, user.uid, {
         shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
         phone: values.phone,
         items,
         totalAmount: finalTotalPrice,
-    });
-    
-    // Since placeOrder is now non-blocking, we can give immediate UI feedback.
-    toast({
+      });
+
+      toast({
         title: t('checkout.order_placed_title'),
         description: t('checkout.order_placed_desc'),
-    });
-    
-    clearCart();
-    router.push('/dashboard/orders');
+      });
+      
+      clearCart();
+      router.push('/dashboard/orders');
+
+    } catch (error: any) {
+      // Errors from placeOrder (like stock issues) will be caught here.
+      // Permission errors are handled by the emitter in placeOrder.
+      toast({
+        variant: "destructive",
+        title: t('checkout.order_failed_title'),
+        description: error.message || t('checkout.order_failed_desc'),
+      });
+      setIsProcessing(false);
+    }
   }
   
   if (totalItems === 0) {
