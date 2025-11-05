@@ -179,13 +179,20 @@ service cloud.firestore {
     let receivedKeys = request.resource.data.keys();
     let unchangedKeys = receivedKeys.removeAll(allowedFields);
     // Check if any fields other than the allowed ones are being changed.
+    // This logic is complex because we need to ensure that no OTHER field is being changed.
+    // We iterate through all keys that are NOT 'role' or 'loyaltyPoints' and ensure their values haven't changed.
     let isChangingDisallowedKey = false;
-    for (let key in unchangedKeys) {
-      if (request.resource.data[key] != resource.data[key]) {
+    let allKeys = resource.data.keys().concat(receivedKeys).toSet();
+    
+    for (let key in allKeys) {
+      if (!(key in allowedFields) && resource.data[key] != request.resource.data[key]) {
         isChangingDisallowedKey = true;
         break;
       }
     }
-    return !isChangingDisallowedKey;
+    
+    // Ensure that only fields in `allowedFields` are being modified
+    let modifiedKeys = request.resource.data.keys().diff(resource.data.keys()).toSet();
+    return modifiedKeys.hasOnly(allowedFields);
   }
 }
