@@ -182,155 +182,155 @@ export default function CheckoutPage() {
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('checkout.title')}</h1>
       </div>
-
-      <div className="grid lg:grid-cols-2 gap-12">
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('checkout.shipping_info')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('checkout.full_name')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('checkout.address')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('checkout.city')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('checkout.phone')}</FormLabel>
-                        <FormControl>
-                          <Input type="tel" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-        <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid lg:grid-cols-2 gap-12" id="checkout-form">
+          <div>
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('checkout.order_summary')}</CardTitle>
-                    <CardDescription>{t('checkout.item_count', { count: totalItems })}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
-                     {items.map(item => (
-                         <div key={item.id} className="flex justify-between items-center">
-                            <div className='flex items-center gap-4'>
-                                <div className="relative h-12 w-12 flex-shrink-0">
-                                  <Image src={item.images[0]} alt={item.name[locale]} fill className="rounded-md object-cover" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-sm">{item.name[locale]}</p>
-                                    <p className="text-sm text-muted-foreground">{t('checkout.quantity')}: {item.quantity}</p>
-                                </div>
-                            </div>
-                            <p className="font-medium text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
-                         </div>
-                     ))}
-                   </div>
-                   <Separator />
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Input 
-                          placeholder={t('checkout.coupon.placeholder')}
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                          className='flex-grow'
-                          disabled={isApplyingCoupon || !!appliedCoupon}
-                        />
-                        <Button 
-                          onClick={handleApplyCoupon}
-                          disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
-                        >
-                          {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                          {t('checkout.coupon.apply')}
-                        </Button>
-                      </div>
-                      {appliedCoupon && (
-                        <p className="text-sm text-primary flex items-center gap-2">
-                          <TicketPercent className="h-4 w-4" />
-                          <span>{t('checkout.coupon.discount_applied', { code: appliedCoupon.code, percentage: appliedCoupon.discountPercentage })}</span>
-                        </p>
+              <CardHeader>
+                <CardTitle>{t('checkout.shipping_info')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('checkout.full_name')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </div>
-                   <Separator />
-                   <div className="flex justify-between font-semibold">
-                       <span>{t('checkout.subtotal')}</span>
-                       <span>{formatCurrency(totalPrice)}</span>
-                   </div>
-                    {appliedCoupon && (
-                      <div className="flex justify-between font-semibold text-primary">
-                        <span>{t('checkout.coupon.discount_label')}</span>
-                        <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-semibold">
-                       <span>{t('checkout.shipping')}</span>
-                       <span>{t('checkout.shipping_cost')}</span>
-                   </div>
-                   <Separator />
-                    <div className="flex justify-between font-bold text-lg">
-                       <span>{t('checkout.total')}</span>
-                       <span>{formatCurrency(finalTotalPrice)}</span>
-                   </div>
-                </CardContent>
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('checkout.address')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('checkout.city')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('checkout.phone')}</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+              </CardContent>
             </Card>
-             <Button 
-                type="submit" 
-                size="lg" 
-                className="w-full mt-8 font-bold text-base py-6"
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={isProcessing}
-            >
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('checkout.place_order')}
-            </Button>
-        </div>
-      </div>
+          </div>
+          <div>
+              <Card>
+                  <CardHeader>
+                      <CardTitle>{t('checkout.order_summary')}</CardTitle>
+                      <CardDescription>{t('checkout.item_count', { count: totalItems })}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                     <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                       {items.map(item => (
+                           <div key={item.id} className="flex justify-between items-center">
+                              <div className='flex items-center gap-4'>
+                                  <div className="relative h-12 w-12 flex-shrink-0">
+                                    <Image src={item.images[0]} alt={item.name[locale]} fill className="rounded-md object-cover" />
+                                  </div>
+                                  <div>
+                                      <p className="font-medium text-sm">{item.name[locale]}</p>
+                                      <p className="text-sm text-muted-foreground">{t('checkout.quantity')}: {item.quantity}</p>
+                                  </div>
+                              </div>
+                              <p className="font-medium text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
+                           </div>
+                       ))}
+                     </div>
+                     <Separator />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            placeholder={t('checkout.coupon.placeholder')}
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            className='flex-grow'
+                            disabled={isApplyingCoupon || !!appliedCoupon}
+                          />
+                          <Button 
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
+                          >
+                            {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                            {t('checkout.coupon.apply')}
+                          </Button>
+                        </div>
+                        {appliedCoupon && (
+                          <p className="text-sm text-primary flex items-center gap-2">
+                            <TicketPercent className="h-4 w-4" />
+                            <span>{t('checkout.coupon.discount_applied', { code: appliedCoupon.code, percentage: appliedCoupon.discountPercentage })}</span>
+                          </p>
+                        )}
+                      </div>
+                     <Separator />
+                     <div className="flex justify-between font-semibold">
+                         <span>{t('checkout.subtotal')}</span>
+                         <span>{formatCurrency(totalPrice)}</span>
+                     </div>
+                      {appliedCoupon && (
+                        <div className="flex justify-between font-semibold text-primary">
+                          <span>{t('checkout.coupon.discount_label')}</span>
+                          <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-semibold">
+                         <span>{t('checkout.shipping')}</span>
+                         <span>{t('checkout.shipping_cost')}</span>
+                     </div>
+                     <Separator />
+                      <div className="flex justify-between font-bold text-lg">
+                         <span>{t('checkout.total')}</span>
+                         <span>{formatCurrency(finalTotalPrice)}</span>
+                     </div>
+                  </CardContent>
+              </Card>
+               <Button 
+                  type="submit" 
+                  form="checkout-form"
+                  size="lg" 
+                  className="w-full mt-8 font-bold text-base py-6"
+                  disabled={isProcessing}
+              >
+                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('checkout.place_order')}
+              </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
