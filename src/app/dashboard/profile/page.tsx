@@ -415,7 +415,7 @@ export default function ProfilePage() {
             )}
            </div>
            <Separator className="my-6" />
-            <h4 className="font-semibold mb-4">{t('dashboard.profile.add_new_address')}</h4>
+            <h4 className="font-semibold mb-4">{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</h4>
              <Form {...addressForm}>
                 <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-form">
                     <FormField control={addressForm.control} name="street" render={({ field }) => (
