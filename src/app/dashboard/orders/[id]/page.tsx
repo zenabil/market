@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection } from '@/firebase';
@@ -22,23 +22,37 @@ function OrderDetails() {
     const firestore = useFirestore();
     const router = useRouter();
 
-    const orderRef = useMemoFirebase(() => {
-        if (!firestore || !user || !orderId) return null;
-        const path = (user as any).isAdmin ? `users/${(order as any)?.userId}/orders/${orderId}` : `users/${user.uid}/orders/${orderId as string}`;
-        // This is a bit tricky, if the user is an admin we might not have the userId initially.
-        // For now, we assume the user flow is the primary one, and admin might need a different approach if order data isn't complete.
-        // Let's rely on fetching the order first and then using its userId for the full path.
-        // A better approach would be to have a separate admin flow to fetch any order.
-        // Let's assume for now the user is not an admin, or the order data is fetched in a way that allows this.
-        if (router.asPath.includes('/admin/')) { // A hypothetical check
-            // Admin logic to fetch order
+    // First, fetch the order by its ID from the orders collection group to find its userId
+    const [orderUserId, setOrderUserId] = React.useState<string | null>(null);
+    const ordersQuery = useMemoFirebase(() => {
+        if (!firestore || !orderId) return null;
+        return query(collection(firestore, `users/${user?.uid}/orders`), where(documentId(), '==', orderId));
+    }, [firestore, orderId, user?.uid]);
+    const { data: userOrder, isLoading: isUserOrderLoading } = useCollection<Order>(ordersQuery);
+
+    const allOrdersQuery = useMemoFirebase(() => {
+        if (!firestore || !orderId) return null;
+        return query(collectionGroup(firestore, 'orders'), where(documentId(), '==', orderId as string));
+    }, [firestore, orderId]);
+    const { data: adminOrder, isLoading: isAdminOrderLoading } = useCollection<Order>(allOrdersQuery);
+    
+    const orderData = adminOrder?.[0] || userOrder?.[0];
+
+    useEffect(() => {
+        if(orderData) {
+            setOrderUserId(orderData.userId);
         }
-        return doc(firestore, `users/${user.uid}/orders`, orderId as string);
-    }, [firestore, user, orderId]);
+    }, [orderData])
+
+
+    const orderRef = useMemoFirebase(() => {
+        if (!firestore || !orderId || !orderUserId) return null;
+        return doc(firestore, `users/${orderUserId}/orders`, orderId as string);
+    }, [firestore, orderId, orderUserId]);
     
     const { data: order, isLoading: isOrderLoading } = useDoc<Order>(orderRef);
 
-    const productIds = useMemoFirebase(() => {
+    const productIds = useMemo(() => {
         if (!order) return null;
         return order.items.map(item => item.productId);
     }, [order]);
@@ -50,12 +64,11 @@ function OrderDetails() {
 
     const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
 
-    const productsMap = useMemoFirebase(() => {
+    const productsMap = useMemo(() => {
         if (!products) return new Map();
         return new Map(products.map(p => [p.id, p]));
     }, [products]);
     
-    // Redirect if user is not logged in
     React.useEffect(() => {
       if (!isUserLoading && !user) {
         router.push('/login');
@@ -82,7 +95,7 @@ function OrderDetails() {
         }
     };
     
-    const isLoading = isUserLoading || isOrderLoading || (order && areProductsLoading);
+    const isLoading = isUserLoading || isUserOrderLoading || isAdminOrderLoading || isOrderLoading || (order && areProductsLoading);
 
     if (isLoading) {
         return (
