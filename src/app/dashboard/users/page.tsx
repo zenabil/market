@@ -6,32 +6,130 @@ import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Gem } from 'lucide-react';
+import { Gem, Edit, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-function AdminSwitch({ user, initialIsAdmin }: { user: FirestoreUser, initialIsAdmin: boolean }) {
+function LoyaltyDialog({ user }: { user: FirestoreUser }) {
+  const { t } = useLanguage();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [points, setPoints] = React.useState(user.loyaltyPoints || 0);
+
+  const handleSave = () => {
+    if (!firestore || points < 0) return;
+    
+    setIsSaving(true);
+    const userRef = doc(firestore, 'users', user.id);
+    const updateData = { loyaltyPoints: Number(points) };
+
+    updateDoc(userRef, updateData)
+      .then(() => {
+        toast({
+          title: t('dashboard.users.loyalty_updated_title'),
+          description: t('dashboard.users.loyalty_updated_desc', { userName: user.name, points: String(points) }),
+        });
+        setIsOpen(false);
+      })
+      .catch(error => {
+         errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userRef.path,
+                operation: 'update',
+                requestResourceData: updateData,
+            })
+        );
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Edit className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('dashboard.users.edit_loyalty_title', { userName: user.name })}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="loyaltyPoints">{t('dashboard.loyalty.points')}</Label>
+          <Input 
+            id="loyaltyPoints"
+            type="number"
+            value={points}
+            onChange={(e) => setPoints(Number(e.target.value))}
+          />
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+          </DialogClose>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('dashboard.save_changes')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+function AdminSwitch({ user }: { user: FirestoreUser }) {
   const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const [isAdmin, setIsAdmin] = React.useState(initialIsAdmin);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
+  // Check initial admin status
   React.useEffect(() => {
-    setIsAdmin(initialIsAdmin);
-  }, [initialIsAdmin]);
+    if (!firestore) return;
+    const adminRoleRef = doc(firestore, 'roles_admin', user.id);
+    // This is a one-time check. For real-time, you might use useDoc.
+    const checkStatus = async () => {
+        try {
+            const docSnap = await doc(firestore, 'roles_admin', user.id).get();
+            setIsAdmin(docSnap.exists());
+        } catch(e) {
+            // ignore, probably permissions
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    checkStatus();
+  }, [firestore, user.id]);
 
   const handleAdminChange = (newAdminStatus: boolean) => {
     if (!firestore) return;
-    setIsLoading(true);
-    
-    const adminRoleRef = doc(firestore, 'roles_admin', user.id);
 
+    setIsLoading(true);
+    const adminRoleRef = doc(firestore, 'roles_admin', user.id);
     const operation = newAdminStatus 
       ? setDoc(adminRoleRef, { role: 'admin' }) 
       : deleteDoc(adminRoleRef);
@@ -117,6 +215,7 @@ export default function UsersPage() {
                   <TableHead>{t('dashboard.users.orders')}</TableHead>
                   <TableHead>{t('dashboard.users.total_spent')}</TableHead>
                   <TableHead>{t('dashboard.loyalty.points')}</TableHead>
+                   <TableHead className="text-right">{t('dashboard.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -136,6 +235,7 @@ export default function UsersPage() {
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))}
                 {users && users.map((user) => (
@@ -153,7 +253,7 @@ export default function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <AdminSwitch user={user} initialIsAdmin={adminIds.has(user.id)} />
+                      <AdminSwitch user={user} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{user.orderCount || 0}</TableCell>
@@ -163,6 +263,9 @@ export default function UsersPage() {
                            <Gem className="h-4 w-4 text-accent" />
                            <span className="font-semibold">{user.loyaltyPoints || 0}</span>
                         </div>
+                    </TableCell>
+                     <TableCell className="text-right">
+                      <LoyaltyDialog user={user} />
                     </TableCell>
                   </TableRow>
                 ))}

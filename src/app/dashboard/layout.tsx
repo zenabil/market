@@ -74,11 +74,6 @@ const adminMenuItems = [
     icon: Percent,
   },
   {
-    key: 'dashboard.nav.loyalty',
-    href: '/dashboard/loyalty',
-    icon: Gem,
-  },
-  {
     key: 'dashboard.nav.settings',
     href: '/dashboard/settings',
     icon: Settings,
