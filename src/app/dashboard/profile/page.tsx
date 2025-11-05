@@ -127,7 +127,7 @@ export default function ProfilePage() {
                     new FirestorePermissionError({
                         path: userDocRef.path,
                         operation: 'update',
-                        requestResourceData: updateData,
+                        requestResourceData: { avatar: '...data URI...' },
                     })
                 );
             });
@@ -188,61 +188,81 @@ export default function ProfilePage() {
   async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
     if (!userDocRef) return;
     setIsAddressSaving(true);
-  
-    try {
-      if (addressToEdit) {
-        const currentAddresses = firestoreUser?.addresses || [];
-        const updatedAddresses = currentAddresses.map(addr =>
-          addr.id === addressToEdit.id ? { ...addr, ...values } : addr
-        );
-        
-        await updateDoc(userDocRef, { addresses: updatedAddresses });
-        toast({ title: t('dashboard.profile.address_updated_title') });
-        setAddressToEdit(null);
-  
-      } else {
-        const newAddress: Address = {
-            id: `addr_${Date.now()}`,
-            ...values
-        };
-        await updateDoc(userDocRef, { addresses: arrayUnion(newAddress) });
-        toast({ title: t('dashboard.profile.address_added_title') });
-        addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
-      }
-    } catch (error) {
-        const action = addressToEdit ? 'update' : 'add';
-        errorEmitter.emit(
-            'permission-error',
-            new FirestorePermissionError({
-                path: userDocRef.path,
-                operation: 'update',
-                requestResourceData: { addresses: '...' }
-            })
-        );
-    } finally {
-      setIsAddressSaving(false);
+
+    if (addressToEdit) {
+      // Logic for updating an existing address
+      const currentAddresses = firestoreUser?.addresses || [];
+      const updatedAddresses = currentAddresses.map(addr =>
+        addr.id === addressToEdit.id ? { ...addr, ...values } : addr
+      );
+      
+      updateDoc(userDocRef, { addresses: updatedAddresses })
+        .then(() => {
+            toast({ title: t('dashboard.profile.address_updated_title') });
+            setAddressToEdit(null);
+        })
+        .catch(() => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { addresses: '...updated array...' }
+                })
+            );
+        })
+        .finally(() => {
+            setIsAddressSaving(false);
+        });
+
+    } else {
+      // Logic for adding a new address
+      const newAddress: Address = { id: `addr_${Date.now()}`, ...values };
+      updateDoc(userDocRef, { addresses: arrayUnion(newAddress) })
+        .then(() => {
+            toast({ title: t('dashboard.profile.address_added_title') });
+            addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+        })
+        .catch(() => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { addresses: `arrayUnion with ${newAddress.id}` }
+                })
+            );
+        })
+        .finally(() => {
+            setIsAddressSaving(false);
+        });
     }
   }
 
   async function deleteAddress(address: Address) {
-    if (!userDocRef) return;
-    try {
-        const addressToDelete = firestoreUser?.addresses?.find(a => a.id === address.id);
-        if (!addressToDelete) {
-            throw new Error("Address not found in user's profile.");
-        }
-        await updateDoc(userDocRef, { addresses: arrayRemove(addressToDelete) });
-        toast({ title: t('dashboard.profile.address_removed_title') });
-    } catch (error) {
-         errorEmitter.emit(
-            'permission-error',
-            new FirestorePermissionError({
-                path: userDocRef.path,
-                operation: 'update',
-                requestResourceData: { addresses: '...' }
-            })
-        );
+    if (!userDocRef || !firestoreUser) return;
+    
+    // Find the full address object to remove, as arrayRemove needs an exact match.
+    const addressToDelete = firestoreUser.addresses?.find(a => a.id === address.id);
+    if (!addressToDelete) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not find address to delete.' });
+      return;
     }
+
+    updateDoc(userDocRef, { addresses: arrayRemove(addressToDelete) })
+        .then(() => {
+            toast({ title: t('dashboard.profile.address_removed_title') });
+        })
+        .catch(() => {
+             errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { addresses: `arrayRemove with ${addressToDelete.id}` }
+                })
+            );
+        });
   }
 
 
@@ -439,7 +459,7 @@ export default function ProfilePage() {
             )}
            </div>
            <Separator className="my-6" />
-            <h4 className="font-semibold mb-4">{t('dashboard.profile.add_new_address')}</h4>
+            <h4 className="font-semibold mb-4">{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</h4>
              <Form {...addressForm}>
                 <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-form">
                     <FormField control={addressForm.control} name="street" render={({ field }) => (
@@ -506,3 +526,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
