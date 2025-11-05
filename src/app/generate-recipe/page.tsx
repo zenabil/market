@@ -160,22 +160,22 @@ export default function GenerateRecipePage() {
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <Clock className="h-8 w-8 mx-auto text-primary" />
                             <p className="mt-2 font-semibold">{t('recipes.prep_time')}</p>
-                            <p className="text-sm text-muted-foreground">{t('recipes.minutes', { count: generatedRecipe.prepTime })}</p>
+                            <p className="text-sm text-muted-foreground">{generatedRecipe.prepTime} {t('recipes.minutes_short')}</p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <ChefHat className="h-8 w-8 mx-auto text-primary" />
                             <p className="mt-2 font-semibold">{t('recipes.cook_time')}</p>
-                            <p className="text-sm text-muted-foreground">{t('recipes.minutes', { count: generatedRecipe.cookTime })}</p>
+                            <p className="text-sm text-muted-foreground">{generatedRecipe.cookTime} {t('recipes.minutes_short')}</p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <Soup className="h-8 w-8 mx-auto text-primary" />
                             <p className="mt-2 font-semibold">{t('recipes.total_time_label')}</p>
-                            <p className="text-sm text-muted-foreground">{t('recipes.minutes', { count: generatedRecipe.prepTime + generatedRecipe.cookTime })}</p>
+                            <p className="text-sm text-muted-foreground">{generatedRecipe.prepTime + generatedRecipe.cookTime} {t('recipes.minutes_short')}</p>
                         </div>
                          <div className="p-4 bg-muted/50 rounded-lg">
                             <Users className="h-8 w-8 mx-auto text-primary" />
                             <p className="mt-2 font-semibold">{t('recipes.servings')}</p>
-                            <p className="text-sm text-muted-foreground">{t('recipes.people', { count: generatedRecipe.servings })}</p>
+                            <p className="text-sm text-muted-foreground">{generatedRecipe.servings} {t('recipes.people_short')}</p>
                         </div>
                     </div>
                     

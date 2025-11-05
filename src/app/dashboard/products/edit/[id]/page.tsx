@@ -105,7 +105,7 @@ function EditProductForm({ productId }: { productId: string }) {
         .then(() => {
             toast({
                 title: t('dashboard.product_updated_success'),
-                description: t('dashboard.product_updated_desc', { productName: values.nameEn }),
+                description: `${t('dashboard.product_updated_desc')} ${values.nameEn}`,
             });
         })
         .catch(error => {

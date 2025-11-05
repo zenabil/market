@@ -40,7 +40,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
         {isLoading || !category ? (
             <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
         ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{t('products.subtitle_category', { categoryName: category.name[locale] })}</p>
+            <p className="mt-2 text-lg text-muted-foreground">{`${t('products.subtitle_category')} ${category.name[locale]}`}</p>
         )}
       </div>
       {isLoading ? (

@@ -124,7 +124,7 @@ export default function CheckoutPage() {
         }
         
         setAppliedCoupon(couponData);
-        toast({ title: t('checkout.coupon.applied', { code: couponData.code }) });
+        toast({ title: `${t('checkout.coupon.applied')} ${couponData.code}` });
     }).catch(error => {
         const contextualError = new FirestorePermissionError({
             operation: 'list',
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
               <Card>
                   <CardHeader>
                       <CardTitle>{t('checkout.order_summary')}</CardTitle>
-                      <CardDescription>{t('checkout.item_count', { count: totalItems })}</CardDescription>
+                      <CardDescription>{`${totalItems} ${t('checkout.item_count')}`}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                      <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
                         {appliedCoupon && (
                           <p className="text-sm text-primary flex items-center gap-2">
                             <TicketPercent className="h-4 w-4" />
-                            <span>{t('checkout.coupon.discount_applied', { code: appliedCoupon.code, percentage: appliedCoupon.discountPercentage })}</span>
+                            <span>{`${t('checkout.coupon.discount_applied')} ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
                           </p>
                         )}
                       </div>

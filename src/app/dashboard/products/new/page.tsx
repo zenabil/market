@@ -93,7 +93,7 @@ export default function NewProductPage() {
       .then(() => {
         toast({
             title: t('dashboard.product_created_success'),
-            description: t('dashboard.product_created_desc', { productName: values.nameEn }),
+            description: `${t('dashboard.product_created_desc')} ${values.nameEn}`,
         });
         form.reset({
             nameAr: '',

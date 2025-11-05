@@ -46,7 +46,7 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
       .then(() => {
         toast({
           title: t('dashboard.users.loyalty_updated_title'),
-          description: t('dashboard.users.loyalty_updated_desc', { userName: user.name, points: String(points) }),
+          description: `${user.name} ${t('dashboard.users.loyalty_updated_desc')} ${points}`,
         });
         setIsOpen(false);
       })
@@ -74,7 +74,7 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('dashboard.users.edit_loyalty_title', { userName: user.name })}</DialogTitle>
+          <DialogTitle>{`${t('dashboard.users.edit_loyalty_title')} ${user.name}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
           <Label htmlFor="loyaltyPoints">{t('dashboard.loyalty.points')}</Label>
@@ -132,7 +132,7 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
       .then(() => {
         toast({
           title: t('dashboard.users.role_updated_title'),
-          description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
+          description: `${user.name} ${t('dashboard.users.role_updated_desc_1')} ${newAdminStatus ? t('dashboard.users.admin') : t('dashboard.users.user_role')}`,
         });
       })
       .catch(error => {

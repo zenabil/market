@@ -58,7 +58,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
             .then(() => {
                 toast({
                     title: t('dashboard.orders.status_updated_title'),
-                    description: t('dashboard.orders.status_updated_desc', { orderId: order.id.slice(-6), status: t(`orders.status_types.${newStatus.toLowerCase()}`) }),
+                    description: `${t('dashboard.orders.status_updated_desc_1')} ${order.id.slice(-6)} ${t('dashboard.orders.status_updated_desc_2')} ${t(`orders.status_types.${newStatus.toLowerCase()}`)}`,
                 });
             })
             .catch(error => {

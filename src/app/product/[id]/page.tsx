@@ -222,7 +222,7 @@ function ProductDetails({ productId }: { productId: string }) {
           </div>
            <p className="text-sm text-muted-foreground mt-2">
             {product.stock > 0 
-                ? t('product.stock_available', { count: product.stock })
+                ? `${t('product.stock_available')} ${product.stock}`
                 : t('product.out_of_stock_long')
             }
            </p>

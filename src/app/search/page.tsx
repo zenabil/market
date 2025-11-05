@@ -42,11 +42,11 @@ function SearchResults() {
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">
-          {searchQuery ? t('search.results_for', { query: searchQuery }) : t('search.title')}
+          {searchQuery ? `${t('search.results_for')} "${searchQuery}"` : t('search.title')}
         </h1>
         {filteredProducts && (
             <p className="mt-2 text-lg text-muted-foreground">
-                {t('search.products_found', { count: filteredProducts.length })}
+                {`${filteredProducts.length} ${t('search.products_found')}`}
             </p>
         )}
       </div>
