@@ -186,29 +186,40 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
 export default function CategoriesPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const { categories, areCategoriesLoading, refetchCategories } = useCategories();
   const [categoryToDelete, setCategoryToDelete] = React.useState<Category | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const handleDeleteCategory = () => {
-    if (categoryToDelete && firestore) {
-      const categoryDocRef = doc(firestore, 'categories', categoryToDelete.id);
-      deleteDoc(categoryDocRef)
-        .then(() => {
-          refetchCategories();
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete || !firestore) return;
+    
+    setIsDeleting(true);
+    const categoryDocRef = doc(firestore, 'categories', categoryToDelete.id);
+    
+    try {
+      await deleteDoc(categoryDocRef);
+      refetchCategories();
+      toast({ title: t('dashboard.categories.deleted_title') });
+    } catch (error) {
+      errorEmitter.emit(
+        'permission-error',
+        new FirestorePermissionError({
+          path: categoryDocRef.path,
+          operation: 'delete',
         })
-        .catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: categoryDocRef.path,
-                    operation: 'delete',
-                })
-            );
-        });
+      );
+      toast({
+        variant: 'destructive',
+        title: t('dashboard.error_deleting_title'),
+        description: t('dashboard.error_deleting_desc'),
+      });
+    } finally {
+      setIsDeleting(false);
       setCategoryToDelete(null);
+      setIsAlertOpen(false);
     }
-    setIsAlertOpen(false);
   };
   
   const openDeleteDialog = (category: Category) => {
@@ -288,7 +299,10 @@ export default function CategoriesPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteCategory}>{t('dashboard.delete')}</AlertDialogAction>
+                <AlertDialogAction onClick={handleDeleteCategory} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('dashboard.delete')}
+                </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
