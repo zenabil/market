@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Edit, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
