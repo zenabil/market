@@ -75,6 +75,7 @@ function EditProductForm({ productId }: { productId: string }) {
   }, [product, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!product) return;
     setIsSaving(true);
     const productData = {
       name: {
@@ -91,6 +92,7 @@ function EditProductForm({ productId }: { productId: string }) {
       stock: values.stock,
       categoryId: values.categoryId,
       discount: values.discount,
+      images: product.images, // Preserve existing images
     };
 
     updateDoc(productRef, productData)
