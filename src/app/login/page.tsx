@@ -106,6 +106,8 @@ export default function LoginPage() {
           registrationDate: new Date().toISOString(),
           orderCount: 0,
           totalSpent: 0,
+          loyaltyPoints: 0,
+          avatar: `https://picsum.photos/seed/${user.uid}/100/100`,
         };
         // This is a non-blocking write
         setDocumentNonBlocking(userDocRef, userData, { merge: true });

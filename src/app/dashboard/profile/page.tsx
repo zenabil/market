@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
-import { Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, Pencil, Trash2, Gem } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -216,7 +216,7 @@ export default function ProfilePage() {
             ) : (
                 <Form {...profileForm}>
                     <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-8">
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-wrap items-center gap-6">
                         <div className="relative group">
                             <Avatar className="h-24 w-24">
                                 <AvatarImage src={firestoreUser?.avatar || authUser?.photoURL || `https://picsum.photos/seed/${authUser?.uid}/100/100`} />
@@ -241,6 +241,11 @@ export default function ProfilePage() {
                         <div className='space-y-1'>
                             <h2 className="text-2xl font-bold">{profileForm.watch('name')}</h2>
                             <p className="text-muted-foreground">{profileForm.watch('email')}</p>
+                            <div className="flex items-center gap-2 pt-2">
+                                <Gem className="h-5 w-5 text-accent"/>
+                                <span className="font-bold text-lg">{firestoreUser?.loyaltyPoints || 0}</span>
+                                <span className="text-sm text-muted-foreground">{t('dashboard.loyalty.points')}</span>
+                            </div>
                         </div>
                     </div>
                     <FormField

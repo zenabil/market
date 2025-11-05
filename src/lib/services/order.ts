@@ -23,6 +23,7 @@ interface PlaceOrderParams {
  * 1. Create a new order document for the user.
  * 2. For each item in the order, decrement the product's stock and increment its 'sold' count.
  * 3. Update the user's total order count and total spent amount.
+ * 4. Award loyalty points based on the total amount.
  *
  * @param {Firestore} db - The Firestore database instance.
  * @param {string} userId - The ID of the user placing the order.
@@ -34,6 +35,7 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
 
   const userRef = doc(db, 'users', userId);
   const newOrderRef = doc(collection(db, `users/${userId}/orders`));
+  const loyaltyPointsEarned = Math.floor(totalAmount / 100);
 
   const transactionPromise = runTransaction(db, async (transaction) => {
     // 1. Get current user data to ensure it exists
@@ -81,10 +83,11 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
       });
     }
 
-    // 5. Update user's order stats
+    // 5. Update user's order stats and loyalty points
     transaction.update(userRef, {
       orderCount: increment(1),
       totalSpent: increment(totalAmount),
+      loyaltyPoints: increment(loyaltyPointsEarned),
     });
   });
 

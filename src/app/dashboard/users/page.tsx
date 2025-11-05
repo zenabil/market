@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +11,7 @@ import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { Gem } from 'lucide-react';
 
 function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins: { id: string }[] | null, setAdmins: React.Dispatch<React.SetStateAction<{ id: string; }[] | null>> }) {
   const { t } = useLanguage();
@@ -109,7 +110,8 @@ export default function UsersPage() {
     <div className="container py-8 md:py-12">
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.nav.users')}</CardTitle>
+          <CardTitle className='font-headline text-3xl'>{t('dashboard.nav.users')}</CardTitle>
+          <CardDescription>{t('dashboard.users.description')}</CardDescription>
         </CardHeader>
         <CardContent>
            <Table>
@@ -120,6 +122,7 @@ export default function UsersPage() {
                   <TableHead>{t('dashboard.users.registration_date')}</TableHead>
                   <TableHead>{t('dashboard.users.orders')}</TableHead>
                   <TableHead>{t('dashboard.users.total_spent')}</TableHead>
+                  <TableHead>{t('dashboard.loyalty.points')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -138,6 +141,7 @@ export default function UsersPage() {
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                   </TableRow>
                 ))}
                 {users && users.map((user) => (
@@ -160,6 +164,12 @@ export default function UsersPage() {
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{user.orderCount || 0}</TableCell>
                     <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-2">
+                           <Gem className="h-4 w-4 text-accent" />
+                           <span className="font-semibold">{user.loyaltyPoints || 0}</span>
+                        </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
