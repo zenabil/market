@@ -82,6 +82,8 @@ export default function LoginPage() {
         title: t('auth.error_title'),
         description: error.message,
       });
+      // Clear password field on failed login attempt
+      loginForm.setValue('password', '');
     } finally {
         setIsLoading(false);
     }
