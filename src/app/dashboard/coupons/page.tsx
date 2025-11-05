@@ -188,7 +188,6 @@ export default function CouponsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -255,19 +254,20 @@ export default function CouponsPage() {
             )}
           </CardContent>
         </Card>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('dashboard.coupons.delete_confirmation_title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('dashboard.coupons.delete_confirmation_desc', { couponCode: couponToDelete?.code || '' })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteCoupon}>{t('dashboard.delete')}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>{t('dashboard.coupons.delete_confirmation_title')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                {t('dashboard.coupons.delete_confirmation_desc', { couponCode: couponToDelete?.code || '' })}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteCoupon}>{t('dashboard.delete')}</AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }
