@@ -108,7 +108,7 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
       });
       errorEmitter.emit('permission-error', permissionError);
     }
-    // Re-throw the original error to be caught by the caller
-    throw e;
+    // Re-throw the original error as a standard Error object to ensure a message is available
+    throw new Error(e.message || 'An unknown error occurred during the transaction.');
   });
 }
