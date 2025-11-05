@@ -104,7 +104,6 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  // Use local state to manage the visual state of the switch immediately.
   const [isAdmin, setIsAdmin] = React.useState(user.role === 'Admin');
   const [isLoading, setIsLoading] = React.useState(false);
   
@@ -116,7 +115,7 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
     if (!firestore) return;
 
     setIsLoading(true);
-    setIsAdmin(newAdminStatus); // Optimistically update UI
+    setIsAdmin(newAdminStatus); 
 
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
     const userRef = doc(firestore, 'users', user.id);
@@ -127,7 +126,6 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
 
     operation
       .then(() => {
-        // Also update the user document itself
         return updateDoc(userRef, { role: newAdminStatus ? 'Admin' : 'User' });
       })
       .then(() => {
@@ -137,10 +135,10 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
         });
       })
       .catch(error => {
-        setIsAdmin(!newAdminStatus); // Revert UI on error
+        setIsAdmin(!newAdminStatus); 
         const permissionError = new FirestorePermissionError({
             path: newAdminStatus ? adminRoleRef.path : userRef.path,
-            operation: newAdminStatus ? 'create' : 'delete', // This is a simplification
+            operation: newAdminStatus ? 'create' : 'delete', 
             requestResourceData: newAdminStatus ? { role: 'admin' } : { role: 'User' }
         });
         errorEmitter.emit('permission-error', permissionError);
