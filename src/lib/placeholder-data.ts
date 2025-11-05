@@ -36,6 +36,7 @@ export type User = {
   registrationDate: string;
   orderCount: number;
   totalSpent: number;
+  loyaltyPoints: number;
   role: 'User' | 'Admin';
   addresses?: Address[];
 };
