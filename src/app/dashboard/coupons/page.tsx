@@ -148,9 +148,11 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
 export default function CouponsPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const { coupons, isLoading, refetchCoupons } = useCoupons();
   const [couponToDelete, setCouponToDelete] = React.useState<Coupon | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(locale, {
@@ -160,25 +162,34 @@ export default function CouponsPage() {
     });
   };
 
-  const handleDeleteCoupon = () => {
-    if (couponToDelete && firestore) {
-      const couponDocRef = doc(firestore, 'coupons', couponToDelete.id);
-      deleteDoc(couponDocRef)
-        .then(() => {
-          refetchCoupons();
-        })
-        .catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: couponDocRef.path,
-                    operation: 'delete',
-                })
-            );
+  const handleDeleteCoupon = async () => {
+    if (!couponToDelete || !firestore) return;
+
+    setIsDeleting(true);
+    const couponDocRef = doc(firestore, 'coupons', couponToDelete.id);
+
+    try {
+        await deleteDoc(couponDocRef);
+        refetchCoupons();
+        toast({ title: t('dashboard.coupons.deleted_title') });
+    } catch (error) {
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: couponDocRef.path,
+                operation: 'delete',
+            })
+        );
+        toast({
+            variant: 'destructive',
+            title: t('dashboard.error_deleting_title'),
+            description: t('dashboard.error_deleting_desc'),
         });
-      setCouponToDelete(null);
+    } finally {
+        setIsDeleting(false);
+        setCouponToDelete(null);
+        setIsAlertOpen(false);
     }
-    setIsAlertOpen(false);
   };
   
   const openDeleteDialog = (coupon: Coupon) => {
@@ -264,7 +275,10 @@ export default function CouponsPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteCoupon}>{t('dashboard.delete')}</AlertDialogAction>
+                <AlertDialogAction onClick={handleDeleteCoupon} disabled={isDeleting}>
+                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('dashboard.delete')}
+                </AlertDialogAction>
             </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
