@@ -60,7 +60,7 @@ export default function ProfilePage() {
   const firestore = useFirestore();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = React.useState(false);
-  const [isAddressSaving, setIsAddressSaving] = React.useState(false);
+  const [isSubmittingAddress, setIsSubmittingAddress] = React.useState(false);
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
 
@@ -191,8 +191,8 @@ export default function ProfilePage() {
   }
   
   async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
-    if (!userDocRef) return;
-    setIsAddressSaving(true);
+    if (!userDocRef || !firestore) return;
+    setIsSubmittingAddress(true);
 
     if (addressToEdit) {
       const currentAddresses = firestoreUser?.addresses || [];
@@ -216,7 +216,7 @@ export default function ProfilePage() {
             );
         })
         .finally(() => {
-            setIsAddressSaving(false);
+            setIsSubmittingAddress(false);
         });
 
     } else {
@@ -237,7 +237,7 @@ export default function ProfilePage() {
             );
         })
         .finally(() => {
-            setIsAddressSaving(false);
+            setIsSubmittingAddress(false);
         });
     }
   }
@@ -507,8 +507,8 @@ export default function ProfilePage() {
                 <DialogClose asChild>
                     <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
                 </DialogClose>
-                <Button type="submit" form="address-dialog-form" disabled={isAddressSaving}>
-                    {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" form="address-dialog-form" disabled={isSubmittingAddress}>
+                    {isSubmittingAddress && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t('dashboard.save_changes')}
                 </Button>
             </DialogFooter>
