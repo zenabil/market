@@ -39,6 +39,8 @@ function OrderDetails() {
 
     const productsQuery = useMemoFirebase(() => {
         if (!firestore || !productIds || productIds.length === 0) return null;
+        // Firestore 'in' queries are limited to 30 elements. If an order has more, this will fail.
+        // For this app's scale, it's an acceptable limitation.
         return query(collection(firestore, 'products'), where(documentId(), 'in', productIds));
     }, [firestore, productIds]);
 
