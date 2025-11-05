@@ -172,48 +172,53 @@ export default function ProfilePage() {
   }
   
   async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
-      if (!userDocRef) return;
-      setIsAddressSaving(true);
-
+    if (!userDocRef) return;
+    setIsAddressSaving(true);
+  
+    try {
       if (addressToEdit) {
         // Handle update
-        const updatedAddresses = firestoreUser?.addresses?.map(addr => 
-            addr.id === addressToEdit.id ? { ...addressToEdit, ...values } : addr
-        ) || [];
-
-        try {
-            await updateDocumentNonBlocking(userDocRef, { addresses: updatedAddresses });
-            toast({ title: t('dashboard.profile.address_updated_title') });
-            setAddressToEdit(null);
-        } catch (error) {
-            toast({ variant: 'destructive', title: "Error", description: "Could not update address." });
-        }
-
+        const currentAddresses = firestoreUser?.addresses || [];
+        const updatedAddresses = currentAddresses.map(addr =>
+          addr.id === addressToEdit.id ? { ...addr, ...values } : addr
+        );
+        
+        await updateDocumentNonBlocking(userDocRef, { addresses: updatedAddresses });
+        toast({ title: t('dashboard.profile.address_updated_title') });
+        setAddressToEdit(null); // Close the dialog
+  
       } else {
         // Handle add new
         const newAddress: Address = {
             id: `addr_${Date.now()}`, // Simple unique ID
             ...values
         };
-        try {
-            await updateDocumentNonBlocking(userDocRef, {
-                addresses: arrayUnion(newAddress)
-            });
-            toast({ title: t('dashboard.profile.address_added_title') });
-            addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
-        } catch (error) {
-            toast({ variant: 'destructive', title: "Error", description: "Could not add address." });
-        }
+        await updateDocumentNonBlocking(userDocRef, {
+            addresses: arrayUnion(newAddress)
+        });
+        toast({ title: t('dashboard.profile.address_added_title') });
+        addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
       }
-
+    } catch (error) {
+        const action = addressToEdit ? 'update' : 'add';
+        toast({ variant: 'destructive', title: "Error", description: `Could not ${action} address.` });
+        console.error(`Error ${action}ing address:`, error);
+    } finally {
       setIsAddressSaving(false);
+    }
   }
 
   async function deleteAddress(address: Address) {
         if (!userDocRef) return;
         try {
+            // To delete an item from an array, we need to provide the exact object to remove.
+            // We need to find the full address object from the user's data to ensure it matches.
+            const addressToDelete = firestoreUser?.addresses?.find(a => a.id === address.id);
+            if (!addressToDelete) {
+                throw new Error("Address not found in user's profile.");
+            }
             await updateDocumentNonBlocking(userDocRef, {
-                addresses: arrayRemove(address)
+                addresses: arrayRemove(addressToDelete)
             });
             toast({ title: t('dashboard.profile.address_removed_title') });
         } catch (error) {
@@ -415,7 +420,7 @@ export default function ProfilePage() {
             )}
            </div>
            <Separator className="my-6" />
-            <h4 className="font-semibold mb-4">{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</h4>
+            <h4 className="font-semibold mb-4">{t('dashboard.profile.add_new_address')}</h4>
              <Form {...addressForm}>
                 <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-form">
                     <FormField control={addressForm.control} name="street" render={({ field }) => (
