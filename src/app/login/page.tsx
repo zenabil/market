@@ -95,7 +95,7 @@ export default function LoginPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      if (user) {
+      if (user && firestore) {
         const userDocRef = doc(firestore, 'users', user.uid);
         const userData = {
           id: user.uid,
