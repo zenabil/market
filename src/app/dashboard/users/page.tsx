@@ -14,62 +14,47 @@ import { useToast } from '@/hooks/use-toast';
 import { Gem } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins: { id: string }[] | null, setAdmins: React.Dispatch<React.SetStateAction<{ id: string; }[] | null>> }) {
+function AdminSwitch({ user, initialIsAdmin }: { user: FirestoreUser, initialIsAdmin: boolean }) {
   const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const isUserAdmin = admins?.some(admin => admin.id === user.id) || false;
-  const [isAdmin, setIsAdmin] = React.useState(isUserAdmin);
+  const [isAdmin, setIsAdmin] = React.useState(initialIsAdmin);
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    setIsAdmin(isUserAdmin);
-  }, [isUserAdmin]);
+    setIsAdmin(initialIsAdmin);
+  }, [initialIsAdmin]);
 
   const handleAdminChange = async (newAdminStatus: boolean) => {
     if (!firestore) return;
     setIsLoading(true);
-    setIsAdmin(newAdminStatus); // Optimistic update
-
+    
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
 
     try {
       if (newAdminStatus) {
         const roleData = { role: 'admin' };
-        await setDoc(adminRoleRef, roleData)
-            .catch(error => {
-                setIsAdmin(false); // Revert optimistic update
-                errorEmitter.emit(
-                    'permission-error',
-                    new FirestorePermissionError({
-                        path: adminRoleRef.path,
-                        operation: 'create',
-                        requestResourceData: roleData
-                    })
-                )
-            });
-        setAdmins(prevAdmins => [...(prevAdmins || []), { id: user.id }]);
+        // This setDoc operation triggers the Cloud Function to set custom claims.
+        await setDoc(adminRoleRef, roleData);
       } else {
-        await deleteDoc(adminRoleRef)
-            .catch(error => {
-                setIsAdmin(true); // Revert optimistic update
-                 errorEmitter.emit(
-                    'permission-error',
-                    new FirestorePermissionError({
-                        path: adminRoleRef.path,
-                        operation: 'delete'
-                    })
-                )
-            });
-        setAdmins(prevAdmins => prevAdmins?.filter(admin => admin.id !== user.id) || null);
+        // This deleteDoc operation triggers the Cloud Function to remove custom claims.
+        await deleteDoc(adminRoleRef);
       }
+       // After the function is triggered, we optimistically update the UI.
+      setIsAdmin(newAdminStatus);
       toast({
         title: t('dashboard.users.role_updated_title'),
         description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
       });
     } catch (error) {
-      // Errors are now handled in the catch blocks of the firestore operations
+      const permissionError = new FirestorePermissionError({
+          path: adminRoleRef.path,
+          operation: newAdminStatus ? 'create' : 'delete',
+          requestResourceData: newAdminStatus ? { role: 'admin' } : undefined
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      // Don't need to revert UI here as component will re-render with fresh `initialIsAdmin` prop
     } finally {
       setIsLoading(false);
     }
@@ -92,18 +77,15 @@ function AdminSwitch({ user, admins, setAdmins }: { user: FirestoreUser, admins:
 export default function UsersPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
-  const usersQuery = useMemoFirebase(() => query(collection(firestore, 'users')), [firestore]);
-  const { data: users, isLoading } = useCollection<FirestoreUser>(usersQuery);
+  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
+  const { data: users, isLoading: isLoadingUsers } = useCollection<FirestoreUser>(usersQuery);
 
-  const adminsQuery = useMemoFirebase(() => query(collection(firestore, 'roles_admin')), [firestore]);
-  const { data: initialAdmins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
+  const adminsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'roles_admin')) : null, [firestore]);
+  const { data: admins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
 
-  const [admins, setAdmins] = React.useState(initialAdmins);
+  const adminIds = React.useMemo(() => new Set(admins?.map(admin => admin.id) || []), [admins]);
 
-  React.useEffect(() => {
-    setAdmins(initialAdmins);
-  }, [initialAdmins]);
-
+  const isLoading = isLoadingUsers || isLoadingAdmins;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
@@ -141,7 +123,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(isLoading || isLoadingAdmins) && Array.from({ length: 5 }).map((_, i) => (
+                {isLoading && Array.from({ length: 5 }).map((_, i) => (
                    <TableRow key={i}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -174,7 +156,7 @@ export default function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <AdminSwitch user={user} admins={admins} setAdmins={setAdmins} />
+                      <AdminSwitch user={user} initialIsAdmin={adminIds.has(user.id)} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{user.orderCount || 0}</TableCell>

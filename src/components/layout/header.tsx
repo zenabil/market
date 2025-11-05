@@ -1,10 +1,8 @@
-
-
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, User, LogOut, ShoppingBasket } from 'lucide-react';
+import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -43,6 +41,7 @@ function UserNav() {
   const auth = useAuth();
   const { t } = useLanguage();
   const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !authUser) return null;
@@ -51,9 +50,21 @@ function UserNav() {
 
   const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
 
+  useEffect(() => {
+    const checkAdmin = async () => {
+        if(authUser){
+            const token = await authUser.getIdTokenResult();
+            setIsAdmin(!!token.claims.admin);
+        }
+    };
+    checkAdmin();
+  }, [authUser]);
+
 
   const handleLogout = async () => {
-    await auth.signOut();
+    if (auth) {
+        await auth.signOut();
+    }
   };
 
   if (isUserLoading) {
@@ -99,10 +110,11 @@ function UserNav() {
                 <span>{t('nav.my_orders')}</span>
             </Link>
         </DropdownMenuItem>
-        {firestoreUser?.role === 'Admin' && (
+        {isAdmin && (
             <DropdownMenuItem asChild>
                 <Link href="/dashboard">
-                    {t('nav.dashboard')}
+                     <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>{t('nav.dashboard')}</span>
                 </Link>
             </DropdownMenuItem>
         )}

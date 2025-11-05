@@ -34,7 +34,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { useAuth, useUser as useAuthUser } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 
 const adminMenuItems = [
   {
@@ -97,7 +97,7 @@ function DashboardSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
   const { state, setOpen } = useSidebar();
-  const { user, isUserLoading } = useAuthUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const [isAdmin, setIsAdmin] = React.useState(false);
 
@@ -114,7 +114,9 @@ function DashboardSidebar() {
   }, [user, isUserLoading]);
   
   const handleLogout = async () => {
-    await auth.signOut();
+    if (auth) {
+        await auth.signOut();
+    }
   };
 
 

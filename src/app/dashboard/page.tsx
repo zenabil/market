@@ -182,6 +182,7 @@ function AdminDashboard() {
 }
 
 export default function DashboardPage() {
+    const { t } = useLanguage();
     const { user, isUserLoading } = useUser();
     const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
     const router = useRouter();
