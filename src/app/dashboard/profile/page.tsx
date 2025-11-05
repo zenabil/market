@@ -168,10 +168,12 @@ export default function ProfilePage() {
   
     const addressObject = firestoreUser?.addresses?.find(addr => addr.id === addressToDelete.id);
     if (!addressObject) return;
+    
+    const updateData = {
+        addresses: arrayRemove(addressObject)
+    };
 
-    updateDoc(userDocRef, {
-      addresses: arrayRemove(addressObject)
-    })
+    updateDoc(userDocRef, updateData)
     .then(() => {
       toast({ title: t('dashboard.profile.address_removed_title') });
     })
