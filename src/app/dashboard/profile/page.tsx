@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { doc, arrayUnion, arrayRemove, updateDoc } from 'firebase/firestore';
+import { doc, arrayUnion, arrayRemove, updateDoc, runTransaction } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2, Pencil, Trash2, Gem, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -142,30 +143,30 @@ export default function ProfilePage() {
 
 
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
-    if (!userDocRef) return;
+    if (!userDocRef || !firestore) return;
 
     setIsSaving(true);
     const updateData = { name: values.name, phone: values.phone };
-    updateDoc(userDocRef, updateData)
-        .then(() => {
-            toast({
-                title: t('dashboard.profile.update_success_title'),
-                description: t('dashboard.profile.update_success_desc'),
-            });
-        })
-        .catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: userDocRef.path,
-                    operation: 'update',
-                    requestResourceData: updateData,
-                })
-            );
-        })
-        .finally(() => {
-            setIsSaving(false);
+
+    runTransaction(firestore, async (transaction) => {
+        transaction.update(userDocRef, updateData);
+    }).then(() => {
+        toast({
+            title: t('dashboard.profile.update_success_title'),
+            description: t('dashboard.profile.update_success_desc'),
         });
+    }).catch(error => {
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'update',
+                requestResourceData: updateData,
+            })
+        );
+    }).finally(() => {
+        setIsSaving(false);
+    });
   }
 
   async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {

@@ -108,6 +108,7 @@ export default function LoginPage() {
           totalSpent: 0,
           loyaltyPoints: 0,
           avatar: `https://picsum.photos/seed/${user.uid}/100/100`,
+          addresses: [],
         };
         
         setDoc(userDocRef, userData, { merge: true }).catch(error => {
