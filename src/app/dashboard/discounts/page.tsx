@@ -56,13 +56,14 @@ function DiscountRow({ product }: { product: Product }) {
                 );
             })
             .finally(() => {
-                // Let useEffect handle this based on prop changes
+                setIsUpdating(false);
             });
     };
 
     const handleRemoveDiscount = () => {
         setDiscount(0);
-        updateDoc(productRef, { discount: 0 })
+        const updateData = { discount: 0 };
+        updateDoc(productRef, updateData)
           .then(() => {
             toast({
                 title: t('dashboard.discounts.discount_removed_title'),
@@ -75,7 +76,7 @@ function DiscountRow({ product }: { product: Product }) {
                 new FirestorePermissionError({
                     path: productRef.path,
                     operation: 'update',
-                    requestResourceData: { discount: 0 },
+                    requestResourceData: updateData,
                 })
              )
           });
