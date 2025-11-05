@@ -78,6 +78,7 @@ export default function CheckoutPage() {
             itemCount: totalItems,
         });
         
+        // Since placeOrder is now non-blocking, we can give immediate UI feedback.
         toast({
             title: t('checkout.order_placed_title'),
             description: t('checkout.order_placed_desc'),
@@ -86,15 +87,17 @@ export default function CheckoutPage() {
         clearCart();
         router.push('/dashboard/orders');
     } catch (error) {
-        console.error("Error placing order: ", error);
+        // This will now primarily catch client-side errors (e.g., validation)
+        // as Firestore permission errors are handled by the global error emitter.
+        console.error("Error initiating order placement: ", error);
         toast({
             variant: "destructive",
             title: t('checkout.order_failed_title'),
             description: (error instanceof Error) ? error.message : t('checkout.order_failed_desc'),
         });
-    } finally {
-        setIsProcessing(false);
+        setIsProcessing(false); // Only set to false on client-side error
     }
+    // No finally block needed as we want the user to navigate away immediately
   }
   
   if (totalItems === 0) {
