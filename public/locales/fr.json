@@ -1,3 +1,4 @@
+
 {
   "site_name": "Tlemcen Smart Supermarché",
   "nav": {
@@ -5,13 +6,27 @@
     "products": "Produits",
     "about": "À propos",
     "contact": "Contact",
-    "dashboard": "Tableau de Bord"
+    "dashboard": "Tableau de bord"
   },
   "header": {
     "search_placeholder": "Rechercher des produits..."
   },
+  "hero": {
+    "slide1_heading": "Produits Frais Livrés à Votre Porte",
+    "slide1_subheading": "Les meilleurs fruits, légumes et plus encore, livrés quotidiennement.",
+    "slide2_heading": "Offres Irrésistibles",
+    "slide2_subheading": "Profitez de réductions exclusives sur les produits que vous aimez.",
+    "slide3_heading": "De Notre Boulangerie à Votre Table",
+    "slide3_subheading": "Du pain et des pâtisseries frais, préparés avec amour.",
+    "shop_now": "Acheter Maintenant"
+  },
+  "homepage": {
+    "categories": "Parcourir par Catégorie",
+    "best_sellers": "Meilleures Ventes",
+    "exclusive_offers": "Offres Exclusives"
+  },
   "footer": {
-    "slogan": "Une expérience d'achat intelligente, au cœur de Tlemcen.",
+    "slogan": "Une expérience d'achat intelligente et pratique pour les habitants de Tlemcen.",
     "quick_links": "Liens Rapides",
     "legal": "Légal",
     "follow_us": "Suivez-nous",
@@ -19,55 +34,46 @@
     "terms_of_service": "Conditions d'Utilisation",
     "copyright": "Tous droits réservés."
   },
-  "hero": {
-    "slide1_heading": "Produits Frais Livrés Chaque Jour",
-    "slide1_subheading": "Les meilleurs fruits et légumes des fermes locales.",
-    "slide2_heading": "Offres Exclusives en Ligne",
-    "slide2_subheading": "Des réductions imbattables sur vos produits préférés.",
-    "slide3_heading": "Boulangerie Délicieuse Chaque Matin",
-    "slide3_subheading": "Commencez votre journée avec notre sélection de pains et viennoiseries frais.",
-    "shop_now": "Acheter Maintenant"
-  },
-  "homepage": {
-    "categories": "Acheter par Catégorie",
-    "best_sellers": "Meilleures Ventes",
-    "exclusive_offers": "Offres Exclusives"
-  },
   "cart": {
     "shopping_cart": "Panier d'Achat",
-    "empty_cart": "Votre panier est vide.",
-    "subtotal": "Sous-total",
-    "checkout": "Passer à la caisse",
+    "empty_cart": "Votre panier est actuellement vide.",
     "add_to_cart": "Ajouter au Panier",
-    "added_to_cart_title": "Ajouté au panier !",
-    "added_to_cart_desc": "a été ajouté à votre panier."
+    "added_to_cart_title": "Ajouté au Panier",
+    "added_to_cart_desc": "a été ajouté à votre panier.",
+    "subtotal": "Sous-total",
+    "checkout": "Passer à la caisse"
   },
   "dashboard": {
-    "title": "Tableau de Bord",
+    "overview": "Aperçu",
     "total_revenue": "Revenu Total",
     "products_sold": "Produits Vendus",
     "products_in_stock": "Produits en Stock",
-    "top_selling_products": "Meilleures Ventes de Produits",
+    "top_selling_products": "Produits les Plus Vendus",
     "units_sold": "Unités Vendues",
     "manage_products": "Gérer les Produits",
-    "add_product": "Ajouter un Produit",
     "product": "Produit",
     "price": "Prix",
     "stock": "Stock",
     "sold": "Vendu",
     "actions": "Actions",
-    "toggle_menu": "Basculer le menu",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "add_new_product": "Ajouter un nouveau produit",
-    "product_details": "Détails du produit",
-    "product_name_ar": "Nom du produit (Arabe)",
-    "product_name_en": "Nom du produit (Anglais)",
-    "product_name_fr": "Nom du produit (Français)",
-    "product_name_placeholder": "Ex : Tomates Fraîches",
-    "product_description": "Description du produit",
+    "toggle_menu": "Basculer le menu",
+    "add_product": "Ajouter un Produit",
+    "add_new_product": "Ajouter un Nouveau Produit",
+    "product_details": "Détails du Produit",
+    "product_name_placeholder": "Ex: Tomates Fraîches",
+    "product_name_ar": "Nom du Produit (Arabe)",
+    "product_name_en": "Nom du Produit (Anglais)",
+    "product_name_fr": "Nom du Produit (Français)",
+    "product_description": "Description du Produit",
     "generate_with_ai": "Générer avec l'IA",
     "generating_description": "Génération en cours...",
+    "description_generated_success": "Description générée avec succès !",
+    "generation_error_title": "Erreur de Génération",
+    "generation_error_desc": "Veuillez d'abord remplir les noms de produits et la catégorie.",
+    "generation_failed_title": "Échec de la Génération",
+    "generation_failed_desc": "Une erreur s'est produite lors de la génération de la description. Veuillez réessayer.",
     "description_ar": "Description (Arabe)",
     "description_en": "Description (Anglais)",
     "description_fr": "Description (Français)",
@@ -76,17 +82,31 @@
     "category": "Catégorie",
     "select_category_placeholder": "Sélectionnez une catégorie",
     "pricing_stock": "Tarification et Stock",
-    "discount_percentage": "Pourcentage de remise (%)",
+    "discount_percentage": "Pourcentage de Réduction (%)",
     "cancel": "Annuler",
-    "save_product": "Enregistrer le produit",
+    "save_product": "Enregistrer le Produit",
     "product_created_success": "Produit créé avec succès !",
     "product_created_desc": "{{productName}} a été ajouté à votre boutique.",
-    "generation_error_title": "Informations insuffisantes",
-    "generation_error_desc": "Veuillez d'abord saisir les noms de produit et la catégorie.",
-    "description_generated_success": "Description générée avec succès !",
-    "generation_failed_title": "Échec de la génération",
-    "generation_failed_desc": "Une erreur est survenue lors de la génération de la description."
+    "nav": {
+      "overview": "Aperçu",
+      "products": "Produits",
+      "users": "Utilisateurs",
+      "coupons": "Coupons",
+      "discounts": "Réductions",
+      "loyalty": "Fidélité",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    },
+    "coming_soon": "Bientôt disponible...",
+    "settings_desc": "Gérez les paramètres et les préférences de votre boutique.",
+    "settings": {
+      "site_name": "Nom du Site",
+      "logo": "Logo",
+      "phone": "Numéro de Téléphone",
+      "address": "Adresse"
+    },
+    "save_changes": "Enregistrer les Modifications",
+    "settings_updated_title": "Paramètres Mis à Jour",
+    "settings_updated_desc": "Les informations de votre boutique ont été enregistrées avec succès."
   }
 }
-
-    

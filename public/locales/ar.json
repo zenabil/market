@@ -1,17 +1,32 @@
+
 {
   "site_name": "سوبر ماركت تلمسان الذكي",
   "nav": {
     "home": "الرئيسية",
     "products": "المنتجات",
-    "about": "من نحن",
+    "about": "عنا",
     "contact": "اتصل بنا",
     "dashboard": "لوحة التحكم"
   },
   "header": {
-    "search_placeholder": "ابحث عن منتجات..."
+    "search_placeholder": "ابحث عن المنتجات..."
+  },
+  "hero": {
+    "slide1_heading": "منتجات طازجة تصل إلى باب منزلك",
+    "slide1_subheading": "أفضل أنواع الفواكه والخضروات والمزيد، يتم توصيلها يوميًا.",
+    "slide2_heading": "عروض لا تقاوم",
+    "slide2_subheading": "استمتع بخصومات حصرية على المنتجات التي تحبها.",
+    "slide3_heading": "من مخبزنا إلى مائدتك",
+    "slide3_subheading": "خبز وحلويات طازجة ومخبوزة بحب.",
+    "shop_now": "تسوق الآن"
+  },
+  "homepage": {
+    "categories": "تصفح حسب الفئة",
+    "best_sellers": "الأكثر مبيعًا",
+    "exclusive_offers": "عروض حصرية"
   },
   "footer": {
-    "slogan": "تجربة تسوق ذكية، في قلب تلمسان.",
+    "slogan": "تجربة تسوق ذكية ومريحة لسكان تلمسان.",
     "quick_links": "روابط سريعة",
     "legal": "قانوني",
     "follow_us": "تابعنا",
@@ -19,55 +34,46 @@
     "terms_of_service": "شروط الخدمة",
     "copyright": "جميع الحقوق محفوظة."
   },
-  "hero": {
-    "slide1_heading": "منتجات طازجة تصلك يومياً",
-    "slide1_subheading": "أفضل الفواكه والخضروات من المزارع المحلية.",
-    "slide2_heading": "عروض حصرية عبر الإنترنت",
-    "slide2_subheading": "خصومات لا مثيل لها على منتجاتك المفضلة.",
-    "slide3_heading": "مخبوزات شهية كل صباح",
-    "slide3_subheading": "ابدأ يومك مع تشكيلتنا من الخبز والمعجنات الطازجة.",
-    "shop_now": "تسوق الآن"
-  },
-  "homepage": {
-    "categories": "تسوق حسب الفئات",
-    "best_sellers": "الأكثر مبيعاً",
-    "exclusive_offers": "عروض حصرية"
-  },
   "cart": {
     "shopping_cart": "سلة التسوق",
-    "empty_cart": "سلة التسوق الخاصة بك فارغة.",
-    "subtotal": "المجموع الفرعي",
-    "checkout": "إتمام الشراء",
+    "empty_cart": "سلتك فارغة حاليًا.",
     "add_to_cart": "أضف إلى السلة",
-    "added_to_cart_title": "تمت الإضافة إلى السلة!",
-    "added_to_cart_desc": "تمت إضافته إلى سلتك."
+    "added_to_cart_title": "تمت الإضافة إلى السلة",
+    "added_to_cart_desc": "تمت إضافته إلى سلتك.",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "الدفع"
   },
   "dashboard": {
-    "title": "لوحة التحكم",
+    "overview": "نظرة عامة",
     "total_revenue": "إجمالي الإيرادات",
     "products_sold": "المنتجات المباعة",
     "products_in_stock": "المنتجات في المخزن",
     "top_selling_products": "المنتجات الأكثر مبيعاً",
     "units_sold": "الوحدات المباعة",
     "manage_products": "إدارة المنتجات",
-    "add_product": "إضافة منتج",
     "product": "المنتج",
     "price": "السعر",
     "stock": "المخزون",
     "sold": "مباع",
     "actions": "الإجراءات",
-    "toggle_menu": "تبديل القائمة",
     "edit": "تعديل",
     "delete": "حذف",
+    "toggle_menu": "تبديل القائمة",
+    "add_product": "إضافة منتج",
     "add_new_product": "إضافة منتج جديد",
     "product_details": "تفاصيل المنتج",
+    "product_name_placeholder": "مثال: طماطم طازجة",
     "product_name_ar": "اسم المنتج (العربية)",
     "product_name_en": "اسم المنتج (الإنجليزية)",
     "product_name_fr": "اسم المنتج (الفرنسية)",
-    "product_name_placeholder": "مثال: طماطم طازجة",
     "product_description": "وصف المنتج",
     "generate_with_ai": "إنشاء باستخدام الذكاء الاصطناعي",
-    "generating_description": "جاري الإنشاء...",
+    "generating_description": "جارٍ الإنشاء...",
+    "description_generated_success": "تم إنشاء الوصف بنجاح!",
+    "generation_error_title": "خطأ في الإنشاء",
+    "generation_error_desc": "يرجى ملء أسماء المنتجات والفئة أولاً.",
+    "generation_failed_title": "فشل الإنشاء",
+    "generation_failed_desc": "حدث خطأ أثناء إنشاء الوصف. يرجى المحاولة مرة أخرى.",
     "description_ar": "الوصف (العربية)",
     "description_en": "الوصف (الإنجليزية)",
     "description_fr": "الوصف (الفرنسية)",
@@ -81,12 +87,26 @@
     "save_product": "حفظ المنتج",
     "product_created_success": "تم إنشاء المنتج بنجاح!",
     "product_created_desc": "تمت إضافة {{productName}} إلى متجرك.",
-    "generation_error_title": "معلومات غير كافية",
-    "generation_error_desc": "يرجى إدخال أسماء المنتج والفئة أولاً.",
-    "description_generated_success": "تم إنشاء الوصف بنجاح!",
-    "generation_failed_title": "فشل الإنشاء",
-    "generation_failed_desc": "حدث خطأ أثناء إنشاء الوصف."
+    "nav": {
+      "overview": "نظرة عامة",
+      "products": "المنتجات",
+      "users": "المستخدمون",
+      "coupons": "الكوبونات",
+      "discounts": "الخصومات",
+      "loyalty": "نقاط الولاء",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
+    },
+    "coming_soon": "قريبا...",
+    "settings_desc": "قم بإدارة إعدادات متجرك وتفضيلاتك.",
+    "settings": {
+      "site_name": "اسم الموقع",
+      "logo": "الشعار",
+      "phone": "رقم الهاتف",
+      "address": "العنوان"
+    },
+    "save_changes": "حفظ التغييرات",
+    "settings_updated_title": "تم تحديث الإعدادات",
+    "settings_updated_desc": "تم حفظ معلومات متجرك بنجاح."
   }
 }
-
-    

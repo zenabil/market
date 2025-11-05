@@ -1,3 +1,4 @@
+
 {
   "site_name": "Tlemcen Smart Supermarket",
   "nav": {
@@ -10,8 +11,22 @@
   "header": {
     "search_placeholder": "Search for products..."
   },
+  "hero": {
+    "slide1_heading": "Fresh Groceries to Your Doorstep",
+    "slide1_subheading": "The best fruits, vegetables, and more, delivered daily.",
+    "slide2_heading": "Irresistible Offers",
+    "slide2_subheading": "Enjoy exclusive discounts on the products you love.",
+    "slide3_heading": "From Our Bakery to Your Table",
+    "slide3_subheading": "Fresh bread and pastries, baked with love.",
+    "shop_now": "Shop Now"
+  },
+  "homepage": {
+    "categories": "Browse by Category",
+    "best_sellers": "Best Sellers",
+    "exclusive_offers": "Exclusive Offers"
+  },
   "footer": {
-    "slogan": "A smart shopping experience, in the heart of Tlemcen.",
+    "slogan": "A smart and convenient shopping experience for the people of Tlemcen.",
     "quick_links": "Quick Links",
     "legal": "Legal",
     "follow_us": "Follow Us",
@@ -19,55 +34,46 @@
     "terms_of_service": "Terms of Service",
     "copyright": "All rights reserved."
   },
-  "hero": {
-    "slide1_heading": "Fresh Produce Delivered Daily",
-    "slide1_subheading": "The best fruits and vegetables from local farms.",
-    "slide2_heading": "Exclusive Online Offers",
-    "slide2_subheading": "Unbeatable discounts on your favorite products.",
-    "slide3_heading": "Delicious Baked Goods Every Morning",
-    "slide3_subheading": "Start your day with our selection of fresh bread and pastries.",
-    "shop_now": "Shop Now"
-  },
-  "homepage": {
-    "categories": "Shop by Category",
-    "best_sellers": "Best Sellers",
-    "exclusive_offers": "Exclusive Offers"
-  },
   "cart": {
     "shopping_cart": "Shopping Cart",
-    "empty_cart": "Your cart is empty.",
-    "subtotal": "Subtotal",
-    "checkout": "Checkout",
+    "empty_cart": "Your cart is currently empty.",
     "add_to_cart": "Add to Cart",
-    "added_to_cart_title": "Added to Cart!",
-    "added_to_cart_desc": "has been added to your cart."
+    "added_to_cart_title": "Added to Cart",
+    "added_to_cart_desc": "has been added to your cart.",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "overview": "Overview",
     "total_revenue": "Total Revenue",
     "products_sold": "Products Sold",
     "products_in_stock": "Products in Stock",
     "top_selling_products": "Top Selling Products",
     "units_sold": "Units Sold",
     "manage_products": "Manage Products",
-    "add_product": "Add Product",
     "product": "Product",
     "price": "Price",
     "stock": "Stock",
     "sold": "Sold",
     "actions": "Actions",
-    "toggle_menu": "Toggle menu",
     "edit": "Edit",
     "delete": "Delete",
+    "toggle_menu": "Toggle menu",
+    "add_product": "Add Product",
     "add_new_product": "Add New Product",
     "product_details": "Product Details",
+    "product_name_placeholder": "e.g. Fresh Tomatoes",
     "product_name_ar": "Product Name (Arabic)",
     "product_name_en": "Product Name (English)",
     "product_name_fr": "Product Name (French)",
-    "product_name_placeholder": "e.g. Fresh Tomatoes",
     "product_description": "Product Description",
     "generate_with_ai": "Generate with AI",
     "generating_description": "Generating...",
+    "description_generated_success": "Description generated successfully!",
+    "generation_error_title": "Generation Error",
+    "generation_error_desc": "Please fill out product names and category first.",
+    "generation_failed_title": "Generation Failed",
+    "generation_failed_desc": "An error occurred while generating the description. Please try again.",
     "description_ar": "Description (Arabic)",
     "description_en": "Description (English)",
     "description_fr": "Description (French)",
@@ -79,14 +85,28 @@
     "discount_percentage": "Discount (%)",
     "cancel": "Cancel",
     "save_product": "Save Product",
-    "product_created_success": "Product Created Successfully!",
+    "product_created_success": "Product created successfully!",
     "product_created_desc": "{{productName}} has been added to your store.",
-    "generation_error_title": "Insufficient Information",
-    "generation_error_desc": "Please enter product names and category first.",
-    "description_generated_success": "Description generated successfully!",
-    "generation_failed_title": "Generation Failed",
-    "generation_failed_desc": "An error occurred while generating the description."
+    "nav": {
+      "overview": "Overview",
+      "products": "Products",
+      "users": "Users",
+      "coupons": "Coupons",
+      "discounts": "Discounts",
+      "loyalty": "Loyalty",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "coming_soon": "Coming soon...",
+    "settings_desc": "Manage your store's settings and preferences.",
+    "settings": {
+      "site_name": "Site Name",
+      "logo": "Logo",
+      "phone": "Phone Number",
+      "address": "Address"
+    },
+    "save_changes": "Save Changes",
+    "settings_updated_title": "Settings Updated",
+    "settings_updated_desc": "Your store information has been saved successfully."
   }
 }
-
-    
