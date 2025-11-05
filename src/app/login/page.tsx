@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, writeBatch, query, limit } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -91,17 +91,29 @@ export default function LoginPage() {
 
   const handleSignup = async (values: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
+    if (!firestore) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Firestore not available' });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // Check if there are any users already
+      const usersRef = collection(firestore, 'users');
+      const q = query(usersRef, limit(1));
+      const querySnapshot = await getDocs(q);
+      const isFirstUser = querySnapshot.empty;
+
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      if (user && firestore) {
+      if (user) {
         const userDocRef = doc(firestore, 'users', user.uid);
         const userData = {
           id: user.uid,
           name: values.name,
           email: user.email,
-          role: 'User',
+          role: isFirstUser ? 'Admin' : 'User',
           preferredLanguage: 'ar',
           registrationDate: new Date().toISOString(),
           orderCount: 0,
@@ -111,21 +123,23 @@ export default function LoginPage() {
           addresses: [],
         };
         
-        setDoc(userDocRef, userData, { merge: true }).catch(error => {
-            errorEmitter.emit(
-                'permission-error',
-                new FirestorePermissionError({
-                    path: userDocRef.path,
-                    operation: 'create',
-                    requestResourceData: userData,
-                })
-            );
-        });
+        const batch = writeBatch(firestore);
+        batch.set(userDocRef, userData);
+
+        if (isFirstUser) {
+          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+          batch.set(adminRoleRef, { role: 'admin' });
+        }
+        
+        // The batch write will succeed or fail atomically, respecting security rules.
+        // The rules are now updated to allow the first user creation.
+        await batch.commit();
       }
 
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
+      console.error(error);
       toast({
         variant: 'destructive',
         title: t('auth.error_title'),

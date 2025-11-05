@@ -55,13 +55,13 @@ service cloud.firestore {
 
     /**
      * @description Allows a user to read their own document, and admins to read any.
-     * Creation is allowed for any signed-in user for their own document.
+     * Creation is allowed for any signed-in user for their own document, and for the very first user in the system.
      * Updates are restricted to the owner for most fields, but admins can update role and loyalty points.
      * Deletion is disallowed.
      * @path /users/{userId}
      * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow list: if isAdmin();
-     * @allow create: if isSignedIn() && isOwner(userId);
+     * @allow create: if (isSignedIn() && isOwner(userId)) || isFirstUser();
      * @allow update: if isSignedIn() && (
      *                  (isOwner(userId) && isUpdatingOwnData()) || 
      *                  (isAdmin() && isUpdatingAllowedAdminFields())
@@ -72,7 +72,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
-      allow create: if isSignedIn() && isOwner(userId);
+      allow create: if (isSignedIn() && isOwner(userId)) || isFirstUser();
       allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
       allow delete: if false; // Generally don't want users to delete their own account record
     }
@@ -110,17 +110,17 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins to manage admin roles.
+     * @description Allows admins to manage admin roles. First user can create their own admin role.
      * @path /roles_admin/{userId}
      * @allow get, list: if isAdmin();
-     * @allow create: if isAdmin();
+     * @allow create: if isAdmin() || isFirstUser();
      * @allow update: if false;
      * @allow delete: if isAdmin();
      * @principle Restricts access to admins only.
      */
     match /roles_admin/{userId} {
       allow get, list: if isAdmin();
-      allow create: if isAdmin();
+      allow create: if isAdmin() || isFirstUser();
       allow update: if false;
       allow delete: if isAdmin();
     }
@@ -166,6 +166,10 @@ service cloud.firestore {
   function isAdmin() {
     return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
   }
+
+  function isFirstUser() {
+    return !exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users).size == 0;
+  }
   
   function isUpdatingOwnData() {
     // Users can't change their own role, order count, total spent, or loyalty points directly.
@@ -173,11 +177,11 @@ service cloud.firestore {
     let incomingKeys = request.resource.data.keys();
     
     // Ensure no disallowed fields are being modified, unless they are being set to their existing value (which is a no-op).
-    return incomingKeys.hasAll(disallowedFields) == false &&
-           (request.resource.data.role == resource.data.role) &&
-           (request.resource.data.orderCount == resource.data.orderCount) &&
-           (request.resource.data.totalSpent == resource.data.totalSpent) &&
-           (request.resource.data.loyaltyPoints == resource.data.loyaltyPoints);
+    return incomingKeys.hasAll(disallowedFields) == false ||
+           (request.resource.data.role == resource.data.role &&
+           request.resource.data.orderCount == resource.data.orderCount &&
+           request.resource.data.totalSpent == resource.data.totalSpent &&
+           request.resource.data.loyaltyPoints == resource.data.loyaltyPoints);
   }
   
   function isUpdatingAllowedAdminFields() {
