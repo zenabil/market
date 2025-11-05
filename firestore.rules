@@ -177,8 +177,15 @@ service cloud.firestore {
     // Admins can only update the role and loyaltyPoints.
     let allowedFields = ['role', 'loyaltyPoints'];
     let receivedKeys = request.resource.data.keys();
-    let changingDisallowedKeys = receivedKeys.removeAll(allowedFields).size() > 0;
-    
-    return !changingDisallowedKeys;
+    let unchangedKeys = receivedKeys.removeAll(allowedFields);
+    // Check if any fields other than the allowed ones are being changed.
+    let isChangingDisallowedKey = false;
+    for (let key in unchangedKeys) {
+      if (request.resource.data[key] != resource.data[key]) {
+        isChangingDisallowedKey = true;
+        break;
+      }
+    }
+    return !isChangingDisallowedKey;
   }
 }
