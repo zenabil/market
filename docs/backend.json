@@ -6,10 +6,6 @@
       "type": "object",
       "description": "Represents a product available in the Tlemcen Smart Supermarket.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the product."
-        },
         "name": {
           "type": "object",
           "description": "Product name in multiple languages.",
@@ -66,7 +62,6 @@
         }
       },
       "required": [
-        "id",
         "name",
         "price",
         "stock",
@@ -181,10 +176,6 @@
       "type": "object",
       "description": "Represents an order placed by a user.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the order."
-        },
         "userId": {
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Order)"
@@ -239,7 +230,6 @@
         }
       },
       "required": [
-        "id",
         "userId",
         "orderDate",
         "totalAmount",
@@ -281,7 +271,6 @@
       },
       "required": [
         "id",
-        "userId",
         "street",
         "city",
         "zipCode",
