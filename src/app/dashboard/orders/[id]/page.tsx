@@ -3,8 +3,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
-import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection } from '@/firebase';
-import { doc, collection, query, where, documentId } from 'firebase/firestore';
+import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection, useCollectionGroup } from '@/firebase';
+import { doc, collection, query, where, documentId, collectionGroup } from 'firebase/firestore';
 import type { Order, Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,35 +22,15 @@ function OrderDetails() {
     const firestore = useFirestore();
     const router = useRouter();
 
-    // First, fetch the order by its ID from the orders collection group to find its userId
-    const [orderUserId, setOrderUserId] = React.useState<string | null>(null);
-    const ordersQuery = useMemoFirebase(() => {
-        if (!firestore || !orderId) return null;
-        return query(collection(firestore, `users/${user?.uid}/orders`), where(documentId(), '==', orderId));
-    }, [firestore, orderId, user?.uid]);
-    const { data: userOrder, isLoading: isUserOrderLoading } = useCollection<Order>(ordersQuery);
-
-    const allOrdersQuery = useMemoFirebase(() => {
+    // Query across all 'orders' collections to find the one with the matching ID.
+    // This works for both admins (who can read all) and users (who can only read their own).
+    const orderQuery = useMemoFirebase(() => {
         if (!firestore || !orderId) return null;
         return query(collectionGroup(firestore, 'orders'), where(documentId(), '==', orderId as string));
     }, [firestore, orderId]);
-    const { data: adminOrder, isLoading: isAdminOrderLoading } = useCollection<Order>(allOrdersQuery);
     
-    const orderData = adminOrder?.[0] || userOrder?.[0];
-
-    useEffect(() => {
-        if(orderData) {
-            setOrderUserId(orderData.userId);
-        }
-    }, [orderData])
-
-
-    const orderRef = useMemoFirebase(() => {
-        if (!firestore || !orderId || !orderUserId) return null;
-        return doc(firestore, `users/${orderUserId}/orders`, orderId as string);
-    }, [firestore, orderId, orderUserId]);
-    
-    const { data: order, isLoading: isOrderLoading } = useDoc<Order>(orderRef);
+    const { data: orders, isLoading: isOrderLoading } = useCollection<Order>(orderQuery);
+    const order = orders?.[0];
 
     const productIds = useMemo(() => {
         if (!order) return null;
@@ -95,7 +75,7 @@ function OrderDetails() {
         }
     };
     
-    const isLoading = isUserLoading || isUserOrderLoading || isAdminOrderLoading || isOrderLoading || (order && areProductsLoading);
+    const isLoading = isUserLoading || isOrderLoading || (order && areProductsLoading);
 
     if (isLoading) {
         return (

@@ -346,7 +346,7 @@ export default function NewProductPage() {
             <Button type="button" variant="outline" asChild>
                 <Link href="/dashboard/products">{t('dashboard.cancel')}</Link>
             </Button>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving} form='new-product-form'>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('dashboard.save_product')}
             </Button>
