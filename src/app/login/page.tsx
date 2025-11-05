@@ -33,13 +33,13 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-const signupSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters."}),
+const getSignupSchema = (t: (key: string) => string) => z.object({
+  name: z.string().min(2, { message: t('auth.name_min_length') }),
   email: z.string().email(),
   password: z.string().min(6),
   confirmPassword: z.string().min(6),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: t('auth.passwords_dont_match'),
   path: ["confirmPassword"],
 });
 
@@ -57,6 +57,8 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+  
+  const signupSchema = getSignupSchema(t);
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -139,14 +141,13 @@ export default function LoginPage() {
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
-      const permissionError = new FirestorePermissionError({ 
-          path: `users/${(error as any).customData?.uid || 'unknown'}`, 
-          operation: 'create', 
-          requestResourceData: { email: values.email } 
-      });
-
       // Handle primary account creation errors
       if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
+        const permissionError = new FirestorePermissionError({ 
+            path: `users/${(error as any).customData?.uid || 'unknown'}`, 
+            operation: 'create', 
+            requestResourceData: { email: values.email } 
+        });
         errorEmitter.emit('permission-error', permissionError);
         toast({
             variant: 'destructive',
