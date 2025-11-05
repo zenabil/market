@@ -36,11 +36,11 @@ const profileFormSchema = z.object({
   phone: z.string().optional(),
 });
 
-const passwordFormSchema = z.object({
-    newPassword: z.string().min(6, { message: "Password must be at least 6 characters."}),
+const getPasswordFormSchema = (t: (key: string) => string) => z.object({
+    newPassword: z.string().min(6, { message: t('auth.password_min_length') }),
     confirmPassword: z.string().min(6),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: t('auth.passwords_dont_match'),
     path: ["confirmPassword"],
 });
 
@@ -64,6 +64,8 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: { name: '', email: '', phone: '' },
   });
+  
+  const passwordFormSchema = getPasswordFormSchema(t);
 
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
       resolver: zodResolver(passwordFormSchema),
