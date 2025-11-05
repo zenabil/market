@@ -19,13 +19,23 @@ import { useCart } from '@/hooks/use-cart';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, TicketPercent } from 'lucide-react';
 import React from 'react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { placeOrder } from '@/lib/services/order';
-import { doc } from 'firebase/firestore';
+import { collection, doc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
+import { cn } from '@/lib/utils';
+
+type Coupon = {
+  id: string;
+  code: string;
+  discountPercentage: number;
+  expiryDate: string; // ISO string
+  isActive: boolean;
+};
+
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -42,6 +52,9 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [couponCode, setCouponCode] = React.useState('');
+  const [appliedCoupon, setAppliedCoupon] = React.useState<Coupon | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = React.useState(false);
   
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -87,6 +100,48 @@ export default function CheckoutPage() {
     }
   }, [firestoreUser, user, form]);
 
+  const finalTotalPrice = appliedCoupon
+    ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
+    : totalPrice;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim() || !firestore) return;
+    setIsApplyingCoupon(true);
+
+    try {
+      const couponsRef = collection(firestore, 'coupons');
+      const q = query(couponsRef, where('code', '==', couponCode.trim()));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        toast({ variant: 'destructive', title: t('checkout.coupon.invalid') });
+        setAppliedCoupon(null);
+        return;
+      }
+
+      const couponDoc = querySnapshot.docs[0];
+      const couponData = { id: couponDoc.id, ...couponDoc.data() } as Coupon;
+      
+      const now = new Date();
+      const expiry = new Date(couponData.expiryDate);
+
+      if (!couponData.isActive || now > expiry) {
+         toast({ variant: 'destructive', title: t('checkout.coupon.expired') });
+         setAppliedCoupon(null);
+         return;
+      }
+      
+      setAppliedCoupon(couponData);
+      toast({ title: t('checkout.coupon.applied', { code: couponData.code }) });
+
+    } catch (error) {
+      toast({ variant: 'destructive', title: t('checkout.coupon.error_applying') });
+      console.error("Error applying coupon: ", error);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
@@ -101,7 +156,7 @@ export default function CheckoutPage() {
         await placeOrder(firestore, user.uid, {
             shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
             items,
-            totalAmount: totalPrice,
+            totalAmount: finalTotalPrice,
         });
         
         // Since placeOrder is now non-blocking, we can give immediate UI feedback.
@@ -213,7 +268,9 @@ export default function CheckoutPage() {
                      {items.map(item => (
                          <div key={item.id} className="flex justify-between items-center">
                             <div className='flex items-center gap-4'>
-                                <Image src={item.images[0]} alt={item.name[locale]} width={48} height={48} className="rounded-md" />
+                                <div className="relative h-12 w-12 flex-shrink-0">
+                                  <Image src={item.images[0]} alt={item.name[locale]} fill className="rounded-md object-cover" />
+                                </div>
                                 <div>
                                     <p className="font-medium text-sm">{item.name[locale]}</p>
                                     <p className="text-sm text-muted-foreground">{t('checkout.quantity')}: {item.quantity}</p>
@@ -224,10 +281,41 @@ export default function CheckoutPage() {
                      ))}
                    </div>
                    <Separator />
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          placeholder={t('checkout.coupon.placeholder')}
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          className='flex-grow'
+                          disabled={isApplyingCoupon || !!appliedCoupon}
+                        />
+                        <Button 
+                          onClick={handleApplyCoupon}
+                          disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
+                        >
+                          {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                          {t('checkout.coupon.apply')}
+                        </Button>
+                      </div>
+                      {appliedCoupon && (
+                        <p className="text-sm text-primary flex items-center gap-2">
+                          <TicketPercent className="h-4 w-4" />
+                          <span>{t('checkout.coupon.discount_applied', { code: appliedCoupon.code, percentage: appliedCoupon.discountPercentage })}</span>
+                        </p>
+                      )}
+                    </div>
+                   <Separator />
                    <div className="flex justify-between font-semibold">
                        <span>{t('checkout.subtotal')}</span>
                        <span>{formatCurrency(totalPrice)}</span>
                    </div>
+                    {appliedCoupon && (
+                      <div className="flex justify-between font-semibold text-primary">
+                        <span>{t('checkout.coupon.discount_label')}</span>
+                        <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-semibold">
                        <span>{t('checkout.shipping')}</span>
                        <span>{t('checkout.shipping_cost')}</span>
@@ -235,7 +323,7 @@ export default function CheckoutPage() {
                    <Separator />
                     <div className="flex justify-between font-bold text-lg">
                        <span>{t('checkout.total')}</span>
-                       <span>{formatCurrency(totalPrice)}</span>
+                       <span>{formatCurrency(finalTotalPrice)}</span>
                    </div>
                 </CardContent>
             </Card>
