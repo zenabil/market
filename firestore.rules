@@ -56,20 +56,24 @@ service cloud.firestore {
     /**
      * @description Allows a user to read their own document, and admins to read any.
      * Creation is allowed for any signed-in user for their own document.
-     * Updates are restricted to the owner. Deletion is disallowed.
+     * Updates are restricted to the owner for most fields, but admins can update role and loyalty points.
+     * Deletion is disallowed.
      * @path /users/{userId}
      * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow list: if isAdmin();
      * @allow create: if isSignedIn() && isOwner(userId);
-     * @allow update: if isSignedIn() && isOwner(userId);
+     * @allow update: if isSignedIn() && (
+     *                  (isOwner(userId) && isUpdatingOwnData()) || 
+     *                  (isAdmin() && isUpdatingAllowedAdminFields())
+     *                );
      * @allow delete: if false;
-     * @principle Enforces document ownership and admin read access.
+     * @principle Enforces document ownership and admin read/limited-write access.
      */
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
       allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
       allow delete: if false; // Generally don't want users to delete their own account record
     }
 
@@ -155,11 +159,23 @@ service cloud.firestore {
     return request.auth.uid == userId;
   }
 
-    function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-    }
+  function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+  }
 
   function isAdmin() {
     return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+  }
+  
+  function isUpdatingOwnData() {
+    // Users can't change their own role, order count, total spent, or loyalty points directly.
+    let disallowedFields = ['role', 'orderCount', 'totalSpent', 'loyaltyPoints'];
+    return request.resource.data.keys().diff(resource.data.keys()).hasOnly(disallowedFields) == false;
+  }
+  
+  function isUpdatingAllowedAdminFields() {
+    // Admins can only update the role and loyaltyPoints.
+    let allowedFields = ['role', 'loyaltyPoints'];
+    return request.resource.data.keys().hasAny(allowedFields);
   }
 }
