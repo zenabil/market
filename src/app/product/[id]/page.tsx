@@ -1,10 +1,8 @@
-
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getProductById, getProducts } from '@/lib/placeholder-data';
 import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
@@ -14,24 +12,70 @@ import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, where, limit } from 'firebase/firestore';
+import type { Product } from '@/lib/placeholder-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+
+function ProductDetails({ productId }: { productId: string }) {
   const { t, locale } = useLanguage();
   const { addItem, updateQuantity: updateCartQuantity } = useCart();
   const { toast } = useToast();
-  const product = getProductById(params.id);
+  const firestore = useFirestore();
+
+  const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
+  const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
+
+  const relatedProductsQuery = useMemoFirebase(() => {
+    if (!product) return null;
+    return query(
+      collection(firestore, 'products'),
+      where('categoryId', '==', product.categoryId),
+      where('id', '!=', product.id),
+      limit(4)
+    );
+  }, [firestore, product]);
+  
+  const { data: relatedProducts, isLoading: isLoadingRelated } = useCollection<Product>(relatedProductsQuery);
+
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  if (isLoadingProduct) {
+    return (
+        <div className="container py-8 md:py-12">
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+                <div>
+                    <Skeleton className="aspect-square w-full rounded-lg" />
+                    <div className="flex gap-2 mt-4">
+                        <Skeleton className="w-20 h-20 rounded-md" />
+                        <Skeleton className="w-20 h-20 rounded-md" />
+                        <Skeleton className="w-20 h-20 rounded-md" />
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    <Skeleton className="h-12 w-3/4" />
+                    <Skeleton className="h-10 w-1/4" />
+                    <Skeleton className="h-px w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-5/6" />
+                    <Skeleton className="h-6 w-full" />
+                    <div className="flex items-center gap-4 pt-4">
+                        <Skeleton className="h-12 w-32" />
+                        <Skeleton className="h-12 flex-1" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+  }
 
   if (!product) {
     notFound();
   }
-  
-  const relatedProducts = getProducts()
-    .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
-    .slice(0, 4);
-    
-  const discountedPrice = product.price * (1 - product.discount / 100);
+
+  const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, { style: 'currency', currency: 'DZD' }).format(amount);
@@ -121,16 +165,21 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart}>
+            <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {t('cart.add_to_cart')}
+              {product.stock === 0 ? t('product.out_of_stock') : t('cart.add_to_cart')}
             </Button>
           </div>
-           <p className="text-sm text-muted-foreground mt-2">{t('product.stock_available', { count: product.stock })}</p>
+           <p className="text-sm text-muted-foreground mt-2">
+            {product.stock > 0 
+                ? t('product.stock_available', { count: product.stock })
+                : t('product.out_of_stock_long')
+            }
+           </p>
         </div>
       </div>
 
-      {relatedProducts.length > 0 && (
+      {relatedProducts && relatedProducts.length > 0 && (
         <div className="mt-16 md:mt-24">
           <ProductGrid title={t('product.related_products')} products={relatedProducts} />
         </div>
@@ -139,17 +188,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   );
 }
 
-// Add this to public/locales/ar.json
-// "stock_available": "{{count}} متوفر في المخزون"
 
-// Add this to public/locales/en.json
-// "stock_available": "{{count}} in stock"
-
-// Add this to public/locales/fr.json
-// "stock_available": "{{count}} en stock"
-
-// Add related_products keys as well
-// ar: "منتجات ذات صلة"
-// en: "Related Products"
-// fr: "Produits similaires"
-
+export default function ProductPage({ params }: { params: { id: string } }) {
+    return <ProductDetails productId={params.id} />
+}
