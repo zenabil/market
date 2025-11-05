@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
-import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, arrayUnion, arrayRemove, updateDoc, DocumentReference } from 'firebase/firestore';
@@ -25,10 +24,10 @@ import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2 } from 'lucide-react';
 
 const addressFormSchema = z.object({
-    street: z.string().min(5, { message: "Street must be at least 5 characters."}),
-    city: z.string().min(2, { message: "City must be at least 2 characters."}),
-    zipCode: z.string().min(3, { message: "Zip code must be at least 3 characters."}),
-    country: z.string().min(2, { message: "Country must be at least 2 characters."}),
+    street: z.string().min(5, { message: "La rue doit comporter au moins 5 caractères."}),
+    city: z.string().min(2, { message: "La ville doit comporter au moins 2 caractères."}),
+    zipCode: z.string().min(3, { message: "Le code postal doit comporter au moins 3 caractères."}),
+    country: z.string().min(2, { message: "Le pays doit comporter au moins 2 caractères."}),
 });
 
 interface AddressDialogProps {
@@ -39,7 +38,6 @@ interface AddressDialogProps {
 }
 
 export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, children }: AddressDialogProps) {
-    const { t } = useLanguage();
     const { toast } = useToast();
     const firestore = useFirestore();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,7 +70,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
             
             updateDoc(userDocRef, { addresses: updatedAddresses })
                 .then(() => {
-                    toast({ title: t('dashboard.profile.address_updated_title') });
+                    toast({ title: 'Adresse mise à jour' });
                     setIsOpen(false);
                 })
                 .catch(() => {
@@ -92,7 +90,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
             const newAddress: Address = { id: `addr_${Date.now()}`, ...values };
             updateDoc(userDocRef, { addresses: arrayUnion(newAddress) })
                 .then(() => {
-                    toast({ title: t('dashboard.profile.address_added_title') });
+                    toast({ title: 'Adresse ajoutée' });
                     setIsOpen(false);
                 })
                 .catch(() => {
@@ -116,34 +114,34 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</DialogTitle>
-                    <DialogDescription>{addressToEdit ? t('dashboard.profile.edit_address_desc') : t('dashboard.profile.add_new_address_desc')}</DialogDescription>
+                    <DialogTitle>{addressToEdit ? 'Modifier l\'adresse' : 'Ajouter une nouvelle adresse'}</DialogTitle>
+                    <DialogDescription>{addressToEdit ? 'Modifiez les détails de votre adresse ci-dessous.' : 'Ajoutez une nouvelle adresse de livraison à votre profil.'}</DialogDescription>
                 </DialogHeader>
                 <Form {...addressForm}>
                     <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-dialog-form">
                         <FormField control={addressForm.control} name="street" render={({ field }) => (
-                            <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Rue</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField control={addressForm.control} name="city" render={({ field }) => (
-                                <FormItem><FormLabel>{t('checkout.city')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Ville</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={addressForm.control} name="zipCode" render={({ field }) => (
-                                <FormItem><FormLabel>{t('dashboard.profile.zip_code')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Code postal</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={addressForm.control} name="country" render={({ field }) => (
-                                <FormItem><FormLabel>{t('dashboard.profile.country')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Pays</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         </div>
                     </form>
                 </Form>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
+                        <Button type="button" variant="outline">Annuler</Button>
                     </DialogClose>
                     <Button type="submit" form="address-dialog-form" disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {t('dashboard.save_changes')}
+                        Enregistrer les modifications
                     </Button>
                 </DialogFooter>
             </DialogContent>
