@@ -3,27 +3,44 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { getProducts } from '@/lib/placeholder-data';
 import { useLanguage } from '@/hooks/use-language';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import type { Product } from '@/lib/placeholder-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const { t, locale, direction } = useLanguage();
-  const products = getProducts();
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
-  const totalRevenue = products.reduce((acc, product) => {
-    const discountedPrice = product.price * (1 - product.discount / 100);
-    return acc + discountedPrice * product.sold;
-  }, 0);
+  const stats = React.useMemo(() => {
+    if (!products) {
+      return {
+        totalRevenue: 0,
+        totalProductsSold: 0,
+        topSellingProducts: [],
+      };
+    }
+    const totalRevenue = products.reduce((acc, product) => {
+      const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+      return acc + discountedPrice * product.sold;
+    }, 0);
 
-  const totalProductsSold = products.reduce((acc, product) => acc + product.sold, 0);
+    const totalProductsSold = products.reduce((acc, product) => acc + product.sold, 0);
 
-  const topSellingProducts = [...products]
-    .sort((a, b) => b.sold - a.sold)
-    .slice(0, 5)
-    .map(p => ({
-      name: p.name[locale],
-      sold: p.sold,
-    }));
+    const topSellingProducts = [...products]
+      .sort((a, b) => b.sold - a.sold)
+      .slice(0, 5)
+      .map(p => ({
+        name: p.name[locale],
+        sold: p.sold,
+      }));
+    
+    return { totalRevenue, totalProductsSold, topSellingProducts };
+  }, [products, locale]);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
@@ -60,7 +77,7 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
+            {isLoading ? <Skeleton className="h-8 w-32" /> : <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>}
           </CardContent>
         </Card>
         <Card>
@@ -84,7 +101,7 @@ export default function DashboardPage() {
               </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalProductsSold}</div>
+            {isLoading ? <Skeleton className="h-8 w-20" /> : <div className="text-2xl font-bold">{stats.totalProductsSold}</div>}
           </CardContent>
         </Card>
          <Card>
@@ -109,7 +126,7 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
+            {isLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{products?.length || 0}</div>}
           </CardContent>
         </Card>
       </div>
@@ -120,24 +137,30 @@ export default function DashboardPage() {
             <CardTitle>{t('dashboard.top_selling_products')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={topSellingProducts} layout="vertical" dir={direction}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    width={150}
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ dx: -5 }}
-                  />
-                   <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
-                  <Bar dataKey="sold" fill="var(--color-sold)" radius={4} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            {isLoading ? (
+                <div className="min-h-[350px] w-full flex items-center justify-center">
+                    <Skeleton className="h-[300px] w-[95%]" />
+                </div>
+            ) : (
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={stats.topSellingProducts} layout="vertical" dir={direction}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis
+                        dataKey="name"
+                        type="category"
+                        width={150}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ dx: -5 }}
+                    />
+                    <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
+                    <Bar dataKey="sold" fill="var(--color-sold)" radius={4} />
+                    </BarChart>
+                </ResponsiveContainer>
+                </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </div>

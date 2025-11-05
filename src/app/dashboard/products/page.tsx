@@ -1,6 +1,5 @@
 'use client';
 
-import { getProducts } from '@/lib/placeholder-data';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -8,10 +7,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { Product } from '@/lib/placeholder-data';
 
 export default function ProductsPage() {
   const { t, locale } = useLanguage();
-  const products = getProducts();
+  const firestore = useFirestore();
+  const productsQuery = query(collection(firestore, 'products'));
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
@@ -46,7 +51,16 @@ export default function ProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                  </TableRow>
+                ))}
+                {products && products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name[locale]}</TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
@@ -70,6 +84,11 @@ export default function ProductsPage() {
                 ))}
               </TableBody>
             </Table>
+             {!isLoading && products?.length === 0 && (
+                <div className="text-center p-8 text-muted-foreground">
+                    {t('dashboard.no_products_found')}
+                </div>
+            )}
           </CardContent>
         </Card>
       </div>
