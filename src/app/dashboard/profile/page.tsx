@@ -22,12 +22,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, arrayUnion, arrayRemove, updateDoc } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
-import { Loader2, Pencil, Trash2, Gem } from 'lucide-react';
+import { Loader2, Pencil, Trash2, Gem, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 
 
 const profileFormSchema = z.object({
@@ -61,6 +61,8 @@ export default function ProfilePage() {
   const [isPasswordSaving, setIsPasswordSaving] = React.useState(false);
   const [isAddressSaving, setIsAddressSaving] = React.useState(false);
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,7 +192,6 @@ export default function ProfilePage() {
     setIsAddressSaving(true);
 
     if (addressToEdit) {
-      // Logic for updating an existing address
       const currentAddresses = firestoreUser?.addresses || [];
       const updatedAddresses = currentAddresses.map(addr =>
         addr.id === addressToEdit.id ? { ...addr, ...values } : addr
@@ -199,7 +200,7 @@ export default function ProfilePage() {
       updateDoc(userDocRef, { addresses: updatedAddresses })
         .then(() => {
             toast({ title: t('dashboard.profile.address_updated_title') });
-            setAddressToEdit(null);
+            setIsAddressDialogOpen(false);
         })
         .catch(() => {
             errorEmitter.emit(
@@ -216,12 +217,11 @@ export default function ProfilePage() {
         });
 
     } else {
-      // Logic for adding a new address
       const newAddress: Address = { id: `addr_${Date.now()}`, ...values };
       updateDoc(userDocRef, { addresses: arrayUnion(newAddress) })
         .then(() => {
             toast({ title: t('dashboard.profile.address_added_title') });
-            addressForm.reset({ street: '', city: 'Tlemcen', zipCode: '', country: 'Algeria' });
+            setIsAddressDialogOpen(false);
         })
         .catch(() => {
             errorEmitter.emit(
@@ -242,7 +242,6 @@ export default function ProfilePage() {
   async function deleteAddress(address: Address) {
     if (!userDocRef || !firestoreUser) return;
     
-    // Find the full address object to remove, as arrayRemove needs an exact match.
     const addressToDelete = firestoreUser.addresses?.find(a => a.id === address.id);
     if (!addressToDelete) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not find address to delete.' });
@@ -263,6 +262,11 @@ export default function ProfilePage() {
                 })
             );
         });
+  }
+
+  const openAddressDialog = (address: Address | null) => {
+    setAddressToEdit(address);
+    setIsAddressDialogOpen(true);
   }
 
 
@@ -424,9 +428,15 @@ export default function ProfilePage() {
     </Card>
 
     <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle>{t('dashboard.profile.manage_addresses_title')}</CardTitle>
-          <CardDescription>{t('dashboard.profile.manage_addresses_desc')}</CardDescription>
+        <CardHeader className="flex-row items-center justify-between">
+          <div>
+            <CardTitle>{t('dashboard.profile.manage_addresses_title')}</CardTitle>
+            <CardDescription>{t('dashboard.profile.manage_addresses_desc')}</CardDescription>
+          </div>
+          <Button onClick={() => openAddressDialog(null)} size="sm">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {t('dashboard.profile.add_address_button')}
+          </Button>
         </CardHeader>
         <CardContent>
            <div className="space-y-4">
@@ -435,7 +445,7 @@ export default function ProfilePage() {
                     <div key={addr.id} className="flex justify-between items-center p-3 border rounded-md">
                         <p className="text-sm text-muted-foreground">{addr.street}, {addr.city}, {addr.zipCode}, {addr.country}</p>
                         <div className="flex items-center">
-                            <Button variant="ghost" size="icon" onClick={() => setAddressToEdit(addr)}><Pencil className="h-4 w-4 text-muted-foreground" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => openAddressDialog(addr)}><Pencil className="h-4 w-4 text-muted-foreground" /></Button>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
@@ -458,45 +468,22 @@ export default function ProfilePage() {
                 <p className="text-sm text-center text-muted-foreground py-4">{t('dashboard.profile.no_addresses')}</p>
             )}
            </div>
-           <Separator className="my-6" />
-            <h4 className="font-semibold mb-4">{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</h4>
-             <Form {...addressForm}>
-                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-form">
-                    <FormField control={addressForm.control} name="street" render={({ field }) => (
-                        <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField control={addressForm.control} name="city" render={({ field }) => (
-                            <FormItem><FormLabel>{t('checkout.city')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={addressForm.control} name="zipCode" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.profile.zip_code')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={addressForm.control} name="country" render={({ field }) => (
-                            <FormItem><FormLabel>{t('dashboard.profile.country')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                     </div>
-                </form>
-            </Form>
-            {!addressToEdit && (
-                <div className="flex justify-end mt-4">
-                    <Button type="submit" form="address-form" disabled={isAddressSaving}>
-                        {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {t('dashboard.profile.add_address_button')}
-                    </Button>
-                </div>
-            )}
         </CardContent>
     </Card>
 
-    <Dialog open={!!addressToEdit} onOpenChange={(isOpen) => !isOpen && setAddressToEdit(null)}>
+    <Dialog open={isAddressDialogOpen} onOpenChange={(isOpen) => {
+        setIsAddressDialogOpen(isOpen);
+        if (!isOpen) {
+            setAddressToEdit(null);
+        }
+    }}>
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>{t('dashboard.profile.edit_address_title')}</DialogTitle>
-                <DialogDescription>{t('dashboard.profile.edit_address_desc')}</DialogDescription>
+                <DialogTitle>{addressToEdit ? t('dashboard.profile.edit_address_title') : t('dashboard.profile.add_new_address')}</DialogTitle>
+                <DialogDescription>{addressToEdit ? t('dashboard.profile.edit_address_desc') : t('dashboard.profile.add_new_address_desc')}</DialogDescription>
             </DialogHeader>
             <Form {...addressForm}>
-                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="edit-address-form">
+                <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-dialog-form">
                      <FormField control={addressForm.control} name="street" render={({ field }) => (
                         <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -517,7 +504,7 @@ export default function ProfilePage() {
                 <DialogClose asChild>
                     <Button type="button" variant="outline">{t('dashboard.cancel')}</Button>
                 </DialogClose>
-                <Button type="submit" form="edit-address-form" disabled={isAddressSaving}>
+                <Button type="submit" form="address-dialog-form" disabled={isAddressSaving}>
                     {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t('dashboard.save_changes')}
                 </Button>
