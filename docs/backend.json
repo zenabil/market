@@ -60,6 +60,14 @@
         "descriptionEn": {
           "type": "string",
           "description": "Product description in English."
+        },
+        "sold": {
+          "type": "number",
+          "description": "Number of units sold."
+        },
+        "discount": {
+          "type": "number",
+          "description": "Discount percentage for the product."
         }
       },
       "required": [
@@ -143,6 +151,23 @@
         "role": {
           "type": "string",
           "description": "User's role (Admin or User)."
+        },
+        "avatar": {
+          "type": "string",
+          "description": "URL of the user's avatar image."
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date the user registered.",
+          "format": "date-time"
+        },
+        "orderCount": {
+          "type": "number",
+          "description": "Total number of orders placed by the user."
+        },
+        "totalSpent": {
+          "type": "number",
+          "description": "Total amount of money spent by the user."
         }
       },
       "required": [
