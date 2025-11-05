@@ -168,7 +168,10 @@
         "name",
         "email",
         "preferredLanguage",
-        "role"
+        "role",
+        "registrationDate",
+        "orderCount",
+        "totalSpent"
       ]
     },
     "Order": {
