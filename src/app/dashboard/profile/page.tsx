@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useLanguage } from '@/hooks/use-language';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { doc, arrayUnion, arrayRemove, updateDoc, runTransaction, getDoc } from 'firebase/firestore';
+import { doc, arrayUnion, arrayRemove, updateDoc, getDoc } from 'firebase/firestore';
 import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2, Pencil, Trash2, Gem, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -143,19 +143,19 @@ export default function ProfilePage() {
 
 
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
-    if (!userDocRef || !firestore) return;
+    if (!userDocRef) return;
 
     setIsSaving(true);
     const updateData = { name: values.name, phone: values.phone };
 
-    runTransaction(firestore, async (transaction) => {
-        transaction.update(userDocRef, updateData);
-    }).then(() => {
+    updateDoc(userDocRef, updateData)
+      .then(() => {
         toast({
             title: t('dashboard.profile.update_success_title'),
             description: t('dashboard.profile.update_success_desc'),
         });
-    }).catch(error => {
+      })
+      .catch(error => {
         errorEmitter.emit(
             'permission-error',
             new FirestorePermissionError({
@@ -164,9 +164,10 @@ export default function ProfilePage() {
                 requestResourceData: updateData,
             })
         );
-    }).finally(() => {
+      })
+      .finally(() => {
         setIsSaving(false);
-    });
+      });
   }
 
   async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
