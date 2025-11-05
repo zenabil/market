@@ -244,7 +244,7 @@ export default function ProfilePage() {
   }
 
   async function deleteAddress(addressToDelete: Address) {
-    if (!userDocRef) return;
+    if (!userDocRef || !firestore) return;
 
     try {
         const userDoc = await getDoc(userDocRef);
