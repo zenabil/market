@@ -1,20 +1,86 @@
 
 'use client';
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/hooks/use-language';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, query, doc } from 'firebase/firestore';
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+
+function AdminSwitch({ user, admins }: { user: FirestoreUser, admins: { id: string }[] | null }) {
+  const { t } = useLanguage();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  
+  const isUserAdmin = admins?.some(admin => admin.id === user.id) || false;
+  const [isAdmin, setIsAdmin] = React.useState(isUserAdmin);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsAdmin(isUserAdmin);
+  }, [isUserAdmin]);
+
+  const handleAdminChange = async (newAdminStatus: boolean) => {
+    if (!firestore) return;
+    setIsLoading(true);
+    setIsAdmin(newAdminStatus);
+
+    const adminRoleRef = doc(firestore, 'roles_admin', user.id);
+
+    try {
+      if (newAdminStatus) {
+        // To make a user an admin, create a document in roles_admin collection
+        setDocumentNonBlocking(adminRoleRef, { role: 'admin' }, {});
+      } else {
+        // To remove admin role, delete the document
+        deleteDocumentNonBlocking(adminRoleRef);
+      }
+      toast({
+        title: t('dashboard.users.role_updated_title'),
+        description: t('dashboard.users.role_updated_desc', { userName: user.name, role: newAdminStatus ? 'Admin' : 'User' }),
+      });
+    } catch (error) {
+      console.error('Failed to update admin status', error);
+      setIsAdmin(!newAdminStatus); // Revert on error
+      toast({
+        variant: 'destructive',
+        title: t('dashboard.generation_failed_title'),
+        description: t('dashboard.users.role_update_failed_desc')
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className='flex items-center gap-2'>
+        <Switch
+            checked={isAdmin}
+            onCheckedChange={handleAdminChange}
+            aria-label={`Toggle admin status for ${user.name}`}
+            disabled={isLoading}
+        />
+        <span>{isAdmin ? t('dashboard.users.admin') : t('dashboard.users.user_role')}</span>
+    </div>
+  );
+}
+
 
 export default function UsersPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
   const usersQuery = useMemoFirebase(() => query(collection(firestore, 'users')), [firestore]);
   const { data: users, isLoading } = useCollection<FirestoreUser>(usersQuery);
+
+  const adminsQuery = useMemoFirebase(() => query(collection(firestore, 'roles_admin')), [firestore]);
+  const { data: admins, isLoading: isLoadingAdmins } = useCollection<{ id: string }>(adminsQuery);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(locale, {
@@ -43,13 +109,14 @@ export default function UsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('dashboard.users.user')}</TableHead>
+                  <TableHead>{t('dashboard.users.role')}</TableHead>
                   <TableHead>{t('dashboard.users.registration_date')}</TableHead>
                   <TableHead>{t('dashboard.users.orders')}</TableHead>
                   <TableHead>{t('dashboard.users.total_spent')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                {(isLoading || isLoadingAdmins) && Array.from({ length: 5 }).map((_, i) => (
                    <TableRow key={i}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -60,6 +127,7 @@ export default function UsersPage() {
                         </div>
                       </div>
                     </TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
@@ -78,6 +146,9 @@ export default function UsersPage() {
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <AdminSwitch user={user} admins={admins} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{user.orderCount || 0}</TableCell>
