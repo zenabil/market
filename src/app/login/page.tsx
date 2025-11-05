@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
-import { doc, setDoc, getDocs, collection, writeBatch, query, limit } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, writeBatch, query, limit, updateDoc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -117,31 +117,29 @@ export default function LoginPage() {
           addresses: [],
         };
   
-        // Set user document. Security rules will handle the logic.
+        // Set the main user document first. Security rules allow this for any new user.
         await setDoc(userDocRef, userData);
         
-        // Try to create the admin role. This will only succeed if the user is the first one.
-        // This is a "fire-and-forget" attempt; failure is expected for non-first users.
+        // Now, attempt to create the admin role. This will only succeed if the user is the first one.
         const adminRoleRef = doc(firestore, 'roles_admin', newUser.uid);
-        setDoc(adminRoleRef, { role: 'admin' })
-          .then(() => {
-            // If admin role creation succeeds, update the user's role to Admin.
-            return setDoc(userDocRef, { role: 'Admin' }, { merge: true });
-          })
-          .catch((error) => {
-            // This is expected to fail with a permission error if the user is not the first one.
-            // We can safely ignore this specific error.
-            if (error.code !== 'permission-denied') {
-               // Log any other unexpected errors during admin role setting.
-               console.error("An unexpected error occurred while trying to set admin role:", error);
-            }
-          });
+        try {
+          await setDoc(adminRoleRef, { role: 'admin' });
+          // If the above line succeeds, it means this is the first user. Now, update their user document role.
+          await updateDoc(userDocRef, { role: 'Admin' });
+        } catch (adminError: any) {
+          // This permission error is expected for all users except the first one.
+          // We can safely ignore it and let the user continue with the 'User' role.
+          if (adminError.code !== 'permission-denied') {
+            // Log any other unexpected errors during the admin role setting attempt.
+            console.error("An unexpected error occurred while trying to set admin role:", adminError);
+          }
+        }
       }
   
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
-      // Handle specific errors for better UX and DX
+      // Handle primary account creation errors
       if (error.code === 'permission-denied') {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ 
           path: `users/${error.customData?.uid || 'unknown'}`, 
@@ -149,7 +147,7 @@ export default function LoginPage() {
           requestResourceData: { email: values.email } 
         }));
       } else {
-          // For other errors (like auth/email-already-in-use), show a toast to the user.
+          // For other auth errors (like email-already-in-use), show a toast to the user.
           toast({
               variant: 'destructive',
               title: t('auth.error_title'),
