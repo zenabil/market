@@ -139,13 +139,20 @@ export default function LoginPage() {
       toast({ title: t('auth.signup_success_title') });
       router.push('/dashboard');
     } catch (error: any) {
-      // Handle primary account creation errors
-      if (error.code === 'permission-denied') {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ 
-          path: `users/${error.customData?.uid || 'unknown'}`, 
+      const permissionError = new FirestorePermissionError({ 
+          path: `users/${(error as any).customData?.uid || 'unknown'}`, 
           operation: 'create', 
           requestResourceData: { email: values.email } 
-        }));
+      });
+
+      // Handle primary account creation errors
+      if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
+        errorEmitter.emit('permission-error', permissionError);
+        toast({
+            variant: 'destructive',
+            title: t('auth.error_title'),
+            description: t('auth.signup_profile_error'),
+        });
       } else {
           // For other auth errors (like email-already-in-use), show a toast to the user.
           toast({
