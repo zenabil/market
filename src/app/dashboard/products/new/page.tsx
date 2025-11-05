@@ -56,6 +56,9 @@ export default function NewProductPage() {
       nameAr: '',
       nameEn: '',
       nameFr: '',
+      descriptionAr: '',
+      descriptionEn: '',
+      descriptionFr: '',
       price: 0,
       stock: 0,
       discount: 0,
@@ -94,7 +97,18 @@ export default function NewProductPage() {
             title: t('dashboard.product_created_success'),
             description: t('dashboard.product_created_desc', { productName: values.nameEn }),
         });
-        form.reset();
+        form.reset({
+            nameAr: '',
+            nameEn: '',
+            nameFr: '',
+            descriptionAr: '',
+            descriptionEn: '',
+            descriptionFr: '',
+            price: 0,
+            stock: 0,
+            discount: 0,
+            categoryId: undefined,
+        });
     } catch (error) {
         console.error("Error adding document: ", error);
         toast({
@@ -161,7 +175,7 @@ export default function NewProductPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" id="new-product-form">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <Card>
@@ -274,7 +288,7 @@ export default function NewProductPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('dashboard.category')}</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={t('dashboard.select_category_placeholder')} />
