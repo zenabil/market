@@ -478,12 +478,14 @@ export default function ProfilePage() {
                      </div>
                 </form>
             </Form>
-             <div className="flex justify-end mt-4">
-                <Button type="submit" form="address-form" disabled={isAddressSaving || !!addressToEdit}>
-                    {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {t('dashboard.profile.add_address_button')}
-                </Button>
-            </div>
+            {!addressToEdit && (
+                <div className="flex justify-end mt-4">
+                    <Button type="submit" form="address-form" disabled={isAddressSaving}>
+                        {isAddressSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t('dashboard.profile.add_address_button')}
+                    </Button>
+                </div>
+            )}
         </CardContent>
     </Card>
 
