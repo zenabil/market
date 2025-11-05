@@ -3,48 +3,51 @@
   "nav": {
     "home": "الرئيسية",
     "products": "المنتجات",
-    "about": "من نحن",
-    "contact": "اتصل بنا"
+    "about": "حولنا",
+    "contact": "اتصل بنا",
+    "dashboard": "لوحة التحكم"
   },
   "header": {
-    "search_placeholder": "ابحث عن منتجات...",
-    "login": "تسجيل الدخول",
-    "account": "حسابي"
+    "search_placeholder": "ابحث عن منتجات..."
+  },
+  "footer": {
+    "slogan": "بقالتك المحلية في تلمسان، الآن عبر الإنترنت بميزات ذكية.",
+    "quick_links": "روابط سريعة",
+    "legal": "قانوني",
+    "follow_us": "تابعنا",
+    "privacy_policy": "سياسة الخصوصية",
+    "terms_of_service": "شروط الخدمة",
+    "copyright": "كل الحقوق محفوظة."
   },
   "hero": {
-    "slide1_heading": "نضارة لا تضاهى، تصلك حتى بابك",
-    "slide1_subheading": "أفضل المنتجات المحلية والمستوردة مباشرة إلى عتبة داركم.",
-    "slide2_heading": "عروض وصفقات أسبوعية",
-    "slide2_subheading": "وفّر الكثير على منتجاتك المفضلة كل أسبوع.",
-    "slide3_heading": "نكهات تلمسان الأصيلة",
-    "slide3_subheading": "اكتشف وادعم الحرفيين والمنتجين المحليين.",
-    "shop_now": "تسوّق الآن"
+    "slide1_heading": "منتجات طازجة تصل إلى باب منزلك",
+    "slide1_subheading": "أفضل الفواكه والخضروات والمزيد، يتم توصيلها يوميًا.",
+    "slide2_heading": "عروض حصرية عبر الإنترنت",
+    "slide2_subheading": "تسوق أسبوعيًا ووفر الكثير على مشترياتك.",
+    "slide3_heading": "اكتشف مخبوزاتنا الحرفية",
+    "slide3_subheading": "خبز ومعجنات طازجة ومخبوزة بحب.",
+    "shop_now": "تسوق الآن"
   },
   "homepage": {
-    "categories": "تسوّق حسب الفئة",
-    "best_sellers": "الأكثر مبيعاً",
+    "categories": "تسوق حسب الفئة",
+    "best_sellers": "الأكثر مبيعًا",
     "exclusive_offers": "عروض حصرية"
   },
   "cart": {
+    "shopping_cart": "عربة التسوق",
+    "empty_cart": "عربة التسوق فارغة.",
     "add_to_cart": "أضف إلى السلة",
-    "added_to_cart_title": "أُضيف المنتج",
-    "added_to_cart_desc": "تمت إضافته إلى سلتك.",
-    "shopping_cart": "سلة المشتريات",
-    "empty_cart": "سلتك فارغة حالياً.",
+    "added_to_cart_title": "تمت الإضافة إلى السلة!",
+    "added_to_cart_desc": "تمت إضافته إلى عربة التسوق الخاصة بك.",
     "subtotal": "المجموع الفرعي",
-    "checkout": "متابعة للدفع",
-    "view_cart": "عرض السلة"
+    "checkout": "الدفع"
   },
-  "footer": {
-    "slogan": "نضارتك اليومية، بنقرة واحدة.",
-    "quick_links": "روابط سريعة",
-    "legal": "قانوني",
-    "privacy_policy": "سياسة الخصوصية",
-    "terms_of_service": "شروط الخدمة",
-    "follow_us": "تابعنا",
-    "copyright": "جميع الحقوق محفوظة."
-  },
-  "product": {
-    "sold": "مباع"
+  "dashboard": {
+    "title": "لوحة تحكم المشرف",
+    "total_revenue": "إجمالي الإيرادات",
+    "products_sold": "المنتجات المباعة",
+    "products_in_stock": "المنتجات في المخزون",
+    "top_selling_products": "المنتجات الأكثر مبيعًا",
+    "units_sold": "الوحدات المباعة"
   }
 }

@@ -3,48 +3,51 @@
   "nav": {
     "home": "Home",
     "products": "Products",
-    "about": "About Us",
-    "contact": "Contact"
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard"
   },
   "header": {
-    "search_placeholder": "Search for products...",
-    "login": "Log In",
-    "account": "My Account"
+    "search_placeholder": "Search for products..."
+  },
+  "footer": {
+    "slogan": "Your local supermarket in Tlemcen, now online with smart features.",
+    "quick_links": "Quick Links",
+    "legal": "Legal",
+    "follow_us": "Follow Us",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "copyright": "All rights reserved."
   },
   "hero": {
-    "slide1_heading": "Unbeatable Freshness, Delivered",
-    "slide1_subheading": "The best local and imported products right to your doorstep.",
-    "slide2_heading": "Weekly Deals & Offers",
-    "slide2_subheading": "Save big on your favorite items every single week.",
-    "slide3_heading": "Authentic Tlemcen Flavors",
-    "slide3_subheading": "Discover and support local artisans and producers.",
+    "slide1_heading": "Fresh Groceries to Your Doorstep",
+    "slide1_subheading": "The best fruits, vegetables, and more, delivered daily.",
+    "slide2_heading": "Exclusive Online Offers",
+    "slide2_subheading": "Shop our weekly deals and save big on your groceries.",
+    "slide3_heading": "Discover Our Artisan Bakery",
+    "slide3_subheading": "Fresh bread and pastries, baked with love.",
     "shop_now": "Shop Now"
   },
   "homepage": {
     "categories": "Shop by Category",
-    "best_sellers": "Our Best Sellers",
+    "best_sellers": "Best Sellers",
     "exclusive_offers": "Exclusive Offers"
   },
   "cart": {
-    "add_to_cart": "Add to Cart",
-    "added_to_cart_title": "Product Added",
-    "added_to_cart_desc": "has been added to your cart.",
     "shopping_cart": "Shopping Cart",
-    "empty_cart": "Your cart is currently empty.",
+    "empty_cart": "Your cart is empty.",
+    "add_to_cart": "Add to Cart",
+    "added_to_cart_title": "Added to Cart!",
+    "added_to_cart_desc": "has been added to your cart.",
     "subtotal": "Subtotal",
-    "checkout": "Proceed to Checkout",
-    "view_cart": "View Cart"
+    "checkout": "Checkout"
   },
-  "footer": {
-    "slogan": "Your daily freshness, just a click away.",
-    "quick_links": "Quick Links",
-    "legal": "Legal",
-    "privacy_policy": "Privacy Policy",
-    "terms_of_service": "Terms of Service",
-    "follow_us": "Follow Us",
-    "copyright": "All rights reserved."
-  },
-  "product": {
-    "sold": "sold"
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "total_revenue": "Total Revenue",
+    "products_sold": "Products Sold",
+    "products_in_stock": "Products in Stock",
+    "top_selling_products": "Top Selling Products",
+    "units_sold": "Units Sold"
   }
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Menu } from 'lucide-react';
+import { Search, Menu, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const navLinks = [
   { key: 'nav.products', href: '/products' },
   { key: 'nav.about', href: '/about' },
   { key: 'nav.contact', href: '/contact' },
+  { key: 'nav.dashboard', href: '/dashboard' },
 ];
 
 export default function Header() {

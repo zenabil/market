@@ -1,50 +1,53 @@
 {
-  "site_name": "Supermarché Intelligent de Tlemcen",
+  "site_name": "Tlemcen Smart Supermarché",
   "nav": {
     "home": "Accueil",
     "products": "Produits",
     "about": "À propos",
-    "contact": "Contact"
+    "contact": "Contact",
+    "dashboard": "Tableau de Bord"
   },
   "header": {
-    "search_placeholder": "Rechercher des produits...",
-    "login": "Connexion",
-    "account": "Mon Compte"
+    "search_placeholder": "Rechercher des produits..."
+  },
+  "footer": {
+    "slogan": "Votre supermarché local à Tlemcen, maintenant en ligne avec des fonctionnalités intelligentes.",
+    "quick_links": "Liens Rapides",
+    "legal": "Légal",
+    "follow_us": "Suivez-nous",
+    "privacy_policy": "Politique de Confidentialité",
+    "terms_of_service": "Conditions d'Utilisation",
+    "copyright": "Tous droits réservés."
   },
   "hero": {
-    "slide1_heading": "Fraîcheur Inégalée, Livrée",
-    "slide1_subheading": "Les meilleurs produits locaux et importés directement chez vous.",
-    "slide2_heading": "Promotions et Offres Hebdomadaires",
-    "slide2_subheading": "Économisez gros sur vos articles préférés chaque semaine.",
-    "slide3_heading": "Saveurs Authentiques de Tlemcen",
-    "slide3_subheading": "Découvrez et soutenez les artisans et producteurs locaux.",
+    "slide1_heading": "Des Produits Frais à Votre Porte",
+    "slide1_subheading": "Les meilleurs fruits, légumes et plus encore, livrés quotidiennement.",
+    "slide2_heading": "Offres Exclusives en Ligne",
+    "slide2_subheading": "Profitez de nos offres hebdomadaires et économisez gros sur vos courses.",
+    "slide3_heading": "Découvrez Notre Boulangerie Artisanale",
+    "slide3_subheading": "Du pain et des pâtisseries frais, faits avec amour.",
     "shop_now": "Acheter Maintenant"
   },
   "homepage": {
     "categories": "Acheter par Catégorie",
-    "best_sellers": "Nos Meilleures Ventes",
+    "best_sellers": "Meilleures Ventes",
     "exclusive_offers": "Offres Exclusives"
   },
   "cart": {
+    "shopping_cart": "Panier d'achat",
+    "empty_cart": "Votre panier est vide.",
     "add_to_cart": "Ajouter au Panier",
-    "added_to_cart_title": "Produit Ajouté",
+    "added_to_cart_title": "Ajouté au panier!",
     "added_to_cart_desc": "a été ajouté à votre panier.",
-    "shopping_cart": "Panier d'Achat",
-    "empty_cart": "Votre panier est actuellement vide.",
     "subtotal": "Sous-total",
-    "checkout": "Passer à la Caisse",
-    "view_cart": "Voir le Panier"
+    "checkout": "Passer à la caisse"
   },
-  "footer": {
-    "slogan": "Votre fraîcheur quotidienne, à portée de clic.",
-    "quick_links": "Liens Rapides",
-    "legal": "Légal",
-    "privacy_policy": "Politique de Confidentialité",
-    "terms_of_service": "Conditions d'Utilisation",
-    "follow_us": "Suivez-nous",
-    "copyright": "Tous droits réservés."
-  },
-  "product": {
-    "sold": "vendu"
+  "dashboard": {
+    "title": "Tableau de Bord Administrateur",
+    "total_revenue": "Revenu Total",
+    "products_sold": "Produits Vendus",
+    "products_in_stock": "Produits en Stock",
+    "top_selling_products": "Meilleures Ventes de Produits",
+    "units_sold": "Unités Vendues"
   }
 }
