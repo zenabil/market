@@ -26,6 +26,7 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -33,9 +34,9 @@ import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { useAuth, useUser as useAuthUser } from '@/firebase';
 
-
-const menuItems = [
+const adminMenuItems = [
   {
     key: 'dashboard.nav.overview',
     href: '/dashboard',
@@ -78,12 +79,47 @@ const menuItems = [
   },
 ];
 
+const userMenuItems = [
+    {
+        key: 'nav.my_orders',
+        href: '/dashboard/orders',
+        icon: ShoppingBasket,
+    },
+    {
+        key: 'nav.my_profile',
+        href: '/dashboard/profile',
+        icon: User,
+    }
+]
+
+
 function DashboardSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { state, open, setOpen } = useSidebar();
+  const { state, setOpen } = useSidebar();
+  const { user, isUserLoading } = useAuthUser();
+  const auth = useAuth();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+        if (user) {
+            const token = await user.getIdTokenResult();
+            setIsAdmin(!!token.claims.admin);
+        }
+    }
+    if(!isUserLoading){
+        checkAdmin();
+    }
+  }, [user, isUserLoading]);
+  
+  const handleLogout = async () => {
+    await auth.signOut();
+  };
+
 
   const isCollapsed = state === 'collapsed';
+  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
   return (
     <Sidebar
@@ -104,7 +140,7 @@ function DashboardSidebar() {
             <SidebarMenuItem key={item.key}>
               <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}
                   tooltip={{ content: t(item.key) }}
                   className={cn(isCollapsed && 'justify-center')}
                 >
@@ -119,17 +155,17 @@ function DashboardSidebar() {
       <SidebarFooter className="p-2">
         <div className={cn('flex items-center gap-2 p-2 rounded-md bg-muted', isCollapsed && 'justify-center p-0 bg-transparent')}>
            <Avatar className="h-9 w-9">
-              <AvatarImage src="https://picsum.photos/seed/admin/100/100" alt="Admin" />
-              <AvatarFallback>A</AvatarFallback>
+              <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/100/100`} alt={user?.displayName || 'User'} />
+              <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className={cn('flex flex-col', isCollapsed && 'hidden')}>
-              <span className='text-sm font-semibold'>Admin User</span>
-              <span className='text-xs text-muted-foreground'>admin@example.com</span>
+              <span className='text-sm font-semibold'>{user?.displayName || 'User'}</span>
+              <span className='text-xs text-muted-foreground'>{user?.email}</span>
             </div>
         </div>
         <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton className={cn(isCollapsed && 'justify-center')}>
+                <SidebarMenuButton onClick={handleLogout} className={cn(isCollapsed && 'justify-center')}>
                     <LogOut />
                     <span className={cn(isCollapsed && 'hidden')}>{t('dashboard.nav.logout')}</span>
                 </SidebarMenuButton>
