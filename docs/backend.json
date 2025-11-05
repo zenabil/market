@@ -76,12 +76,8 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
-      "description": "Represents a category of products.",
+      "description": "Represents a category of products. The document ID is the category's unique identifier.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the category."
-        },
         "name": {
           "type": "object",
           "properties": {
@@ -106,7 +102,6 @@
         }
       },
       "required": [
-        "id",
         "name",
         "image"
       ]

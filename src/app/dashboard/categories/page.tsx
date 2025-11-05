@@ -43,12 +43,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
 import { useCategories } from '@/hooks/use-categories';
+import type { Category } from '@/lib/placeholder-data';
 
-type Category = {
-  id: string;
-  name: { ar: string; fr: string; en: string };
-  image: string;
-};
 
 const categoryFormSchema = z.object({
   nameAr: z.string().min(2, { message: 'Arabic name is required.' }),
@@ -90,7 +86,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
         image: 'https://picsum.photos/seed/' + Date.now() + '/400/400',
       });
     }
-  }, [category, form]);
+  }, [category, form, isOpen]); // Rerun when dialog opens
 
   async function onSubmit(values: z.infer<typeof categoryFormSchema>) {
     if (!firestore) return;
@@ -107,7 +103,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
     
     const actionPromise = category 
         ? updateDoc(doc(firestore, 'categories', category.id), categoryData)
-        : addDoc(collection(firestore, 'categories'), { ...categoryData, id: `cat-${Date.now()}`});
+        : addDoc(collection(firestore, 'categories'), categoryData);
 
     actionPromise
       .then(() => {
@@ -190,7 +186,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
 export default function CategoriesPage() {
   const { t, locale } = useLanguage();
   const firestore = useFirestore();
-  const { categories, areCategoriesLoading } = useCategories();
+  const { categories, areCategoriesLoading, refetchCategories } = useCategories();
   const [categoryToDelete, setCategoryToDelete] = React.useState<Category | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
@@ -198,6 +194,9 @@ export default function CategoriesPage() {
     if (categoryToDelete && firestore) {
       const categoryDocRef = doc(firestore, 'categories', categoryToDelete.id);
       deleteDoc(categoryDocRef)
+        .then(() => {
+          refetchCategories();
+        })
         .catch(error => {
             errorEmitter.emit(
                 'permission-error',
@@ -226,7 +225,7 @@ export default function CategoriesPage() {
                 <CardTitle>{t('dashboard.nav.categories')}</CardTitle>
                 <CardDescription>{t('dashboard.categories.description')}</CardDescription>
               </div>
-              <CategoryDialog onActionComplete={() => { /* Could refetch here */ }} />
+              <CategoryDialog onActionComplete={refetchCategories} />
             </CardHeader>
             <CardContent>
               <Table>
@@ -260,7 +259,7 @@ export default function CategoriesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                               <CategoryDialog category={category} onActionComplete={() => {}} />
+                               <CategoryDialog category={category} onActionComplete={refetchCategories} />
                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 {t('dashboard.delete')}

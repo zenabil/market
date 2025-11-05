@@ -15,7 +15,7 @@ export type Product = {
 };
 
 export type Category = {
-  id: string;
+  id: string; // This is the Firestore document ID
   name: { ar: string; fr: string; en: string };
   image: string;
 };
