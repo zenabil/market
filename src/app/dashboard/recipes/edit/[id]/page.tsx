@@ -91,6 +91,14 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      titleAr: '', titleEn: '', titleFr: '',
+      descriptionAr: '', descriptionEn: '', descriptionFr: '',
+      image: '',
+      prepTime: 0, cookTime: 0, servings: 1,
+      ingredients: [{ value: '' }],
+      instructions: [{ value: '' }],
+    },
   });
 
   useEffect(() => {
@@ -248,5 +256,3 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
 export default function EditRecipePage({ params }: { params: { id: string } }) {
   return <EditRecipeForm recipeId={params.id} />
 }
-
-    
