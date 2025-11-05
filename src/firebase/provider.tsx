@@ -1,8 +1,8 @@
 'use client';
 
-import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore, Query, CollectionReference, DocumentReference } from 'firebase/firestore';
+import { Firestore } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
 
@@ -153,26 +153,6 @@ export const useFirebaseApp = (): FirebaseApp => {
   const { firebaseApp } = useFirebase();
   return firebaseApp;
 };
-
-type MemoFirebase<T> = T & {__memo?: boolean};
-
-export function useMemoFirebase<T extends Query | CollectionReference | DocumentReference | null | undefined>(factory: () => T, deps: DependencyList): T {
-    const memoized = useMemo(factory, deps);
-
-    if (memoized && (typeof memoized === 'object')) {
-        // Here we are marking the object with a non-enumerable property
-        // This is a bit of a hack, but it's a way to track if the object was created by this hook
-        Object.defineProperty(memoized, '__memo', {
-            value: true,
-            writable: false,
-            enumerable: false,
-            configurable: false,
-        });
-    }
-
-    return memoized;
-}
-
 
 /**
  * Hook specifically for accessing the authenticated user's state.
