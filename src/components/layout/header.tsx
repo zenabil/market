@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Menu, User, LogOut } from 'lucide-react';
+import { Search, Menu, User, LogOut, ShoppingBasket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
@@ -93,10 +94,18 @@ function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-            <Link href="/dashboard">
-                {t('nav.dashboard')}
+            <Link href="/dashboard/orders">
+                <ShoppingBasket className="mr-2 h-4 w-4" />
+                <span>{t('nav.my_orders')}</span>
             </Link>
         </DropdownMenuItem>
+        {firestoreUser?.role === 'Admin' && (
+            <DropdownMenuItem asChild>
+                <Link href="/dashboard">
+                    {t('nav.dashboard')}
+                </Link>
+            </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
