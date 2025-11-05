@@ -10,14 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
-import { ShoppingCart, Plus, Minus, Star } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Star, Heart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, where, limit, documentId } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
 import ProductReviews from '@/components/product/product-reviews';
+import { useWishlist } from '@/hooks/use-wishlist';
+import { cn } from '@/lib/utils';
 
 
 function ProductDetails({ productId }: { productId: string }) {
@@ -25,12 +27,16 @@ function ProductDetails({ productId }: { productId: string }) {
   const { addItem, updateQuantity: updateCartQuantity } = useCart();
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { wishlist, toggleWishlist, isWishlistLoading } = useWishlist();
 
   const productRef = useMemoFirebase(() => {
       if (!firestore || !productId) return null;
       return doc(firestore, 'products', productId);
   }, [firestore, productId]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
+
+  const isWishlisted = !!wishlist?.find(item => item.id === productId);
 
   const relatedProductsQuery = useMemoFirebase(() => {
     if (!firestore || !product?.categoryId) return null;
@@ -93,6 +99,18 @@ function ProductDetails({ productId }: { productId: string }) {
       title: t('cart.added_to_cart_title'),
       description: `${product.name[locale]} (${quantity}) ${t('cart.added_to_cart_desc')}`,
     });
+  };
+
+  const handleWishlistToggle = () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: t('wishlist.login_required_title'),
+        description: t('wishlist.login_required_desc'),
+      });
+      return;
+    }
+    toggleWishlist(productId);
   };
 
   const updateQuantity = (newQuantity: number) => {
@@ -180,6 +198,9 @@ function ProductDetails({ productId }: { productId: string }) {
             <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
               <ShoppingCart className="mr-2 h-5 w-5" />
               {product.stock === 0 ? t('product.out_of_stock') : t('cart.add_to_cart')}
+            </Button>
+             <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
+                <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
             </Button>
           </div>
            <p className="text-sm text-muted-foreground mt-2">

@@ -77,6 +77,12 @@ export type Review = {
     createdAt: string; // ISO string
 };
 
+export type WishlistItem = {
+    id: string; // This is the product ID
+    productId: string;
+    addedAt: string; // ISO string
+};
+
 
 // Placeholder data is no longer the source of truth for products, categories, or users.
 // It will be fetched from Firestore. This array can be kept for reference or removed.

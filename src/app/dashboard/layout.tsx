@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   User,
   LayoutGrid,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -86,6 +87,11 @@ const userMenuItems = [
         key: 'nav.my_orders',
         href: '/dashboard/orders',
         icon: ShoppingBasket,
+    },
+    {
+        key: 'nav.my_wishlist',
+        href: '/dashboard/wishlist',
+        icon: Heart,
     },
     {
         key: 'nav.my_profile',

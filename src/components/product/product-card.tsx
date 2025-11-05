@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,9 @@ import type { Product } from '@/lib/placeholder-data';
 import { useLanguage } from '@/hooks/use-language';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
+import { useWishlist } from '@/hooks/use-wishlist';
+import { useUser } from '@/firebase';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -20,14 +23,33 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { locale, t } = useLanguage();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { user } = useUser();
+  const { wishlist, toggleWishlist, isWishlistLoading } = useWishlist();
+
+  const isWishlisted = !!wishlist?.find(item => item.id === product.id);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     addItem(product);
     toast({
       title: t('cart.added_to_cart_title'),
       description: `${product.name[locale]} ${t('cart.added_to_cart_desc')}`,
     });
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: t('wishlist.login_required_title'),
+        description: t('wishlist.login_required_desc'),
+      });
+      return;
+    }
+    toggleWishlist(product.id);
   };
 
   const formatCurrency = (amount: number) => {
@@ -48,6 +70,15 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="object-cover"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-2 left-2 bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75"
+              onClick={handleWishlistToggle}
+              disabled={isWishlistLoading}
+            >
+              <Heart className={cn("h-5 w-5 text-muted-foreground", isWishlisted && "fill-destructive text-destructive")} />
+            </Button>
             {product.discount > 0 && (
               <Badge variant="destructive" className="absolute top-2 right-2">
                 -{product.discount}%
