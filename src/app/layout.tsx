@@ -39,9 +39,12 @@ export async function generateMetadata(
   }
 
   return {
-    title: siteName,
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
     description: siteDescription,
-  }
+  };
 }
 
 
