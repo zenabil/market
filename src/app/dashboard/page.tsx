@@ -6,13 +6,17 @@ import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
-import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
+import type { Product } from '@/lib/placeholder-data';
 
 export default function DashboardPage() {
   const { t, locale, direction } = useLanguage();
   const firestore = useFirestore();
-  const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
+  const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'products'));
+  }, [firestore]);
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   const stats = React.useMemo(() => {
@@ -21,24 +25,26 @@ export default function DashboardPage() {
         totalRevenue: 0,
         totalProductsSold: 0,
         topSellingProducts: [],
+        productsInStock: 0,
       };
     }
     const totalRevenue = products.reduce((acc, product) => {
       const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
-      return acc + discountedPrice * product.sold;
+      return acc + discountedPrice * (product.sold || 0);
     }, 0);
 
-    const totalProductsSold = products.reduce((acc, product) => acc + product.sold, 0);
+    const totalProductsSold = products.reduce((acc, product) => acc + (product.sold || 0), 0);
 
     const topSellingProducts = [...products]
-      .sort((a, b) => b.sold - a.sold)
+      .filter(p => p.sold > 0)
+      .sort((a, b) => (b.sold || 0) - (a.sold || 0))
       .slice(0, 5)
       .map(p => ({
-        name: p.name[locale],
+        name: p.name[locale] || p.name.en,
         sold: p.sold,
       }));
     
-    return { totalRevenue, totalProductsSold, topSellingProducts };
+    return { totalRevenue, totalProductsSold, topSellingProducts, productsInStock: products.length };
   }, [products, locale]);
 
 
@@ -126,7 +132,7 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{products?.length || 0}</div>}
+            {isLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{stats.productsInStock}</div>}
           </CardContent>
         </Card>
       </div>
@@ -141,25 +147,30 @@ export default function DashboardPage() {
                 <div className="min-h-[350px] w-full flex items-center justify-center">
                     <Skeleton className="h-[300px] w-[95%]" />
                 </div>
-            ) : (
+            ) : stats.topSellingProducts.length > 0 ? (
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={stats.topSellingProducts} layout="vertical" dir={direction}>
+                    <BarChart data={stats.topSellingProducts} layout="vertical" dir={direction} margin={{ right: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
+                    <XAxis type="number" allowDecimals={false} />
                     <YAxis
                         dataKey="name"
                         type="category"
                         width={150}
                         tickLine={false}
                         axisLine={false}
-                        tick={{ dx: -5 }}
+                        tick={{ dx: direction === 'rtl' ? 5 : -5, fontSize: '12px' }}
+                        interval={0}
                     />
                     <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
                     <Bar dataKey="sold" fill="var(--color-sold)" radius={4} />
                     </BarChart>
                 </ResponsiveContainer>
                 </ChartContainer>
+            ) : (
+              <div className="text-center p-8 text-muted-foreground">
+                {t('dashboard.no_sales_data')}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -167,3 +178,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
