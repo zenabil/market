@@ -34,7 +34,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
                     <p className="text-muted-foreground text-sm line-clamp-3">{recipe.description[locale]}</p>
                      <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        <span>{t('recipes.total_time', { minutes: totalTime })}</span>
+                        <span>{t('recipes.total_time')} {totalTime} {t('recipes.minutes_short')}</span>
                     </div>
                 </CardContent>
             </Card>
@@ -76,5 +76,3 @@ export default function RecipesPage() {
         </div>
     );
 }
-
-    
