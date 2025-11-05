@@ -11,6 +11,7 @@ import React from 'react';
 import type { Product } from '@/lib/placeholder-data';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useUserRole } from '@/hooks/use-user-role';
 
 function AdminDashboard() {
   const { t, locale, direction } = useLanguage();
@@ -184,34 +185,22 @@ function AdminDashboard() {
 export default function DashboardPage() {
     const { t } = useLanguage();
     const { user, isUserLoading } = useUser();
-    const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
+    const { isAdmin, isRoleLoading } = useUserRole();
     const router = useRouter();
-
+    
     React.useEffect(() => {
-        const checkAdminStatus = async () => {
-            if (user) {
-                try {
-                    const tokenResult = await user.getIdTokenResult();
-                    const isAdminClaim = !!tokenResult.claims.admin;
-                    setIsAdmin(isAdminClaim);
-                    if (!isAdminClaim) {
-                        router.replace('/dashboard/orders');
-                    }
-                } catch (error) {
-                    console.error("Error getting user token:", error);
-                    setIsAdmin(false);
-                    router.replace('/dashboard/orders');
-                }
-            } else if (!isUserLoading) {
-                // If there's no user and we're not loading, they need to log in.
-                router.replace('/login');
-            }
-        };
-        checkAdminStatus();
-    }, [user, isUserLoading, router]);
+        if (isRoleLoading || isUserLoading) {
+            return; // Wait until we know the user's status
+        }
+        if (!user) {
+            router.replace('/login');
+        } else if (!isAdmin) {
+            router.replace('/dashboard/orders');
+        }
+    }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
     // Show a loading indicator while we verify auth and admin status.
-    if (isUserLoading || isAdmin === null) {
+    if (isUserLoading || isRoleLoading) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
                 <div className="flex items-center gap-2 text-muted-foreground">
