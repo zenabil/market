@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { collection, query, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/lib/placeholder-data';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ function DiscountRow({ product }: { product: Product }) {
     const { locale, t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
-    const [discount, setDiscount] = React.useState(product.discount);
+    const [discount, setDiscount] = React.useState(product.discount || 0);
     const [isUpdating, setIsUpdating] = React.useState(false);
 
     const productRef = doc(firestore, 'products', product.id);
@@ -54,15 +54,15 @@ function DiscountRow({ product }: { product: Product }) {
     };
 
     const originalPrice = product.price;
-    const discountedPrice = product.price * (1 - discount / 100);
+    const discountedPrice = product.price * (1 - (discount || 0) / 100);
 
     return (
         <TableRow>
             <TableCell className="font-medium">{product.name[locale]}</TableCell>
             <TableCell>
-                <span className="text-muted-foreground line-through">{formatCurrency(originalPrice)}</span>
+                <span className={cn("text-muted-foreground", discount > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
             </TableCell>
-            <TableCell className="font-semibold text-primary">
+            <TableCell className={cn("font-semibold", discount > 0 && "text-primary")}>
                 {formatCurrency(discountedPrice)}
             </TableCell>
             <TableCell>
@@ -79,12 +79,14 @@ function DiscountRow({ product }: { product: Product }) {
                 </div>
             </TableCell>
             <TableCell className="text-right space-x-2">
-                <Button size="sm" onClick={handleUpdateDiscount} disabled={isUpdating}>
+                <Button size="sm" onClick={handleUpdateDiscount} disabled={isUpdating || discount === product.discount}>
                     {t('dashboard.discounts.update')}
                 </Button>
-                 <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
-                    <Trash2 className="h-4 w-4" />
-                 </Button>
+                 {discount > 0 && (
+                    <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                 )}
             </TableCell>
         </TableRow>
     );
@@ -94,12 +96,12 @@ export default function DiscountsPage() {
     const { t } = useLanguage();
     const firestore = useFirestore();
 
-    const discountedProductsQuery = useMemoFirebase(() => {
+    const allProductsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, 'products'), where('discount', '>', 0));
+        return query(collection(firestore, 'products'));
     }, [firestore]);
 
-    const { data: products, isLoading } = useCollection<Product>(discountedProductsQuery);
+    const { data: products, isLoading } = useCollection<Product>(allProductsQuery);
 
     return (
         <div className="container py-8 md:py-12">
@@ -120,7 +122,7 @@ export default function DiscountsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {isLoading && Array.from({ length: 3 }).map((_, i) => (
+                            {isLoading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
                                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
@@ -136,7 +138,7 @@ export default function DiscountsPage() {
                     </Table>
                     {!isLoading && products?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
-                            {t('dashboard.discounts.no_discounts')}
+                            {t('dashboard.no_products_found')}
                         </div>
                     )}
                 </CardContent>
