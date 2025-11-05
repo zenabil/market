@@ -147,6 +147,7 @@ export default function CouponsPage() {
   const couponsQuery = useMemoFirebase(() => query(collection(firestore, 'coupons')), [firestore]);
   const { data: coupons, isLoading, error } = useCollection<Coupon>(couponsQuery);
   const [couponToDelete, setCouponToDelete] = React.useState<Coupon | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(locale, {
@@ -162,11 +163,17 @@ export default function CouponsPage() {
       deleteDocumentNonBlocking(couponDocRef);
       setCouponToDelete(null);
     }
+    setIsAlertOpen(false);
   };
+  
+  const openDeleteDialog = (coupon: Coupon) => {
+    setCouponToDelete(coupon);
+    setIsAlertOpen(true);
+  }
 
   return (
     <div className="container py-8 md:py-12">
-        <AlertDialog>
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -215,12 +222,10 @@ export default function CouponsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <AlertDialogTrigger asChild>
-                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive" onClick={() => setCouponToDelete(coupon)}>
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  {t('dashboard.delete')}
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
+                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t('dashboard.delete')}
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                       </TableCell>
