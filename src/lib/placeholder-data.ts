@@ -20,6 +20,14 @@ export type Category = {
   image: string;
 };
 
+export type Address = {
+  id: string;
+  street: string;
+  city: string;
+  zipCode: string;
+  country: string;
+};
+
 export type User = {
   id: string;
   name: string;
@@ -29,6 +37,7 @@ export type User = {
   orderCount: number;
   totalSpent: number;
   role: 'User' | 'Admin';
+  addresses?: Address[];
 };
 
 export type Order = {
