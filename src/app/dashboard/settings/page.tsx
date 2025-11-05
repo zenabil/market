@@ -95,7 +95,7 @@ export default function SettingsPage() {
                 'permission-error',
                 new FirestorePermissionError({
                     path: settingsRef.path,
-                    operation: 'write',
+                    operation: 'update',
                     requestResourceData: values,
                 })
             );
