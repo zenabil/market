@@ -243,30 +243,28 @@ export default function ProfilePage() {
     }
   }
 
-  async function deleteAddress(addressToDelete: Address) {
-    if (!userDocRef || !firestore) return;
-
-    try {
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-            const userData = userDoc.data() as FirestoreUser;
-            const currentAddresses = userData.addresses || [];
-            const updatedAddresses = currentAddresses.filter(addr => addr.id !== addressToDelete.id);
-            
-            await updateDoc(userDocRef, { addresses: updatedAddresses });
-            toast({ title: t('dashboard.profile.address_removed_title') });
-        }
-    } catch (error) {
-        errorEmitter.emit(
-            'permission-error',
-            new FirestorePermissionError({
-                path: userDocRef.path,
-                operation: 'update',
-                requestResourceData: { addresses: '...filtered array...' }
-            })
-        );
-    }
-}
+  function deleteAddress(addressToDelete: Address) {
+    if (!userDocRef) return;
+  
+    // Use arrayRemove to delete the specific address object from the array.
+    updateDoc(userDocRef, {
+      addresses: arrayRemove(addressToDelete)
+    })
+    .then(() => {
+      toast({ title: t('dashboard.profile.address_removed_title') });
+    })
+    .catch((error) => {
+      // If the update fails (e.g., due to permissions), emit a structured error.
+      errorEmitter.emit(
+        'permission-error',
+        new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'update',
+          requestResourceData: { addresses: `arrayRemove operation for address id: ${addressToDelete.id}` }
+        })
+      );
+    });
+  }
 
   const openAddressDialog = (address: Address | null) => {
     setAddressToEdit(address);
