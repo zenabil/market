@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 import { Input } from '../ui/input';
+import Link from 'next/link';
 
 interface CartSheetProps {
   open: boolean;
@@ -107,7 +108,9 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <SheetClose asChild>
-                <Button className="w-full font-bold text-base py-6">{t('cart.checkout')}</Button>
+                <Button asChild className="w-full font-bold text-base py-6">
+                  <Link href="/checkout">{t('cart.checkout')}</Link>
+                </Button>
               </SheetClose>
             </SheetFooter>
           </>
