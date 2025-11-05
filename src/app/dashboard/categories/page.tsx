@@ -218,78 +218,79 @@ export default function CategoriesPage() {
 
   return (
     <div className="container py-8 md:py-12">
+        <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+            <CardTitle>{t('dashboard.nav.categories')}</CardTitle>
+            <CardDescription>{t('dashboard.categories.description')}</CardDescription>
+            </div>
+            <CategoryDialog onActionComplete={refetchCategories} />
+        </CardHeader>
+        <CardContent>
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead>{t('dashboard.categories.image')}</TableHead>
+                <TableHead>{t('dashboard.categories.name')}</TableHead>
+                <TableHead><span className="sr-only">{t('dashboard.actions')}</span></TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {areCategoriesLoading && Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}>
+                    <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                </TableRow>
+                ))}
+                {categories && categories.map(category => (
+                <TableRow key={category.id}>
+                    <TableCell>
+                        <Image src={category.image} alt={category.name[locale]} width={40} height={40} className="rounded-md object-cover" />
+                    </TableCell>
+                    <TableCell className="font-medium">{category.name[locale]}</TableCell>
+                    <TableCell className="text-right">
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">{t('dashboard.toggle_menu')}</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <CategoryDialog category={category} onActionComplete={refetchCategories} />
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t('dashboard.delete')}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                </TableRow>
+                ))}
+            </TableBody>
+            </Table>
+            {!areCategoriesLoading && categories?.length === 0 && (
+            <div className="text-center p-8 text-muted-foreground">
+                {t('dashboard.categories.no_categories')}
+            </div>
+            )}
+        </CardContent>
+        </Card>
+        
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>{t('dashboard.nav.categories')}</CardTitle>
-                <CardDescription>{t('dashboard.categories.description')}</CardDescription>
-              </div>
-              <CategoryDialog onActionComplete={refetchCategories} />
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('dashboard.categories.image')}</TableHead>
-                    <TableHead>{t('dashboard.categories.name')}</TableHead>
-                    <TableHead><span className="sr-only">{t('dashboard.actions')}</span></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {areCategoriesLoading && Array.from({ length: 3 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                      <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                    </TableRow>
-                  ))}
-                  {categories && categories.map(category => (
-                    <TableRow key={category.id}>
-                        <TableCell>
-                            <Image src={category.image} alt={category.name[locale]} width={40} height={40} className="rounded-md object-cover" />
-                        </TableCell>
-                      <TableCell className="font-medium">{category.name[locale]}</TableCell>
-                      <TableCell className="text-right">
-                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">{t('dashboard.toggle_menu')}</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                               <CategoryDialog category={category} onActionComplete={refetchCategories} />
-                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {t('dashboard.delete')}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {!areCategoriesLoading && categories?.length === 0 && (
-                <div className="text-center p-8 text-muted-foreground">
-                  {t('dashboard.categories.no_categories')}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('dashboard.categories.delete_confirmation_title')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('dashboard.categories.delete_confirmation_desc', { categoryName: categoryToDelete?.name[locale] || '' })}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteCategory}>{t('dashboard.delete')}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>{t('dashboard.categories.delete_confirmation_title')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                    {t('dashboard.categories.delete_confirmation_desc', { categoryName: categoryToDelete?.name[locale] || '' })}
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>{t('dashboard.cancel')}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteCategory}>{t('dashboard.delete')}</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
         </AlertDialog>
     </div>
   );
