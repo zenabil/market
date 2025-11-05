@@ -55,22 +55,32 @@ function RecommendedProducts() {
             setIsLoading(false);
         }
     }, [user, viewedProducts]);
-
-    const recommendedProductsQuery = useMemoFirebase(() => {
+    
+    // Fetch all products to filter locally, as Firestore doesn't support OR queries on different fields.
+    const allProductsQuery = useMemoFirebase(() => {
         if (!firestore || recommendedProductNames.length === 0) return null;
-        // The AI might return names in any language. We search across all of them.
-        const searchTerms = recommendedProductNames.slice(0, 10);
-        return query(
-            collection(firestore, 'products'), 
-            where('name.en', 'in', searchTerms)
-        );
-    }, [firestore, recommendedProductNames]);
+        return query(collection(firestore, 'products'));
+    }, [firestore, recommendedProductNames.length > 0]);
 
-    const { data: products, isLoading: areProductsLoading } = useCollection<Product>(recommendedProductsQuery);
+    const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(allProductsQuery);
+
+    const recommendedProducts = useMemo(() => {
+        if (!allProducts || recommendedProductNames.length === 0) return [];
+        
+        const lowercasedRecNames = recommendedProductNames.map(name => name.toLowerCase());
+        
+        return allProducts.filter(product => 
+            lowercasedRecNames.includes(product.name.en.toLowerCase()) ||
+            lowercasedRecNames.includes(product.name.fr.toLowerCase()) ||
+            lowercasedRecNames.includes(product.name.ar.toLowerCase())
+        ).slice(0, 4); // Limit to 4 recommendations
+
+    }, [allProducts, recommendedProductNames]);
+
 
     const finalIsLoading = isLoading || areProductsLoading;
 
-    if (!user || viewedProducts.length === 0 || (!finalIsLoading && (!products || products.length === 0))) {
+    if (!user || viewedProducts.length === 0 || (!finalIsLoading && recommendedProducts.length === 0)) {
         return null;
     }
 
@@ -87,7 +97,7 @@ function RecommendedProducts() {
 
     return (
         <div className="mt-12 md:mt-16">
-            <ProductGrid title={t('homepage.recommended_for_you')} products={products || []} />
+            <ProductGrid title={t('homepage.recommended_for_you')} products={recommendedProducts} />
         </div>
     );
 }
