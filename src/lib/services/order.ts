@@ -13,6 +13,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 
 interface PlaceOrderParams {
   shippingAddress: string;
+  phone: string;
   items: CartItem[];
   totalAmount: number;
 }
@@ -24,6 +25,7 @@ interface PlaceOrderParams {
  * 2. For each item in the order, decrement the product's stock and increment its 'sold' count.
  * 3. Update the user's total order count and total spent amount.
  * 4. Award loyalty points based on the total amount.
+ * 5. Update user's phone number if provided.
  *
  * @param {Firestore} db - The Firestore database instance.
  * @param {string} userId - The ID of the user placing the order.
@@ -31,7 +33,7 @@ interface PlaceOrderParams {
  * @returns {Promise<void>} A promise that resolves when the transaction is initiated. The UI should not wait for it to complete.
  */
 export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrderParams): Promise<void> {
-  const { shippingAddress, items, totalAmount } = orderDetails;
+  const { shippingAddress, phone, items, totalAmount } = orderDetails;
 
   const userRef = doc(db, 'users', userId);
   const newOrderRef = doc(collection(db, `users/${userId}/orders`));
@@ -83,12 +85,18 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
       });
     }
 
-    // 5. Update user's order stats and loyalty points
-    transaction.update(userRef, {
+    // 5. Update user's order stats, loyalty points, and phone number
+    const userUpdateData: any = {
       orderCount: increment(1),
       totalSpent: increment(totalAmount),
       loyaltyPoints: increment(loyaltyPointsEarned),
-    });
+    };
+
+    if (phone) {
+      userUpdateData.phone = phone;
+    }
+    
+    transaction.update(userRef, userUpdateData);
   });
 
   // Attach a catch block to handle transaction failures, especially permission errors.

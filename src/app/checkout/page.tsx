@@ -88,7 +88,7 @@ export default function CheckoutPage() {
             name: firestoreUser.name || '',
             address: firestoreUser.addresses?.[0]?.street || '',
             city: firestoreUser.addresses?.[0]?.city || 'Tlemcen',
-            phone: '', // Phone is not stored in user data yet
+            phone: firestoreUser.phone || '',
         });
     } else if (user) {
         form.reset({
@@ -155,6 +155,7 @@ export default function CheckoutPage() {
     try {
         await placeOrder(firestore, user.uid, {
             shippingAddress: `${values.name}, ${values.address}, ${values.city}`,
+            phone: values.phone,
             items,
             totalAmount: finalTotalPrice,
         });

@@ -130,6 +130,10 @@
           "description": "User's email address.",
           "format": "email"
         },
+        "phone": {
+          "type": "string",
+          "description": "User's phone number."
+        },
         "addresses": {
           "type": "array",
           "description": "Array of user's addresses.",
@@ -173,10 +177,10 @@
         "email",
         "preferredLanguage",
         "role",
+        "avatar",
         "registrationDate",
         "orderCount",
         "totalSpent",
-        "avatar",
         "loyaltyPoints"
       ]
     },

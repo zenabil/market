@@ -31,6 +31,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email(),
+  phone: z.string().optional(),
 });
 
 const passwordFormSchema = z.object({
@@ -69,7 +70,7 @@ export default function ProfilePage() {
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { name: '', email: '' },
+    defaultValues: { name: '', email: '', phone: '' },
   });
 
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
@@ -87,11 +88,13 @@ export default function ProfilePage() {
       profileForm.reset({
         name: firestoreUser.name,
         email: firestoreUser.email,
+        phone: firestoreUser.phone || '',
       });
     } else if (authUser) {
         profileForm.reset({
             name: authUser.displayName || '',
             email: authUser.email || '',
+            phone: authUser.phoneNumber || '',
         });
     }
   }, [firestoreUser, authUser, profileForm]);
@@ -117,9 +120,9 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-      await updateDocumentNonBlocking(userDocRef, { name: values.name });
+      await updateDocumentNonBlocking(userDocRef, { name: values.name, phone: values.phone });
       // Note: Email updates require re-authentication and are more complex.
-      // We are only allowing name updates here.
+      // We are only allowing name and phone updates here.
       toast({
         title: t('dashboard.profile.update_success_title'),
         description: t('dashboard.profile.update_success_desc'),
@@ -276,6 +279,20 @@ export default function ProfilePage() {
                         )}
                     />
                     
+                    <FormField
+                        control={profileForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('checkout.phone')}</FormLabel>
+                            <FormControl>
+                            <Input type="tel" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+
                     <div className="flex justify-end">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
