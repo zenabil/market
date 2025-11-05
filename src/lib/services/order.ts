@@ -102,24 +102,24 @@ export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrd
   // Attach a catch block to handle transaction failures, especially permission errors.
   // This is a non-blocking operation from the UI's perspective.
   transactionPromise.catch((e) => {
-    console.error("Transaction failed: ", e);
     // Check if the error is likely a permission error. Firestore throws 'FirebaseError' for this.
     // We emit our custom, more detailed error for better debugging.
     if (e.code === 'permission-denied' || e.name === 'FirebaseError') {
-      errorEmitter.emit(
-        'permission-error',
-        new FirestorePermissionError({
-          path: `users/${userId}/orders`, // The primary path being written to
-          operation: 'create', // The core operation is creating an order
-          requestResourceData: { 
-            order: 'details withheld for brevity', 
-            updates: `${items.length} products`,
-            user_stats: 'increment' 
-          },
-        })
-      );
+      const permissionError = new FirestorePermissionError({
+        path: `users/${userId}/orders`, // The primary path being written to
+        operation: 'create', // The core operation is creating an order
+        requestResourceData: { 
+          order: 'details withheld for brevity', 
+          updates: `${items.length} products`,
+          user_stats: 'increment' 
+        },
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    } else {
+        // For other types of transaction errors (e.g., stock issue), log them.
+        console.error("Transaction failed: ", e);
     }
-    // We don't re-throw here because the error is handled globally by the emitter.
+    // We don't re-throw here because the error is handled globally.
   });
 
   return Promise.resolve();
