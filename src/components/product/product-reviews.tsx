@@ -113,9 +113,9 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
 };
 
 const ReviewItem = ({ review }: { review: Review }) => {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString(t('locale_code'), { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateString).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     return (
