@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import type { Product } from '@/lib/placeholder-data';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 function AdminDashboard() {
   const { t, locale, direction } = useLanguage();
@@ -201,24 +202,26 @@ export default function DashboardPage() {
                     router.replace('/dashboard/orders');
                 }
             } else if (!isUserLoading) {
-                setIsAdmin(false);
+                // If there's no user and we're not loading, they need to log in.
                 router.replace('/login');
             }
         };
         checkAdminStatus();
     }, [user, isUserLoading, router]);
 
-    if (isUserLoading || isAdmin === null || !isAdmin) {
+    // Show a loading indicator while we verify auth and admin status.
+    if (isUserLoading || isAdmin === null) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
-                <div className="space-y-4 text-center">
-                     <Skeleton className="h-12 w-12 rounded-full mx-auto" />
-                     <Skeleton className="h-8 w-48 mx-auto" />
-                     <Skeleton className="h-4 w-64 mx-auto" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                     <Loader2 className="h-6 w-6 animate-spin" />
+                     <p>{t('dashboard.loading_user_data')}</p>
                 </div>
             </div>
         );
     }
-
-    return <AdminDashboard />;
+    
+    // Only render the admin dashboard if the user is confirmed to be an admin.
+    // Non-admins will have already been redirected by the useEffect.
+    return isAdmin ? <AdminDashboard /> : null;
 }
