@@ -98,12 +98,6 @@ export default function LoginPage() {
     }
   
     try {
-      // Check if this will be the first user in the system.
-      const usersRef = collection(firestore, 'users');
-      const q = query(usersRef, limit(1));
-      const querySnapshot = await getDocs(q);
-      const isFirstUser = querySnapshot.empty;
-  
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const newUser = userCredential.user;
   
@@ -113,7 +107,7 @@ export default function LoginPage() {
           id: newUser.uid,
           name: values.name,
           email: newUser.email,
-          role: isFirstUser ? 'Admin' : 'User',
+          role: 'User', // Default role is User
           preferredLanguage: 'ar',
           registrationDate: new Date().toISOString(),
           orderCount: 0,
@@ -123,18 +117,24 @@ export default function LoginPage() {
           addresses: [],
         };
   
-        const batch = writeBatch(firestore);
-        batch.set(userDocRef, userData);
-  
-        // If this is the first user, also add them to the admin roles collection.
-        if (isFirstUser) {
-          const adminRoleRef = doc(firestore, 'roles_admin', newUser.uid);
-          batch.set(adminRoleRef, { role: 'admin' });
-        }
-  
-        // Atomically commit both the user document and the admin role (if applicable).
-        // This will now succeed because the security rules allow a signed-in user to create their own document.
-        await batch.commit();
+        // Use setDoc instead of a batch for simplicity. Security rules will handle the logic.
+        // The `isFirstUser()` rule will determine if the admin role can be created.
+        await setDoc(userDocRef, userData);
+        
+        // Try to create the admin role. This will only succeed if the user is the first one.
+        const adminRoleRef = doc(firestore, 'roles_admin', newUser.uid);
+        setDoc(adminRoleRef, { role: 'admin' })
+          .then(() => {
+            // If this succeeds, update the user's role to Admin
+            return setDoc(userDocRef, { role: 'Admin' }, { merge: true });
+          })
+          .catch((error) => {
+            // This is expected to fail with a permission error if the user is not the first one.
+            // We can safely ignore this error.
+            if (error.code !== 'permission-denied') {
+               console.error("An unexpected error occurred while trying to set admin role:", error);
+            }
+          });
       }
   
       toast({ title: t('auth.signup_success_title') });
@@ -142,14 +142,13 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error(error);
   
-      // If the error is a permission error from the batch commit, emit a contextual error.
-      if (error.name === 'FirebaseError' && error.code === 'permission-denied') {
-          const isFirstUser = (await getDocs(query(collection(firestore, 'users'), limit(1)))).empty;
-          const path = isFirstUser ? 'roles_admin' : 'users';
-          const operation = 'create';
-          errorEmitter.emit('permission-error', new FirestorePermissionError({ path, operation, requestResourceData: { email: values.email, role: isFirstUser ? 'Admin' : 'User' } }));
+      if (error.code === 'permission-denied') {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ 
+          path: `users/${error.customData?.uid || 'unknown'}`, 
+          operation: 'create', 
+          requestResourceData: { email: values.email } 
+        }));
       } else {
-          // For other errors (e.g., email already in use), show a generic toast.
           toast({
               variant: 'destructive',
               title: t('auth.error_title'),

@@ -151,17 +151,17 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins to manage admin roles. First user can create their own admin role.
+     * @description Allows admins to manage admin roles. The first user in the system can self-assign the admin role.
      * @path /roles_admin/{userId}
      * @allow get, list: if isAdmin();
-     * @allow create: if isAdmin() || isFirstUser();
+     * @allow create: if isSignedIn() && (isAdmin() || isFirstUser());
      * @allow update: if false;
      * @allow delete: if isAdmin();
-     * @principle Restricts access to admins only.
+     * @principle Restricts access to admins only, with a special case for bootstrapping the first admin.
      */
     match /roles_admin/{userId} {
       allow get, list: if isAdmin();
-      allow create: if isAdmin() || isFirstUser();
+      allow create: if isSignedIn() && (isAdmin() || isFirstUser());
       allow update: if false;
       allow delete: if isAdmin();
     }
@@ -213,8 +213,8 @@ service cloud.firestore {
   }
   
   function isFirstUser() {
-    // This function is now only used for creating the first admin role.
-    // It checks if there are NO documents in the 'users' collection at all.
+    // This function checks if the 'users' collection is completely empty.
+    // It is used to securely allow the very first person who signs up to become an admin.
     return !exists(/databases/$(database)/documents/users);
   }
   
@@ -260,5 +260,3 @@ service cloud.firestore {
             request.resource.data.reviewCount == resource.data.reviewCount);
   }
 }
-
-    
