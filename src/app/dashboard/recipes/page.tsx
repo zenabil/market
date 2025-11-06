@@ -21,7 +21,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
@@ -33,12 +32,13 @@ export default function RecipesDashboardPage() {
   const recipesQuery = useMemoFirebase(() => query(collection(firestore, 'recipes')), [firestore]);
   const { data: recipes, isLoading: areRecipesLoading } = useCollection<Recipe>(recipesQuery);
   const [recipeToDelete, setRecipeToDelete] = React.useState<Recipe | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
   
   React.useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
-        router.replace('/dashboard/orders');
+        router.replace('/dashboard');
     }
   }, [isAdmin, isRoleLoading, router]);
 
@@ -64,8 +64,15 @@ export default function RecipesDashboardPage() {
       });
     } finally {
       setRecipeToDelete(null);
+      setIsAlertOpen(false);
     }
   };
+
+    const openDeleteDialog = (recipe: Recipe) => {
+        setRecipeToDelete(recipe);
+        setIsAlertOpen(true);
+    };
+
   
   const isLoading = areRecipesLoading || isRoleLoading;
 
@@ -79,7 +86,6 @@ export default function RecipesDashboardPage() {
 
   return (
     <div className="container py-8 md:py-12">
-      <AlertDialog>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -136,12 +142,10 @@ export default function RecipesDashboardPage() {
                           <DropdownMenuItem asChild>
                             <Link href={`/dashboard/recipes/edit/${recipe.id}`}>Modifier</Link>
                           </DropdownMenuItem>
-                          <AlertDialogTrigger asChild>
-                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive" onClick={() => setRecipeToDelete(recipe)}>
+                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(recipe); }} className="text-destructive">
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Supprimer
                             </DropdownMenuItem>
-                          </AlertDialogTrigger>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -156,12 +160,13 @@ export default function RecipesDashboardPage() {
             )}
           </CardContent>
         </Card>
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
               <AlertDialogDescription>
                 Cette action ne peut pas être annulée. Cela supprimera définitivement la recette "{recipeToDelete?.title || ''}".
-              </AlertDialogDescription>
+              </Aler_dialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setRecipeToDelete(null)}>Annuler</AlertDialogCancel>

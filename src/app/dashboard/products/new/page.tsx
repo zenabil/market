@@ -22,9 +22,11 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 
 const formSchema = z.object({
@@ -42,6 +44,14 @@ export default function NewProductPage() {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,6 +78,8 @@ export default function NewProductPage() {
         sku: `SKU-${Date.now()}`,
         barcode: `${Date.now()}`,
         sold: 0,
+        averageRating: 0,
+        reviewCount: 0,
     };
 
     const productsCollection = collection(firestore, 'products');
@@ -137,6 +149,14 @@ export default function NewProductPage() {
     } finally {
       setIsGenerating(false);
     }
+  }
+
+  if (isRoleLoading || !isAdmin) {
+    return (
+        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
   }
 
   return (

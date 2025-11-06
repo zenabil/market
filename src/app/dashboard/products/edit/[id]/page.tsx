@@ -26,7 +26,8 @@ import { generateProductDescription } from '@/ai/flows/generate-product-descript
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -43,6 +44,8 @@ function EditProductForm({ productId }: { productId: string }) {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
 
   const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
@@ -50,6 +53,12 @@ function EditProductForm({ productId }: { productId: string }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+
+  useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   useEffect(() => {
     if (product) {
@@ -136,18 +145,13 @@ function EditProductForm({ productId }: { productId: string }) {
     }
   }
 
-  if (isLoadingProduct || areCategoriesLoading) {
+  const isLoading = isLoadingProduct || areCategoriesLoading || isRoleLoading;
+  
+  if (isLoading || !isAdmin) {
     return (
-      <div className="container py-8 md:py-12">
-        <div className="flex items-center gap-4 mb-8">
-          <Skeleton className="h-10 w-10" />
-          <Skeleton className="h-10 w-64" />
+        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-        <div className="space-y-8">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
     );
   }
 

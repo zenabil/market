@@ -59,7 +59,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
-        router.replace('/dashboard/orders');
+        router.replace('/dashboard');
     }
   }, [isAdmin, isRoleLoading, router]);
 

@@ -18,10 +18,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, PlusCircle, Trash2 } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
-
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   title: z.string().min(2),
@@ -76,6 +77,14 @@ export default function NewRecipePage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+  
+  useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -122,6 +131,14 @@ export default function NewRecipePage() {
       .finally(() => {
         setIsSaving(false);
       });
+  }
+  
+  if (isRoleLoading || !isAdmin) {
+    return (
+        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
   }
 
   return (

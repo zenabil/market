@@ -38,7 +38,7 @@ export default function ProductsPage() {
 
   React.useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
-        router.replace('/dashboard/orders');
+        router.replace('/dashboard');
     }
   }, [isAdmin, isRoleLoading, router]);
 
@@ -92,7 +92,6 @@ export default function ProductsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Gérer les produits</CardTitle>
@@ -162,6 +161,7 @@ export default function ProductsPage() {
             )}
           </CardContent>
         </Card>
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>

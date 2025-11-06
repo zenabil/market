@@ -22,8 +22,9 @@ import React, { useEffect } from 'react';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import type { Recipe } from '@/lib/placeholder-data';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const formSchema = z.object({
   title: z.string().min(2),
@@ -79,6 +80,8 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
 
   const recipeRef = useMemoFirebase(() => doc(firestore, 'recipes', recipeId), [firestore, recipeId]);
   const { data: recipe, isLoading: isLoadingRecipe } = useDoc<Recipe>(recipeRef);
@@ -94,6 +97,12 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
       instructions: [{ value: '' }],
     },
   });
+
+  useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   useEffect(() => {
     if (recipe) {
@@ -141,15 +150,13 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
             setIsSaving(false);
         });
   }
+  
+  const isLoading = isLoadingRecipe || isRoleLoading;
 
-  if (isLoadingRecipe) {
+  if (isLoading || !isAdmin) {
     return (
-      <div className="container py-8 md:py-12">
-        <div className="flex items-center gap-4 mb-8">
-          <Skeleton className="h-10 w-10" />
-          <Skeleton className="h-10 w-64" />
-        </div>
-        <Skeleton className="h-[500px] w-full" />
+      <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

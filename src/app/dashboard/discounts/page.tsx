@@ -144,7 +144,7 @@ export default function DiscountsPage() {
     
     React.useEffect(() => {
         if (!isRoleLoading && !isAdmin) {
-            router.replace('/dashboard/orders');
+            router.replace('/dashboard');
         }
     }, [isAdmin, isRoleLoading, router]);
 

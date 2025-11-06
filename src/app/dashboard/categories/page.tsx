@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Edit, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFirestore, errorEmitter, FirestorePermissionError, useUser } from '@/firebase';
-import { doc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
+import { doc, addDoc, updateDoc, deleteDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -174,7 +174,7 @@ export default function CategoriesPage() {
   
   React.useEffect(() => {
       if (!isRoleLoading && !isAdmin) {
-          router.replace('/dashboard/orders');
+          router.replace('/dashboard');
       }
   }, [isAdmin, isRoleLoading, router]);
 
@@ -182,6 +182,24 @@ export default function CategoriesPage() {
     if (!categoryToDelete || !firestore) return;
     
     setIsDeleting(true);
+
+    // Check if any products are using this category
+    const productsQuery = query(collection(firestore, 'products'), where('categoryId', '==', categoryToDelete.id), limit(1));
+    const productSnapshot = await getDocs(productsQuery);
+
+    if (!productSnapshot.empty) {
+      toast({
+        variant: 'destructive',
+        title: 'Impossible de supprimer la catégorie',
+        description: 'Cette catégorie contient encore des produits. Veuillez d\'abord déplacer ou supprimer les produits.',
+      });
+      setIsDeleting(false);
+      setIsAlertOpen(false);
+      setCategoryToDelete(null);
+      return;
+    }
+
+
     const categoryDocRef = doc(firestore, 'categories', categoryToDelete.id);
     
     try {
