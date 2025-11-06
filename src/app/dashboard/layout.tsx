@@ -30,6 +30,7 @@ import {
   LayoutGrid,
   Heart,
   BookOpen,
+  List,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -92,6 +93,11 @@ const userMenuItems = [
         key: 'Mes commandes',
         href: '/dashboard/orders',
         icon: ShoppingBasket,
+    },
+    {
+        key: 'Mes listes de courses',
+        href: '/dashboard/shopping-lists',
+        icon: List,
     },
     {
         key: 'Ma liste de souhaits',

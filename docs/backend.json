@@ -422,6 +422,33 @@
             }
         },
         "required": ["title", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
+    },
+    "ShoppingList": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Shopping List",
+        "type": "object",
+        "description": "Represents a user's shopping list.",
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": "The name of the shopping list."
+            },
+            "userId": {
+                "type": "string",
+                "description": "The ID of the user who owns this list."
+            },
+            "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp when the list was created."
+            },
+            "items": {
+                "type": "array",
+                "description": "Raw text items added by the user.",
+                "items": { "type": "string" }
+            }
+        },
+        "required": ["name", "userId", "createdAt", "items"]
     }
   },
   "auth": {
@@ -459,6 +486,10 @@
     "/users/{userId}/wishlist/{productId}": {
         "schema": { "$ref": "#/entities/WishlistItem" },
         "description": "Stores a user's wishlist items. The document ID is the product ID for quick lookups. Only accessible by the user who owns the wishlist and admins."
+    },
+    "/users/{userId}/shopping-lists/{listId}": {
+        "schema": { "$ref": "#/entities/ShoppingList" },
+        "description": "Stores a user's shopping lists. Only accessible by the user who owns the list."
     },
     "/roles_admin/{userId}": {
       "schema": {

@@ -15,6 +15,7 @@
  * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
  * - `/users/{userId}/orders/{orderId}`: User orders, accessible only to the user and admins. The `userId` field is denormalized to match the path.
  * - `/users/{userId}/wishlist/{productId}`: User wishlist items, accessible only to the user.
+ * - `/users/{userId}/shopping-lists/{listId}`: User shopping lists, accessible only to the user.
  * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
  * - `/settings/site`: Global site settings, publicly readable.
  *
@@ -115,6 +116,16 @@ service cloud.firestore {
       match /wishlist/{productId} {
         allow get, list, create, delete: if isSignedIn() && isOwner(userId);
         allow update: if false;
+      }
+      
+      /**
+       * @description Allows a user to manage their own shopping lists.
+       * @path /users/{userId}/shopping-lists/{listId}
+       * @allow get, list, create, update, delete: if isSignedIn() && isOwner(userId);
+       * @principle Restricts access to a user's own data tree for shopping lists.
+       */
+      match /shopping-lists/{listId} {
+        allow get, list, create, update, delete: if isSignedIn() && isOwner(userId);
       }
     }
 
