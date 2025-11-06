@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
-import type { Review } from '@/lib/placeholder-data';
+import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
+import { collection, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import type { Review, Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import StarRating from './star-rating';
@@ -29,13 +29,21 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Fetch product to update rating
+  const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
+  const { data: product } = useDoc<Product>(productRef);
+  const { data: reviews } = useCollection<Review>(
+    useMemoFirebase(() => query(collection(firestore, 'products', productId, 'reviews')), [firestore, productId])
+  );
+
+
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
     defaultValues: { comment: '', rating: 0 },
   });
 
   const onSubmit = async (values: z.infer<typeof reviewSchema>) => {
-    if (!user || !firestore) return;
+    if (!user || !firestore || !product || !reviews) return;
 
     setIsSubmitting(true);
     
@@ -49,22 +57,45 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
     };
 
     const reviewsCollection = collection(firestore, 'products', productId, 'reviews');
-    addDoc(reviewsCollection, reviewData)
-      .then(() => {
+    
+    try {
+        await addDoc(reviewsCollection, reviewData);
         toast({ title: 'Avis soumis avec succès' });
+        
+        // --- Start: Update product average rating ---
+        const totalReviews = reviews.length + 1;
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0) + values.rating;
+        const averageRating = totalRating / totalReviews;
+
+        const productUpdateData = {
+            reviewCount: totalReviews,
+            averageRating: averageRating
+        };
+
+        await updateDoc(productRef, productUpdateData);
+        // --- End: Update product average rating ---
+
         form.reset({ comment: '', rating: 0 });
         onReviewAdded();
-      })
-      .catch(error => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: reviewsCollection.path,
-            operation: 'create',
-            requestResourceData: reviewData
-        }));
-      })
-      .finally(() => {
+
+    } catch (error) {
+        if ((error as any).code === 'permission-denied') {
+             errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: reviewsCollection.path,
+                operation: 'create',
+                requestResourceData: reviewData
+            }));
+        } else {
+            console.error("An unexpected error occurred:", error);
+             toast({
+                variant: 'destructive',
+                title: 'Erreur',
+                description: "Une erreur inattendue s'est produite lors de la soumission de l'avis."
+            });
+        }
+    } finally {
         setIsSubmitting(false);
-      });
+    }
   };
   
   if (!user) {
@@ -135,7 +166,7 @@ const ReviewItem = ({ review }: { review: Review }) => {
 
 export default function ProductReviews({ productId }: { productId: string }) {
   const firestore = useFirestore();
-  const [key, setKey] = useState(0);
+  const [key, setKey] = useState(0); // Used to force a refetch
 
   const reviewsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -145,8 +176,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
   const { data: reviews, isLoading } = useCollection<Review>(reviewsQuery);
   
   const handleReviewAdded = () => {
-    // This is a temporary client-side trigger. In a real app, this would be handled by a Cloud Function
-    // that updates the product's averageRating and reviewCount.
+    // Force the useCollection hook to re-run by changing its dependency 'key'
     setKey(prev => prev + 1); 
   }
 
