@@ -341,19 +341,21 @@ export default function CheckoutPage() {
                       )}
                     </div>
                    <Separator />
-                   <div className="flex justify-between font-semibold">
-                       <span>Sous-total</span>
-                       <span>{formatCurrency(totalPrice)}</span>
-                   </div>
-                    {appliedCoupon && (
-                      <div className="flex justify-between font-semibold text-primary">
-                        <span>Réduction</span>
-                        <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-semibold">
-                       <span>Livraison</span>
-                       <span>Gratuit</span>
+                   <div className="space-y-2">
+                       <div className="flex justify-between">
+                           <span>Sous-total</span>
+                           <span>{formatCurrency(totalPrice)}</span>
+                       </div>
+                        {appliedCoupon && (
+                          <div className="flex justify-between text-primary">
+                            <span>Réduction</span>
+                            <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                           <span>Livraison</span>
+                           <span className="font-semibold">Gratuit</span>
+                       </div>
                    </div>
                    <Separator />
                     <div className="flex justify-between font-bold text-lg">
@@ -377,5 +379,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
