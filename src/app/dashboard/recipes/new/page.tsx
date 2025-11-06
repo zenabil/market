@@ -110,13 +110,15 @@ export default function NewRecipePage() {
         servings: values.servings,
         ingredients: values.ingredients.map(i => i.value),
         instructions: values.instructions.map(i => i.value),
+        averageRating: 0,
+        reviewCount: 0,
     };
 
     const recipesCollection = collection(firestore, 'recipes');
     addDoc(recipesCollection, recipeData)
-      .then(() => {
+      .then((docRef) => {
         toast({ title: 'Recette créée' });
-        form.reset();
+        router.push(`/dashboard/recipes/edit/${docRef.id}`);
       })
       .catch(error => {
         errorEmitter.emit(
@@ -202,7 +204,7 @@ export default function NewRecipePage() {
             </Button>
             <Button type="submit" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enregistrer la recette
+                Créer et continuer
             </Button>
           </div>
         </form>
