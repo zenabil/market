@@ -37,7 +37,7 @@ function RecipeDetailsPage() {
             
             // Firestore 'in' query is limited to 30 items. For recipes with more, this needs chunking.
             // For now, we assume fewer than 30 ingredients.
-            const q = query(productsRef, where('name', 'in', recipe.ingredients));
+            const q = query(productsRef, where('name', 'in', recipe.ingredients.slice(0, 30)));
 
             const querySnapshot = await getDocs(q);
             const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -53,8 +53,8 @@ function RecipeDetailsPage() {
     
             if (itemsAddedCount > 0) {
                 toast({
-                    title: 'المكونات أضيفت إلى السلة',
-                    description: `${itemsAddedCount} مكون(ات) من الوصفة أضيفت إلى سلتك.`
+                    title: 'Ingrédients ajoutés au panier',
+                    description: `${itemsAddedCount} ingrédient(s) ont été ajoutés à votre panier.`
                 });
             }
             
@@ -65,8 +65,8 @@ function RecipeDetailsPage() {
             if (notFoundProducts.length > 0) {
                  toast({
                     variant: 'destructive',
-                    title: 'بعض المكونات غير متوفرة',
-                    description: `لم نتمكن من العثور على: ${notFoundProducts.join(', ')}`
+                    title: 'Certains ingrédients non trouvés',
+                    description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
                 });
             }
 
@@ -74,8 +74,8 @@ function RecipeDetailsPage() {
             console.error("Error adding recipe ingredients to cart:", error);
             toast({
                 variant: 'destructive',
-                title: 'خطأ',
-                description: "لم نتمكن من إضافة المكونات إلى السلة."
+                title: 'Erreur',
+                description: "Impossible d'ajouter les ingrédients au panier."
             });
         } finally {
             setIsAddingToCart(false);
@@ -107,6 +107,8 @@ function RecipeDetailsPage() {
         return notFound();
     }
     
+    const totalTime = recipe.prepTime + recipe.cookTime;
+
     return (
         <div className="container py-8 md:py-12 max-w-4xl mx-auto">
             <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl text-center">{recipe.title}</h1>
@@ -130,7 +132,7 @@ function RecipeDetailsPage() {
                 <div className="p-4 bg-muted/50 rounded-lg">
                     <Soup className="h-8 w-8 mx-auto text-primary" />
                     <p className="mt-2 font-semibold">Temps Total</p>
-                    <p className="text-sm text-muted-foreground">{recipe.prepTime + recipe.cookTime} min</p>
+                    <p className="text-sm text-muted-foreground">{totalTime} min</p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg">
                     <Users className="h-8 w-8 mx-auto text-primary" />
@@ -157,7 +159,7 @@ function RecipeDetailsPage() {
                         ) : (
                             <ShoppingCart className="mr-2 h-4 w-4" />
                         )}
-                        Ajouter les ingrédients à la salla
+                        Ajouter les ingrédients au panier
                     </Button>
                 </div>
                  <div className="md:col-span-2">

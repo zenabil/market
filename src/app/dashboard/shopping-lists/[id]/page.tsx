@@ -1,9 +1,9 @@
 'use client';
 
-import React, 'react';
+import React from 'react';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError, useCollection } from '@/firebase';
-import { doc, updateDoc, collection, query, where } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import type { ShoppingList, Product } from '@/lib/placeholder-data';
 import { Loader2, ArrowLeft, Save, Sparkles, ShoppingCart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -102,7 +102,8 @@ function ShoppingListDetail() {
         try {
             const result = await analyzeShoppingList({ listText });
             if (result.products && result.products.length > 0) {
-                 setAnalyzedProductNames(result.products);
+                 // Firestore 'in' query is limited to 30 items.
+                 setAnalyzedProductNames(result.products.slice(0, 30));
                  toast({ title: 'Analyse terminée', description: `${result.products.length} produits potentiels identifiés.` });
             } else {
                 toast({ title: 'Analyse terminée', description: 'Aucun produit n\'a pu être identifié.' });
@@ -179,7 +180,7 @@ function ShoppingListDetail() {
                                 )}
                             />
                             <div className="flex justify-between items-center">
-                                 <Button type="button" onClick={handleAnalyzeList} disabled={isAnalyzing || !form.formState.isDirty}>
+                                 <Button type="button" onClick={handleAnalyzeList} disabled={isAnalyzing}>
                                     {isAnalyzing ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : (
