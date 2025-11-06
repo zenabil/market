@@ -28,6 +28,10 @@ import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
 import type { Coupon } from '@/lib/placeholder-data';
 
+type SiteSettings = {
+    deliveryFee?: number;
+};
+
 
 const shippingFormSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -61,6 +65,11 @@ export default function CheckoutPage() {
   }, [firestore, user]);
   
   const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
+
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings } = useDoc<SiteSettings>(settingsRef);
+  const deliveryFee = settings?.deliveryFee ?? 0;
+
 
   const shippingForm = useForm<z.infer<typeof shippingFormSchema>>({
     resolver: zodResolver(shippingFormSchema),
@@ -111,9 +120,11 @@ export default function CheckoutPage() {
   }, [step]);
 
 
-  const finalTotalPrice = appliedCoupon
+  const subTotalAfterDiscount = appliedCoupon
     ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
     : totalPrice;
+
+  const finalTotalPrice = subTotalAfterDiscount + deliveryFee;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim() || !firestore) return;
@@ -356,12 +367,14 @@ export default function CheckoutPage() {
                         {appliedCoupon && (
                           <div className="flex justify-between text-primary">
                             <span>Réduction</span>
-                            <span>- {formatCurrency(totalPrice - finalTotalPrice)}</span>
+                            <span>- {formatCurrency(totalPrice - subTotalAfterDiscount)}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
                            <span>Livraison</span>
-                           <span className="font-semibold">Gratuit</span>
+                           <span className={cn(deliveryFee === 0 && 'font-semibold')}>
+                                {deliveryFee > 0 ? formatCurrency(deliveryFee) : 'Gratuit'}
+                           </span>
                        </div>
                    </div>
                    <Separator />
@@ -386,3 +399,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

@@ -14,6 +14,10 @@
           "type": "number",
           "description": "Product price. For a 'bundle' type, this is the total price of the bundle."
         },
+        "purchasePrice": {
+          "type": "number",
+          "description": "The cost price of the product for the supermarket. Admin only."
+        },
         "stock": {
           "type": "number",
           "description": "Current stock quantity of the product."
@@ -304,6 +308,10 @@
         "address": {
           "type": "string",
           "description": "Physical address of the business."
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "The flat rate for delivery."
         }
       },
       "required": [
@@ -543,7 +551,7 @@
   "firestore": {
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },
-      "description": "Stores product information. No denormalized authorization fields are included because all products are publicly readable."
+      "description": "Stores product information. Contains a private `purchasePrice` field for admins."
     },
     "/products/{productId}/reviews/{reviewId}": {
       "schema": { "$ref": "#/entities/Review" },

@@ -31,6 +31,7 @@ const formSchema = z.object({
   logoUrl: z.string().url().optional().or(z.literal('')),
   phone: z.string().min(10, { message: 'Le numéro de téléphone doit comporter au moins 10 chiffres.' }),
   address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
+  deliveryFee: z.coerce.number().min(0, { message: "Les frais de livraison ne peuvent pas être négatifs." }),
 });
 
 type SiteSettings = z.infer<typeof formSchema>;
@@ -54,6 +55,7 @@ export default function SettingsPage() {
       phone: '',
       address: '',
       logoUrl: '',
+      deliveryFee: 0,
     },
   });
 
@@ -233,6 +235,21 @@ export default function SettingsPage() {
                   </FormItem>
                 )}
               />
+
+               <FormField
+                control={form.control}
+                name="deliveryFee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Frais de livraison</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="flex justify-end">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -246,3 +263,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
