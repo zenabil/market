@@ -11,6 +11,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import StarRating from '@/components/product/star-rating';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 export default function ComparePage() {
   const { items, removeFromComparison, clearComparison } = useComparison();
@@ -50,25 +51,68 @@ export default function ComparePage() {
 
   return (
     <div className="container py-8 md:py-12">
-        <div className="flex justify-between items-center mb-8">
-            <h1 className="font-headline text-4xl md:text-5xl">Comparer les produits</h1>
-            <Button variant="outline" onClick={clearComparison}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Effacer tout
-            </Button>
-        </div>
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${items.length + 1} gap-4`}>
-        {/* Headers Column */}
-        <div className="hidden lg:block">
-            <div className="h-[400px]"></div>
-            <div className="space-y-4 p-4">
-                {features.map(feature => (
-                    <div key={feature.key} className="font-bold h-12 flex items-center">{feature.label}</div>
-                ))}
-            </div>
-        </div>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="font-headline text-4xl md:text-5xl">Comparer</h1>
+        {items.length > 0 && (
+          <Button variant="outline" onClick={clearComparison} size="sm">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Effacer tout
+          </Button>
+        )}
+      </div>
 
-        {/* Product Columns */}
+      {/* Mobile View: Stacked cards */}
+      <div className="grid grid-cols-1 gap-6 sm:hidden">
+        {items.map(product => (
+          <Card key={product.id} className="relative">
+             <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 h-7 w-7 rounded-full z-10"
+                onClick={() => removeFromComparison(product.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            <CardHeader>
+                <div className="aspect-square relative w-full">
+                    <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        fill
+                        className="rounded-md object-cover"
+                    />
+                </div>
+                <CardTitle className="pt-4">{product.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableBody>
+                         {features.map(feature => (
+                            <TableRow key={feature.key}>
+                                <TableCell className="font-semibold">{feature.label}</TableCell>
+                                <TableCell>
+                                    {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
+                                    {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
+                                    {feature.key === 'discount' && (product.discount > 0 ? `${product.discount}%` : 'Aucune')}
+                                    {feature.key === 'stock' && (product.stock > 0 ? `${product.stock} en stock` : 'En rupture')}
+                                </TableCell>
+                            </TableRow>
+                         ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+            <CardFooter>
+                 <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Ajouter au panier
+                </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop View: Grid */}
+      <div className="hidden sm:grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {items.map(product => (
           <Card key={product.id} className="flex flex-col">
             <CardHeader className="p-4">
@@ -93,8 +137,8 @@ export default function ComparePage() {
             <CardContent className="flex-grow p-4">
               <div className="space-y-4">
                  {features.map(feature => (
-                    <div key={feature.key} className="h-12">
-                        <span className="font-bold lg:hidden">{feature.label}: </span>
+                    <div key={feature.key} className="h-12 border-b last:border-b-0 flex items-center justify-between">
+                        <span className="font-bold">{feature.label}</span>
                         <span>
                             {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
                             {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
