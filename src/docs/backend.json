@@ -1,0 +1,615 @@
+{
+  "entities": {
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product available in the Tlemcen Smart Supermarket.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Product name in French."
+        },
+        "price": {
+          "type": "number",
+          "description": "Product price. For a 'bundle' type, this is the total price of the bundle."
+        },
+        "purchasePrice": {
+          "type": "number",
+          "description": "The cost price of the product for the supermarket. Admin only."
+        },
+        "stock": {
+          "type": "number",
+          "description": "Current stock quantity of the product."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Product)"
+        },
+        "images": {
+          "type": "array",
+          "description": "Array of image URLs for the product.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sku": {
+          "type": "string",
+          "description": "Stock Keeping Unit (SKU) for the product."
+        },
+        "barcode": {
+          "type": "string",
+          "description": "Barcode for the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description in French."
+        },
+        "sold": {
+          "type": "number",
+          "description": "Number of units sold."
+        },
+        "discount": {
+          "type": "number",
+          "description": "Discount percentage for the product."
+        },
+        "averageRating": {
+          "type": "number",
+          "description": "The average rating of the product, from 0 to 5."
+        },
+        "reviewCount": {
+          "type": "number",
+          "description": "The total number of reviews for the product."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the product was created."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["standard", "bundle"],
+          "description": "The type of the product. 'standard' for a single item, 'bundle' for a collection of items."
+        },
+        "bundleItems": {
+            "type": "array",
+            "description": "A list of product IDs included in this bundle. Only applicable if type is 'bundle'.",
+            "items": {
+                "type": "string"
+            }
+        }
+      },
+      "required": [
+        "name",
+        "price",
+        "stock",
+        "categoryId",
+        "images",
+        "sku",
+        "barcode",
+        "sold",
+        "createdAt",
+        "type"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category of products. The document ID is the category's unique identifier.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Category name in French."
+        },
+        "image": {
+          "type": "string",
+          "description": "URL of the category image."
+        }
+      },
+      "required": [
+        "name",
+        "image"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Tlemcen Smart Supermarket.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user (from Firebase Auth)."
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "User's phone number."
+        },
+        "addresses": {
+          "type": "array",
+          "description": "Array of user's addresses.",
+          "items": {
+             "$ref": "#/entities/Address"
+          }
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "description": "User's preferred language (fr)."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (Admin or User)."
+        },
+        "avatar": {
+          "type": "string",
+          "description": "URL of the user's avatar image."
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date the user registered.",
+          "format": "date-time"
+        },
+        "orderCount": {
+          "type": "number",
+          "description": "Total number of orders placed by the user."
+        },
+        "totalSpent": {
+          "type": "number",
+          "description": "Total amount of money spent by the user."
+        },
+        "loyaltyPoints": {
+          "type": "number",
+          "description": "Total loyalty points accumulated by the user."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "preferredLanguage",
+        "role",
+        "avatar",
+        "registrationDate",
+        "orderCount",
+        "totalSpent",
+        "loyaltyPoints"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a user.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Date and time when the order was placed.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total amount of the order."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the order (e.g., Pending, Confirmed, Shipped, Delivered, Cancelled)."
+        },
+        "shippingAddress": {
+          "type": "string",
+          "description": "The user's shipping address for this order."
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of order items, denormalized for efficiency.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": {
+                "type": "string",
+                "description": "Reference to the Product."
+              },
+              "productName": {
+                "type": "string",
+                "description": "Denormalized product name for display purposes."
+              },
+              "quantity": {
+                "type": "number",
+                "description": "Quantity of the product in the order item."
+              },
+              "price": {
+                "type": "number",
+                "description": "Price of the product at the time of the order."
+              }
+            },
+            "required": ["productId", "productName", "quantity", "price"]
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "orderDate",
+        "totalAmount",
+        "status",
+        "shippingAddress",
+        "items"
+      ]
+    },
+    "Address": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Address",
+      "type": "object",
+      "description": "Represents a user's address.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the address."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Address)"
+        },
+        "street": {
+          "type": "string",
+          "description": "Street address."
+        },
+        "city": {
+          "type": "string",
+          "description": "City."
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "Zip code."
+        },
+        "country": {
+          "type": "string",
+          "description": "Country."
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "city",
+        "zipCode",
+        "country"
+      ]
+    },
+    "SiteSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SiteSettings",
+      "type": "object",
+      "description": "Global settings for the website.",
+      "properties": {
+        "siteName": {
+          "type": "string",
+          "description": "The name of the website."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL for the site logo."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number for the business."
+        },
+        "address": {
+          "type": "string",
+          "description": "Physical address of the business."
+        }
+      },
+      "required": [
+        "siteName",
+        "phone",
+        "address"
+      ]
+    },
+    "Coupon": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Coupon",
+        "type": "object",
+        "description": "Represents a discount coupon.",
+        "properties": {
+            "code": {
+                "type": "string",
+                "description": "The unique coupon code."
+            },
+            "discountPercentage": {
+                "type": "number",
+                "description": "The discount percentage (e.g., 10 for 10%)."
+            },
+            "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The date and time when the coupon expires."
+            },
+            "isActive": {
+                "type": "boolean",
+                "description": "Whether the coupon is currently active."
+            }
+        },
+        "required": [
+            "code",
+            "discountPercentage",
+            "expiryDate",
+            "isActive"
+        ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a user review for a product or recipe.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who wrote the review."
+        },
+        "userName": {
+          "type": "string",
+          "description": "Name of the user who wrote the review (denormalized)."
+        },
+        "userAvatar": {
+          "type": "string",
+          "description": "Avatar URL of the user (denormalized)."
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating from 1 to 5.",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "comment": {
+          "type": "string",
+          "description": "The user's comment."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the review was created."
+        }
+      },
+      "required": ["userId", "userName", "rating", "createdAt"]
+    },
+    "WishlistItem": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Wishlist Item",
+        "type": "object",
+        "description": "Represents a single item in a user's wishlist.",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Reference to the Product. The document ID is the product ID."
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the item was added to the wishlist."
+          }
+        },
+        "required": ["productId", "addedAt"]
+    },
+    "Recipe": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Recipe",
+        "type": "object",
+        "description": "Represents a cooking recipe.",
+        "properties": {
+            "title": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "image": {
+                "type": "string",
+                "description": "URL of the recipe image."
+            },
+            "prepTime": {
+                "type": "number",
+                "description": "Preparation time in minutes."
+            },
+            "cookTime": {
+                "type": "number",
+                "description": "Cooking time in minutes."
+            },
+            "servings": {
+                "type": "number",
+                "description": "Number of servings."
+            },
+            "ingredients": {
+                "type": "array",
+                "items": { "type": "string" }
+            },
+            "instructions": {
+                "type": "array",
+                "items": { "type": "string" }
+            },
+            "averageRating": {
+                "type": "number",
+                "description": "The average rating of the recipe, from 0 to 5."
+            },
+            "reviewCount": {
+                "type": "number",
+                "description": "The total number of reviews for the recipe."
+            }
+        },
+        "required": ["title", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
+    },
+    "ShoppingList": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Shopping List",
+        "type": "object",
+        "description": "Represents a user's shopping list.",
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": "The name of the shopping list."
+            },
+            "userId": {
+                "type": "string",
+                "description": "The ID of the user who owns this list."
+            },
+            "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp when the list was created."
+            },
+            "items": {
+                "type": "array",
+                "description": "Raw text items added by the user.",
+                "items": { "type": "string" }
+            }
+        },
+        "required": ["name", "userId", "createdAt", "items"]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Contact Message",
+      "type": "object",
+      "description": "Represents a message sent through the contact form.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The sender's name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The sender's email address."
+        },
+        "subject": {
+          "type": "string",
+          "description": "The message subject."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message content."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the message was sent."
+        }
+      },
+      "required": ["name", "email", "subject", "message", "createdAt"]
+    },
+    "Notification": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Notification",
+        "type": "object",
+        "description": "Represents a notification for a user.",
+        "properties": {
+            "userId": {
+                "type": "string",
+                "description": "The ID of the user this notification is for."
+            },
+            "message": {
+                "type": "string",
+                "description": "The content of the notification."
+            },
+            "link": {
+                "type": "string",
+                "description": "A URL to navigate to when the notification is clicked."
+            },
+            "isRead": {
+                "type": "boolean",
+                "description": "Whether the user has read the notification."
+            },
+            "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp when the notification was created."
+            }
+        },
+        "required": ["userId", "message", "isRead", "createdAt"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Stores product information. Contains a private `purchasePrice` field for admins."
+    },
+    "/products/{productId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews for a specific product. Writable by the user who owns the review."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Stores category information. Readable by all users, writable only by admins."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profile information. Accessible only by the user and admins."
+    },
+    "/users/{userId}/addresses/{addressId}": {
+      "schema": { "$ref": "#/entities/Address" },
+      "description": "Stores user addresses. Only accessible by the user and admins."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Stores user orders. Only accessible by the user who created the order and admins. Includes denormalized `userId` for authorization."
+    },
+    "/users/{userId}/wishlist/{productId}": {
+        "schema": { "$ref": "#/entities/WishlistItem" },
+        "description": "Stores a user's wishlist items. The document ID is the product ID for quick lookups. Only accessible by the user who owns the wishlist and admins."
+    },
+    "/users/{userId}/shopping-lists/{listId}": {
+        "schema": { "$ref": "#/entities/ShoppingList" },
+        "description": "Stores a user's shopping lists. Only accessible by the user who owns the list."
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+        "schema": { "$ref": "#/entities/Notification" },
+        "description": "Stores notifications for a specific user. Only accessible by that user."
+    },
+    "/roles_admin/{userId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string", "enum": ["admin"] }
+        },
+        "required": ["role"]
+       },
+      "description": "Collection to store admin user IDs. Presence of a document with role 'admin' indicates admin privileges."
+    },
+    "/settings/site": {
+        "schema": { "$ref": "#/entities/SiteSettings" },
+        "description": "Stores global site settings in a single document."
+    },
+    "/coupons/{couponId}": {
+        "schema": { "$ref": "#/entities/Coupon" },
+        "description": "Stores discount coupons. Readable by all users, writable only by admins."
+    },
+    "/recipes/{recipeId}": {
+        "schema": { "$ref": "#/entities/Recipe" },
+        "description": "Stores cooking recipes. Publicly readable, writable only by admins."
+    },
+    "/recipes/{recipeId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews for a specific recipe. Writable by the user who owns the review."
+    },
+    "/contactMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/ContactMessage" },
+      "description": "Stores messages submitted through the contact form. Writable by anyone, but not readable by clients."
+    }
+  }
+}

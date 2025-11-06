@@ -29,6 +29,7 @@ import { generateProductDescription } from '@/ai/flows/generate-product-descript
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
+  purchasePrice: z.coerce.number().min(0, { message: 'Le prix ne peut pas être négatif.' }),
   price: z.coerce.number().positive({ message: 'Le prix doit être un nombre positif.' }),
   stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
   categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
@@ -52,6 +53,7 @@ export default function NewProductPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
+      purchasePrice: 0,
       price: 0,
       stock: 0,
     },
@@ -189,10 +191,23 @@ export default function NewProductPage() {
                 />
                 <FormField
                   control={form.control}
+                  name="purchasePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prix d'achat</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="80.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prix</FormLabel>
+                      <FormLabel>Prix de vente</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100.00" {...field} />
                       </FormControl>

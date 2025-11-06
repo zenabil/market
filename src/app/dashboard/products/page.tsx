@@ -43,6 +43,7 @@ export default function ProductsPage() {
   }, [isAdmin, isRoleLoading, router]);
 
   const formatCurrency = (amount: number) => {
+    if (typeof amount !== 'number') return 'N/A';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'DZD',
@@ -92,81 +93,86 @@ export default function ProductsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Gérer les produits</CardTitle>
-            <Button asChild size="sm" className="gap-1">
-              <Link href="/dashboard/products/new">
-                <PlusCircle className="h-4 w-4" />
-                Ajouter un produit
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Vendus</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                  </TableRow>
-                ))}
-                {products && products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{formatCurrency(product.price)}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>{product.sold}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Ouvrir le menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
-                          </DropdownMenuItem>
-                           <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
-                             <Trash2 className="mr-2 h-4 w-4" />
-                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-             {!areProductsLoading && products?.length === 0 && (
-                <div className="text-center p-8 text-muted-foreground">
-                    Aucun produit trouvé.
-                </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="overflow-x-auto">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Gérer les produits</CardTitle>
+                <Button asChild size="sm" className="gap-1">
+                  <Link href="/dashboard/products/new">
+                    <PlusCircle className="h-4 w-4" />
+                    Ajouter un produit
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Produit</TableHead>
+                      <TableHead>Prix d'achat</TableHead>
+                      <TableHead>Prix de vente</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Vendus</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                      </TableRow>
+                    ))}
+                    {products && products.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{formatCurrency(product.purchasePrice)}</TableCell>
+                        <TableCell>{formatCurrency(product.price)}</TableCell>
+                        <TableCell>{product.stock}</TableCell>
+                        <TableCell>{product.sold}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button aria-haspopup="true" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Ouvrir le menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
+                              </DropdownMenuItem>
+                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
+                                 <Trash2 className="mr-2 h-4 w-4" />
+                                 Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                 {!areProductsLoading && products?.length === 0 && (
+                    <div className="text-center p-8 text-muted-foreground">
+                        Aucun produit trouvé.
+                    </div>
+                )}
+              </CardContent>
+            </Card>
+        </div>
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
               <AlertDialogDescription>
-                Cette action ne peut pas être annulée. Cela supprimera définitivement le produit "{productToDelete?.name || ''}".
+                Cette action ne peut pas être annulée. Cela supprimera définitivelement le produit "{productToDelete?.name || ''}".
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

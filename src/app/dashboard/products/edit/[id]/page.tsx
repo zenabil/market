@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils';
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
   description: z.string().optional(),
+  purchasePrice: z.coerce.number().min(0, { message: 'Le prix ne peut pas être négatif.' }),
   price: z.coerce.number().positive({ message: 'Le prix doit être un nombre positif.' }),
   stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
   categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
@@ -74,6 +75,7 @@ function EditProductForm({ productId }: { productId: string }) {
       form.reset({
         name: product.name,
         description: product.description,
+        purchasePrice: product.purchasePrice,
         price: product.price,
         stock: product.stock,
         categoryId: product.categoryId,
@@ -325,10 +327,23 @@ function EditProductForm({ productId }: { productId: string }) {
                 <CardContent className="space-y-4">
                    <FormField
                     control={form.control}
+                    name="purchasePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prix d'achat</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="80.00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Prix</FormLabel>
+                        <FormLabel>Prix de vente</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="100.00" {...field} />
                         </FormControl>
