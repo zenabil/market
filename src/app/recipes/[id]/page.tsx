@@ -128,14 +128,14 @@ function RecipeDetailsPage() {
                     <p className="text-sm text-muted-foreground">{recipe.cookTime} min</p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg">
-                    <Users className="h-8 w-8 mx-auto text-primary" />
-                    <p className="mt-2 font-semibold">Portions</p>
-                    <p className="text-sm text-muted-foreground">{recipe.servings} pers.</p>
-                </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
                     <Soup className="h-8 w-8 mx-auto text-primary" />
                     <p className="mt-2 font-semibold">Temps Total</p>
                     <p className="text-sm text-muted-foreground">{recipe.prepTime + recipe.cookTime} min</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                    <Users className="h-8 w-8 mx-auto text-primary" />
+                    <p className="mt-2 font-semibold">Portions</p>
+                    <p className="text-sm text-muted-foreground">{recipe.servings} pers.</p>
                 </div>
             </div>
 

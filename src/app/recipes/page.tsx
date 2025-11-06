@@ -28,8 +28,8 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
                 <CardHeader>
                     <h3 className="font-headline text-xl font-semibold truncate">{recipe.title}</h3>
                 </CardHeader>
-                <CardContent className="flex-grow">
-                    <p className="text-muted-foreground text-sm line-clamp-3">{recipe.description}</p>
+                <CardContent className="flex-grow flex flex-col">
+                    <p className="text-muted-foreground text-sm line-clamp-3 flex-grow">{recipe.description}</p>
                      <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         <span>Temps total: {totalTime} min</span>
