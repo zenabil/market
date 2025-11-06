@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,6 +15,10 @@ import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Product } from '@/lib/placeholder-data';
+
 
 const formSchema = z.object({
     ingredients: z.string().min(10, { message: 'Veuillez lister au moins quelques ingrédients.' }),
@@ -25,7 +29,9 @@ export default function GenerateRecipePage() {
     const { toast } = useToast();
     const { addItem } = useCart();
     const [isLoading, setIsLoading] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [generatedRecipe, setGeneratedRecipe] = useState<GenerateRecipeFromIngredientsOutput | null>(null);
+    const firestore = useFirestore();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -34,32 +40,47 @@ export default function GenerateRecipePage() {
         },
     });
 
+    const productsQuery = useMemoFirebase(() => {
+        if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) return null;
+        return query(collection(firestore, 'products'), where('name', 'in', generatedRecipe.missingProducts));
+    }, [firestore, generatedRecipe]);
+
+    const { data: foundProducts } = useCollection<Product>(productsQuery);
+
+
     const handleAddMissingToCart = () => {
-        if (!generatedRecipe?.missingProducts) return;
+        if (!generatedRecipe?.missingProducts || !foundProducts) return;
+        setIsAddingToCart(true);
 
-        // This is a simplified implementation. A real-world scenario would involve
-        // searching for product IDs based on the names and adding the correct product objects.
+        let itemsAddedCount = 0;
+        let notFoundProducts: string[] = [];
+
         generatedRecipe.missingProducts.forEach(productName => {
-            const mockProduct = {
-                id: `ai-${productName.replace(/\s+/g, '-')}`,
-                name: productName,
-                price: 100, // Placeholder price
-                images: ['https://picsum.photos/seed/' + productName + '/400/400'],
-                discount: 0,
-                stock: 99,
-                categoryId: 'ai-generated',
-                description: '',
-                sku: '',
-                barcode: '',
-                sold: 0,
-            };
-            addItem(mockProduct);
+            const productToAdd = foundProducts.find(p => p.name.toLowerCase() === productName.toLowerCase());
+            if (productToAdd) {
+                addItem(productToAdd);
+                itemsAddedCount++;
+            } else {
+                notFoundProducts.push(productName);
+            }
         });
 
-        toast({
-            title: 'Articles ajoutés au panier',
-            description: 'Les ingrédients manquants ont été ajoutés à votre panier.'
-        });
+        if (itemsAddedCount > 0) {
+            toast({
+                title: 'Articles ajoutés au panier',
+                description: `${itemsAddedCount} ingrédient(s) manquant(s) ont été ajoutés à votre panier.`
+            });
+        }
+        
+        if (notFoundProducts.length > 0) {
+             toast({
+                variant: 'destructive',
+                title: 'Produits non trouvés',
+                description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+            });
+        }
+
+        setIsAddingToCart(false);
     };
 
 
@@ -206,7 +227,8 @@ export default function GenerateRecipePage() {
                                         <ul className="space-y-1 list-disc pl-5 text-sm text-muted-foreground">
                                             {generatedRecipe.missingProducts.map((p, i) => <li key={i}>{p}</li>)}
                                         </ul>
-                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart}>
+                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart}>
+                                            {isAddingToCart && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             <ShoppingCart className="mr-2 h-4 w-4" />
                                             Ajouter au panier
                                         </Button>
