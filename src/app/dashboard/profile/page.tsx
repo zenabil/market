@@ -93,23 +93,20 @@ export default function ProfilePage() {
       const dataUrl = reader.result as string;
       try {
         await updateProfile(authUser, { photoURL: dataUrl });
-        
         const updateData = { avatar: dataUrl };
-        await updateDoc(userDocRef, updateData);
-        
+        updateDoc(userDocRef, updateData).catch((error) => {
+           if ((error as any).code?.includes('permission-denied')) {
+                errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { avatar: '...data URI...' },
+                }));
+            }
+        });
         toast({ title: 'Avatar mis à jour' });
       } catch (error) {
         console.error("Avatar update failed:", error);
-        
-        if ((error as any).code?.includes('permission-denied')) {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: userDocRef.path,
-            operation: 'update',
-            requestResourceData: { avatar: '...data URI...' },
-          }));
-        } else {
-          toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
-        }
+        toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
       }
     };
     reader.readAsDataURL(file);
@@ -118,34 +115,36 @@ export default function ProfilePage() {
 
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>>) {
     if (!userDocRef || !authUser) return;
-
     setIsSaving(true);
     
     try {
-      // Update Firebase Auth profile first for name
-      if (values.name !== authUser.displayName) {
-          await updateProfile(authUser, { displayName: values.name });
-      }
+        if (values.name !== authUser.displayName) {
+            await updateProfile(authUser, { displayName: values.name });
+        }
 
-      // Then update Firestore document
-      const updateData = { name: values.name, phone: values.phone };
-      await updateDoc(userDocRef, updateData);
+        const updateData = { name: values.name, phone: values.phone };
+        await updateDoc(userDocRef, updateData);
 
-      toast({
-          title: 'Profil mis à jour',
-          description: 'Vos informations ont été enregistrées.',
-      });
+        toast({
+            title: 'Profil mis à jour',
+            description: 'Vos informations ont été enregistrées.',
+        });
 
     } catch (error: any) {
         console.error(error);
-        errorEmitter.emit(
-            'permission-error',
-            new FirestorePermissionError({
+        if (error.code === 'permission-denied' || (error.name === 'FirebaseError' && error.message.includes('permission'))) {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: userDocRef.path,
                 operation: 'update',
                 requestResourceData: { name: values.name, phone: values.phone },
-            })
-        );
+            }));
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Échec de la mise à jour",
+                description: "Nous n'avons pas pu enregistrer vos modifications."
+            });
+        }
     } finally {
         setIsSaving(false);
     }
