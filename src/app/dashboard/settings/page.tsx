@@ -23,6 +23,8 @@ import Link from 'next/link';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   siteName: z.string().min(2, { message: 'Le nom du site doit comporter au moins 2 caractères.' }),
@@ -38,6 +40,8 @@ export default function SettingsPage() {
   const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = React.useState(false);
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
 
   const firestore = useFirestore();
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
@@ -52,6 +56,12 @@ export default function SettingsPage() {
       logoUrl: '',
     },
   });
+
+  useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+        router.replace('/dashboard/orders');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   useEffect(() => {
     if (settings) {
@@ -103,25 +113,12 @@ export default function SettingsPage() {
         });
   }
 
-  if (isLoadingSettings) {
+  const isLoading = isLoadingSettings || isRoleLoading;
+  
+  if (isLoading || !isAdmin) {
       return (
-        <div className="container py-8 md:py-12">
-            <div className="flex items-center gap-4 mb-8">
-                <Skeleton className="h-10 w-10" />
-                <Skeleton className="h-10 w-64" />
-            </div>
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-8 w-40" />
-                    <Skeleton className="h-4 w-80" />
-                </CardHeader>
-                <CardContent className='space-y-8 max-w-2xl'>
-                     <Skeleton className="h-14 w-full" />
-                     <Skeleton className="h-20 w-full" />
-                     <Skeleton className="h-14 w-full" />
-                     <Skeleton className="h-14 w-full" />
-                </CardContent>
-            </Card>
+        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )
   }

@@ -23,13 +23,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function ProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
   const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+        router.replace('/dashboard/orders');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -63,6 +74,16 @@ export default function ProductsPage() {
     }
   };
   
+  const isLoading = areProductsLoading || isRoleLoading;
+
+  if (isLoading || !isAdmin) {
+      return (
+          <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
+  }
+
   return (
     <div className="container py-8 md:py-12">
       <AlertDialog>
@@ -90,7 +111,7 @@ export default function ProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-20" /></TableCell>
@@ -130,7 +151,7 @@ export default function ProductsPage() {
                 ))}
               </TableBody>
             </Table>
-             {!isLoading && products?.length === 0 && (
+             {!areProductsLoading && products?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
                     Aucun produit trouvé.
                 </div>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal, Trash2, Edit, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { useFirestore, errorEmitter, FirestorePermissionError, useUser } from '@/firebase';
 import { doc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -43,6 +43,8 @@ import {
 import Image from 'next/image';
 import { useCategories } from '@/hooks/use-categories';
 import type { Category } from '@/lib/placeholder-data';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 
 const categoryFormSchema = z.object({
@@ -166,6 +168,15 @@ export default function CategoriesPage() {
   const [categoryToDelete, setCategoryToDelete] = React.useState<Category | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const { user } = useUser();
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+  
+  React.useEffect(() => {
+      if (!isRoleLoading && !isAdmin) {
+          router.replace('/dashboard/orders');
+      }
+  }, [isAdmin, isRoleLoading, router]);
 
   const handleDeleteCategory = async () => {
     if (!categoryToDelete || !firestore) return;
@@ -200,6 +211,16 @@ export default function CategoriesPage() {
   const openDeleteDialog = (category: Category) => {
     setCategoryToDelete(category);
     setIsAlertOpen(true);
+  }
+  
+  const isLoading = areCategoriesLoading || isRoleLoading;
+
+  if (isLoading || !isAdmin) {
+      return (
+          <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
   }
 
   return (

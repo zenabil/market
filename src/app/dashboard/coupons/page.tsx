@@ -43,6 +43,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useCoupons } from '@/hooks/use-coupons';
 import type { Coupon } from '@/lib/placeholder-data';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 
 function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
@@ -146,10 +148,18 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
 export default function CouponsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { coupons, isLoading, refetchCoupons } = useCoupons();
+  const { coupons, isLoading: areCouponsLoading, refetchCoupons } = useCoupons();
   const [couponToDelete, setCouponToDelete] = React.useState<Coupon | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+        router.replace('/dashboard/orders');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -193,6 +203,16 @@ export default function CouponsPage() {
     setCouponToDelete(coupon);
     setIsAlertOpen(true);
   }
+  
+  const isLoading = areCouponsLoading || isRoleLoading;
+
+  if (isLoading || !isAdmin) {
+      return (
+          <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
+  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -216,7 +236,7 @@ export default function CouponsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && Array.from({ length: 3 }).map((_, i) => (
+                {areCouponsLoading && Array.from({ length: 3 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-16" /></TableCell>
@@ -255,7 +275,7 @@ export default function CouponsPage() {
                 ))}
               </TableBody>
             </Table>
-            {!isLoading && coupons?.length === 0 && (
+            {!areCouponsLoading && coupons?.length === 0 && (
               <div className="text-center p-8 text-muted-foreground">
                 Aucun coupon trouvé.
               </div>

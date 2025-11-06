@@ -4,7 +4,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, PlusCircle, Trash2 } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -24,13 +24,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 export default function RecipesDashboardPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const recipesQuery = useMemoFirebase(() => query(collection(firestore, 'recipes')), [firestore]);
-  const { data: recipes, isLoading } = useCollection<Recipe>(recipesQuery);
+  const { data: recipes, isLoading: areRecipesLoading } = useCollection<Recipe>(recipesQuery);
   const [recipeToDelete, setRecipeToDelete] = React.useState<Recipe | null>(null);
+  const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
+  
+  React.useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+        router.replace('/dashboard/orders');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const handleDeleteRecipe = async () => {
     if (!recipeToDelete || !firestore) return;
@@ -57,6 +67,16 @@ export default function RecipesDashboardPage() {
     }
   };
   
+  const isLoading = areRecipesLoading || isRoleLoading;
+
+  if (isLoading || !isAdmin) {
+      return (
+          <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
+  }
+
   return (
     <div className="container py-8 md:py-12">
       <AlertDialog>
@@ -87,7 +107,7 @@ export default function RecipesDashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                {areRecipesLoading && Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-48" /></TableCell>
@@ -129,7 +149,7 @@ export default function RecipesDashboardPage() {
                 ))}
               </TableBody>
             </Table>
-             {!isLoading && recipes?.length === 0 && (
+             {!areRecipesLoading && recipes?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
                     Aucune recette trouvée.
                 </div>

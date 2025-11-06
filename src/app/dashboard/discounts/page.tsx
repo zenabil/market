@@ -10,8 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/lib/placeholder-data';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 function DiscountRow({ product }: { product: Product }) {
     const firestore = useFirestore();
@@ -130,13 +132,31 @@ function DiscountRow({ product }: { product: Product }) {
 
 export default function DiscountsPage() {
     const firestore = useFirestore();
+    const { isAdmin, isRoleLoading } = useUserRole();
+    const router = useRouter();
 
     const allProductsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'products'));
     }, [firestore]);
 
-    const { data: products, isLoading } = useCollection<Product>(allProductsQuery);
+    const { data: products, isLoading: areProductsLoading } = useCollection<Product>(allProductsQuery);
+    
+    React.useEffect(() => {
+        if (!isRoleLoading && !isAdmin) {
+            router.replace('/dashboard/orders');
+        }
+    }, [isAdmin, isRoleLoading, router]);
+
+    const isLoading = areProductsLoading || isRoleLoading;
+
+    if (isLoading || !isAdmin) {
+        return (
+            <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="container py-8 md:py-12">
@@ -157,7 +177,7 @@ export default function DiscountsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                            {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
                                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
@@ -171,7 +191,7 @@ export default function DiscountsPage() {
                             ))}
                         </TableBody>
                     </Table>
-                    {!isLoading && products?.length === 0 && (
+                    {!areProductsLoading && products?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
                             Aucun produit trouvé.
                         </div>

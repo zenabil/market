@@ -64,6 +64,7 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
+    // Only redirect if authentication state is fully resolved and user is logged in
     if (!isUserLoading && !isRoleLoading && user) {
         if (isAdmin) {
           router.replace('/dashboard');
@@ -79,7 +80,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({ title: 'Connexion réussie !' });
-      // The useEffect will handle the redirect
+      // The useEffect will handle the redirect. No router.push() here.
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -141,7 +142,7 @@ export default function LoginPage() {
       }
   
       toast({ title: 'Inscription réussie !' });
-      // The useEffect will handle the redirect
+      // The useEffect will handle the redirect. No router.push() here.
     } catch (error: any) {
       // Handle primary account creation errors
       if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
@@ -169,7 +170,8 @@ export default function LoginPage() {
     }
   };
 
-  if (isUserLoading || (!isUserLoading && user)) {
+  // Show a loading spinner if we are still checking the auth state, or if the user is logged in but we are waiting for the redirect.
+  if (isUserLoading || isRoleLoading || user) {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
              <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -177,6 +179,7 @@ export default function LoginPage() {
     );
   }
 
+  // Only show the login form if there is no user and all loading is complete.
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <div className='absolute top-8 left-8'>

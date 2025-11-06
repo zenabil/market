@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useRouter } from 'next/navigation';
 
 function LoyaltyDialog({ user }: { user: FirestoreUser }) {
   const firestore = useFirestore();
@@ -173,6 +174,7 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
 export default function UsersPage() {
   const firestore = useFirestore();
   const { isAdmin, isRoleLoading } = useUserRole();
+  const router = useRouter();
 
   // Only attempt to query users if the current user is an admin.
   const usersQuery = useMemoFirebase(() => {
@@ -181,6 +183,12 @@ export default function UsersPage() {
   }, [firestore, isRoleLoading, isAdmin]);
 
   const { data: users, isLoading: areUsersLoading } = useCollection<FirestoreUser>(usersQuery);
+
+  React.useEffect(() => {
+    if (!isRoleLoading && !isAdmin) {
+        router.replace('/dashboard/orders');
+    }
+  }, [isAdmin, isRoleLoading, router]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -199,6 +207,15 @@ export default function UsersPage() {
   };
   
   const isLoading = isRoleLoading || areUsersLoading;
+
+  if (isLoading || !isAdmin) {
+    return (
+        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
+
 
   return (
     <div className="container py-8 md:py-12">
@@ -221,7 +238,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                {areUsersLoading && Array.from({ length: 5 }).map((_, i) => (
                    <TableRow key={i}>
                     <TableCell>
                       <div className="flex items-center gap-3">
