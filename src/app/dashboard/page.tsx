@@ -59,7 +59,7 @@ function AdminDashboard() {
   const chartConfig = {
     sold: {
       label: 'Unités vendues',
-      color: 'hsl(var(--primary))',
+      color: 'hsl(var(--chart-1))',
     },
   };
 
@@ -187,7 +187,7 @@ export default function DashboardPage() {
     
     React.useEffect(() => {
         if (isUserLoading || isRoleLoading) {
-            return; // Wait until we know the user's status
+            return;
         }
         if (!user) {
             router.replace('/login');
@@ -196,7 +196,6 @@ export default function DashboardPage() {
         }
     }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
-    // Show a loading indicator while we verify auth and admin status.
     if (isUserLoading || isRoleLoading || !isAdmin) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
@@ -205,6 +204,5 @@ export default function DashboardPage() {
         );
     }
     
-    // Only render the admin dashboard if the user is confirmed to be an admin.
     return <AdminDashboard />;
 }
