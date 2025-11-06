@@ -128,9 +128,10 @@ export default function CheckoutPage() {
         const couponData = { id: couponDoc.id, ...couponDoc.data() } as Coupon;
         
         const now = new Date();
-        const expiry = new Date(couponData.expiryDate);
+        // Firestore timestamps can be seconds/nanoseconds objects, convert to Date
+        const expiryDate = (couponData.expiryDate as any).toDate ? (couponData.expiryDate as any).toDate() : new Date(couponData.expiryDate);
 
-        if (!couponData.isActive || now > expiry) {
+        if (!couponData.isActive || now > expiryDate) {
             toast({ variant: 'destructive', title: 'Coupon expiré ou inactif', description: "Ce code promo n'est plus valide." });
             return;
         }

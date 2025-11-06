@@ -11,18 +11,17 @@ import React from "react";
  */
 export function useCoupons() {
   const firestore = useFirestore();
-  const [key, setKey] = React.useState(0);
 
   const couponsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, "coupons"), orderBy("expiryDate", "desc")) : null),
-    [firestore, key]
+    [firestore]
   );
 
-  const { data: coupons, isLoading, error } = useCollection<Coupon>(couponsQuery);
+  const { data: coupons, isLoading, error, refetch } = useCollection<Coupon>(couponsQuery);
 
   const refetchCoupons = React.useCallback(() => {
-    setKey(prevKey => prevKey + 1);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   return { coupons, isLoading, error, refetchCoupons };
 }
