@@ -1,19 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import type { Recipe } from '@/lib/placeholder-data';
+import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import type { Recipe, Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Clock, Users, Soup } from 'lucide-react';
+import { Clock, Users, Soup, ShoppingCart, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 
 function RecipeDetailsPage() {
     const { id: recipeId } = useParams();
     const firestore = useFirestore();
+    const { addItem } = useCart();
+    const { toast } = useToast();
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
 
     const recipeRef = useMemoFirebase(() => {
         if (!firestore || !recipeId) return null;
@@ -21,6 +26,62 @@ function RecipeDetailsPage() {
     }, [firestore, recipeId]);
 
     const { data: recipe, isLoading } = useDoc<Recipe>(recipeRef);
+
+    const handleAddAllToCart = async () => {
+        if (!firestore || !recipe?.ingredients.length) return;
+        setIsAddingToCart(true);
+
+        try {
+            const ingredientNames = recipe.ingredients.map(name => name.toLowerCase());
+            const productsRef = collection(firestore, 'products');
+            
+            // Firestore 'in' query is limited to 30 items. For recipes with more, this needs chunking.
+            // For now, we assume fewer than 30 ingredients.
+            const q = query(productsRef, where('name', 'in', recipe.ingredients));
+
+            const querySnapshot = await getDocs(q);
+            const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            
+            const foundProducts = allProducts.filter(p => ingredientNames.includes(p.name.toLowerCase()));
+            const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
+            
+            let itemsAddedCount = 0;
+            foundProducts.forEach(product => {
+                addItem(product);
+                itemsAddedCount++;
+            });
+    
+            if (itemsAddedCount > 0) {
+                toast({
+                    title: 'المكونات أضيفت إلى السلة',
+                    description: `${itemsAddedCount} مكون(ات) من الوصفة أضيفت إلى سلتك.`
+                });
+            }
+            
+            const notFoundProducts = recipe.ingredients.filter(
+                name => !foundProductNames.includes(name.toLowerCase())
+            );
+    
+            if (notFoundProducts.length > 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'بعض المكونات غير متوفرة',
+                    description: `لم نتمكن من العثور على: ${notFoundProducts.join(', ')}`
+                });
+            }
+
+        } catch (error) {
+            console.error("Error adding recipe ingredients to cart:", error);
+            toast({
+                variant: 'destructive',
+                title: 'خطأ',
+                description: "لم نتمكن من إضافة المكونات إلى السلة."
+            });
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
 
     if (isLoading) {
         return (
@@ -82,12 +143,22 @@ function RecipeDetailsPage() {
             
             <div className="grid md:grid-cols-3 gap-12">
                 <div className="md:col-span-1">
-                    <h2 className="font-headline text-2xl mb-4">Ingrédients</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="font-headline text-2xl">Ingrédients</h2>
+                    </div>
                     <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
                         {recipe.ingredients.map((ingredient, index) => (
                             <li key={index}>{ingredient}</li>
                         ))}
                     </ul>
+                    <Button className="w-full mt-6" onClick={handleAddAllToCart} disabled={isAddingToCart}>
+                        {isAddingToCart ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                        )}
+                        Ajouter les ingrédients à la salla
+                    </Button>
                 </div>
                  <div className="md:col-span-2">
                      <h2 className="font-headline text-2xl mb-4">Instructions</h2>
