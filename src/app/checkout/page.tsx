@@ -103,6 +103,13 @@ export default function CheckoutPage() {
         })
     }
   }, [firestoreUser, user, shippingForm]);
+  
+    React.useEffect(() => {
+    if (step === 'payment') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step]);
+
 
   const finalTotalPrice = appliedCoupon
     ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
