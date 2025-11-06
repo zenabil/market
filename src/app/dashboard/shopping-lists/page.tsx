@@ -183,7 +183,7 @@ export default function ShoppingListsPage() {
 
     const isLoading = isUserLoading || areListsLoading;
 
-    if (isLoading) {
+    if (isLoading && !shoppingLists) {
         return (
             <div className="container py-8 md:py-12">
                 <div className="flex justify-between items-center mb-8">
@@ -210,7 +210,7 @@ export default function ShoppingListsPage() {
             {shoppingLists && shoppingLists.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {shoppingLists.map(list => (
-                        <Card key={list.id}>
+                        <Card key={list.id} className="flex flex-col">
                             <CardHeader className="flex-row items-start justify-between">
                                 <div>
                                     <CardTitle className="hover:text-primary transition-colors">
@@ -238,7 +238,7 @@ export default function ShoppingListsPage() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-grow">
                                 <p className="text-sm text-muted-foreground italic">
                                     {list.items.length > 0 ? `${list.items.length} article(s)` : "Cette liste est vide."}
                                 </p>
