@@ -203,7 +203,7 @@ function EditProductForm({ productId }: { productId: string }) {
                   <div className="space-y-2">
                     <div className='flex justify-between items-center'>
                       <h3 className='text-sm font-medium'>Description du produit</h3>
-                      <Button type="button" size="sm" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating}>
+                      <Button type="button" size="sm" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating || !form.watch('name') || !form.watch('categoryId')}>
                         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isGenerating ? 'Génération...' : 'Générer avec l\'IA'}
                       </Button>
