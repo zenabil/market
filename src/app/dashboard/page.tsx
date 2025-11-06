@@ -186,7 +186,7 @@ export default function DashboardPage() {
     const router = useRouter();
     
     React.useEffect(() => {
-        if (isRoleLoading || isUserLoading) {
+        if (isUserLoading || isRoleLoading) {
             return; // Wait until we know the user's status
         }
         if (!user) {
@@ -197,18 +197,17 @@ export default function DashboardPage() {
     }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
     // Show a loading indicator while we verify auth and admin status.
-    if (isUserLoading || isRoleLoading || (user && !isAdmin)) {
+    if (isUserLoading || isRoleLoading || !isAdmin) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
                 <div className="flex items-center gap-2 text-muted-foreground">
                      <Loader2 className="h-6 w-6 animate-spin" />
-                     <p>Chargement des données utilisateur...</p>
+                     <p>Chargement...</p>
                 </div>
             </div>
         );
     }
     
     // Only render the admin dashboard if the user is confirmed to be an admin.
-    // Non-admins will have already been redirected by the useEffect.
     return <AdminDashboard />;
 }

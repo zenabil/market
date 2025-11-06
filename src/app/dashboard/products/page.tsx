@@ -33,6 +33,7 @@ export default function ProductsPage() {
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
   const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
   const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
 
@@ -71,8 +72,14 @@ export default function ProductsPage() {
       });
     } finally {
       setProductToDelete(null);
+      setIsAlertOpen(false);
     }
   };
+  
+  const openDeleteDialog = (product: Product) => {
+    setProductToDelete(product);
+    setIsAlertOpen(true);
+  }
   
   const isLoading = areProductsLoading || isRoleLoading;
 
@@ -86,7 +93,7 @@ export default function ProductsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-      <AlertDialog>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Gérer les produits</CardTitle>
@@ -139,7 +146,7 @@ export default function ProductsPage() {
                             <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
                           </DropdownMenuItem>
                           <AlertDialogTrigger asChild>
-                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setProductToDelete(product); }} className="text-destructive">
+                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
                                <Trash2 className="mr-2 h-4 w-4" />
                                Supprimer
                             </DropdownMenuItem>
