@@ -28,16 +28,26 @@ function RecipeDetailsPage() {
     const { data: recipe, isLoading } = useDoc<Recipe>(recipeRef);
 
     const handleAddAllToCart = async () => {
-        if (!firestore || !recipe?.ingredients.length) return;
+        if (!firestore || !recipe?.ingredients || recipe.ingredients.length === 0) return;
         setIsAddingToCart(true);
 
         try {
             const ingredientNames = recipe.ingredients.map(name => name.toLowerCase());
+            if(ingredientNames.length === 0) return;
+
             const productsRef = collection(firestore, 'products');
             
             // Firestore 'in' query is limited to 30 items. For recipes with more, this needs chunking.
-            // For now, we assume fewer than 30 ingredients.
-            const q = query(productsRef, where('name', 'in', recipe.ingredients.slice(0, 30)));
+            const productsToQuery = recipe.ingredients.slice(0, 30);
+            if (productsToQuery.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Aucun ingrédient à rechercher',
+                });
+                return;
+            }
+
+            const q = query(productsRef, where('name', 'in', productsToQuery));
 
             const querySnapshot = await getDocs(q);
             const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -125,12 +135,12 @@ function RecipeDetailsPage() {
                     <p className="text-sm text-muted-foreground">{recipe.prepTime} min</p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg">
-                    <Clock className="h-8 w-8 mx-auto text-primary" />
+                    <Soup className="h-8 w-8 mx-auto text-primary" />
                     <p className="mt-2 font-semibold">Temps de cuisson</p>
                     <p className="text-sm text-muted-foreground">{recipe.cookTime} min</p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg">
-                    <Soup className="h-8 w-8 mx-auto text-primary" />
+                    <Clock className="h-8 w-8 mx-auto text-primary" />
                     <p className="mt-2 font-semibold">Temps Total</p>
                     <p className="text-sm text-muted-foreground">{totalTime} min</p>
                 </div>
