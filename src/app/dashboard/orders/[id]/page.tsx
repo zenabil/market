@@ -8,13 +8,14 @@ import type { Order, Product, User as FirestoreUser } from '@/lib/placeholder-da
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Package, User, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, FileText, Package, User, Truck, CheckCircle, XCircle, Home } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { AddressDialog } from '@/components/dashboard/address-dialog';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -234,7 +235,17 @@ function OrderDetails() {
                 <div className="space-y-8">
                      <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><User /> Client</CardTitle>
+                            <CardTitle className='flex items-center justify-between'>
+                                <span className='flex items-center gap-2'><User /> Client</span>
+                                <AddressDialog 
+                                    userDocRef={userDocRef} 
+                                    firestoreUser={customer}
+                                >
+                                    <Button variant="ghost" size="icon" title="Modifier les adresses du client">
+                                        <Home className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                </AddressDialog>
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                            {isCustomerLoading ? (
