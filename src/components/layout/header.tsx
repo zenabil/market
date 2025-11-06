@@ -1,8 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays, Bell, GitCompareArrows } from 'lucide-react';
+import {
+  Search,
+  Menu,
+  LogOut,
+  ShoppingBasket,
+  LayoutDashboard,
+  Wand2,
+  CalendarDays,
+  Bell,
+  GitCompareArrows,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +23,7 @@ import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
-import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase, useCollection, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
@@ -28,6 +38,7 @@ import { doc, collection, query, orderBy, writeBatch } from 'firebase/firestore'
 import { useUserRole } from '@/hooks/use-user-role';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
+
 
 const navLinks = [
   { key: 'Accueil', href: '/' },
@@ -205,50 +216,31 @@ function UserNav() {
 }
 
 
-export default function Header() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const isMobile = useIsMobile();
-  const pathname = usePathname();
-  const router = useRouter();
+function NavLinks({ className }: { className?: string }) {
+    return (
+        <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
+        {navLinks.map((link) => (
+            <Link
+            key={link.key}
+            href={link.href}
+            className={cn(
+                "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
+                (link.icon) && "text-primary hover:text-primary/80 font-bold"
+                )}
+            >
+            {link.icon && <link.icon className="h-4 w-4" />}
+            {link.key}
+            </Link>
+        ))}
+        </nav>
+    )
+}
 
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
-    return null;
-  }
-  
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const searchQuery = formData.get('search') as string;
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
-  const NavLinks = ({ className }: { className?: string }) => (
-    <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
-      {navLinks.map((link) => (
-        <Link
-          key={link.key}
-          href={link.href}
-          className={cn(
-              "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
-              (link.icon) && "text-primary hover:text-primary/80 font-bold"
-            )}
-        >
-          {link.icon && <link.icon className="h-4 w-4" />}
-          {link.key}
-        </Link>
-      ))}
-    </nav>
-  );
-
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        {isMobile && (
-          <Sheet>
+function MobileNav() {
+    return (
+        <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="mr-4">
+              <Button variant="ghost" size="icon" className="mr-4 md:hidden">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Ouvrir le menu</span>
               </Button>
@@ -274,14 +266,41 @@ export default function Header() {
                 ))}
               </div>
             </SheetContent>
-          </Sheet>
-        )}
+        </Sheet>
+    )
+}
+
+
+export default function Header() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
+    return null;
+  }
+  
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const searchQuery = formData.get('search') as string;
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
+        <MobileNav />
         
         <Link href="/" className="mr-6 hidden md:flex">
           <Logo className="h-8 w-auto" />
         </Link>
 
-        <NavLinks className="hidden md:flex" />
+        <div className="hidden md:flex flex-1">
+            <NavLinks />
+        </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
