@@ -95,18 +95,23 @@ export default function ProfilePage() {
           await updateProfile(authUser, { photoURL: dataUrl });
           // Update Firestore document
           const updateData = { avatar: dataUrl };
-          await updateDoc(userDocRef, updateData)
-          toast({ title: 'Avatar mis à jour' });
-        } catch(error) {
-          console.error(error);
-          errorEmitter.emit(
-            'permission-error',
-            new FirestorePermissionError({
-                path: userDocRef.path,
-                operation: 'update',
-                requestResourceData: { avatar: '...data URI...' },
+          updateDoc(userDocRef, updateData)
+            .then(() => {
+                toast({ title: 'Avatar mis à jour' });
             })
-          );
+            .catch((error) => {
+                 errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: userDocRef.path,
+                        operation: 'update',
+                        requestResourceData: { avatar: '...data URI...' },
+                    })
+                );
+            });
+        } catch(error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
         }
       };
       reader.readAsDataURL(file);
@@ -114,7 +119,7 @@ export default function ProfilePage() {
   };
 
 
-  async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
+  async function onProfileSubmit(values: z.infer<typeof profileFormSchema>>) {
     if (!userDocRef || !authUser) return;
 
     setIsSaving(true);
@@ -149,7 +154,7 @@ export default function ProfilePage() {
     }
   }
 
-  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
+  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>>) {
       if (!authUser) return;
       setIsPasswordSaving(true);
       try {

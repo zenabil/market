@@ -39,7 +39,6 @@ interface AddressDialogProps {
 
 export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, children }: AddressDialogProps) {
     const { toast } = useToast();
-    const firestore = useFirestore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -59,7 +58,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
     }, [addressToEdit, isOpen, addressForm]);
 
     async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
-        if (!userDocRef || !firestore) return;
+        if (!userDocRef) return;
         setIsSubmitting(true);
 
         if (addressToEdit) {
@@ -111,7 +110,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger asChild onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(true); }}>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{addressToEdit ? 'Modifier l\'adresse' : 'Ajouter une nouvelle adresse'}</DialogTitle>
