@@ -39,16 +39,17 @@ service cloud.firestore {
     /**
      * @description Allows anyone to read product information, but restricts creation, updates, and deletion to admins.
      * Calculated fields like averageRating and reviewCount should only be updated by backend functions.
+     * Admins can create standard products or bundle products.
      * @path /products/{productId}
      * @allow get, list: if true;
      * @allow create, delete: if isAdmin();
-     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
-     * @principle Public read, admin write for products. Protect calculated fields.
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent();
+     * @principle Public read, admin write for products. Protect calculated fields and product type.
      */
     match /products/{productId} {
       allow get, list: if true;
       allow create, delete: if isAdmin();
-      allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+      allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent();
 
       /**
        * @description Allows anyone to read reviews, but only signed-in users can create/update their own.
@@ -315,6 +316,11 @@ service cloud.firestore {
     return incomingKeys.hasAll(disallowedFields) == false ||
            (request.resource.data.averageRating == resource.data.averageRating &&
             request.resource.data.reviewCount == resource.data.reviewCount);
+  }
+  
+  function isProductTypeConsistent() {
+    // The 'type' of a product (standard or bundle) should not be changed after creation.
+    return request.resource.data.type == resource.data.type;
   }
 }
 

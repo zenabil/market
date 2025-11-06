@@ -12,7 +12,7 @@
         },
         "price": {
           "type": "number",
-          "description": "Product price."
+          "description": "Product price. For a 'bundle' type, this is the total price of the bundle."
         },
         "stock": {
           "type": "number",
@@ -50,17 +50,29 @@
           "description": "Discount percentage for the product."
         },
         "averageRating": {
-            "type": "number",
-            "description": "The average rating of the product, from 0 to 5."
+          "type": "number",
+          "description": "The average rating of the product, from 0 to 5."
         },
         "reviewCount": {
-            "type": "number",
-            "description": "The total number of reviews for the product."
+          "type": "number",
+          "description": "The total number of reviews for the product."
         },
         "createdAt": {
           "type": "string",
           "format": "date-time",
           "description": "Timestamp when the product was created."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["standard", "bundle"],
+          "description": "The type of the product. 'standard' for a single item, 'bundle' for a collection of items."
+        },
+        "bundleItems": {
+            "type": "array",
+            "description": "A list of product IDs included in this bundle. Only applicable if type is 'bundle'.",
+            "items": {
+                "type": "string"
+            }
         }
       },
       "required": [
@@ -72,7 +84,8 @@
         "sku",
         "barcode",
         "sold",
-        "createdAt"
+        "createdAt",
+        "type"
       ]
     },
     "Category": {
