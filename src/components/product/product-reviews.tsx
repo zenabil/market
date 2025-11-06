@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Review, Product, Recipe } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -31,15 +31,22 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   const [collectionName, setCollectionName] = useState<'products' | 'recipes' | null>(null);
 
   // Check which collection the ID belongs to
-  const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
-  const recipeRef = useMemoFirebase(() => doc(firestore, 'recipes', productId), [firestore, productId]);
-  const { data: product } = useDoc<Product>(productRef);
-  const { data: recipe } = useDoc<Recipe>(recipeRef);
-
-  useEffect(() => {
-    if (product) setCollectionName('products');
-    else if (recipe) setCollectionName('recipes');
-  }, [product, recipe]);
+   useEffect(() => {
+    async function determineCollection() {
+      if (!firestore) return;
+      const productDoc = await getDoc(doc(firestore, 'products', productId));
+      if (productDoc.exists()) {
+        setCollectionName('products');
+        return;
+      }
+      const recipeDoc = await getDoc(doc(firestore, 'recipes', productId));
+      if (recipeDoc.exists()) {
+        setCollectionName('recipes');
+        return;
+      }
+    }
+    determineCollection();
+  }, [firestore, productId]);
   
   const targetRef = useMemoFirebase(() => {
     if (!firestore || !collectionName) return null;
@@ -118,6 +125,10 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
         </div>
     )
   }
+  
+  if (!collectionName) {
+      return <Skeleton className="h-64 w-full" />
+  }
 
   return (
     <Form {...form}>
@@ -179,15 +190,30 @@ const ReviewItem = ({ review }: { review: Review }) => {
 export default function ProductReviews({ productId }: { productId: string }) {
   const firestore = useFirestore();
   const [key, setKey] = useState(0);
+  const [collectionName, setCollectionName] = useState<'products' | 'recipes' | null>(null);
+
+  // Determine collection name
+  useEffect(() => {
+    async function determineCollection() {
+      if (!firestore) return;
+      const productDoc = await getDoc(doc(firestore, 'products', productId));
+      if (productDoc.exists()) {
+        setCollectionName('products');
+        return;
+      }
+      const recipeDoc = await getDoc(doc(firestore, 'recipes', productId));
+      if (recipeDoc.exists()) {
+        setCollectionName('recipes');
+        return;
+      }
+    }
+    determineCollection();
+  }, [firestore, productId]);
 
   const reviewsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    const path = `products/${productId}/reviews`; // Default to products
-    // This part is tricky without knowing if it's a product or recipe upfront.
-    // We'll optimistically query products, and the form will handle recipes.
-    // A better solution might involve passing the type ('product'/'recipe') as a prop.
-    return query(collection(firestore, path), orderBy('createdAt', 'desc'));
-  }, [firestore, productId, key]);
+    if (!firestore || !collectionName) return null;
+    return query(collection(firestore, `${collectionName}/${productId}/reviews`), orderBy('createdAt', 'desc'));
+  }, [firestore, collectionName, productId, key]);
 
   const { data: reviews, isLoading } = useCollection<Review>(reviewsQuery);
   
@@ -226,5 +252,3 @@ export default function ProductReviews({ productId }: { productId: string }) {
     </div>
   );
 }
-
-    

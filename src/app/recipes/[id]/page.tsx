@@ -189,7 +189,7 @@ function RecipeDetailsPage() {
                     </div>
                 </div>
             </div>
-            <ProductReviews productId={recipeId} />
+            <ProductReviews productId={recipeId as string} />
         </>
     )
 }
@@ -198,5 +198,3 @@ function RecipeDetailsPage() {
 export default function RecipePage() {
     return <RecipeDetailsPage />
 }
-
-    
