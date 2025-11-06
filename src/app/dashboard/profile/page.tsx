@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import React, { useEffect, useRef } from 'react';
-import { updatePassword } from 'firebase/auth';
+import { updatePassword, updateProfile } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -84,27 +84,30 @@ export default function ProfilePage() {
   }, [firestoreUser, authUser, profileForm]);
 
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && userDocRef) {
+    if (file && userDocRef && authUser) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const dataUrl = reader.result as string;
-        const updateData = { avatar: dataUrl };
-        updateDoc(userDocRef, updateData)
-            .then(() => {
-                toast({ title: 'Avatar mis à jour' });
+        try {
+          // Update Firebase Auth profile
+          await updateProfile(authUser, { photoURL: dataUrl });
+          // Update Firestore document
+          const updateData = { avatar: dataUrl };
+          await updateDoc(userDocRef, updateData)
+          toast({ title: 'Avatar mis à jour' });
+        } catch(error) {
+          console.error(error);
+          errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'update',
+                requestResourceData: { avatar: '...data URI...' },
             })
-            .catch(error => {
-                 errorEmitter.emit(
-                    'permission-error',
-                    new FirestorePermissionError({
-                        path: userDocRef.path,
-                        operation: 'update',
-                        requestResourceData: { avatar: '...data URI...' },
-                    })
-                );
-            });
+          );
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -112,31 +115,38 @@ export default function ProfilePage() {
 
 
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
-    if (!userDocRef) return;
+    if (!userDocRef || !authUser) return;
 
     setIsSaving(true);
-    const updateData = { name: values.name, phone: values.phone };
+    
+    try {
+      // Update Firebase Auth profile first for name
+      if (values.name !== authUser.displayName) {
+          await updateProfile(authUser, { displayName: values.name });
+      }
 
-    updateDoc(userDocRef, updateData)
-      .then(() => {
-        toast({
-            title: 'Profil mis à jour',
-            description: 'Vos informations ont été enregistrées.',
-        });
-      })
-      .catch(error => {
+      // Then update Firestore document
+      const updateData = { name: values.name, phone: values.phone };
+      await updateDoc(userDocRef, updateData);
+
+      toast({
+          title: 'Profil mis à jour',
+          description: 'Vos informations ont été enregistrées.',
+      });
+
+    } catch (error: any) {
+        console.error(error);
         errorEmitter.emit(
             'permission-error',
             new FirestorePermissionError({
                 path: userDocRef.path,
                 operation: 'update',
-                requestResourceData: updateData,
+                requestResourceData: { name: values.name, phone: values.phone },
             })
         );
-      })
-      .finally(() => {
+    } finally {
         setIsSaving(false);
-      });
+    }
   }
 
   async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
@@ -215,7 +225,7 @@ export default function ProfilePage() {
                     <div className="flex flex-wrap items-center gap-6">
                         <div className="relative group">
                             <Avatar className="h-24 w-24">
-                                <AvatarImage src={firestoreUser?.avatar || authUser?.photoURL || `https://picsum.photos/seed/${authUser?.uid}/100/100`} />
+                                <AvatarImage src={authUser?.photoURL || firestoreUser?.avatar || `https://picsum.photos/seed/${authUser?.uid}/100/100`} />
                                 <AvatarFallback>{profileForm.getValues('name')?.charAt(0) || 'U'}</AvatarFallback>
                             </Avatar>
                             <Button 

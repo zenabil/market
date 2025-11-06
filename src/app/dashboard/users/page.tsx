@@ -6,11 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, query, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import type { User as FirestoreUser } from '@/lib/placeholder-data';
+import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Gem, Edit, Loader2 } from 'lucide-react';
+import { Gem, Edit, Loader2, Home } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { AddressDialog } from '@/components/dashboard/address-dialog';
 
 function LoyaltyDialog({ user }: { user: FirestoreUser }) {
   const firestore = useFirestore();
@@ -67,8 +68,9 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Edit className="h-4 w-4 text-muted-foreground" />
+        <Button variant="ghost" size="sm" className="gap-2">
+            <Gem className="h-4 w-4 text-accent" />
+            <span>{user.loyaltyPoints || 0}</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -231,10 +233,8 @@ export default function UsersPage() {
                   <TableHead>Utilisateur</TableHead>
                   <TableHead>Rôle</TableHead>
                   <TableHead>Date d'inscription</TableHead>
-                  <TableHead>Commandes</TableHead>
                   <TableHead>Total dépensé</TableHead>
-                  <TableHead>Points de fidélité</TableHead>
-                   <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -251,10 +251,8 @@ export default function UsersPage() {
                     </TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                   </TableRow>
                 ))}
                 {!isLoading && users && users.map((user) => (
@@ -275,16 +273,19 @@ export default function UsersPage() {
                       <AdminSwitch user={user} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
-                    <TableCell>{user.orderCount || 0}</TableCell>
                     <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
-                    <TableCell>
-                        <div className="flex items-center gap-2">
-                           <Gem className="h-4 w-4 text-accent" />
-                           <span className="font-semibold">{user.loyaltyPoints || 0}</span>
-                        </div>
-                    </TableCell>
                      <TableCell className="text-right">
-                      <LoyaltyDialog user={user} />
+                       <div className="flex items-center justify-end gap-2">
+                        <LoyaltyDialog user={user} />
+                        <AddressDialog 
+                          userDocRef={doc(firestore, 'users', user.id)} 
+                          firestoreUser={user}
+                        >
+                            <Button variant="ghost" size="icon" title="Modifier les adresses">
+                                <Home className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </AddressDialog>
+                       </div>
                     </TableCell>
                   </TableRow>
                 ))}

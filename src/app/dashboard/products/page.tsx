@@ -20,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
@@ -145,12 +144,10 @@ export default function ProductsPage() {
                           <DropdownMenuItem asChild>
                             <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
                           </DropdownMenuItem>
-                          <AlertDialogTrigger asChild>
-                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
-                               <Trash2 className="mr-2 h-4 w-4" />
-                               Supprimer
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
+                           <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
+                             <Trash2 className="mr-2 h-4 w-4" />
+                             Supprimer
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
