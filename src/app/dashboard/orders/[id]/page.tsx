@@ -297,5 +297,3 @@ function OrderDetails() {
 export default function OrderDetailsPage() {
     return <OrderDetails />;
 }
-
-    

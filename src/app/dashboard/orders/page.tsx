@@ -55,7 +55,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
         return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
 
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {
             case 'Pending': return 'default';
             case 'Confirmed': return 'secondary';
@@ -79,7 +79,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                  createNotification(firestore, order.userId, {
                     message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
                     link: `/dashboard/orders/${order.id}`,
-                 }).catch(console.error);_
+                 }).catch(console.error);
             })
             .catch(error => {
                 errorEmitter.emit(
@@ -182,7 +182,7 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
         return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
 
-     const getStatusVariant = (status: string) => {
+     const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {
             case 'Pending': return 'default';
             case 'Confirmed': return 'secondary';
@@ -276,5 +276,3 @@ export default function OrdersPage() {
         </div>
     );
 }
-
-    

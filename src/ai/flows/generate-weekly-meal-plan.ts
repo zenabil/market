@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const GenerateWeeklyMealPlanInputSchema = z.object({
   diet: z.string().optional().describe('The user\'s dietary preference (e.g., balanced, vegetarian, low-calorie).'),
@@ -62,7 +62,7 @@ Assurez-vous que la réponse est entièrement en français et respecte le format
 });
 
 
-const generateMealPlanFlow = ai.defineFlow(
+const generateWeeklyMealPlanFlow = ai.defineFlow(
   {
     name: 'generateWeeklyMealPlanFlow',
     inputSchema: GenerateWeeklyMealPlanInputSchema,
