@@ -30,7 +30,7 @@ export default function RecipesDashboardPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const recipesQuery = useMemoFirebase(() => query(collection(firestore, 'recipes')), [firestore]);
-  const { data: recipes, isLoading: areRecipesLoading } = useCollection<Recipe>(recipesQuery);
+  const { data: recipes, isLoading: areRecipesLoading, refetch: refetchRecipes } = useCollection<Recipe>(recipesQuery);
   const [recipeToDelete, setRecipeToDelete] = React.useState<Recipe | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
@@ -49,6 +49,7 @@ export default function RecipesDashboardPage() {
     try {
       await deleteDoc(recipeDocRef);
       toast({ title: 'Recette supprimée' });
+      refetchRecipes();
     } catch (error) {
       errorEmitter.emit(
           'permission-error',
@@ -166,7 +167,7 @@ export default function RecipesDashboardPage() {
               <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
               <AlertDialogDescription>
                 Cette action ne peut pas être annulée. Cela supprimera définitivement la recette "{recipeToDelete?.title || ''}".
-              </Aler_dialogDescription>
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setRecipeToDelete(null)}>Annuler</AlertDialogCancel>
