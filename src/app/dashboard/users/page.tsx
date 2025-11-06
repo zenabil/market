@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
   DialogClose,
   DialogTrigger,
@@ -28,7 +29,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { AddressDialog } from '@/components/dashboard/address-dialog';
 
-function LoyaltyDialog({ user }: { user: FirestoreUser }) {
+function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPointsUpdate: () => void }) {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -48,6 +49,7 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
           title: 'Points de fidélité mis à jour',
           description: `${user.name} a maintenant ${points} points.`,
         });
+        onPointsUpdate();
         setIsOpen(false);
       })
       .catch(error => {
@@ -101,7 +103,7 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
 }
 
 
-function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange: (userId: string, newRole: 'Admin' | 'User') => void }) {
+function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange: () => void }) {
   const firestore = useFirestore();
   const { toast } = useToast();
   
@@ -134,7 +136,7 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
           title: 'Rôle mis à jour',
           description: `${user.name} est maintenant ${newRole}.`,
         });
-        onRoleChange(user.id, newRole);
+        onRoleChange();
       })
       .catch(error => {
         const permissionError = new FirestorePermissionError({
@@ -186,7 +188,7 @@ export default function UsersPage() {
     }
   }, [isAdmin, isRoleLoading, router]);
 
-  const handleRoleChange = (userId: string, newRole: 'Admin' | 'User') => {
+  const handleUpdate = () => {
     refetch();
   };
 
@@ -268,13 +270,13 @@ export default function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <AdminSwitch user={user} onRoleChange={handleRoleChange} />
+                      <AdminSwitch user={user} onRoleChange={handleUpdate} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
                      <TableCell className="text-right">
                        <div className="flex items-center justify-end gap-2">
-                        <LoyaltyDialog user={user} />
+                        <LoyaltyDialog user={user} onPointsUpdate={handleUpdate} />
                         <AddressDialog 
                           userDocRef={doc(firestore, 'users', user.id)} 
                           firestoreUser={user}
