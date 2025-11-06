@@ -1,9 +1,8 @@
 'use client';
 
-import { useCollection, useCollectionGroup, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import type { Order } from "@/lib/placeholder-data";
 import { collection, query, orderBy, collectionGroup as fsCollectionGroup } from "firebase/firestore";
-import React from "react";
 import { useUserRole } from "./use-user-role";
 
 /**
@@ -31,12 +30,10 @@ export function useOrders() {
         return null;
     }, [firestore, user, isAdmin, isRoleLoading]);
     
-    // The type of hook used depends on the user's role
-    const { data: adminData, isLoading: isAdminLoading } = useCollectionGroup<Order>(isAdmin ? ordersQuery : null);
-    const { data: userData, isLoading: isUserLoading } = useCollection<Order>(!isAdmin ? ordersQuery : null);
+    // We can use useCollection for both because a collectionGroup query is also a Query type.
+    const { data: orders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
     
-    const orders = isAdmin ? adminData : userData;
-    const isLoading = isRoleLoading || isAdminLoading || isUserLoading;
+    const isLoading = isRoleLoading || areOrdersLoading;
 
     return { orders, isLoading };
 }
