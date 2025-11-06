@@ -136,14 +136,14 @@ export default function ContactPage() {
                         <MapPin className="h-6 w-6 mt-1 text-primary"/>
                         <div>
                             <h3 className="font-semibold text-foreground">Adresse</h3>
-                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || '123 Rue de la Liberté, Tlemcen, Algérie'}</p>}
+                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || 'Non disponible'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Phone className="h-6 w-6 mt-1 text-primary"/>
                         <div>
                             <h3 className="font-semibold text-foreground">Téléphone</h3>
-                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || '+213 123 456 789'}</p>}
+                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || 'Non disponible'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
