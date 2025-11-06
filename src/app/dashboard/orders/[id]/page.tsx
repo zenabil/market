@@ -19,18 +19,18 @@ import { useToast } from '@/hooks/use-toast';
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
 const statusTranslations: { [key: string]: string } = {
-    pending: 'En attente',
-    confirmed: 'Confirmée',
-    shipped: 'Expédiée',
-    delivered: 'Livrée',
-    cancelled: 'Annulée',
+    Pending: 'En attente',
+    Confirmed: 'Confirmée',
+    Shipped: 'Expédiée',
+    Delivered: 'Livrée',
+    Cancelled: 'Annulée',
 };
 const markAsTranslations: { [key: string]: string } = {
-    pending: 'Marquer comme En attente',
-    confirmed: 'Marquer como Confirmée',
-    shipped: 'Marquer comme Expédiée',
-    delivered: 'Marquer comme Livrée',
-    cancelled: 'Marquer comme Annulée',
+    Pending: 'Marquer comme En attente',
+    Confirmed: 'Marquer como Confirmée',
+    Shipped: 'Marquer comme Expédiée',
+    Delivered: 'Marquer comme Livrée',
+    Cancelled: 'Marquer comme Annulée',
 };
 
 function OrderDetails() {
@@ -81,7 +81,7 @@ function OrderDetails() {
             .then(() => {
                 toast({
                     title: 'Statut de la commande mis à jour',
-                    description: `La commande est maintenant ${statusTranslations[newStatus.toLowerCase()]}.`,
+                    description: `La commande est maintenant ${statusTranslations[newStatus]}.`,
                 });
             })
             .catch(error => {
@@ -106,23 +106,23 @@ function OrderDetails() {
     };
     
     const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-        switch (status.toLowerCase()) {
-            case 'pending': return 'default';
-            case 'confirmed': return 'secondary';
-            case 'shipped': return 'default';
-            case 'delivered': return 'outline';
-            case 'cancelled': return 'destructive';
+        switch (status) {
+            case 'Pending': return 'default';
+            case 'Confirmed': return 'secondary';
+            case 'Shipped': return 'default';
+            case 'Delivered': return 'outline';
+            case 'Cancelled': return 'destructive';
             default: return 'default';
         }
     };
 
     const getStatusIcon = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'pending': return <User className="h-4 w-4 mr-2" />;
-            case 'confirmed': return <CheckCircle className="h-4 w-4 mr-2" />;
-            case 'shipped': return <Truck className="h-4 w-4 mr-2" />;
-            case 'delivered': return <CheckCircle className="h-4 w-4 mr-2 text-green-500" />;
-            case 'cancelled': return <XCircle className="h-4 w-4 mr-2" />;
+        switch (status) {
+            case 'Pending': return <User className="h-4 w-4 mr-2" />;
+            case 'Confirmed': return <CheckCircle className="h-4 w-4 mr-2" />;
+            case 'Shipped': return <Truck className="h-4 w-4 mr-2" />;
+            case 'Delivered': return <CheckCircle className="h-4 w-4 mr-2 text-green-500" />;
+            case 'Cancelled': return <XCircle className="h-4 w-4 mr-2" />;
             default: return <Package className="h-4 w-4 mr-2" />;
         }
     };
@@ -134,7 +134,10 @@ function OrderDetails() {
             <div className="container py-8 md:py-12">
                  <div className="flex items-center gap-4 mb-8">
                     <Skeleton className="h-10 w-10" />
-                    <Skeleton className="h-10 w-64" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-8 w-64" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
                 </div>
                 <div className="grid lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
@@ -174,7 +177,7 @@ function OrderDetails() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline">
                             {getStatusIcon(order.status)}
-                            {statusTranslations[order.status.toLowerCase()] || order.status}
+                            {statusTranslations[order.status] || order.status}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -186,7 +189,7 @@ function OrderDetails() {
                                 disabled={order.status === status}
                                 onClick={() => handleStatusChange(status)}
                             >
-                                {markAsTranslations[status.toLowerCase()]}
+                                {markAsTranslations[status]}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
@@ -260,7 +263,7 @@ function OrderDetails() {
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Statut</span>
-                                <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
+                                <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
                             </div>
                              <Separator />
                              <div>

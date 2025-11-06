@@ -21,22 +21,23 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useOrders } from '@/hooks/use-orders';
+import { Button } from '@/components/ui/button';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
 const statusTranslations: { [key: string]: string } = {
-    pending: 'En attente',
-    confirmed: 'Confirmée',
-    shipped: 'Expédiée',
-    delivered: 'Livrée',
-    cancelled: 'Annulée',
+    Pending: 'En attente',
+    Confirmed: 'Confirmée',
+    Shipped: 'Expédiée',
+    Delivered: 'Livrée',
+    Cancelled: 'Annulée',
 };
 const markAsTranslations: { [key: string]: string } = {
-    pending: 'Marquer comme En attente',
-    confirmed: 'Marquer como Confirmée',
-    shipped: 'Marquer comme Expédiée',
-    delivered: 'Marquer comme Livrée',
-    cancelled: 'Marquer comme Annulée',
+    Pending: 'Marquer comme En attente',
+    Confirmed: 'Marquer como Confirmée',
+    Shipped: 'Marquer comme Expédiée',
+    Delivered: 'Marquer comme Livrée',
+    Cancelled: 'Marquer comme Annulée',
 };
 
 
@@ -54,12 +55,12 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
     };
 
     const getStatusVariant = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'pending': return 'default';
-            case 'confirmed': return 'secondary';
-            case 'shipped': return 'default';
-            case 'delivered': return 'outline';
-            case 'cancelled': return 'destructive';
+        switch (status) {
+            case 'Pending': return 'default';
+            case 'Confirmed': return 'secondary';
+            case 'Shipped': return 'default';
+            case 'Delivered': return 'outline';
+            case 'Cancelled': return 'destructive';
             default: return 'default';
         }
     };
@@ -72,7 +73,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
             .then(() => {
                 toast({
                     title: 'Statut de la commande mis à jour',
-                    description: `La commande ...${order.id.slice(-6)} est maintenant ${statusTranslations[newStatus.toLowerCase()]}.`,
+                    description: `La commande ...${order.id.slice(-6)} est maintenant ${statusTranslations[newStatus]}.`,
                 });
             })
             .catch(error => {
@@ -122,7 +123,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                                 <TableCell>{order.shippingAddress.split(',')[0]}</TableCell>
                                 <TableCell>{formatDate(order.orderDate)}</TableCell>
                                 <TableCell>
-                                    <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
+                                    <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                                 <TableCell className="text-right">
@@ -146,7 +147,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                                                     disabled={order.status === status}
                                                     onClick={() => handleStatusChange(order, status)}
                                                 >
-                                                    {markAsTranslations[status.toLowerCase()]}
+                                                    {markAsTranslations[status]}
                                                 </DropdownMenuItem>
                                             ))}
                                         </DropdownMenuContent>
@@ -177,12 +178,12 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
     };
 
      const getStatusVariant = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'pending': return 'default';
-            case 'confirmed': return 'secondary';
-            case 'shipped': return 'default';
-            case 'delivered': return 'outline';
-            case 'cancelled': return 'destructive';
+        switch (status) {
+            case 'Pending': return 'default';
+            case 'Confirmed': return 'secondary';
+            case 'Shipped': return 'default';
+            case 'Delivered': return 'outline';
+            case 'Cancelled': return 'destructive';
             default: return 'default';
         }
     };
@@ -219,7 +220,7 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
                                 <TableCell className="font-mono text-sm text-muted-foreground">...{order.id.slice(-12)}</TableCell>
                                 <TableCell>{formatDate(order.orderDate)}</TableCell>
                                 <TableCell>
-                                     <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
+                                     <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                                 <TableCell className="text-right">
