@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { notFound, useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/use-user-role';
 import Image from 'next/image';
+import { ImageDialog } from '@/components/dashboard/image-dialog';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -235,14 +236,15 @@ function EditProductForm({ productId }: { productId: string }) {
                         </Button>
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() => append('https://picsum.photos/seed/' + Date.now() + '/600/600')}
-                      className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
-                    >
-                      <PlusCircle className="h-8 w-8" />
-                      <span className="text-xs mt-2">Ajouter une image</span>
-                    </button>
+                    <ImageDialog onImageAdd={(url) => append(url)}>
+                      <button
+                        type="button"
+                        className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
+                      >
+                        <PlusCircle className="h-8 w-8" />
+                        <span className="text-xs mt-2">Ajouter une image</span>
+                      </button>
+                    </ImageDialog>
                   </div>
                    {form.formState.errors.images && <p className="text-sm text-destructive">{form.formState.errors.images.message}</p>}
                 </CardContent>
