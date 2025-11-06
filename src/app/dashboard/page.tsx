@@ -200,9 +200,7 @@ export default function DashboardPage() {
     if (isUserLoading || isRoleLoading || !isAdmin) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                     <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
     }

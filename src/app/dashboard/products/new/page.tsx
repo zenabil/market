@@ -71,6 +71,8 @@ export default function NewProductPage() {
         averageRating: 0,
         reviewCount: 0,
         createdAt: new Date().toISOString(),
+        type: 'standard',
+        bundleItems: [],
     };
 
     try {
