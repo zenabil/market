@@ -39,37 +39,29 @@ export default function GenerateRecipePage() {
             ingredients: '',
         },
     });
+    
+    // Create a query that depends on the missing products from the generated recipe.
+    const missingProductsQuery = useMemoFirebase(() => {
+        if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) {
+            return null;
+        }
+        // Firestore 'in' query has a limit of 30 items.
+        const productNames = generatedRecipe.missingProducts.slice(0, 30);
+        return query(collection(firestore, 'products'), where('name', 'in', productNames));
+    }, [firestore, generatedRecipe]);
 
-    const productsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        // Fetch all products. Client-side filtering is needed for case-insensitive matching.
-        return query(collection(firestore, 'products'));
-    }, [firestore]);
-
-    const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
-
+    const { data: foundProducts, isLoading: areProductsLoading } = useCollection<Product>(missingProductsQuery);
 
     const handleAddMissingToCart = () => {
-        if (!generatedRecipe?.missingProducts || !allProducts) return;
+        if (!generatedRecipe || !foundProducts) return;
         setIsAddingToCart(true);
 
         let itemsAddedCount = 0;
-        let notFoundProducts: string[] = [];
-
-        const missingProductNamesLower = generatedRecipe.missingProducts.map(p => p.toLowerCase());
         
-        allProducts.forEach(product => {
-            if (missingProductNamesLower.includes(product.name.toLowerCase())) {
-                addItem(product);
-                itemsAddedCount++;
-            }
+        foundProducts.forEach(product => {
+            addItem(product);
+            itemsAddedCount++;
         });
-
-        // Determine which products were not found in our store.
-        const foundProductNamesLower = allProducts.map(p => p.name.toLowerCase());
-        notFoundProducts = generatedRecipe.missingProducts.filter(
-            name => !foundProductNamesLower.includes(name.toLowerCase())
-        );
 
         if (itemsAddedCount > 0) {
             toast({
@@ -78,6 +70,11 @@ export default function GenerateRecipePage() {
             });
         }
         
+        const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
+        const notFoundProducts = generatedRecipe.missingProducts.filter(
+            name => !foundProductNames.includes(name.toLowerCase())
+        );
+
         if (notFoundProducts.length > 0) {
              toast({
                 variant: 'destructive',
