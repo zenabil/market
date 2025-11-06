@@ -71,10 +71,11 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
     if (!firestore) return;
 
     setIsSaving(true);
+    const expiryDate = new Date(values.expiryDate);
     const couponData = {
         ...values,
-        isActive: new Date(values.expiryDate) > new Date(),
-        expiryDate: new Date(values.expiryDate).toISOString()
+        isActive: expiryDate > new Date(),
+        expiryDate: expiryDate.toISOString(),
     };
     
     const couponsCollection = collection(firestore, 'coupons');
