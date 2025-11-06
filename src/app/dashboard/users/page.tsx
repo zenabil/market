@@ -115,6 +115,7 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
     if (!firestore) return;
 
     setIsLoading(true);
+    setIsAdmin(newAdminStatus); // Optimistically update UI
 
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
     const userRef = doc(firestore, 'users', user.id);
@@ -133,7 +134,7 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
           title: 'Rôle mis à jour',
           description: `${user.name} est maintenant ${newAdminStatus ? 'Admin' : 'Utilisateur'}.`,
         });
-        // The state is already visually updated by `setIsAdmin`, so we just let it be.
+        // The state is already visually updated, so we just let it be.
       })
       .catch(error => {
         // If any part of the operation fails, revert the visual state

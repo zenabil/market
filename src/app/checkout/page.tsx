@@ -134,8 +134,8 @@ export default function CheckoutPage() {
         // Show a generic message to the user, the dev overlay will show the details
         toast({
             variant: 'destructive',
-            title: 'Erreur',
-            description: "Impossible de vérifier le coupon. Vérifiez vos permissions de lecture pour la collection 'coupons'.",
+            title: 'Erreur de coupon',
+            description: "Impossible de vérifier le coupon pour le moment.",
         });
     } finally {
         setIsApplyingCoupon(false);

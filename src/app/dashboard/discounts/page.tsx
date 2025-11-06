@@ -59,10 +59,11 @@ function DiscountRow({ product }: { product: Product }) {
     };
 
     const handleRemoveDiscount = () => {
-        setDiscount(0);
+        setIsUpdating(true);
         const updateData = { discount: 0 };
         updateDoc(productRef, updateData)
           .then(() => {
+            setDiscount(0); // Update local state
             toast({
                 title: 'Réduction supprimée',
                 description: `La réduction pour ${product.name} a été supprimée.`,
@@ -77,6 +78,9 @@ function DiscountRow({ product }: { product: Product }) {
                     requestResourceData: updateData,
                 })
              )
+          })
+          .finally(() => {
+            setIsUpdating(false);
           });
     }
 
@@ -91,9 +95,9 @@ function DiscountRow({ product }: { product: Product }) {
         <TableRow>
             <TableCell className="font-medium">{product.name}</TableCell>
             <TableCell>
-                <span className={cn("text-muted-foreground", product.discount > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
+                <span className={cn("text-muted-foreground", (product.discount || 0) > 0 && "line-through")}>{formatCurrency(originalPrice)}</span>
             </TableCell>
-            <TableCell className={cn("font-semibold", product.discount > 0 && "text-primary")}>
+            <TableCell className={cn("font-semibold", (product.discount || 0) > 0 && "text-primary")}>
                 {formatCurrency(discountedPrice)}
             </TableCell>
             <TableCell>
@@ -113,8 +117,8 @@ function DiscountRow({ product }: { product: Product }) {
                 <Button size="sm" onClick={handleUpdateDiscount} disabled={discount === (product.discount || 0) || isUpdating}>
                     Mettre à jour
                 </Button>
-                 {product.discount > 0 && (
-                    <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
+                 {(product.discount || 0) > 0 && (
+                    <Button size="sm" variant="ghost" onClick={handleRemoveDiscount} disabled={isUpdating}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Supprimer
                     </Button>

@@ -70,12 +70,7 @@ function EditProductForm({ productId }: { productId: string }) {
     // Construct the data ensuring we don't lose fields not present in the form
     const productData = {
         ...product, // Start with existing product data
-        name: values.name,
-        description: values.description || '',
-        price: values.price,
-        stock: values.stock,
-        categoryId: values.categoryId,
-        discount: values.discount,
+        ...values // Overwrite with form values
     };
     // Remove id from the data object as it's not a field in the document
     delete (productData as any).id;
