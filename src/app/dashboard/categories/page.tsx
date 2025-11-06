@@ -75,7 +75,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
     } else {
       form.reset({
         name: '',
-        image: 'https://picsum.photos/seed/' + Date.now() + '/400/400',
+        image: 'https://picsum.photos/seed/category/400/400',
       });
     }
   }, [category, form, isOpen]); // Rerun when dialog opens
