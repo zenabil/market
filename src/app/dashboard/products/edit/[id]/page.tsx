@@ -235,27 +235,35 @@ function EditProductForm({ productId }: { productId: string }) {
               <Card>
                 <CardHeader><CardTitle>Images</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
+                    {fields.length > 0 && (
+                        <div className="relative group aspect-square max-w-sm">
+                            <Image src={form.watch('images.0')} alt="Primary image" layout="fill" className="object-cover rounded-md border" />
+                            <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
+                                <span className='text-white font-bold bg-black/50 px-2 py-1 rounded-sm'>Image principale</span>
+                            </div>
+                        </div>
+                    )}
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                    {fields.map((field, index) => (
+                    {fields.slice(1).map((field, index) => (
                       <div key={field.id} className="relative group aspect-square">
-                        <Image src={form.watch(`images.${index}`)} alt={`Aperçu ${index}`} layout="fill" className="object-cover rounded-md border" />
+                        <Image src={form.watch(`images.${index + 1}`)} alt={`Aperçu ${index + 1}`} layout="fill" className="object-cover rounded-md border" />
                         <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1'>
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-white hover:bg-white/20"
-                                onClick={() => handleSetPrimaryImage(index)}
+                                onClick={() => handleSetPrimaryImage(index + 1)}
                                 title="Définir comme image principale"
                             >
-                                <Star className={cn("h-5 w-5", index === 0 && "fill-yellow-400 text-yellow-400")} />
+                                <Star className="h-5 w-5" />
                             </Button>
                              <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-white hover:bg-white/20 hover:text-destructive"
-                                onClick={() => remove(index)}
+                                onClick={() => remove(index + 1)}
                                 title="Supprimer l'image"
                             >
                                 <Trash2 className="h-5 w-5" />
@@ -269,7 +277,7 @@ function EditProductForm({ productId }: { productId: string }) {
                         className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
                       >
                         <PlusCircle className="h-8 w-8" />
-                        <span className="text-xs mt-2">Ajouter une image</span>
+                        <span className="text-xs mt-2">Ajouter</span>
                       </button>
                     </ImageDialog>
                   </div>
