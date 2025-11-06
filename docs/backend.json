@@ -419,6 +419,14 @@
             "instructions": {
                 "type": "array",
                 "items": { "type": "string" }
+            },
+            "averageRating": {
+                "type": "number",
+                "description": "The average rating of the recipe, from 0 to 5."
+            },
+            "reviewCount": {
+                "type": "number",
+                "description": "The total number of reviews for the recipe."
             }
         },
         "required": ["title", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
@@ -512,6 +520,12 @@
     "/recipes/{recipeId}": {
         "schema": { "$ref": "#/entities/Recipe" },
         "description": "Stores cooking recipes. Publicly readable, writable only by admins."
+    },
+    "/recipes/{recipeId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews for a specific recipe. Writable by the user who owns the review."
     }
   }
 }
+
+    

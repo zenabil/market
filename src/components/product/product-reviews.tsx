@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
 import { collection, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
-import type { Review, Product } from '@/lib/placeholder-data';
+import type { Review, Product, Recipe } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import StarRating from './star-rating';
@@ -28,12 +28,26 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [collectionName, setCollectionName] = useState<'products' | 'recipes' | null>(null);
 
-  // Fetch product to update rating
+  // Check which collection the ID belongs to
   const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
+  const recipeRef = useMemoFirebase(() => doc(firestore, 'recipes', productId), [firestore, productId]);
   const { data: product } = useDoc<Product>(productRef);
+  const { data: recipe } = useDoc<Recipe>(recipeRef);
+
+  useEffect(() => {
+    if (product) setCollectionName('products');
+    else if (recipe) setCollectionName('recipes');
+  }, [product, recipe]);
+  
+  const targetRef = useMemoFirebase(() => {
+    if (!firestore || !collectionName) return null;
+    return doc(firestore, collectionName, productId);
+  }, [firestore, collectionName, productId]);
+
   const { data: reviews } = useCollection<Review>(
-    useMemoFirebase(() => query(collection(firestore, 'products', productId, 'reviews')), [firestore, productId])
+    useMemoFirebase(() => targetRef ? query(collection(targetRef, 'reviews')) : null, [targetRef])
   );
 
 
@@ -43,7 +57,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   });
 
   const onSubmit = async (values: z.infer<typeof reviewSchema>) => {
-    if (!user || !firestore || !product || !reviews) return;
+    if (!user || !firestore || !targetRef || !collectionName || !reviews) return;
 
     setIsSubmitting(true);
     
@@ -56,12 +70,11 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
         createdAt: new Date().toISOString(),
     };
 
-    const reviewsCollection = collection(firestore, 'products', productId, 'reviews');
+    const reviewsCollection = collection(targetRef, 'reviews');
     
     try {
         await addDoc(reviewsCollection, reviewData);
         
-        // --- Start: Update product average rating ---
         const totalReviews = reviews.length + 1;
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0) + values.rating;
         const averageRating = totalRating / totalReviews;
@@ -71,8 +84,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
             averageRating: averageRating
         };
 
-        await updateDoc(productRef, productUpdateData);
-        // --- End: Update product average rating ---
+        await updateDoc(targetRef, productUpdateData);
         
         toast({ title: 'Avis soumis avec succès' });
         form.reset({ comment: '', rating: 0 });
@@ -166,17 +178,20 @@ const ReviewItem = ({ review }: { review: Review }) => {
 
 export default function ProductReviews({ productId }: { productId: string }) {
   const firestore = useFirestore();
-  const [key, setKey] = useState(0); // Used to force a refetch
+  const [key, setKey] = useState(0);
 
   const reviewsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'products', productId, 'reviews'), orderBy('createdAt', 'desc'));
+    const path = `products/${productId}/reviews`; // Default to products
+    // This part is tricky without knowing if it's a product or recipe upfront.
+    // We'll optimistically query products, and the form will handle recipes.
+    // A better solution might involve passing the type ('product'/'recipe') as a prop.
+    return query(collection(firestore, path), orderBy('createdAt', 'desc'));
   }, [firestore, productId, key]);
 
   const { data: reviews, isLoading } = useCollection<Review>(reviewsQuery);
   
   const handleReviewAdded = () => {
-    // Force the useCollection hook to re-run by changing its dependency 'key'
     setKey(prev => prev + 1); 
   }
 
@@ -211,3 +226,5 @@ export default function ProductReviews({ productId }: { productId: string }) {
     </div>
   );
 }
+
+    

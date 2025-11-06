@@ -12,6 +12,8 @@ import { Clock, Users, Soup, ShoppingCart, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
+import StarRating from '@/components/product/star-rating';
+import ProductReviews from '@/components/product/product-reviews';
 
 function RecipeDetailsPage() {
     const { id: recipeId } = useParams();
@@ -32,18 +34,18 @@ function RecipeDetailsPage() {
         setIsAddingToCart(true);
 
         try {
-            // Firestore 'in' query is limited to 30 items. For recipes with more, this needs chunking.
             const productsToQuery = recipe.ingredients.map(name => name.toLowerCase()).slice(0, 30);
             if (productsToQuery.length === 0) {
                  toast({
                     variant: 'destructive',
                     title: 'Aucun ingrédient à rechercher',
                 });
+                setIsAddingToCart(false);
                 return;
             }
 
             const productsRef = collection(firestore, 'products');
-            const q = query(productsRef); // Fetch all products to perform a case-insensitive search client-side
+            const q = query(productsRef);
             const querySnapshot = await getDocs(q);
             const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             
@@ -115,72 +117,80 @@ function RecipeDetailsPage() {
     const totalTime = recipe.prepTime + recipe.cookTime;
 
     return (
-        <div className="container py-8 md:py-12 max-w-4xl mx-auto">
-            <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl text-center">{recipe.title}</h1>
-            <p className="mt-4 text-center text-lg text-muted-foreground">{recipe.description}</p>
-            
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden my-8">
-                <Image src={recipe.image} alt={recipe.title} fill className="object-cover" />
-            </div>
+        <>
+            <div className="container py-8 md:py-12 max-w-4xl mx-auto">
+                <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl text-center">{recipe.title}</h1>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                    <StarRating rating={recipe.averageRating || 0} />
+                    <span className="text-sm text-muted-foreground">
+                        ({recipe.reviewCount || 0} avis)
+                    </span>
+                </div>
+                <p className="mt-4 text-center text-lg text-muted-foreground">{recipe.description}</p>
+                
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden my-8">
+                    <Image src={recipe.image} alt={recipe.title} fill className="object-cover" />
+                </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-8">
-                 <div className="p-4 bg-muted/50 rounded-lg">
-                    <Clock className="h-8 w-8 mx-auto text-primary" />
-                    <p className="mt-2 font-semibold">Temps de prép.</p>
-                    <p className="text-sm text-muted-foreground">{recipe.prepTime} min</p>
-                </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
-                    <Soup className="h-8 w-8 mx-auto text-primary" />
-                    <p className="mt-2 font-semibold">Temps de cuisson</p>
-                    <p className="text-sm text-muted-foreground">{recipe.cookTime} min</p>
-                </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
-                    <Clock className="h-8 w-8 mx-auto text-primary" />
-                    <p className="mt-2 font-semibold">Temps Total</p>
-                    <p className="text-sm text-muted-foreground">{totalTime} min</p>
-                </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
-                    <Users className="h-8 w-8 mx-auto text-primary" />
-                    <p className="mt-2 font-semibold">Portions</p>
-                    <p className="text-sm text-muted-foreground">{recipe.servings} pers.</p>
-                </div>
-            </div>
-
-            <Separator className="my-8" />
-            
-            <div className="grid md:grid-cols-3 gap-12">
-                <div className="md:col-span-1">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="font-headline text-2xl">Ingrédients</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-8">
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                        <Clock className="h-8 w-8 mx-auto text-primary" />
+                        <p className="mt-2 font-semibold">Temps de prép.</p>
+                        <p className="text-sm text-muted-foreground">{recipe.prepTime} min</p>
                     </div>
-                    <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
-                        {recipe.ingredients.map((ingredient, index) => (
-                            <li key={index}>{ingredient}</li>
-                        ))}
-                    </ul>
-                    <Button className="w-full mt-6" onClick={handleAddAllToCart} disabled={isAddingToCart}>
-                        {isAddingToCart ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <ShoppingCart className="mr-2 h-4 w-4" />
-                        )}
-                        Ajouter les ingrédients au panier
-                    </Button>
-                </div>
-                 <div className="md:col-span-2">
-                     <h2 className="font-headline text-2xl mb-4">Instructions</h2>
-                     <div className="space-y-4 prose prose-neutral dark:prose-invert max-w-none">
-                        {recipe.instructions.map((instruction, index) => (
-                            <div key={index} className="flex gap-4 items-start">
-                                <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground font-bold">{index + 1}</div>
-                                <p className="mt-1">{instruction}</p>
-                            </div>
-                        ))}
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                        <Soup className="h-8 w-8 mx-auto text-primary" />
+                        <p className="mt-2 font-semibold">Temps de cuisson</p>
+                        <p className="text-sm text-muted-foreground">{recipe.cookTime} min</p>
+                    </div>
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                        <Clock className="h-8 w-8 mx-auto text-primary" />
+                        <p className="mt-2 font-semibold">Temps Total</p>
+                        <p className="text-sm text-muted-foreground">{totalTime} min</p>
+                    </div>
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                        <Users className="h-8 w-8 mx-auto text-primary" />
+                        <p className="mt-2 font-semibold">Portions</p>
+                        <p className="text-sm text-muted-foreground">{recipe.servings} pers.</p>
                     </div>
                 </div>
-            </div>
 
-        </div>
+                <Separator className="my-8" />
+                
+                <div className="grid md:grid-cols-3 gap-12">
+                    <div className="md:col-span-1">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="font-headline text-2xl">Ingrédients</h2>
+                        </div>
+                        <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
+                            {recipe.ingredients.map((ingredient, index) => (
+                                <li key={index}>{ingredient}</li>
+                            ))}
+                        </ul>
+                        <Button className="w-full mt-6" onClick={handleAddAllToCart} disabled={isAddingToCart}>
+                            {isAddingToCart ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                            )}
+                            Ajouter les ingrédients au panier
+                        </Button>
+                    </div>
+                    <div className="md:col-span-2">
+                        <h2 className="font-headline text-2xl mb-4">Instructions</h2>
+                        <div className="space-y-4 prose prose-neutral dark:prose-invert max-w-none">
+                            {recipe.instructions.map((instruction, index) => (
+                                <div key={index} className="flex gap-4 items-start">
+                                    <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground font-bold">{index + 1}</div>
+                                    <p className="mt-1">{instruction}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ProductReviews productId={recipeId} />
+        </>
     )
 }
 
@@ -188,3 +198,5 @@ function RecipeDetailsPage() {
 export default function RecipePage() {
     return <RecipeDetailsPage />
 }
+
+    

@@ -11,6 +11,8 @@
  * - `/products/{productId}`: Publicly readable product information.
  * - `/products/{productId}/reviews/{reviewId}`: Publicly readable, owner-writable reviews.
  * - `/categories/{categoryId}`: Publicly readable category information.
+ * - `/recipes/{recipeId}`: Publicly readable recipe information.
+ * - `/recipes/{recipeId}/reviews/{reviewId}`: Publicly readable, owner-writable reviews.
  * - `/users/{userId}`: User profile data, accessible only to the user and admins.
  * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
  * - `/users/{userId}/orders/{orderId}`: User orders, accessible only to the user and admins. The `userId` field is denormalized to match the path.
@@ -75,15 +77,32 @@ service cloud.firestore {
     }
     
     /**
-     * @description Allows public read access to recipes, but write access only to admins.
+     * @description Allows public read access to recipes, but write access only to admins. Protects calculated fields.
      * @path /recipes/{recipeId}
      * @allow get, list: if true;
-     * @allow create, update, delete: if isAdmin();
+     * @allow create, delete: if isAdmin();
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
      * @principle Public read, admin write for recipes.
      */
     match /recipes/{recipeId} {
         allow get, list: if true;
-        allow create, update, delete: if isAdmin();
+        allow create, delete: if isAdmin();
+        allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+
+      /**
+       * @description Allows anyone to read recipe reviews, but only signed-in users can create/update their own.
+       * @path /recipes/{recipeId}/reviews/{reviewId}
+       * @allow get, list: if true;
+       * @allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+       * @allow update: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @allow delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @principle Public read, owner-only write for recipe reviews.
+       */
+        match /reviews/{reviewId} {
+            allow get, list: if true;
+            allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+            allow update, delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+        }
     }
 
     /**
@@ -271,3 +290,5 @@ service cloud.firestore {
             request.resource.data.reviewCount == resource.data.reviewCount);
   }
 }
+
+    

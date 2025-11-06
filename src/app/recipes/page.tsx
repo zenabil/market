@@ -5,10 +5,11 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Recipe } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
+import StarRating from '@/components/product/star-rating';
 
 function RecipeCard({ recipe }: { recipe: Recipe }) {
     const totalTime = recipe.prepTime + recipe.cookTime;
@@ -28,13 +29,19 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
                 <CardHeader>
                     <h3 className="font-headline text-xl font-semibold truncate">{recipe.title}</h3>
                 </CardHeader>
-                <CardContent className="flex-grow flex flex-col">
-                    <p className="text-muted-foreground text-sm line-clamp-3 flex-grow">{recipe.description}</p>
-                     <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+                <CardContent className="flex-grow">
+                    <p className="text-muted-foreground text-sm line-clamp-3">{recipe.description}</p>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2">
+                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         <span>Temps total: {totalTime} min</span>
                     </div>
-                </CardContent>
+                    <div className="flex items-center gap-2">
+                        <StarRating rating={recipe.averageRating || 0} size="sm" />
+                        <span className="text-xs text-muted-foreground">({recipe.reviewCount || 0} avis)</span>
+                    </div>
+                </CardFooter>
             </Card>
         </Link>
     )
@@ -73,3 +80,5 @@ export default function RecipesPage() {
         </div>
     );
 }
+
+    
