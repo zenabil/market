@@ -50,8 +50,8 @@ service cloud.firestore {
     match /products/{productId} {
       allow get: if true;
       allow list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent();
+      allow create: if isAdmin() && request.resource.data.purchasePrice != null;
+      allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent() && request.resource.data.purchasePrice != null;
       allow delete: if isAdmin();
 
 
@@ -314,12 +314,13 @@ service cloud.firestore {
 
   function isNotUpdatingCalculatedFields() {
     // Prevent client-side updates to calculated fields on products or recipes.
-    let disallowedFields = ['averageRating', 'reviewCount'];
+    let disallowedFields = ['averageRating', 'reviewCount', 'sold'];
     let incomingKeys = request.resource.data.keys();
 
     return incomingKeys.hasAll(disallowedFields) == false ||
            (request.resource.data.averageRating == resource.data.averageRating &&
-            request.resource.data.reviewCount == resource.data.reviewCount);
+            request.resource.data.reviewCount == resource.data.reviewCount &&
+            request.resource.data.sold == resource.data.sold);
   }
   
   function isProductTypeConsistent() {
@@ -327,3 +328,5 @@ service cloud.firestore {
     return request.resource.data.type == resource.data.type;
   }
 }
+
+    
