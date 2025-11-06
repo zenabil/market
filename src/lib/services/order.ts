@@ -1,3 +1,4 @@
+
 import {
   Firestore,
   writeBatch,
@@ -32,7 +33,7 @@ interface PlaceOrderParams {
  * @param {PlaceOrderParams} orderDetails - The details of the order.
  * @returns {Promise<void>} A promise that resolves when the transaction completes successfully, or rejects on failure.
  */
-export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrderdDetails): Promise<void> {
+export function placeOrder(db: Firestore, userId: string, orderDetails: PlaceOrderParams): Promise<void> {
   const { shippingAddress, phone, items, totalAmount } = orderDetails;
 
   const userRef = doc(db, 'users', userId);
