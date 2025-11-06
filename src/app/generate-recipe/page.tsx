@@ -41,20 +41,12 @@ export default function GenerateRecipePage() {
     });
 
     const productsQuery = useMemoFirebase(() => {
-        if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) return null;
-        const productNamesLowerCase = generatedRecipe.missingProducts.map(p => p.toLowerCase());
-        // Firestore 'in' query is case-sensitive. We fetch all products and filter client-side.
-        // For a very large product catalog, a more scalable search solution (like Algolia) would be better.
+        if (!firestore) return null;
+        // Fetch all products. Client-side filtering is needed for case-insensitive matching.
         return query(collection(firestore, 'products'));
-    }, [firestore, generatedRecipe]);
+    }, [firestore]);
 
-    const { data: allProducts } = useCollection<Product>(productsQuery);
-
-    const foundProducts = useMemo(() => {
-        if (!allProducts || !generatedRecipe?.missingProducts) return [];
-        const missingProductNamesLower = generatedRecipe.missingProducts.map(p => p.toLowerCase());
-        return allProducts.filter(p => missingProductNamesLower.includes(p.name.toLowerCase()));
-    }, [allProducts, generatedRecipe?.missingProducts]);
+    const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
 
 
     const handleAddMissingToCart = () => {
@@ -64,15 +56,20 @@ export default function GenerateRecipePage() {
         let itemsAddedCount = 0;
         let notFoundProducts: string[] = [];
 
-        generatedRecipe.missingProducts.forEach(productName => {
-            const productToAdd = allProducts.find(p => p.name.toLowerCase() === productName.toLowerCase());
-            if (productToAdd) {
-                addItem(productToAdd);
+        const missingProductNamesLower = generatedRecipe.missingProducts.map(p => p.toLowerCase());
+        
+        allProducts.forEach(product => {
+            if (missingProductNamesLower.includes(product.name.toLowerCase())) {
+                addItem(product);
                 itemsAddedCount++;
-            } else {
-                notFoundProducts.push(productName);
             }
         });
+
+        // Determine which products were not found in our store.
+        const foundProductNamesLower = allProducts.map(p => p.name.toLowerCase());
+        notFoundProducts = generatedRecipe.missingProducts.filter(
+            name => !foundProductNamesLower.includes(name.toLowerCase())
+        );
 
         if (itemsAddedCount > 0) {
             toast({
@@ -236,8 +233,8 @@ export default function GenerateRecipePage() {
                                         <ul className="space-y-1 list-disc pl-5 text-sm text-muted-foreground">
                                             {generatedRecipe.missingProducts.map((p, i) => <li key={i}>{p}</li>)}
                                         </ul>
-                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart}>
-                                            {isAddingToCart && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart || areProductsLoading}>
+                                            {(isAddingToCart || areProductsLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             <ShoppingCart className="mr-2 h-4 w-4" />
                                             Ajouter au panier
                                         </Button>
