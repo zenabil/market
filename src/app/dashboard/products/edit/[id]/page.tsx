@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -21,13 +21,14 @@ import { useCategories } from '@/hooks/use-categories';
 import type { Product } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, PlusCircle, Trash2, ImageIcon } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { notFound, useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/use-user-role';
+import Image from 'next/image';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -36,6 +37,7 @@ const formSchema = z.object({
   stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
   categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
   discount: z.coerce.number().int().min(0).max(100).optional().default(0),
+  images: z.array(z.string().url({ message: 'URL invalide.' })).min(1, { message: 'Au moins une image est requise.'}),
 });
 
 function EditProductForm({ productId }: { productId: string }) {
@@ -54,6 +56,11 @@ function EditProductForm({ productId }: { productId: string }) {
     resolver: zodResolver(formSchema),
   });
 
+  const { fields, append, remove } = useFieldArray({
+      control: form.control,
+      name: "images"
+  });
+
   useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
       router.replace('/dashboard');
@@ -69,6 +76,7 @@ function EditProductForm({ productId }: { productId: string }) {
         stock: product.stock,
         categoryId: product.categoryId,
         discount: product.discount,
+        images: product.images,
       });
     }
   }, [product, form]);
@@ -76,13 +84,11 @@ function EditProductForm({ productId }: { productId: string }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!product) return;
     setIsSaving(true);
-    // Construct the data ensuring we don't lose fields not present in the form
     const productData = {
-        ...product, // Start with existing product data
-        ...values // Overwrite with form values
+        ...product,
+        ...values
     };
     
-    // Remove the client-side 'id' property before sending to Firestore
     const { id, ...dataToUpdate } = productData;
 
     updateDoc(productRef, dataToUpdate)
@@ -216,6 +222,32 @@ function EditProductForm({ productId }: { productId: string }) {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader><CardTitle>Images</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="relative group aspect-square">
+                        <Image src={form.watch(`images.${index}`)} alt={`Aperçu ${index}`} layout="fill" className="object-cover rounded-md border" />
+                        <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => remove(index)}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => append('https://picsum.photos/seed/' + Date.now() + '/600/600')}
+                      className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
+                    >
+                      <PlusCircle className="h-8 w-8" />
+                      <span className="text-xs mt-2">Ajouter une image</span>
+                    </button>
+                  </div>
+                   {form.formState.errors.images && <p className="text-sm text-destructive">{form.formState.errors.images.message}</p>}
+                </CardContent>
+              </Card>
+
             </div>
             <div className="space-y-8">
               <Card>
