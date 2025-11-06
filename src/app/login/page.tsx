@@ -243,8 +243,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:grid-cols-5">
-       <div className="flex items-center justify-center py-12 lg:col-span-1 xl:col-span-2">
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+       <div className="flex items-center justify-center py-12">
          <div className='absolute top-8 left-8'>
             <Link href="/" >
               <Logo className="h-8" />
@@ -442,9 +442,9 @@ export default function LoginPage() {
             </Tabs>
         </div>
       </div>
-      <div className="hidden lg:block lg:col-span-1 xl:col-span-3">
+      <div className="hidden bg-muted lg:block">
         <Image
-          src="https://images.unsplash.com/photo-1543168256-418811576931?q=80&w=1974&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1588964895597-cf29a1a27a8d?q=80&w=1974&auto=format&fit=crop"
           alt="Image d'une épicerie avec des produits frais"
           width="1920"
           height="1080"
