@@ -15,10 +15,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, Mail } from 'lucide-react';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { MapPin, Phone, Mail, Loader2 } from 'lucide-react';
+import { useDoc, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, addDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState } from 'react';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -36,6 +37,7 @@ type SiteSettings = {
 export default function ContactPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
   const { data: settings, isLoading } = useDoc<SiteSettings>(settingsRef);
@@ -51,13 +53,40 @@ export default function ContactPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: 'Message envoyé !',
-      description: 'Nous avons bien reçu votre message et nous vous répondrons bientôt.',
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore) return;
+
+    setIsSubmitting(true);
+    const messageData = {
+        ...values,
+        createdAt: new Date().toISOString(),
+    };
+    
+    try {
+        const contactMessagesCollection = collection(firestore, 'contactMessages');
+        await addDoc(contactMessagesCollection, messageData);
+        toast({
+          title: 'Message envoyé !',
+          description: 'Nous avons bien reçu votre message et nous vous répondrons bientôt.',
+        });
+        form.reset();
+    } catch (error) {
+        errorEmitter.emit(
+            'permission-error',
+            new FirestorePermissionError({
+                path: 'contactMessages',
+                operation: 'create',
+                requestResourceData: messageData
+            })
+        );
+        toast({
+          variant: 'destructive',
+          title: 'Échec de l\'envoi',
+          description: 'Impossible d\'envoyer votre message pour le moment.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -124,7 +153,10 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="lg">Envoyer le Message</Button>
+              <Button type="submit" size="lg" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Envoyer le Message
+              </Button>
             </form>
           </Form>
         </div>
@@ -171,3 +203,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+    

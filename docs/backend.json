@@ -457,6 +457,37 @@
             }
         },
         "required": ["name", "userId", "createdAt", "items"]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Contact Message",
+      "type": "object",
+      "description": "Represents a message sent through the contact form.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The sender's name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The sender's email address."
+        },
+        "subject": {
+          "type": "string",
+          "description": "The message subject."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message content."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the message was sent."
+        }
+      },
+      "required": ["name", "email", "subject", "message", "createdAt"]
     }
   },
   "auth": {
@@ -524,6 +555,10 @@
     "/recipes/{recipeId}/reviews/{reviewId}": {
       "schema": { "$ref": "#/entities/Review" },
       "description": "Stores reviews for a specific recipe. Writable by the user who owns the review."
+    },
+    "/contactMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/ContactMessage" },
+      "description": "Stores messages submitted through the contact form. Writable by anyone, but not readable by clients."
     }
   }
 }

@@ -20,6 +20,7 @@
  * - `/users/{userId}/shopping-lists/{listId}`: User shopping lists, accessible only to the user.
  * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
  * - `/settings/site`: Global site settings, publicly readable.
+ * - `/contactMessages/{messageId}`: Contact form submissions, write-only for users.
  *
  * Key Security Decisions:
  * - Products, Categories, and Reviews are publicly readable.
@@ -218,6 +219,18 @@ service cloud.firestore {
     match /settings/site {
         allow get: if true;
         allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Allows anyone to submit a contact message. Reading and deleting is restricted to admins.
+     * @path /contactMessages/{messageId}
+     * @allow create: if true;
+     * @allow read, update, delete: if isAdmin();
+     * @principle Write-only for public users, full access for admins.
+     */
+    match /contactMessages/{messageId} {
+        allow create: if true;
+        allow read, update, delete: if isAdmin();
     }
   }
 
