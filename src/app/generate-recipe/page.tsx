@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
     ingredients: z.string().min(10, { message: 'Veuillez lister au moins quelques ingrédients.' }),
@@ -144,7 +145,7 @@ export default function GenerateRecipePage() {
             {generatedRecipe && (
                  <div className="mt-12 max-w-4xl mx-auto animate-in fade-in-50 duration-500">
                      <div className="relative aspect-video w-full rounded-lg overflow-hidden my-8 bg-muted">
-                        <Image src={`https://picsum.photos/seed/${generatedRecipe.title.replace(/\s+/g, '-')}/1280/720`} alt={generatedRecipe.title} fill className="object-cover" />
+                        <Image src={generatedRecipe.imageUrl} alt={generatedRecipe.title} fill className="object-cover" />
                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                          <div className="absolute bottom-0 left-0 p-8 text-white">
                             <h2 className="font-headline text-3xl md:text-4xl lg:text-5xl drop-shadow-md">{generatedRecipe.title}</h2>
@@ -225,17 +226,6 @@ export default function GenerateRecipePage() {
                             </div>
                         </div>
                     </div>
-                     <Card className="mt-8">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <ImageIcon className="h-5 w-5"/>
-                                Invite pour image IA
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground italic p-4 bg-muted rounded-md font-mono">{generatedRecipe.imagePrompt}</p>
-                        </CardContent>
-                     </Card>
                  </div>
             )}
         </div>

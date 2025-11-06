@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview AI flow to generate a recipe from a list of ingredients.
+ * @fileOverview AI flow to generate a recipe from a list of ingredients, including an image.
  *
- * - generateRecipeFromIngredients - A function that generates a complete recipe.
+ * - generateRecipeFromIngredients - A function that generates a complete recipe with an image.
  * - GenerateRecipeFromIngredientsInput - The input type for the function.
  * - GenerateRecipeFromIngredientsOutput - The return type for the function.
  */
@@ -19,7 +19,7 @@ export type GenerateRecipeFromIngredientsInput = z.infer<typeof GenerateRecipeFr
 const GenerateRecipeFromIngredientsOutputSchema = z.object({
   title: z.string().describe('The creative and appealing title of the generated recipe in French.'),
   description: z.string().describe('A brief, enticing description of the recipe in French.'),
-  imagePrompt: z.string().describe('A prompt for an image generation model to create a picture of the final dish.'),
+  imageUrl: z.string().describe('A data URI of the generated image of the final dish.'),
   prepTime: z.number().describe('The estimated preparation time in minutes.'),
   cookTime: z.number().describe('The estimated cooking time in minutes.'),
   servings: z.number().describe('The number of servings the recipe yields.'),
@@ -37,10 +37,21 @@ export async function generateRecipeFromIngredients(
 }
 
 
-const prompt = ai.definePrompt({
+const recipePrompt = ai.definePrompt({
   name: 'generateRecipeFromIngredientsPrompt',
   input: { schema: GenerateRecipeFromIngredientsInputSchema },
-  output: { schema: GenerateRecipeFromIngredientsOutputSchema },
+  output: { schema: z.object({
+      title: z.string().describe('The creative and appealing title of the generated recipe in French.'),
+      description: z.string().describe('A brief, enticing description of the recipe in French.'),
+      imagePrompt: z.string().describe('A prompt for an image generation model to create a picture of the final dish.'),
+      prepTime: z.number().describe('The estimated preparation time in minutes.'),
+      cookTime: z.number().describe('The estimated cooking time in minutes.'),
+      servings: z.number().describe('The number of servings the recipe yields.'),
+      ingredients: z.array(z.string()).describe('The full list of ingredients required for the recipe in French.'),
+      instructions: z.array(z.string()).describe('The step-by-step instructions to prepare the dish in French.'),
+      missingProducts: z.array(z.string()).describe('A list of products the user might need to buy for this recipe.'),
+    }) 
+  },
   prompt: `Vous êtes un chef expert pour le "Supermarché Intelligent de Tlemcen", spécialisé dans la cuisine algérienne et méditerranéenne. Un utilisateur dispose des ingrédients suivants: {{{ingredients}}}.
 
 Votre tâche est de créer une recette délicieuse et créative à partir de ces ingrédients. La recette doit être en français.
@@ -51,7 +62,7 @@ Votre tâche est de créer une recette délicieuse et créative à partir de ces
 4.  **Rédigez les instructions:** Fournissez des instructions claires, étape par étape.
 5.  **Estimez les temps et les portions:** Fournissez des estimations réalistes pour le temps de préparation, le temps de cuisson et le nombre de portions.
 6.  **Identifiez les produits manquants:** Listez les ingrédients clés que vous avez ajoutés et que l'utilisateur devra probablement acheter. Cette liste ne doit contenir que les noms des produits, par exemple : ["Poitrine de poulet", "Huile d'olive", "Tomates"].
-7.  **Générez une invite d'image:** Créez une invite descriptive pour qu'un modèle de génération d'images puisse créer une image du plat final. Exemple : "Un plat de tajine de poulet algérien magnifiquement présenté avec des olives et des citrons confits, de la vapeur s'en dégageant, sur une table en bois rustique."
+7.  **Générez une invite d'image:** Créez une invite descriptive et détaillée pour qu'un modèle de génération d'images puisse créer une image du plat final. Exemple : "Un plat de tajine de poulet algérien magnifiquement présenté avec des olives et des citrons confits, de la vapeur s'en dégageant, sur une table en bois rustique. Le style est une photographie culinaire professionnelle, avec un éclairage chaleureux et une faible profondeur de champ."
 
 Répondez dans un format JSON structuré. La réponse doit être en français.`,
 });
@@ -64,7 +75,26 @@ const generateRecipeFromIngredientsFlow = ai.defineFlow(
     outputSchema: GenerateRecipeFromIngredientsOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    // Step 1: Generate the recipe text and the image prompt.
+    const { output: recipeDetails } = await recipePrompt(input);
+    if (!recipeDetails) {
+        throw new Error('Failed to generate recipe details.');
+    }
+
+    // Step 2: Generate the image using the prompt from the first step.
+    const { media } = await ai.generate({
+        model: 'googleai/imagen-4.0-fast-generate-001',
+        prompt: recipeDetails.imagePrompt,
+    });
+    
+    if (!media.url) {
+        throw new Error('Failed to generate recipe image.');
+    }
+    
+    // Step 3: Combine the results and return.
+    return {
+        ...recipeDetails,
+        imageUrl: media.url,
+    };
   }
 );
