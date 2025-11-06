@@ -22,9 +22,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Sparkles, Loader2 } from 'lucide-react';
-// import { generateWeeklyMealPlan, type WeeklyMealPlan } from '@/ai/flows/generate-weekly-meal-plan';
+import { CalendarDays, Sparkles, Loader2, Salad, Beef, ShoppingCart } from 'lucide-react';
+import { generateWeeklyMealPlan, type WeeklyMealPlan } from '@/ai/flows/generate-weekly-meal-plan';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   diet: z.string().optional(),
@@ -34,7 +37,7 @@ const formSchema = z.object({
 export default function MealPlannerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  // const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
+  const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,25 +49,27 @@ export default function MealPlannerPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // setMealPlan(null);
+    setMealPlan(null);
     toast({
       title: 'Génération en cours...',
       description: 'Veuillez patienter pendant que nous préparons votre plan de repas personnalisé.',
     });
-    // try {
-    //   const result = await generateWeeklyMealPlan(values);
-    //   setMealPlan(result);
-    // } catch (error) {
-    //   console.error("Failed to generate meal plan:", error);
-    //   toast({
-    //     variant: 'destructive',
-    //     title: 'Échec de la génération',
-    //     description: 'Impossible de générer un plan de repas pour le moment.',
-    //   });
-    // } finally {
+    try {
+      const result = await generateWeeklyMealPlan(values);
+      setMealPlan(result);
+    } catch (error) {
+      console.error("Failed to generate meal plan:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Échec de la génération',
+        description: 'Impossible de générer un plan de repas pour le moment.',
+      });
+    } finally {
       setIsLoading(false);
-    // }
+    }
   }
+
+  const weekDays = mealPlan ? Object.keys(mealPlan).filter(k => k !== 'shoppingList') : [];
 
   return (
     <div className="container py-8 md:py-12">
@@ -141,8 +146,67 @@ export default function MealPlannerPage() {
           </Form>
         </CardContent>
       </Card>
+      
+        {isLoading && (
+            <div className="mt-12 grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2"><Skeleton className="h-96" /></div>
+                <div><Skeleton className="h-96" /></div>
+            </div>
+        )}
 
-      {/* La section des résultats sera ajoutée ici dans les prochaines étapes */}
+      {mealPlan && (
+        <div className="mt-12 grid lg:grid-cols-3 gap-8 animate-in fade-in-50 duration-500">
+            <div className="lg:col-span-2">
+                 <h2 className="font-headline text-3xl mb-4">Votre Plan de la Semaine</h2>
+                 <Tabs defaultValue={weekDays[0]} className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 md:grid-cols-7">
+                        {weekDays.map(day => (
+                            <TabsTrigger key={day} value={day} className="capitalize">{day.substring(0,3)}</TabsTrigger>
+                        ))}
+                    </TabsList>
+                    {weekDays.map(day => (
+                        <TabsContent key={day} value={day}>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="capitalize font-headline text-2xl">{day}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div>
+                                        <h3 className="font-semibold flex items-center gap-2"><Salad className="h-5 w-5 text-primary"/> Déjeuner</h3>
+                                        <p className="text-muted-foreground pl-7">{(mealPlan as any)[day].lunch}</p>
+                                    </div>
+                                     <Separator />
+                                     <div>
+                                        <h3 className="font-semibold flex items-center gap-2"><Beef className="h-5 w-5 text-primary"/> Dîner</h3>
+                                        <p className="text-muted-foreground pl-7">{(mealPlan as any)[day].dinner}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    ))}
+                </Tabs>
+            </div>
+            <div>
+                 <h2 className="font-headline text-3xl mb-4 flex items-center gap-2">
+                    <ShoppingCart className="h-7 w-7"/> Liste de Courses
+                 </h2>
+                 <Card>
+                    <CardContent className="pt-6 space-y-4 max-h-[500px] overflow-y-auto">
+                        {mealPlan.shoppingList.map((category, index) => (
+                            <div key={index}>
+                                <h4 className="font-bold text-lg">{category.category}</h4>
+                                <ul className="list-disc list-inside pl-2 mt-2 space-y-1 text-muted-foreground">
+                                    {category.items.map((item, itemIndex) => (
+                                        <li key={itemIndex}>{item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </CardContent>
+                 </Card>
+            </div>
+        </div>
+      )}
     </div>
   );
 }
