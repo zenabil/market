@@ -67,21 +67,19 @@ function EditProductForm({ productId }: { productId: string }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!product) return;
     setIsSaving(true);
+    // Construct the data ensuring we don't lose fields not present in the form
     const productData = {
-      name: values.name,
-      description: values.description || '',
-      price: values.price,
-      stock: values.stock,
-      categoryId: values.categoryId,
-      discount: values.discount,
-      // Keep existing values for fields not in the form
-      images: product.images,
-      sku: product.sku,
-      barcode: product.barcode,
-      sold: product.sold,
-      averageRating: product.averageRating || 0,
-      reviewCount: product.reviewCount || 0,
+        ...product, // Start with existing product data
+        name: values.name,
+        description: values.description || '',
+        price: values.price,
+        stock: values.stock,
+        categoryId: values.categoryId,
+        discount: values.discount,
     };
+    // Remove id from the data object as it's not a field in the document
+    delete (productData as any).id;
+
 
     updateDoc(productRef, productData)
         .then(() => {

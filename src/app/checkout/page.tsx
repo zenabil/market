@@ -106,7 +106,7 @@ export default function CheckoutPage() {
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-            toast({ variant: 'destructive', title: 'Coupon invalide', description: "Ce code promo n'existe pas." });
+            toast({ variant: 'destructive', title: 'Coupon invalide', description: "Ce code promo n'existe pas ou a été mal saisi." });
             setAppliedCoupon(null);
             return;
         }
@@ -118,7 +118,7 @@ export default function CheckoutPage() {
         const expiry = new Date(couponData.expiryDate);
 
         if (!couponData.isActive || now > expiry) {
-            toast({ variant: 'destructive', title: 'Coupon expiré', description: "Ce code promo n'est plus valide." });
+            toast({ variant: 'destructive', title: 'Coupon expiré ou inactif', description: "Ce code promo n'est plus valide." });
             setAppliedCoupon(null);
             return;
         }
@@ -126,15 +126,16 @@ export default function CheckoutPage() {
         setAppliedCoupon(couponData);
         toast({ title: `Coupon appliqué : ${couponData.code}` });
     } catch (error) {
-        const contextualError = new FirestorePermissionError({
+        // Emit a detailed permission error for the developer overlay to catch
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'list',
             path: couponsRef.path,
-        });
-        errorEmitter.emit('permission-error', contextualError);
+        }));
+        // Show a generic message to the user, the dev overlay will show the details
         toast({
             variant: 'destructive',
             title: 'Erreur',
-            description: "Impossible de vérifier le coupon pour le moment.",
+            description: "Impossible de vérifier le coupon. Vérifiez vos permissions de lecture pour la collection 'coupons'.",
         });
     } finally {
         setIsApplyingCoupon(false);

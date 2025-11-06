@@ -110,12 +110,13 @@ function DiscountRow({ product }: { product: Product }) {
                 </div>
             </TableCell>
             <TableCell className="text-right space-x-2">
-                <Button size="sm" onClick={handleUpdateDiscount} disabled={discount === (product.discount || 0)}>
+                <Button size="sm" onClick={handleUpdateDiscount} disabled={discount === (product.discount || 0) || isUpdating}>
                     Mettre à jour
                 </Button>
                  {product.discount > 0 && (
                     <Button size="sm" variant="ghost" onClick={handleRemoveDiscount}>
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Supprimer
                     </Button>
                  )}
             </TableCell>
