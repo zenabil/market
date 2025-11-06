@@ -1,24 +1,42 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
-import { notFound, useParams, useRouter } from 'next/navigation';
-import { useDoc, useFirestore, useUser, useMemoFirebase, useCollection, useCollectionGroup } from '@/firebase';
-import { doc, collection, query, where, documentId, collectionGroup } from 'firebase/firestore';
-import type { Order, Product } from '@/lib/placeholder-data';
+import React, { useMemo } from 'react';
+import { notFound, useParams } from 'next/navigation';
+import { useCollection, useFirestore, useMemoFirebase, useCollectionGroup, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
+import { doc, collection, query, where, documentId, collectionGroup, updateDoc } from 'firebase/firestore';
+import type { Order, Product, User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Package } from 'lucide-react';
+import { ArrowLeft, FileText, Package, User, Truck, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
+
+const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+
+const statusTranslations: { [key: string]: string } = {
+    pending: 'En attente',
+    confirmed: 'Confirmée',
+    shipped: 'Expédiée',
+    delivered: 'Livrée',
+    cancelled: 'Annulée',
+};
+const markAsTranslations: { [key: string]: string } = {
+    pending: 'Marquer comme En attente',
+    confirmed: 'Marquer como Confirmée',
+    shipped: 'Marquer comme Expédiée',
+    delivered: 'Marquer comme Livrée',
+    cancelled: 'Marquer comme Annulée',
+};
 
 function OrderDetails() {
     const { id: orderId } = useParams();
-    const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
-    const router = useRouter();
+    const { toast } = useToast();
 
     const orderQuery = useMemoFirebase(() => {
         if (!firestore || !orderId) return null;
@@ -31,6 +49,12 @@ function OrderDetails() {
         return orders && orders.length === 1 ? orders[0] : null;
     }, [orders]);
 
+    const userDocRef = useMemoFirebase(() => {
+        if (!firestore || !order) return null;
+        return doc(firestore, 'users', order.userId);
+    }, [firestore, order]);
+
+    const { data: customer, isLoading: isCustomerLoading } = useDoc<FirestoreUser>(userDocRef);
 
     const productIds = useMemo(() => {
         if (!order) return null;
@@ -48,12 +72,29 @@ function OrderDetails() {
         if (!products) return new Map();
         return new Map(products.map(p => [p.id, p]));
     }, [products]);
-    
-    React.useEffect(() => {
-      if (!isUserLoading && !user) {
-        router.push('/login');
-      }
-    }, [user, isUserLoading, router]);
+
+    const handleStatusChange = (newStatus: string) => {
+        if (!firestore || !order) return;
+        const orderRef = doc(firestore, `users/${order.userId}/orders`, order.id);
+        const updateData = { status: newStatus };
+        updateDoc(orderRef, updateData)
+            .then(() => {
+                toast({
+                    title: 'Statut de la commande mis à jour',
+                    description: `La commande est maintenant ${statusTranslations[newStatus.toLowerCase()]}.`,
+                });
+            })
+            .catch(error => {
+                errorEmitter.emit(
+                    'permission-error',
+                    new FirestorePermissionError({
+                        path: orderRef.path,
+                        operation: 'update',
+                        requestResourceData: updateData,
+                    })
+                );
+            });
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
@@ -64,15 +105,7 @@ function OrderDetails() {
         return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
     
-    const statusTranslations: { [key: string]: string } = {
-        pending: 'En attente',
-        confirmed: 'Confirmée',
-        shipped: 'Expédiée',
-        delivered: 'Livrée',
-        cancelled: 'Annulée',
-    };
-
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
         switch (status.toLowerCase()) {
             case 'pending': return 'default';
             case 'confirmed': return 'secondary';
@@ -82,8 +115,19 @@ function OrderDetails() {
             default: return 'default';
         }
     };
+
+    const getStatusIcon = (status: string) => {
+        switch (status.toLowerCase()) {
+            case 'pending': return <User className="h-4 w-4 mr-2" />;
+            case 'confirmed': return <CheckCircle className="h-4 w-4 mr-2" />;
+            case 'shipped': return <Truck className="h-4 w-4 mr-2" />;
+            case 'delivered': return <CheckCircle className="h-4 w-4 mr-2 text-green-500" />;
+            case 'cancelled': return <XCircle className="h-4 w-4 mr-2" />;
+            default: return <Package className="h-4 w-4 mr-2" />;
+        }
+    };
     
-    const isLoading = isUserLoading || isOrderLoading || (order && areProductsLoading);
+    const isLoading = isOrderLoading || isCustomerLoading || (order && areProductsLoading);
 
     if (isLoading) {
         return (
@@ -92,12 +136,13 @@ function OrderDetails() {
                     <Skeleton className="h-10 w-10" />
                     <Skeleton className="h-10 w-64" />
                 </div>
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="md:col-span-2 space-y-6">
+                <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-6">
                         <Skeleton className="h-64 w-full" />
                     </div>
                     <div className='space-y-6'>
                          <Skeleton className="h-48 w-full" />
+                         <Skeleton className="h-32 w-full" />
                     </div>
                 </div>
             </div>
@@ -111,25 +156,48 @@ function OrderDetails() {
 
     return (
         <div className="container py-8 md:py-12">
-            <div className="flex items-center gap-4 mb-8">
-                <Button asChild variant="outline" size="icon">
-                <Link href="/dashboard/orders">
-                    <ArrowLeft className="h-4 w-4" />
-                </Link>
-                </Button>
-                <div>
-                    <h1 className="font-headline text-3xl md:text-4xl">Détails de la commande</h1>
-                     <p className="text-muted-foreground font-mono text-sm">
-                        ID de commande: {order.id}
-                    </p>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                <div className="flex items-center gap-4">
+                    <Button asChild variant="outline" size="icon">
+                    <Link href="/dashboard/orders">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                    </Button>
+                    <div>
+                        <h1 className="font-headline text-3xl md:text-4xl">Détails de la commande</h1>
+                         <p className="text-muted-foreground font-mono text-sm">
+                            ID: {order.id}
+                        </p>
+                    </div>
                 </div>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            {getStatusIcon(order.status)}
+                            {statusTranslations[order.status.toLowerCase()] || order.status}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Changer le statut</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {orderStatuses.map(status => (
+                            <DropdownMenuItem
+                                key={status}
+                                disabled={order.status === status}
+                                onClick={() => handleStatusChange(status)}
+                            >
+                                {markAsTranslations[status.toLowerCase()]}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-                <div className="md:col-span-2">
+            <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><Package /> Articles de la commande</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><Package /> Articles ({order.items.length})</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -139,12 +207,12 @@ function OrderDetails() {
                                         <div key={item.productId} className="flex justify-between items-center">
                                             <div className='flex items-center gap-4'>
                                                  <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 relative overflow-hidden">
-                                                    {product && <Image src={product.images[0]} alt={product.name} fill className="object-cover" />}
+                                                    {product ? <Image src={product.images[0]} alt={product.name} fill className="object-cover" /> : <Skeleton className="w-full h-full" />}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{item.productName}</p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Quantité: {item.quantity} x {formatCurrency(item.price)}
+                                                        {item.quantity} x {formatCurrency(item.price)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -152,20 +220,40 @@ function OrderDetails() {
                                         </div>
                                     )
                                 })}
+                                 <Separator />
+                                <div className="flex justify-end font-bold text-lg">
+                                    <span>Total: {formatCurrency(order.totalAmount)}</span>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
-                <div>
+                <div className="space-y-8">
                      <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><FileText/> Résumé de la commande</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><User /> Client</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                           {isCustomerLoading ? (
+                               <div className="space-y-2">
+                                   <Skeleton className="h-5 w-3/4" />
+                                   <Skeleton className="h-4 w-full" />
+                               </div>
+                           ) : customer ? (
+                                <>
+                                 <p className="font-semibold">{customer.name}</p>
+                                 <p className="text-sm text-muted-foreground">{customer.email}</p>
+                                </>
+                           ): (
+                               <p className="text-sm text-muted-foreground">Client non trouvé</p>
+                           )}
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className='flex items-center gap-2'><FileText/> Résumé</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">ID de commande</span>
-                                <span className="font-mono text-sm">...{order.id.slice(-12)}</span>
-                            </div>
                              <div className="flex justify-between">
                                 <span className="text-muted-foreground">Date</span>
                                 <span>{formatDate(order.orderDate)}</span>
@@ -174,15 +262,10 @@ function OrderDetails() {
                                 <span className="text-muted-foreground">Statut</span>
                                 <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status.toLowerCase()] || order.status}</Badge>
                             </div>
-                            <Separator />
-                            <div className="flex justify-between font-bold text-lg">
-                                <span>Total</span>
-                                <span>{formatCurrency(order.totalAmount)}</span>
-                            </div>
                              <Separator />
                              <div>
-                                 <h4 className="font-semibold mb-2">Informations de livraison</h4>
-                                 <p className='text-sm text-muted-foreground'>{order.shippingAddress}</p>
+                                 <h4 className="font-semibold mb-2">Adresse de livraison</h4>
+                                 <p className='text-sm text-muted-foreground whitespace-pre-line'>{order.shippingAddress.replace(/, /g, '\n')}</p>
                              </div>
                         </CardContent>
                     </Card>
