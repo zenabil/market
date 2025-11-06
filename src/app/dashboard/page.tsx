@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import type { Product } from '@/lib/placeholder-data';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, TrendingUp } from 'lucide-react';
 import { useUserRole } from '@/hooks/use-user-role';
 
 function AdminDashboard() {
@@ -24,6 +24,7 @@ function AdminDashboard() {
     if (!products) {
       return {
         totalRevenue: 0,
+        totalProfit: 0,
         totalProductsSold: 0,
         topSellingProducts: [],
         productsInStock: 0,
@@ -32,6 +33,12 @@ function AdminDashboard() {
     const totalRevenue = products.reduce((acc, product) => {
       const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
       return acc + discountedPrice * (product.sold || 0);
+    }, 0);
+    
+    const totalProfit = products.reduce((acc, product) => {
+        const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+        const profitPerUnit = discountedPrice - (product.purchasePrice || 0);
+        return acc + (profitPerUnit * (product.sold || 0));
     }, 0);
 
     const totalProductsSold = products.reduce((acc, product) => acc + (product.sold || 0), 0);
@@ -45,7 +52,7 @@ function AdminDashboard() {
         sold: p.sold,
       }));
     
-    return { totalRevenue, totalProductsSold, topSellingProducts, productsInStock: products.length };
+    return { totalRevenue, totalProfit, totalProductsSold, topSellingProducts, productsInStock: products.length };
   }, [products]);
 
 
@@ -66,7 +73,7 @@ function AdminDashboard() {
   return (
     <div className="container py-8 md:py-12">
       <h1 className="font-headline text-3xl md:text-4xl mb-8">Aperçu</h1>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Revenu total</CardTitle>
@@ -85,6 +92,15 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {isLoading ? <Skeleton className="h-8 w-32" /> : <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>}
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Bénéfice total</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? <Skeleton className="h-8 w-32" /> : <div className="text-2xl font-bold">{formatCurrency(stats.totalProfit)}</div>}
           </CardContent>
         </Card>
         <Card>
