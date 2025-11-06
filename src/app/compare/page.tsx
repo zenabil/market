@@ -5,7 +5,7 @@ import { useComparison } from '@/hooks/use-comparison';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { Trash2, ShoppingCart, Star } from 'lucide-react';
+import { Trash2, ShoppingCart, Star, X } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
