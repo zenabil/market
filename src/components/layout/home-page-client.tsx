@@ -13,6 +13,7 @@ type HomePageClientProps = {
   categories: Category[];
   bestSellers: Product[];
   exclusiveOffers: Product[];
+  newArrivals: Product[];
 };
 
 const useRecentProducts = () => {
@@ -92,18 +93,21 @@ function RecommendedProducts() {
     );
 }
 
-export default function HomePageClient({ categories, bestSellers, exclusiveOffers }: HomePageClientProps) {
+export default function HomePageClient({ categories, bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
 
   return (
     <div className="container py-8 md:py-12">
       <CategoryShowcase title="Parcourir les catégories" categories={categories} />
-      <RecommendedProducts />
       <div className="mt-12 md:mt-16">
         <ProductGrid title="Meilleures ventes" products={bestSellers} />
       </div>
       <div className="mt-12 md:mt-16">
+        <ProductGrid title="Nouveautés" products={newArrivals} />
+      </div>
+      <div className="mt-12 md:mt-16">
         <ProductGrid title="Offres exclusives" products={exclusiveOffers} />
       </div>
+      <RecommendedProducts />
     </div>
   );
 }

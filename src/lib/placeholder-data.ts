@@ -14,6 +14,7 @@ export type Product = {
   discount: number; // Percentage
   averageRating?: number;
   reviewCount?: number;
+  createdAt: string; // ISO string
 };
 
 export type Category = {

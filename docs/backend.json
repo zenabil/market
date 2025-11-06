@@ -56,6 +56,11 @@
         "reviewCount": {
             "type": "number",
             "description": "The total number of reviews for the product."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the product was created."
         }
       },
       "required": [
@@ -66,7 +71,8 @@
         "images",
         "sku",
         "barcode",
-        "sold"
+        "sold",
+        "createdAt"
       ]
     },
     "Category": {

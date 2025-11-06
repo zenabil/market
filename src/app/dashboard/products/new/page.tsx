@@ -80,6 +80,7 @@ export default function NewProductPage() {
         sold: 0,
         averageRating: 0,
         reviewCount: 0,
+        createdAt: new Date().toISOString(),
     };
 
     const productsCollection = collection(firestore, 'products');
