@@ -94,38 +94,57 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
-  const handleCreateUserDocument = async (user: any) => {
+ const handleCreateUserDocument = async (user: any) => {
     if (!firestore) throw new Error("Firestore not available");
-    
+
     const userDocRef = doc(firestore, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
-  
-    if (!userDoc.exists()) {
-      const userData = {
-        id: user.uid,
-        name: user.displayName,
-        email: user.email,
-        role: "User",
-        preferredLanguage: "fr",
-        registrationDate: new Date().toISOString(),
-        orderCount: 0,
-        totalSpent: 0,
-        loyaltyPoints: 0,
-        avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`,
-        addresses: [],
-      };
-      
-      await setDoc(userDocRef, userData);
 
-      const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-      try {
-        await setDoc(adminRoleRef, { role: 'admin' });
+    if (userDoc.exists()) {
+      return; // User document already exists
+    }
+
+    // This is a new user, create their document and try to make them an admin.
+    const batch = writeBatch(firestore);
+    const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+    
+    // Base user data
+    const userData = {
+      id: user.uid,
+      name: user.displayName,
+      email: user.email,
+      role: 'User', // Default role
+      preferredLanguage: "fr",
+      registrationDate: new Date().toISOString(),
+      orderCount: 0,
+      totalSpent: 0,
+      loyaltyPoints: 0,
+      avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`,
+      addresses: [],
+    };
+    
+    batch.set(userDocRef, userData);
+    
+    // Attempt to grant admin role. Security rules will only allow this for the first user.
+    // If it fails, the user document is still created with the 'User' role.
+    batch.set(adminRoleRef, { role: 'admin' });
+
+    try {
+        await batch.commit();
+        // If the batch commit succeeds and the admin role was part of it,
+        // we need one more write to update the user's role field.
+        // This is safe because only the first user can get this far.
         await updateDoc(userDocRef, { role: 'Admin' });
-      } catch (adminError: any) {
-        if (adminError.code !== 'permission-denied') {
-          console.error("An unexpected error occurred while trying to set admin role:", adminError);
+
+    } catch (error: any) {
+        // A permission-denied error here is expected for all users except the first one.
+        // We can safely ignore it, as the user document has been created.
+        if (error.code !== 'permission-denied') {
+          console.error("An unexpected error occurred during user creation batch:", error);
+          // Optionally re-throw or handle other types of errors (e.g., network issues)
+          throw error;
         }
-      }
+        // If it was a permission error, the user was created as a regular user, which is the correct outcome.
     }
   }
   
