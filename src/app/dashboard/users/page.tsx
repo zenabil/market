@@ -101,15 +101,13 @@ function LoyaltyDialog({ user }: { user: FirestoreUser }) {
 }
 
 
-function AdminSwitch({ user }: { user: FirestoreUser }) {
+function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange: (userId: string, newRole: 'Admin' | 'User') => void }) {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  // Initialize state from prop, but allow it to be updated locally on failure
   const [isAdmin, setIsAdmin] = React.useState(user.role === 'Admin');
   const [isLoading, setIsLoading] = React.useState(false);
   
-  // Effect to sync the visual state if the prop changes from an external refetch
   React.useEffect(() => {
     setIsAdmin(user.role === 'Admin');
   }, [user.role]);
@@ -118,10 +116,10 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
     if (!firestore) return;
 
     setIsLoading(true);
-    setIsAdmin(newAdminStatus); // Optimistically update UI
 
     const adminRoleRef = doc(firestore, 'roles_admin', user.id);
     const userRef = doc(firestore, 'users', user.id);
+    const newRole = newAdminStatus ? 'Admin' : 'User';
 
     const operation = newAdminStatus 
       ? setDoc(adminRoleRef, { role: 'admin' }) 
@@ -129,19 +127,16 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
 
     operation
       .then(() => {
-        // Only update the user doc if the primary role operation succeeds
-        return updateDoc(userRef, { role: newAdminStatus ? 'Admin' : 'User' });
+        return updateDoc(userRef, { role: newRole });
       })
       .then(() => {
         toast({
           title: 'Rôle mis à jour',
-          description: `${user.name} est maintenant ${newAdminStatus ? 'Admin' : 'Utilisateur'}.`,
+          description: `${user.name} est maintenant ${newRole}.`,
         });
-        // The state is already visually updated, so we just let it be.
+        onRoleChange(user.id, newRole);
       })
       .catch(error => {
-        // If any part of the operation fails, revert the visual state
-        setIsAdmin(!newAdminStatus); 
         const permissionError = new FirestorePermissionError({
             path: newAdminStatus ? adminRoleRef.path : userRef.path,
             operation: newAdminStatus ? 'create' : 'delete', 
@@ -178,19 +173,22 @@ export default function UsersPage() {
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
 
-  // Only attempt to query users if the current user is an admin.
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || isRoleLoading || !isAdmin) return null;
     return query(collection(firestore, 'users'));
   }, [firestore, isRoleLoading, isAdmin]);
 
-  const { data: users, isLoading: areUsersLoading } = useCollection<FirestoreUser>(usersQuery);
+  const { data: users, isLoading: areUsersLoading, refetch } = useCollection<FirestoreUser>(usersQuery);
 
   React.useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
         router.replace('/dashboard');
     }
   }, [isAdmin, isRoleLoading, router]);
+
+  const handleRoleChange = (userId: string, newRole: 'Admin' | 'User') => {
+    refetch();
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -270,7 +268,7 @@ export default function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <AdminSwitch user={user} />
+                      <AdminSwitch user={user} onRoleChange={handleRoleChange} />
                     </TableCell>
                     <TableCell>{formatDate(user.registrationDate)}</TableCell>
                     <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
