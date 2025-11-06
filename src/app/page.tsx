@@ -36,7 +36,13 @@ function HomeProducts() {
   if (isLoading) {
     return (
        <div className="container py-8 md:py-12">
-          {/* Skeletons for each product grid */}
+          {/* Skeletons for categories and product grids */}
+           <div className="mb-12 md:mb-16">
+              <h2 className="font-headline text-3xl md:text-4xl text-center mb-8"><Skeleton className="h-10 w-80 mx-auto" /></h2>
+               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+              </div>
+           </div>
           {[...Array(3)].map((_, index) => (
              <div key={index} className="mt-12 md:mt-16">
               <h2 className="font-headline text-3xl md:text-4xl mb-8"><Skeleton className="h-10 w-64" /></h2>
