@@ -102,9 +102,11 @@ export default function CheckoutPage() {
     const couponsRef = collection(firestore, 'coupons');
     const q = query(couponsRef, where('code', '==', couponCode.trim()));
 
-    getDocs(q).then(querySnapshot => {
+    try {
+        const querySnapshot = await getDocs(q);
+        
         if (querySnapshot.empty) {
-            toast({ variant: 'destructive', title: 'Coupon invalide' });
+            toast({ variant: 'destructive', title: 'Coupon invalide', description: "Ce code promo n'existe pas." });
             setAppliedCoupon(null);
             return;
         }
@@ -116,22 +118,27 @@ export default function CheckoutPage() {
         const expiry = new Date(couponData.expiryDate);
 
         if (!couponData.isActive || now > expiry) {
-            toast({ variant: 'destructive', title: 'Coupon expiré' });
+            toast({ variant: 'destructive', title: 'Coupon expiré', description: "Ce code promo n'est plus valide." });
             setAppliedCoupon(null);
             return;
         }
         
         setAppliedCoupon(couponData);
         toast({ title: `Coupon appliqué : ${couponData.code}` });
-    }).catch(error => {
+    } catch (error) {
         const contextualError = new FirestorePermissionError({
             operation: 'list',
             path: couponsRef.path,
         });
         errorEmitter.emit('permission-error', contextualError);
-    }).finally(() => {
+        toast({
+            variant: 'destructive',
+            title: 'Erreur',
+            description: "Impossible de vérifier le coupon pour le moment.",
+        });
+    } finally {
         setIsApplyingCoupon(false);
-    });
+    }
   };
 
 

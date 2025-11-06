@@ -140,6 +140,11 @@ function AdminSwitch({ user }: { user: FirestoreUser }) {
             requestResourceData: newAdminStatus ? { role: 'admin' } : { role: 'User' }
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({
+          variant: "destructive",
+          title: "Échec de la mise à jour du rôle",
+          description: "Vous n'avez peut-être pas la permission d'effectuer cette action.",
+        });
       })
       .finally(() => {
         setIsLoading(false);

@@ -74,6 +74,7 @@ function EditProductForm({ productId }: { productId: string }) {
       stock: values.stock,
       categoryId: values.categoryId,
       discount: values.discount,
+      // Keep existing values for fields not in the form
       images: product.images,
       sku: product.sku,
       barcode: product.barcode,
