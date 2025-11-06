@@ -334,7 +334,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Review",
       "type": "object",
-      "description": "Represents a user review for a product.",
+      "description": "Represents a user review for a product or recipe.",
       "properties": {
         "userId": {
           "type": "string",
@@ -596,3 +596,5 @@
     }
   }
 }
+
+    

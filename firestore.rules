@@ -308,7 +308,7 @@ service cloud.firestore {
   }
 
   function isNotUpdatingCalculatedFields() {
-    // Prevent client-side updates to calculated fields on products.
+    // Prevent client-side updates to calculated fields on products or recipes.
     let disallowedFields = ['averageRating', 'reviewCount'];
     let incomingKeys = request.resource.data.keys();
 
@@ -317,3 +317,5 @@ service cloud.firestore {
             request.resource.data.reviewCount == resource.data.reviewCount);
   }
 }
+
+    
