@@ -42,6 +42,12 @@ const paymentFormSchema = z.object({
     cvc: z.string().min(3, "CVC invalide.").max(4, "CVC invalide."),
 });
 
+type SiteSettings = {
+  deliveryFeeBase?: number;
+  deliveryFeeThreshold?: number;
+  deliveryFeeHigh?: number;
+};
+
 export default function CheckoutPage() {
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { user } = useUser();
@@ -61,11 +67,24 @@ export default function CheckoutPage() {
   
   const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
 
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings } = useDoc<SiteSettings>(settingsRef);
+
   const subTotalAfterDiscount = appliedCoupon
     ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
     : totalPrice;
     
-  const deliveryFee = subTotalAfterDiscount >= 4000 ? 200 : 100;
+  const deliveryFee = React.useMemo(() => {
+    const baseFee = settings?.deliveryFeeBase ?? 100;
+    const highFee = settings?.deliveryFeeHigh ?? 200;
+    const threshold = settings?.deliveryFeeThreshold ?? 4000;
+    
+    if (subTotalAfterDiscount >= threshold) {
+      return highFee;
+    }
+    return baseFee;
+  }, [subTotalAfterDiscount, settings]);
+
 
   const finalTotalPrice = subTotalAfterDiscount + deliveryFee;
 

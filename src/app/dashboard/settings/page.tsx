@@ -25,12 +25,16 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   siteName: z.string().min(2, { message: 'Le nom du site doit comporter au moins 2 caractères.' }),
   logoUrl: z.string().url().optional().or(z.literal('')),
   phone: z.string().min(10, { message: 'Le numéro de téléphone doit comporter au moins 10 chiffres.' }),
   address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
+  deliveryFeeBase: z.coerce.number().min(0),
+  deliveryFeeThreshold: z.coerce.number().min(0),
+  deliveryFeeHigh: z.coerce.number().min(0),
 });
 
 type SiteSettings = z.infer<typeof formSchema>;
@@ -54,6 +58,9 @@ export default function SettingsPage() {
       phone: '',
       address: '',
       logoUrl: '',
+      deliveryFeeBase: 100,
+      deliveryFeeThreshold: 4000,
+      deliveryFeeHigh: 200,
     },
   });
 
@@ -133,117 +140,159 @@ export default function SettingsPage() {
             </Button>
             <h1 className="font-headline text-3xl md:text-4xl">Paramètres</h1>
         </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Paramètres Généraux</CardTitle>
-          <CardDescription>Gérez les paramètres globaux de votre site.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
-              <FormField
-                control={form.control}
-                name="siteName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom du site</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="logoUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Logo</FormLabel>
-                    <FormControl>
-                       <div className="flex items-center gap-4">
-                        {logoPreview ? (
-                          <div className="relative group">
-                            <Image src={logoPreview} alt="Logo preview" width={128} height={40} className="border rounded-md bg-muted aspect-[16/5] object-contain p-1" />
-                             <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => {
-                                    setLogoPreview(null);
-                                    form.setValue('logoUrl', '');
-                                    if(fileInputRef.current) fileInputRef.current.value = '';
-                                }}
-                                >
-                                <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                           <div 
-                                className="w-32 aspect-[16/5] border-2 border-dashed rounded-md flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <ImageIcon className="h-8 w-8" />
-                           </div>
+        <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Paramètres Généraux</CardTitle>
+                    <CardDescription>Gérez les paramètres globaux de votre site.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 max-w-2xl">
+                    <FormField
+                        control={form.control}
+                        name="siteName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nom du site</FormLabel>
+                            <FormControl>
+                            <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
                         )}
-                        <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                           <Upload className="mr-2 h-4 w-4" />
-                            Télécharger le logo
-                        </Button>
-                         <Input 
-                            type="file" 
-                            className="hidden" 
-                            ref={fileInputRef} 
-                            onChange={handleFileChange}
-                            accept="image/png, image/jpeg, image/svg+xml"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    />
 
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Téléphone</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                        control={form.control}
+                        name="logoUrl"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Logo</FormLabel>
+                            <FormControl>
+                            <div className="flex items-center gap-4">
+                                {logoPreview ? (
+                                <div className="relative group">
+                                    <Image src={logoPreview} alt="Logo preview" width={128} height={40} className="border rounded-md bg-muted aspect-[16/5] object-contain p-1" />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => {
+                                            setLogoPreview(null);
+                                            form.setValue('logoUrl', '');
+                                            if(fileInputRef.current) fileInputRef.current.value = '';
+                                        }}
+                                        >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                ) : (
+                                <div 
+                                        className="w-32 aspect-[16/5] border-2 border-dashed rounded-md flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <ImageIcon className="h-8 w-8" />
+                                </div>
+                                )}
+                                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                    Télécharger le logo
+                                </Button>
+                                <Input 
+                                    type="file" 
+                                    className="hidden" 
+                                    ref={fileInputRef} 
+                                    onChange={handleFileChange}
+                                    accept="image/png, image/jpeg, image/svg+xml"
+                                />
+                            </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
 
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adresse</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Téléphone</FormLabel>
+                            <FormControl>
+                            <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
 
-              <div className="flex justify-end">
+                    <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Adresse</FormLabel>
+                            <FormControl>
+                            <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Paramètres de Livraison</CardTitle>
+                    <CardDescription>Configurez les frais de livraison pour votre boutique.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 max-w-2xl">
+                    <FormField
+                        control={form.control}
+                        name="deliveryFeeBase"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Frais de base</FormLabel>
+                            <FormControl><Input type="number" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="deliveryFeeThreshold"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Seuil de commande pour frais élevés</FormLabel>
+                            <FormControl><Input type="number" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="deliveryFeeHigh"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Frais pour commandes élevées</FormLabel>
+                            <FormControl><Input type="number" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+
+            <div className="flex justify-end">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Enregistrer les modifications
                 </Button>
-              </div>
+            </div>
             </form>
-          </Form>
-        </CardContent>
-      </Card>
+        </Form>
     </div>
   );
 }
