@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image as ImageIcon, X, ArrowLeft, Loader2 } from 'lucide-react';
+import { Upload, ImageIcon, X, ArrowLeft, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -135,7 +135,7 @@ export default function SettingsPage() {
         </div>
       <Card>
         <CardHeader>
-          <CardTitle>Paramètres</CardTitle>
+          <CardTitle>Paramètres Généraux</CardTitle>
           <CardDescription>Gérez les paramètres globaux de votre site.</CardDescription>
         </CardHeader>
         <CardContent>
