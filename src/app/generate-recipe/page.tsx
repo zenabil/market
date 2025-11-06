@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 
 
@@ -39,51 +39,57 @@ export default function GenerateRecipePage() {
             ingredients: '',
         },
     });
-    
-    // Create a query that depends on the missing products from the generated recipe.
-    const missingProductsQuery = useMemoFirebase(() => {
-        if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) {
-            return null;
-        }
-        // Firestore 'in' query has a limit of 30 items.
-        const productNames = generatedRecipe.missingProducts.slice(0, 30);
-        return query(collection(firestore, 'products'), where('name', 'in', productNames));
-    }, [firestore, generatedRecipe]);
 
-    const { data: foundProducts, isLoading: areProductsLoading } = useCollection<Product>(missingProductsQuery);
-
-    const handleAddMissingToCart = () => {
-        if (!generatedRecipe || !foundProducts) return;
+    const handleAddMissingToCart = async () => {
+        if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) return;
         setIsAddingToCart(true);
-
-        let itemsAddedCount = 0;
-        
-        foundProducts.forEach(product => {
-            addItem(product);
-            itemsAddedCount++;
-        });
-
-        if (itemsAddedCount > 0) {
+    
+        try {
+            const productNames = generatedRecipe.missingProducts.map(name => name.toLowerCase());
+            const productsRef = collection(firestore, 'products');
+            const q = query(productsRef);
+    
+            const querySnapshot = await getDocs(q);
+            const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    
+            const foundProducts = allProducts.filter(p => productNames.includes(p.name.toLowerCase()));
+            const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
+            
+            let itemsAddedCount = 0;
+            foundProducts.forEach(product => {
+                addItem(product);
+                itemsAddedCount++;
+            });
+    
+            if (itemsAddedCount > 0) {
+                toast({
+                    title: 'Articles ajoutés au panier',
+                    description: `${itemsAddedCount} ingrédient(s) manquant(s) ont été ajoutés à votre panier.`
+                });
+            }
+            
+            const notFoundProducts = generatedRecipe.missingProducts.filter(
+                name => !foundProductNames.includes(name.toLowerCase())
+            );
+    
+            if (notFoundProducts.length > 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Produits non trouvés',
+                    description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+                });
+            }
+    
+        } catch (error) {
+            console.error("Error adding missing products to cart:", error);
             toast({
-                title: 'Articles ajoutés au panier',
-                description: `${itemsAddedCount} ingrédient(s) manquant(s) ont été ajoutés à votre panier.`
-            });
-        }
-        
-        const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
-        const notFoundProducts = generatedRecipe.missingProducts.filter(
-            name => !foundProductNames.includes(name.toLowerCase())
-        );
-
-        if (notFoundProducts.length > 0) {
-             toast({
                 variant: 'destructive',
-                title: 'Produits non trouvés',
-                description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+                title: 'Erreur',
+                description: "Impossible d'ajouter les produits au panier."
             });
+        } finally {
+            setIsAddingToCart(false);
         }
-
-        setIsAddingToCart(false);
     };
 
 
@@ -230,8 +236,8 @@ export default function GenerateRecipePage() {
                                         <ul className="space-y-1 list-disc pl-5 text-sm text-muted-foreground">
                                             {generatedRecipe.missingProducts.map((p, i) => <li key={i}>{p}</li>)}
                                         </ul>
-                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart || areProductsLoading}>
-                                            {(isAddingToCart || areProductsLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart}>
+                                            {isAddingToCart && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             <ShoppingCart className="mr-2 h-4 w-4" />
                                             Ajouter au panier
                                         </Button>
