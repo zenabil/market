@@ -26,6 +26,7 @@ import { Loader2 } from 'lucide-react';
 import { doc, setDoc, getDoc, writeBatch } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
+import Image from 'next/image';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -235,208 +236,232 @@ export default function LoginPage() {
 
   if (isUserLoading || isRoleLoading || user) {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
-             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+            <div className="flex items-center justify-center py-12">
+                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+            <div className="hidden bg-muted lg:block">
+                <Image
+                    src="https://images.unsplash.com/photo-1588964895597-cf29a3a954a2?q=80&w=1974&auto=format&fit=crop"
+                    alt="Image"
+                    width="1920"
+                    height="1080"
+                    className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                />
+            </div>
         </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className='absolute top-8 left-8'>
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+      <div className="flex items-center justify-center py-12">
+         <div className='absolute top-8 left-8'>
             <Link href="/" >
               <Logo className="h-8" />
             </Link>
         </div>
-      <Tabs defaultValue="login" className="w-[400px]">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Connexion</TabsTrigger>
-          <TabsTrigger value="signup">Inscription</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>Connexion</CardTitle>
-              <CardDescription>Connectez-vous à votre compte pour continuer.</CardDescription>
-            </CardHeader>
-            <CardContent>
-               <div className='space-y-4'>
-                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
-                    <GoogleIcon className="mr-2 h-5 w-5" />
-                    Continuer avec Google
-                 </Button>
+        <div className="mx-auto grid w-[350px] gap-6">
+           <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Connexion</TabsTrigger>
+            <TabsTrigger value="signup">Inscription</TabsTrigger>
+            </TabsList>
+            <TabsContent value="login">
+                <Card className="border-none shadow-none">
+                    <CardHeader className="px-0">
+                    <CardTitle>Connexion</CardTitle>
+                    <CardDescription>Connectez-vous à votre compte pour continuer.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                    <div className='space-y-4'>
+                        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+                            <GoogleIcon className="mr-2 h-5 w-5" />
+                            Continuer avec Google
+                        </Button>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Ou continuer avec
-                    </span>
-                  </div>
-                </div>
+                        <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                            Ou continuer avec
+                            </span>
+                        </div>
+                        </div>
 
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mot de passe</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <div className="text-right text-sm">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="link" className="p-0 h-auto">Mot de passe oublié?</Button>
-                            </DialogTrigger>
-                             <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
-                                    <DialogDescription>Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.</DialogDescription>
-                                </DialogHeader>
-                                <Form {...resetPasswordForm}>
-                                <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
-                                    <FormField
-                                        control={resetPasswordForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl><Input type="email" {...field} /></FormControl>
-                                            <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                                </Form>
-                                <DialogFooter>
-                                    <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
-                                    <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
-                                        {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Envoyer l'email
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                        <Form {...loginForm}>
+                        <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                            <FormField
+                            control={loginForm.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField
+                            control={loginForm.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Mot de passe</FormLabel>
+                                <FormControl>
+                                    <Input type="password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <div className="text-right text-sm">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="link" className="p-0 h-auto">Mot de passe oublié?</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+                                            <DialogDescription>Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.</DialogDescription>
+                                        </DialogHeader>
+                                        <Form {...resetPasswordForm}>
+                                        <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
+                                            <FormField
+                                                control={resetPasswordForm.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl><Input type="email" {...field} /></FormControl>
+                                                    <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                        </Form>
+                                        <DialogFooter>
+                                            <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
+                                            <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
+                                                {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Envoyer l'email
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Se connecter
+                            </Button>
+                        </form>
+                        </Form>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Se connecter
-                      </Button>
-                  </form>
-                </Form>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="signup">
-          <Card>
-            <CardHeader>
-              <CardTitle>Créer un compte</CardTitle>
-              <CardDescription>Rejoignez-nous dès aujourd'hui !</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
-                    <GoogleIcon className="mr-2 h-5 w-5" />
-                    Continuer avec Google
-                 </Button>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="signup">
+                <Card className="border-none shadow-none">
+                    <CardHeader className="px-0">
+                        <CardTitle>Créer un compte</CardTitle>
+                        <CardDescription>Rejoignez-nous dès aujourd'hui !</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                    <div className='space-y-4'>
+                        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+                            <GoogleIcon className="mr-2 h-5 w-5" />
+                            Continuer avec Google
+                        </Button>
 
-                 <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Ou créer un compte avec
-                    </span>
-                  </div>
-                </div>
+                        <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                            Ou créer un compte avec
+                            </span>
+                        </div>
+                        </div>
 
-                <Form {...signupForm}>
-                  <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                    <FormField
-                      control={signupForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nom</FormLabel>
-                          <FormControl>
-                            <Input type="text" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signupForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signupForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mot de passe</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField control={signupForm.control} name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirmer le mot de passe</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      S'inscrire
-                    </Button>
-                  </form>
-                </Form>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                        <Form {...signupForm}>
+                        <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                            <FormField
+                            control={signupForm.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Nom</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField
+                            control={signupForm.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField
+                            control={signupForm.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Mot de passe</FormLabel>
+                                <FormControl>
+                                    <Input type="password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField control={signupForm.control} name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Confirmer le mot de passe</FormLabel>
+                                <FormControl>
+                                    <Input type="password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            S'inscrire
+                            </Button>
+                        </form>
+                        </Form>
+                    </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            </Tabs>
+        </div>
+      </div>
+      <div className="hidden bg-muted lg:block">
+        <Image
+          src="https://images.unsplash.com/photo-1588964895597-cf29a3a954a2?q=80&w=1974&auto=format&fit=crop"
+          alt="Image d'une épicerie avec des produits frais"
+          width="1920"
+          height="1080"
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
     </div>
   );
 }
