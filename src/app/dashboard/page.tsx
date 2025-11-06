@@ -197,7 +197,7 @@ export default function DashboardPage() {
     }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
     // Show a loading indicator while we verify auth and admin status.
-    if (isUserLoading || isRoleLoading || !isAdmin) {
+    if (isUserLoading || isRoleLoading || (user && !isAdmin)) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
                 <div className="flex items-center gap-2 text-muted-foreground">

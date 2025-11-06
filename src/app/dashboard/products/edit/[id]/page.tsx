@@ -72,11 +72,11 @@ function EditProductForm({ productId }: { productId: string }) {
         ...product, // Start with existing product data
         ...values // Overwrite with form values
     };
-    // Remove id from the data object as it's not a field in the document
-    delete (productData as any).id;
+    
+    // Remove the client-side 'id' property before sending to Firestore
+    const { id, ...dataToUpdate } = productData;
 
-
-    updateDoc(productRef, productData)
+    updateDoc(productRef, dataToUpdate)
         .then(() => {
             toast({
                 title: 'Produit mis à jour',
@@ -89,7 +89,7 @@ function EditProductForm({ productId }: { productId: string }) {
                 new FirestorePermissionError({
                     path: productRef.path,
                     operation: 'update',
-                    requestResourceData: productData,
+                    requestResourceData: dataToUpdate,
                 })
             );
         })

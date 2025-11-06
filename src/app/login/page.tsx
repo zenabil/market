@@ -24,6 +24,7 @@ import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
 import { doc, setDoc, getDocs, collection, writeBatch, query, limit, updateDoc } from 'firebase/firestore';
+import { useUserRole } from '@/hooks/use-user-role';
 
 
 const loginSchema = z.object({
@@ -45,6 +46,7 @@ const signupSchema = z.object({
 export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
+  const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -62,10 +64,14 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      router.push('/dashboard');
+    if (!isUserLoading && !isRoleLoading && user) {
+        if (isAdmin) {
+          router.replace('/dashboard');
+        } else {
+          router.replace('/dashboard/orders');
+        }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
   
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
@@ -78,7 +84,7 @@ export default function LoginPage() {
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: error.message,
+        description: "L'email ou le mot de passe est incorrect.",
       });
       // Clear password field on failed login attempt
       loginForm.setValue('password', '');
@@ -155,7 +161,7 @@ export default function LoginPage() {
           toast({
               variant: 'destructive',
               title: 'Erreur',
-              description: error.message,
+              description: "Cet email est déjà utilisé.",
           });
       }
     } finally {

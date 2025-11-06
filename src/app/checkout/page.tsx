@@ -98,6 +98,7 @@ export default function CheckoutPage() {
   const handleApplyCoupon = async () => {
     if (!couponCode.trim() || !firestore) return;
     setIsApplyingCoupon(true);
+    setAppliedCoupon(null); // Reset previous coupon
 
     const couponsRef = collection(firestore, 'coupons');
     const q = query(couponsRef, where('code', '==', couponCode.trim()));
@@ -107,7 +108,6 @@ export default function CheckoutPage() {
         
         if (querySnapshot.empty) {
             toast({ variant: 'destructive', title: 'Coupon invalide', description: "Ce code promo n'existe pas ou a été mal saisi." });
-            setAppliedCoupon(null);
             return;
         }
 
@@ -119,23 +119,20 @@ export default function CheckoutPage() {
 
         if (!couponData.isActive || now > expiry) {
             toast({ variant: 'destructive', title: 'Coupon expiré ou inactif', description: "Ce code promo n'est plus valide." });
-            setAppliedCoupon(null);
             return;
         }
         
         setAppliedCoupon(couponData);
         toast({ title: `Coupon appliqué : ${couponData.code}` });
     } catch (error) {
-        // Emit a detailed permission error for the developer overlay to catch
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'list',
             path: couponsRef.path,
         }));
-        // Show a generic message to the user, the dev overlay will show the details
         toast({
             variant: 'destructive',
             title: 'Erreur de coupon',
-            description: "Impossible de vérifier le coupon pour le moment.",
+            description: "Impossible de vérifier le coupon. Vous n'avez peut-être pas la permission.",
         });
     } finally {
         setIsApplyingCoupon(false);
