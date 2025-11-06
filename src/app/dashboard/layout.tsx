@@ -22,7 +22,6 @@ import {
   ShoppingBasket,
   Ticket,
   Percent,
-  Gem,
   Settings,
   LogOut,
   ChevronLeft,

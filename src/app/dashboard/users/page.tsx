@@ -6,18 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, query, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
+import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Gem, Edit, Loader2, Home } from 'lucide-react';
+import { Gem, Loader2, Home } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
   DialogClose,
   DialogTrigger,
