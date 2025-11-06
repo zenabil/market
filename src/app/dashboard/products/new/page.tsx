@@ -22,9 +22,10 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { generateProductDescription } from '@/ai/flows/generate-product-description';
 
 
 const formSchema = z.object({
@@ -73,15 +74,36 @@ export default function NewProductPage() {
         createdAt: new Date().toISOString(),
     };
 
-    addDoc(collection(firestore, 'products'), productData)
-      .then((docRef) => {
+    try {
+        const docRef = await addDoc(collection(firestore, 'products'), productData);
         toast({
             title: 'Produit créé',
-            description: `Le produit "${values.name}" a été ajouté. Vous pouvez maintenant ajouter plus de détails.`,
+            description: `Le produit "${values.name}" a été ajouté. Génération de la description...`,
         });
+
+        // Generate description in the background
+        const categoryName = categories?.find(c => c.id === values.categoryId)?.name || '';
+        generateProductDescription({
+            productName: values.name,
+            productCategory: categoryName,
+            productDetails: '',
+        }).then(async (result) => {
+            if (result.description) {
+                const productDocRef = doc(firestore, 'products', docRef.id);
+                await updateDoc(productDocRef, { description: result.description });
+                toast({
+                    title: 'Description générée!',
+                    description: `La description pour "${values.name}" a été générée par l'IA.`,
+                });
+            }
+        }).catch(err => {
+            console.error("AI description generation failed:", err);
+            // Non-critical error, so we don't need to show a failure toast to the user
+        });
+
         router.push(`/dashboard/products/edit/${docRef.id}`);
-      })
-      .catch(error => {
+
+    } catch (error) {
         errorEmitter.emit(
             'permission-error',
             new FirestorePermissionError({
@@ -90,10 +112,9 @@ export default function NewProductPage() {
                 requestResourceData: productData,
             })
         );
-      })
-      .finally(() => {
+    } finally {
         setIsSaving(false);
-      });
+    }
   }
 
   if (isRoleLoading || !isAdmin) {
