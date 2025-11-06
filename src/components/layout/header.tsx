@@ -62,11 +62,9 @@ function UserNav() {
 
   if (!authUser) {
     return (
-       <div className='flex items-center gap-2'>
-        <Button asChild>
-          <Link href="/login">Connexion / Inscription</Link>
-        </Button>
-      </div>
+      <Button asChild>
+        <Link href="/login">Connexion / Inscription</Link>
+      </Button>
     );
   }
 
