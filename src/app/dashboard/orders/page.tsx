@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useOrders } from '@/hooks/use-orders';
 import { Button } from '@/components/ui/button';
+import { createNotification } from '@/lib/services/notification';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -75,6 +76,10 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                     title: 'Statut de la commande mis à jour',
                     description: `La commande ...${order.id.slice(-6)} est maintenant ${statusTranslations[newStatus]}.`,
                 });
+                 createNotification(firestore, order.userId, {
+                    message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
+                    link: `/dashboard/orders/${order.id}`,
+                 }).catch(console.error);_
             })
             .catch(error => {
                 errorEmitter.emit(
@@ -271,3 +276,5 @@ export default function OrdersPage() {
         </div>
     );
 }
+
+    

@@ -488,6 +488,36 @@
         }
       },
       "required": ["name", "email", "subject", "message", "createdAt"]
+    },
+    "Notification": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Notification",
+        "type": "object",
+        "description": "Represents a notification for a user.",
+        "properties": {
+            "userId": {
+                "type": "string",
+                "description": "The ID of the user this notification is for."
+            },
+            "message": {
+                "type": "string",
+                "description": "The content of the notification."
+            },
+            "link": {
+                "type": "string",
+                "description": "A URL to navigate to when the notification is clicked."
+            },
+            "isRead": {
+                "type": "boolean",
+                "description": "Whether the user has read the notification."
+            },
+            "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp when the notification was created."
+            }
+        },
+        "required": ["userId", "message", "isRead", "createdAt"]
     }
   },
   "auth": {
@@ -530,6 +560,10 @@
         "schema": { "$ref": "#/entities/ShoppingList" },
         "description": "Stores a user's shopping lists. Only accessible by the user who owns the list."
     },
+    "/users/{userId}/notifications/{notificationId}": {
+        "schema": { "$ref": "#/entities/Notification" },
+        "description": "Stores notifications for a specific user. Only accessible by that user."
+    },
     "/roles_admin/{userId}": {
       "schema": {
         "type": "object",
@@ -562,3 +596,5 @@
     }
   }
 }
+
+    

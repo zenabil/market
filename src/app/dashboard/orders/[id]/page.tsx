@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase, useCollectionGroup, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
-import { doc, collection, query, where, documentId, collectionGroup, updateDoc } from 'firebase/firestore';
+import { doc, collection, query, where, documentId, collectionGroup, updateDoc, addDoc } from 'firebase/firestore';
 import type { Order, Product, User as FirestoreUser } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { AddressDialog } from '@/components/dashboard/address-dialog';
+import { createNotification } from '@/lib/services/notification';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -84,6 +85,10 @@ function OrderDetails() {
                     title: 'Statut de la commande mis à jour',
                     description: `La commande est maintenant ${statusTranslations[newStatus]}.`,
                 });
+                 createNotification(firestore, order.userId, {
+                    message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
+                    link: `/dashboard/orders/${order.id}`,
+                 }).catch(console.error);
             })
             .catch(error => {
                 errorEmitter.emit(
@@ -292,3 +297,5 @@ function OrderDetails() {
 export default function OrderDetailsPage() {
     return <OrderDetails />;
 }
+
+    

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays } from 'lucide-react';
+import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
-import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase, useCollection, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
@@ -23,10 +23,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { User as FirestoreUser } from '@/lib/placeholder-data';
-import { doc } from 'firebase/firestore';
+import type { User as FirestoreUser, Notification } from '@/lib/placeholder-data';
+import { doc, collection, query, orderBy, writeBatch } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
-
+import { Separator } from '../ui/separator';
+import { ScrollArea } from '../ui/scroll-area';
 
 const navLinks = [
   { key: 'Accueil', href: '/' },
@@ -37,6 +38,95 @@ const navLinks = [
   { key: 'À Propos', href: '/about' },
   { key: 'Contact', href: '/contact' },
 ];
+
+function NotificationBell() {
+    const { user } = useUser();
+    const firestore = useFirestore();
+    const notificationsQuery = useMemoFirebase(() => {
+        if (!user || !firestore) return null;
+        return query(collection(firestore, `users/${user.uid}/notifications`), orderBy('createdAt', 'desc'));
+    }, [user, firestore]);
+
+    const { data: notifications } = useCollection<Notification>(notificationsQuery);
+    const unreadCount = notifications?.filter(n => !n.isRead).length || 0;
+
+    const handleMarkAllAsRead = async () => {
+        if (!firestore || !user || !notifications || unreadCount === 0) return;
+
+        const batch = writeBatch(firestore);
+        notifications.forEach(notif => {
+            if (!notif.isRead) {
+                const notifRef = doc(firestore, `users/${user.uid}/notifications`, notif.id);
+                batch.update(notifRef, { isRead: true });
+            }
+        });
+
+        try {
+            await batch.commit();
+        } catch (error) {
+            console.error("Failed to mark notifications as read", error);
+        }
+    };
+
+    const timeAgo = (dateString: string) => {
+        const date = new Date(dateString);
+        const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " a";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " m";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " j";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " h";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " min";
+        return Math.floor(seconds) + " s";
+    };
+
+    if (!user) return null;
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+                            {unreadCount}
+                        </span>
+                    )}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 md:w-96" align="end">
+                <DropdownMenuLabel className="flex justify-between items-center">
+                    Notifications
+                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>Marquer comme lu</Button>}
+                </DropdownMenuLabel>
+                <Separator />
+                <ScrollArea className="h-80">
+                    {notifications && notifications.length > 0 ? (
+                        notifications.map(notif => (
+                            <DropdownMenuItem key={notif.id} asChild>
+                                <Link href={notif.link || '#'} className={cn("flex items-start gap-3 whitespace-normal", !notif.isRead && "bg-primary/10")}>
+                                     {!notif.isRead && <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
+                                    <div className={cn("flex-grow", notif.isRead && "pl-4")}>
+                                        <p className="text-sm">{notif.message}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{timeAgo(notif.createdAt)}</p>
+                                    </div>
+                                </Link>
+                            </DropdownMenuItem>
+                        ))
+                    ) : (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            Vous n'avez aucune notification.
+                        </div>
+                    )}
+                </ScrollArea>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
 
 function UserNav() {
   const { user: authUser, isUserLoading } = useUser();
@@ -207,6 +297,7 @@ export default function Header() {
             </form>
           </div>
           <ThemeSwitcher />
+          <NotificationBell />
           <UserNav />
           <CartIcon onClick={() => setIsCartOpen(true)} />
         </div>
@@ -215,3 +306,5 @@ export default function Header() {
     </header>
   );
 }
+
+    

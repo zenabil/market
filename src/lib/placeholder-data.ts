@@ -98,6 +98,15 @@ export type Recipe = {
   reviewCount?: number;
 }
 
+export type Notification = {
+    id: string;
+    userId: string;
+    message: string;
+    link?: string;
+    isRead: boolean;
+    createdAt: string; // ISO string
+};
+
 
 // Placeholder data is no longer the source of truth for products, categories, or users.
 // It will be fetched from Firestore. This array can be kept for reference or removed.
