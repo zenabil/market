@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
-import { ShoppingCart, Plus, Minus, Star, Heart } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, where, limit, documentId } from 'firebase/firestore';
@@ -19,6 +19,7 @@ import StarRating from '@/components/product/star-rating';
 import ProductReviews from '@/components/product/product-reviews';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { cn } from '@/lib/utils';
+import { useComparison } from '@/hooks/use-comparison';
 
 
 function ProductDetails({ productId }: { productId: string }) {
@@ -27,6 +28,7 @@ function ProductDetails({ productId }: { productId: string }) {
   const firestore = useFirestore();
   const { user } = useUser();
   const { wishlist, toggleWishlist, isWishlistLoading } = useWishlist();
+  const { items: comparisonItems, toggleComparison, MAX_COMPARISON_ITEMS } = useComparison();
 
   const productRef = useMemoFirebase(() => {
       if (!firestore || !productId) return null;
@@ -35,6 +37,7 @@ function ProductDetails({ productId }: { productId: string }) {
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const isWishlisted = !!wishlist?.find(item => item.id === productId);
+  const isComparing = !!comparisonItems.find(item => item.id === productId);
 
   useEffect(() => {
     if (product) {
@@ -127,6 +130,10 @@ function ProductDetails({ productId }: { productId: string }) {
     }
     toggleWishlist(productId);
   };
+  
+  const handleCompareToggle = () => {
+    toggleComparison(product);
+  };
 
   const updateQuantity = (newQuantity: number) => {
     if (newQuantity > 0 && newQuantity <= product.stock) {
@@ -183,7 +190,16 @@ function ProductDetails({ productId }: { productId: string }) {
           </div>
           <Separator className="my-6" />
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          <div className="mt-auto pt-8">
+          <div className="mt-auto pt-8 space-y-4">
+             <Button 
+                variant="outline"
+                className="w-full"
+                onClick={handleCompareToggle}
+                disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
+             >
+                <GitCompareArrows className={cn("mr-2 h-4 w-4", isComparing && "text-primary")} />
+                {isComparing ? 'Retirer de la comparaison' : 'Comparer ce produit'}
+             </Button>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Button

@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, GitCompareArrows } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { useWishlist } from '@/hooks/use-wishlist';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import StarRating from './star-rating';
+import { useComparison } from '@/hooks/use-comparison';
 
 interface ProductCardProps {
   product: Product;
@@ -24,8 +25,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const { user } = useUser();
   const { wishlist, toggleWishlist, isWishlistLoading } = useWishlist();
+  const { items: comparisonItems, toggleComparison, MAX_COMPARISON_ITEMS } = useComparison();
 
   const isWishlisted = !!wishlist?.find(item => item.id === product.id);
+  const isComparing = !!comparisonItems.find(item => item.id === product.id);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -50,6 +53,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
     toggleWishlist(product.id);
   };
+  
+  const handleCompareToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleComparison(product);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
@@ -69,15 +78,31 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="object-cover"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute top-2 left-2 bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75"
-              onClick={handleWishlistToggle}
-              disabled={isWishlistLoading}
-            >
-              <Heart className={cn("h-5 w-5 text-muted-foreground", isWishlisted && "fill-destructive text-destructive")} />
-            </Button>
+            <div className="absolute top-2 left-2 flex flex-col gap-2">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75 h-8 w-8"
+                  onClick={handleWishlistToggle}
+                  disabled={isWishlistLoading}
+                  title={isWishlisted ? 'Retirer de la liste de souhaits' : 'Ajouter à la liste de souhaits'}
+                >
+                  <Heart className={cn("h-4 w-4 text-muted-foreground", isWishlisted && "fill-destructive text-destructive")} />
+                </Button>
+                 <Button
+                  size="icon"
+                  variant="ghost"
+                  className={cn(
+                      "bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75 h-8 w-8",
+                      isComparing && "bg-primary/80 hover:bg-primary"
+                    )}
+                  onClick={handleCompareToggle}
+                  disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
+                  title={isComparing ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'}
+                >
+                  <GitCompareArrows className={cn("h-4 w-4", isComparing ? "text-primary-foreground" : "text-muted-foreground")} />
+                </Button>
+            </div>
             {product.discount > 0 && (
               <Badge variant="destructive" className="absolute top-2 right-2">
                 -{product.discount}%

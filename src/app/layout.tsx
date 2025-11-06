@@ -11,6 +11,8 @@ import { FirebaseClientProvider } from '@/firebase';
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
+import { ComparisonProvider } from '@/contexts/comparison-provider';
+import ComparisonBar from '@/components/product/comparison-bar';
 
 // Initialize a temporary Firebase app instance for server-side data fetching
 if (!getApps().length) {
@@ -63,11 +65,14 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <CartProvider>
             <FirebaseClientProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <Toaster />
-              <AiChatbot />
+                <ComparisonProvider>
+                    <Header />
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                    <Toaster />
+                    <AiChatbot />
+                    <ComparisonBar />
+                </ComparisonProvider>
             </FirebaseClientProvider>
           </CartProvider>
         </ThemeProvider>

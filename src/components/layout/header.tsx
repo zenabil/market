@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays, Bell } from 'lucide-react';
+import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays, Bell, GitCompareArrows } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ const navLinks = [
   { key: 'Accueil', href: '/' },
   { key: 'Produits', href: '/products' },
   { key: 'Recettes', href: '/recipes' },
+  { key: 'Comparer', href: '/compare', icon: GitCompareArrows },
   { key: 'Générer une recette', href: '/generate-recipe', icon: Wand2 },
   { key: 'Planificateur de Repas', href: '/meal-planner', icon: CalendarDays },
   { key: 'À Propos', href: '/about' },
