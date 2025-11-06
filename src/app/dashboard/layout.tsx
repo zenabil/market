@@ -30,6 +30,7 @@ import {
   Heart,
   BookOpen,
   List,
+  Mail,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -69,6 +70,11 @@ const adminMenuItems = [
     key: 'Utilisateurs',
     href: '/dashboard/users',
     icon: Users,
+  },
+    {
+    key: 'Messages',
+    href: '/dashboard/messages',
+    icon: Mail,
   },
   {
     key: 'Coupons',
