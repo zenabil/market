@@ -21,7 +21,7 @@ import { useCategories } from '@/hooks/use-categories';
 import type { Product } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, PlusCircle, Trash2, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Loader2, PlusCircle, Trash2, ImageIcon, Star } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -30,6 +30,7 @@ import { notFound, useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/use-user-role';
 import Image from 'next/image';
 import { ImageDialog } from '@/components/dashboard/image-dialog';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -57,7 +58,7 @@ function EditProductForm({ productId }: { productId: string }) {
     resolver: zodResolver(formSchema),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
       control: form.control,
       name: "images"
   });
@@ -152,6 +153,13 @@ function EditProductForm({ productId }: { productId: string }) {
     }
   }
 
+  const handleSetPrimaryImage = (index: number) => {
+    if (index > 0) {
+      move(index, 0);
+      toast({ title: "Image principale mise à jour" });
+    }
+  };
+
   const isLoading = isLoadingProduct || areCategoriesLoading || isRoleLoading;
   
   if (isLoading || !isAdmin) {
@@ -231,9 +239,28 @@ function EditProductForm({ productId }: { productId: string }) {
                     {fields.map((field, index) => (
                       <div key={field.id} className="relative group aspect-square">
                         <Image src={form.watch(`images.${index}`)} alt={`Aperçu ${index}`} layout="fill" className="object-cover rounded-md border" />
-                        <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => remove(index)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1'>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-white hover:bg-white/20"
+                                onClick={() => handleSetPrimaryImage(index)}
+                                title="Définir comme image principale"
+                            >
+                                <Star className={cn("h-5 w-5", index === 0 && "fill-yellow-400 text-yellow-400")} />
+                            </Button>
+                             <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-white hover:bg-white/20 hover:text-destructive"
+                                onClick={() => remove(index)}
+                                title="Supprimer l'image"
+                            >
+                                <Trash2 className="h-5 w-5" />
+                            </Button>
+                        </div>
                       </div>
                     ))}
                     <ImageDialog onImageAdd={(url) => append(url)}>
