@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Wand2, Loader2, Clock, Users, Soup, Sparkles, ChefHat, ShoppingCart, Image as ImageIcon } from 'lucide-react';
+import { Wand2, Loader2, Clock, Users, Soup, Sparkles, ChefHat, ShoppingCart } from 'lucide-react';
 import { generateRecipeFromIngredients, type GenerateRecipeFromIngredientsOutput } from '@/ai/flows/generate-recipe-from-ingredients';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -45,14 +45,16 @@ export default function GenerateRecipePage() {
         setIsAddingToCart(true);
     
         try {
-            const productNames = generatedRecipe.missingProducts.map(name => name.toLowerCase());
+            const productNames = generatedRecipe.missingProducts;
+            if (productNames.length === 0) return;
+    
+            // Firestore 'in' query is limited to 30 items, so we slice the array.
+            const productsToQuery = productNames.slice(0, 30);
             const productsRef = collection(firestore, 'products');
-            const q = query(productsRef);
+            const q = query(productsRef, where('name', 'in', productsToQuery));
     
             const querySnapshot = await getDocs(q);
-            const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    
-            const foundProducts = allProducts.filter(p => productNames.includes(p.name.toLowerCase()));
+            const foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
             
             let itemsAddedCount = 0;
@@ -68,7 +70,7 @@ export default function GenerateRecipePage() {
                 });
             }
             
-            const notFoundProducts = generatedRecipe.missingProducts.filter(
+            const notFoundProducts = productNames.filter(
                 name => !foundProductNames.includes(name.toLowerCase())
             );
     
@@ -225,11 +227,11 @@ export default function GenerateRecipePage() {
                                     </ul>
                                 </CardContent>
                             </Card>
-                            {generatedRecipe.missingProducts.length > 0 && (
+                            {generatedRecipe.missingProducts && generatedRecipe.missingProducts.length > 0 && (
                                  <Card className="mt-4 bg-primary/10 border-primary/50">
                                     <CardHeader>
                                         <CardTitle className="text-base flex items-center gap-2">
-                                            Ingrédients manquants
+                                            Ingrédients manquants suggérés
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>

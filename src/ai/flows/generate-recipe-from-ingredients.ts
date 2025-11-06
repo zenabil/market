@@ -25,7 +25,7 @@ const GenerateRecipeFromIngredientsOutputSchema = z.object({
   servings: z.number().describe('The number of servings the recipe yields.'),
   ingredients: z.array(z.string()).describe('The full list of ingredients required for the recipe in French.'),
   instructions: z.array(z.string()).describe('The step-by-step instructions to prepare the dish in French.'),
-  missingProducts: z.array(z.string()).describe('A list of products the user might need to buy for this recipe.'),
+  missingProducts: z.array(z.string()).describe('A list of key products the user might need to buy for this recipe. Example: ["Poulet", "Huile d\'olive", "Tomates"].'),
 });
 export type GenerateRecipeFromIngredientsOutput = z.infer<typeof GenerateRecipeFromIngredientsOutputSchema>;
 
@@ -49,7 +49,7 @@ const recipePrompt = ai.definePrompt({
       servings: z.number().describe('The number of servings the recipe yields.'),
       ingredients: z.array(z.string()).describe('The full list of ingredients required for the recipe in French.'),
       instructions: z.array(z.string()).describe('The step-by-step instructions to prepare the dish in French.'),
-      missingProducts: z.array(z.string()).describe('A list of products the user might need to buy for this recipe.'),
+      missingProducts: z.array(z.string()).describe('A list of key products the user might need to buy for this recipe. This list should only contain the product names, for example: ["Poitrine de poulet", "Huile d\'olive", "Tomates"].'),
     }) 
   },
   prompt: `Vous êtes un chef expert pour le "Supermarché Intelligent de Tlemcen", spécialisé dans la cuisine algérienne et méditerranéenne. Un utilisateur dispose des ingrédients suivants: {{{ingredients}}}.
