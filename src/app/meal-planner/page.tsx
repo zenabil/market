@@ -28,6 +28,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { useFirestore } from '@/firebase';
+import { collection, getDocs, query } from 'firebase/firestore';
+import type { Product } from '@/lib/placeholder-data';
+import { useCart } from '@/hooks/use-cart';
 
 const formSchema = z.object({
   diet: z.string().optional(),
@@ -37,7 +41,10 @@ const formSchema = z.object({
 export default function MealPlannerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
+  const firestore = useFirestore();
+  const { addItem } = useCart();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,6 +53,68 @@ export default function MealPlannerPage() {
       diet: 'balanced',
     },
   });
+
+  const handleAddAllToCart = async () => {
+    if (!firestore || !mealPlan?.shoppingList) return;
+    setIsAddingToCart(true);
+
+    const allItems = mealPlan.shoppingList.flatMap(category => category.items.map(item => item.toLowerCase()));
+    if (allItems.length === 0) {
+        setIsAddingToCart(false);
+        return;
+    }
+
+    try {
+        const productsRef = collection(firestore, 'products');
+        const q = query(productsRef);
+        const querySnapshot = await getDocs(q);
+        const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
+        const foundProducts: Product[] = [];
+        allItems.forEach(itemName => {
+            const found = allProducts.find(p => p.name.toLowerCase() === itemName);
+            if (found) {
+                foundProducts.push(found);
+            }
+        });
+        
+        const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
+        
+        let itemsAddedCount = 0;
+        foundProducts.forEach(product => {
+            addItem(product);
+            itemsAddedCount++;
+        });
+
+        if (itemsAddedCount > 0) {
+            toast({
+                title: 'Ingrédients ajoutés au panier',
+                description: `${itemsAddedCount} ingrédient(s) ont été ajoutés à votre panier.`
+            });
+        }
+        
+        const notFoundProducts = allItems.filter(name => !foundProductNames.includes(name));
+
+        if (notFoundProducts.length > 0) {
+             toast({
+                variant: 'destructive',
+                title: 'Certains ingrédients non trouvés',
+                description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+            });
+        }
+
+    } catch (error) {
+        console.error("Error adding all items to cart:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erreur',
+            description: "Impossible d'ajouter les ingrédients au panier."
+        });
+    } finally {
+        setIsAddingToCart(false);
+    }
+  };
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -187,9 +256,15 @@ export default function MealPlannerPage() {
                 </Tabs>
             </div>
             <div>
-                 <h2 className="font-headline text-3xl mb-4 flex items-center gap-2">
-                    <ShoppingCart className="h-7 w-7"/> Liste de Courses
-                 </h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                    <h2 className="font-headline text-3xl flex items-center gap-2">
+                        <ShoppingCart className="h-7 w-7"/> Liste de Courses
+                    </h2>
+                     <Button size="sm" onClick={handleAddAllToCart} disabled={isAddingToCart}>
+                        {isAddingToCart ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShoppingCart className="mr-2 h-4 w-4"/>}
+                         Ajouter tout au panier
+                     </Button>
+                 </div>
                  <Card>
                     <CardContent className="pt-6 space-y-4 max-h-[500px] overflow-y-auto">
                         {mealPlan.shoppingList.map((category, index) => (
