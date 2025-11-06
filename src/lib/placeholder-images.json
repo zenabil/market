@@ -133,6 +133,30 @@
       "id": "product-16",
       "imageUrl": "https://images.unsplash.com/photo-1506976785307-8732e854ad03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxlZ2dzfGVufDB8fHx8MTc2MjI3NDg3OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "eggs"
+    },
+    {
+      "id": "about-amina",
+      "description": "Portrait of the CEO",
+      "imageUrl": "https://images.unsplash.com/photo-1554151228-14d9def656e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMHdvbWFufGVufDB8fHx8MTc2MjY0MjM5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait woman"
+    },
+    {
+      "id": "about-karim",
+      "description": "Portrait of the COO",
+      "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMG1hbnxlbnwwfHx8fDE3NjI2NDIzOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait man"
+    },
+    {
+      "id": "about-fatima",
+      "description": "Portrait of the Product Manager",
+      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NjI2NDIzOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "about-supermarket-interior",
+      "description": "Interior of a modern supermarket.",
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdXBlcm1hcmtldCUyMGludGVyaW9yfGVufDB8fHx8MTc2MjY0MjIzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "supermarket interior"
     }
   ]
 }

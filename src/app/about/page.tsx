@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Award, Code, Users, Leaf } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 
 const values = [
@@ -28,19 +29,21 @@ const team = [
     {
         name: "Amina Ziani",
         role: "Fondatrice & PDG",
-        avatar: "https://picsum.photos/seed/amina/200/200"
+        avatar: PlaceHolderImages.find(p => p.id === 'about-amina')?.imageUrl || "https://picsum.photos/seed/amina/200/200"
     },
     {
         name: "Karim Belfodil",
         role: "Responsable des Opérations",
-        avatar: "https://picsum.photos/seed/karim/200/200"
+        avatar: PlaceHolderImages.find(p => p.id === 'about-karim')?.imageUrl || "https://picsum.photos/seed/karim/200/200"
     },
     {
         name: "Fatima Hadjadj",
         role: "Chef de Produit",
-        avatar: "https://picsum.photos/seed/fatima/200/200"
+        avatar: PlaceHolderImages.find(p => p.id === 'about-fatima')?.imageUrl || "https://picsum.photos/seed/fatima/200/200"
     }
 ]
+
+const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket-interior');
 
 export default function AboutPage() {
 
@@ -53,14 +56,16 @@ export default function AboutPage() {
 
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className="relative aspect-square md:aspect-[4/3] rounded-lg overflow-hidden">
-          <Image
-            src="https://images.unsplash.com/photo-1542838132-92c53300491e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdXBlcm1hcmtldCUyMGludGVyaW9yfGVufDB8fHx8MTc2MjY0MjIzM3ww&ixlib=rb-4.1.0&q=80&w=1080"
-            alt="Supermarket Interior"
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            data-ai-hint="supermarket interior"
-          />
+          {supermarketImage && (
+            <Image
+                src={supermarketImage.imageUrl}
+                alt={supermarketImage.description}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                data-ai-hint={supermarketImage.imageHint}
+            />
+          )}
         </div>
         <div className="space-y-4 text-muted-foreground">
           <h2 className="font-headline text-2xl text-foreground">Notre Histoire</h2>
