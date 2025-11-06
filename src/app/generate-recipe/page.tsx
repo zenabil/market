@@ -42,21 +42,30 @@ export default function GenerateRecipePage() {
 
     const productsQuery = useMemoFirebase(() => {
         if (!firestore || !generatedRecipe || generatedRecipe.missingProducts.length === 0) return null;
-        return query(collection(firestore, 'products'), where('name', 'in', generatedRecipe.missingProducts));
+        const productNamesLowerCase = generatedRecipe.missingProducts.map(p => p.toLowerCase());
+        // Firestore 'in' query is case-sensitive. We fetch all products and filter client-side.
+        // For a very large product catalog, a more scalable search solution (like Algolia) would be better.
+        return query(collection(firestore, 'products'));
     }, [firestore, generatedRecipe]);
 
-    const { data: foundProducts } = useCollection<Product>(productsQuery);
+    const { data: allProducts } = useCollection<Product>(productsQuery);
+
+    const foundProducts = useMemo(() => {
+        if (!allProducts || !generatedRecipe?.missingProducts) return [];
+        const missingProductNamesLower = generatedRecipe.missingProducts.map(p => p.toLowerCase());
+        return allProducts.filter(p => missingProductNamesLower.includes(p.name.toLowerCase()));
+    }, [allProducts, generatedRecipe?.missingProducts]);
 
 
     const handleAddMissingToCart = () => {
-        if (!generatedRecipe?.missingProducts || !foundProducts) return;
+        if (!generatedRecipe?.missingProducts || !allProducts) return;
         setIsAddingToCart(true);
 
         let itemsAddedCount = 0;
         let notFoundProducts: string[] = [];
 
         generatedRecipe.missingProducts.forEach(productName => {
-            const productToAdd = foundProducts.find(p => p.name.toLowerCase() === productName.toLowerCase());
+            const productToAdd = allProducts.find(p => p.name.toLowerCase() === productName.toLowerCase());
             if (productToAdd) {
                 addItem(productToAdd);
                 itemsAddedCount++;
