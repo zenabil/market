@@ -3,7 +3,7 @@
 import HeroCarousel from '@/components/product/hero-carousel';
 import HomePageClient from '@/components/layout/home-page-client';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,13 +12,13 @@ function HomeProducts() {
   const firestore = useFirestore();
 
   const bestSellersQuery = useMemoFirebase(
-    () => query(collection(firestore, 'products'), orderBy('sold', 'desc'), limit(8)),
+    () => query(collection(firestore, 'products'), where('sold', '>', 0), orderBy('sold', 'desc'), limit(8)),
     [firestore]
   );
   const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
 
   const exclusiveOffersQuery = useMemoFirebase(
-    () => query(collection(firestore, 'products'), orderBy('discount', 'desc'), limit(8)),
+    () => query(collection(firestore, 'products'), where('discount', '>', 0), orderBy('discount', 'desc'), limit(8)),
     [firestore]
   );
   const { data: exclusiveOffers, isLoading: isLoadingOffers } = useCollection<Product>(exclusiveOffersQuery);

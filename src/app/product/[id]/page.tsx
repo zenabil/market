@@ -58,10 +58,10 @@ function ProductDetails({ productId }: { productId: string }) {
     return query(
       collection(firestore, 'products'),
       where('categoryId', '==', product.categoryId),
-      where(documentId(), '!=', product.id),
+      where(documentId(), '!=', productId),
       limit(4)
     );
-  }, [firestore, product]);
+  }, [firestore, product, productId]);
   
   const { data: relatedProducts, isLoading: isLoadingRelated } = useCollection<Product>(relatedProductsQuery);
 

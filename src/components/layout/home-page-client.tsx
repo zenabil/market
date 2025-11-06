@@ -45,7 +45,12 @@ function RecommendedProducts() {
             const browsingHistory = viewedProducts.join(', ');
             getProductRecommendations({ purchaseHistory: '', browsingHistory })
                 .then(result => {
-                    setRecommendedProductNames(result.recommendedProducts);
+                    // Ensure we have a valid array of product names, max 30 for 'in' query.
+                    if (result?.recommendedProducts && Array.isArray(result.recommendedProducts)) {
+                       setRecommendedProductNames(result.recommendedProducts.slice(0, 30));
+                    } else {
+                       setRecommendedProductNames([]);
+                    }
                 })
                 .catch(console.error)
                 .finally(() => setIsLoading(false));
@@ -54,29 +59,18 @@ function RecommendedProducts() {
         }
     }, [user, viewedProducts]);
     
-    // Fetch all products to filter locally, as Firestore doesn't support OR queries on different fields.
-    const allProductsQuery = useMemoFirebase(() => {
+    // Fetch only the products that match the recommended names.
+    const recommendedProductsQuery = useMemoFirebase(() => {
         if (!firestore || recommendedProductNames.length === 0) return null;
-        return query(collection(firestore, 'products'));
-    }, [firestore, recommendedProductNames.length > 0]);
+        // The 'in' query is limited to 30 items, which we've handled in the useEffect.
+        return query(collection(firestore, 'products'), where('name', 'in', recommendedProductNames));
+    }, [firestore, recommendedProductNames]);
 
-    const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(allProductsQuery);
-
-    const recommendedProducts = useMemo(() => {
-        if (!allProducts || recommendedProductNames.length === 0) return [];
-        
-        const lowercasedRecNames = recommendedProductNames.map(name => name.toLowerCase());
-        
-        return allProducts.filter(product => 
-            lowercasedRecNames.includes(product.name.toLowerCase())
-        ).slice(0, 4); // Limit to 4 recommendations
-
-    }, [allProducts, recommendedProductNames]);
-
+    const { data: recommendedProducts, isLoading: areProductsLoading } = useCollection<Product>(recommendedProductsQuery);
 
     const finalIsLoading = isLoading || areProductsLoading;
 
-    if (!user || viewedProducts.length === 0 || (!finalIsLoading && recommendedProducts.length === 0)) {
+    if (!user || viewedProducts.length === 0 || (!finalIsLoading && (!recommendedProducts || recommendedProducts.length === 0))) {
         return null;
     }
 
@@ -93,7 +87,7 @@ function RecommendedProducts() {
 
     return (
         <div className="mt-12 md:mt-16">
-            <ProductGrid title="Recommandé pour vous" products={recommendedProducts} />
+            <ProductGrid title="Recommandé pour vous" products={recommendedProducts || []} />
         </div>
     );
 }
