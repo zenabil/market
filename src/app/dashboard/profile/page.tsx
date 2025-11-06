@@ -86,36 +86,33 @@ export default function ProfilePage() {
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && userDocRef && authUser) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const dataUrl = reader.result as string;
-        try {
-          // Update Firebase Auth profile
-          await updateProfile(authUser, { photoURL: dataUrl });
-          // Update Firestore document
-          const updateData = { avatar: dataUrl };
-          updateDoc(userDocRef, updateData)
-            .then(() => {
-                toast({ title: 'Avatar mis à jour' });
-            })
-            .catch((error) => {
-                 errorEmitter.emit(
-                    'permission-error',
-                    new FirestorePermissionError({
-                        path: userDocRef.path,
-                        operation: 'update',
-                        requestResourceData: { avatar: '...data URI...' },
-                    })
-                );
-            });
-        } catch(error) {
-            console.error(error);
-            toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
+    if (!file || !userDocRef || !authUser) return;
+  
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUrl = reader.result as string;
+      try {
+        await updateProfile(authUser, { photoURL: dataUrl });
+        
+        const updateData = { avatar: dataUrl };
+        await updateDoc(userDocRef, updateData);
+        
+        toast({ title: 'Avatar mis à jour' });
+      } catch (error) {
+        console.error("Avatar update failed:", error);
+        
+        if ((error as any).code?.includes('permission-denied')) {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'update',
+            requestResourceData: { avatar: '...data URI...' },
+          }));
+        } else {
+          toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
         }
-      };
-      reader.readAsDataURL(file);
-    }
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
 
