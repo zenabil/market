@@ -131,7 +131,6 @@ export default function ProfilePage() {
         });
 
     } catch (error: any) {
-        console.error(error);
         if (error.code === 'permission-denied' || (error.name === 'FirebaseError' && error.message.includes('permission'))) {
             errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: userDocRef.path,
@@ -139,6 +138,7 @@ export default function ProfilePage() {
                 requestResourceData: { name: values.name, phone: values.phone },
             }));
         } else {
+            console.error(error);
             toast({
                 variant: "destructive",
                 title: "Échec de la mise à jour",
@@ -159,7 +159,7 @@ export default function ProfilePage() {
               title: 'Mot de passe mis à jour',
               description: 'Votre mot de passe a été modifié avec succès.',
           });
-          passwordForm.reset();
+          passwordForm.reset({ newPassword: '', confirmPassword: '' });
       } catch (error: any) {
           toast({
               variant: "destructive",
