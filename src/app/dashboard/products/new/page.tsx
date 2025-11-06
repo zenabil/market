@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +21,7 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
@@ -81,26 +80,23 @@ export default function NewProductPage() {
             description: `Le produit "${values.name}" a été ajouté. Génération de la description...`,
         });
 
-        // Generate description in the background
+        // Generate description and then navigate
         const categoryName = categories?.find(c => c.id === values.categoryId)?.name || '';
-        generateProductDescription({
+        const result = await generateProductDescription({
             productName: values.name,
             productCategory: categoryName,
             productDetails: '',
-        }).then(async (result) => {
-            if (result.description) {
-                const productDocRef = doc(firestore, 'products', docRef.id);
-                await updateDoc(productDocRef, { description: result.description });
-                toast({
-                    title: 'Description générée!',
-                    description: `La description pour "${values.name}" a été générée par l'IA.`,
-                });
-            }
-        }).catch(err => {
-            console.error("AI description generation failed:", err);
-            // Non-critical error, so we don't need to show a failure toast to the user
         });
 
+        if (result.description) {
+            const productDocRef = doc(firestore, 'products', docRef.id);
+            await updateDoc(productDocRef, { description: result.description });
+            toast({
+                title: 'Description générée!',
+                description: `La description pour "${values.name}" a été générée par l'IA.`,
+            });
+        }
+        
         router.push(`/dashboard/products/edit/${docRef.id}`);
 
     } catch (error) {
@@ -112,6 +108,11 @@ export default function NewProductPage() {
                 requestResourceData: productData,
             })
         );
+        toast({
+            variant: "destructive",
+            title: "Erreur de création",
+            description: "Impossible de créer le produit."
+        });
     } finally {
         setIsSaving(false);
     }
