@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
+import StarRating from './star-rating';
 
 interface ProductCardProps {
   product: Product;
@@ -83,9 +84,13 @@ export default function ProductCard({ product }: ProductCardProps) {
               </Badge>
             )}
           </div>
-          <div className="p-4">
+          <div className="p-4 space-y-2">
             <h3 className="font-semibold text-base truncate">{product.name}</h3>
-            <div className="flex items-baseline gap-2 mt-2">
+            <div className="flex items-center gap-2">
+                <StarRating rating={product.averageRating || 0} size="sm" />
+                <span className="text-xs text-muted-foreground">({product.reviewCount || 0})</span>
+            </div>
+            <div className="flex items-baseline gap-2">
               <p className="text-lg font-bold text-primary">{formatCurrency(discountedPrice)}</p>
               {product.discount > 0 && (
                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(product.price)}</p>
