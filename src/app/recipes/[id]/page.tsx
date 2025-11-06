@@ -32,13 +32,8 @@ function RecipeDetailsPage() {
         setIsAddingToCart(true);
 
         try {
-            const ingredientNames = recipe.ingredients.map(name => name.toLowerCase());
-            if(ingredientNames.length === 0) return;
-
-            const productsRef = collection(firestore, 'products');
-            
             // Firestore 'in' query is limited to 30 items. For recipes with more, this needs chunking.
-            const productsToQuery = recipe.ingredients.slice(0, 30);
+            const productsToQuery = recipe.ingredients.map(name => name.toLowerCase()).slice(0, 30);
             if (productsToQuery.length === 0) {
                  toast({
                     variant: 'destructive',
@@ -47,18 +42,22 @@ function RecipeDetailsPage() {
                 return;
             }
 
-            const q = query(productsRef, where('name', 'in', productsToQuery));
-
+            const productsRef = collection(firestore, 'products');
+            const q = query(productsRef); // Fetch all products to perform a case-insensitive search client-side
             const querySnapshot = await getDocs(q);
             const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             
-            const foundProducts = allProducts.filter(p => ingredientNames.includes(p.name.toLowerCase()));
-            const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
-            
             let itemsAddedCount = 0;
-            foundProducts.forEach(product => {
-                addItem(product);
-                itemsAddedCount++;
+            const notFoundProducts: string[] = [];
+
+            recipe.ingredients.forEach(ingredientName => {
+                const foundProduct = allProducts.find(p => p.name.toLowerCase() === ingredientName.toLowerCase());
+                if (foundProduct) {
+                    addItem(foundProduct);
+                    itemsAddedCount++;
+                } else {
+                    notFoundProducts.push(ingredientName);
+                }
             });
     
             if (itemsAddedCount > 0) {
@@ -67,10 +66,6 @@ function RecipeDetailsPage() {
                     description: `${itemsAddedCount} ingrédient(s) ont été ajoutés à votre panier.`
                 });
             }
-            
-            const notFoundProducts = recipe.ingredients.filter(
-                name => !foundProductNames.includes(name.toLowerCase())
-            );
     
             if (notFoundProducts.length > 0) {
                  toast({
