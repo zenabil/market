@@ -118,7 +118,7 @@ export default function ProductsPage() {
                             <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
                           </DropdownMenuItem>
                           <AlertDialogTrigger asChild>
-                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive" onClick={() => setProductToDelete(product)}>
+                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setProductToDelete(product); }} className="text-destructive">
                                <Trash2 className="mr-2 h-4 w-4" />
                                Supprimer
                             </DropdownMenuItem>

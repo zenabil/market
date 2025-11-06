@@ -44,7 +44,7 @@ const signupSchema = z.object({
 
 export default function LoginPage() {
   const auth = useAuth();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -62,10 +62,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (user) {
+    if (!isUserLoading && user) {
       router.push('/dashboard');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
   
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
@@ -162,6 +162,14 @@ export default function LoginPage() {
         setIsLoading(false);
     }
   };
+
+  if (isUserLoading || (!isUserLoading && user)) {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">

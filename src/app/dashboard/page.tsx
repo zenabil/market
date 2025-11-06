@@ -197,7 +197,7 @@ export default function DashboardPage() {
     }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
     // Show a loading indicator while we verify auth and admin status.
-    if (isUserLoading || isRoleLoading) {
+    if (isUserLoading || isRoleLoading || !isAdmin) {
         return (
             <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -210,5 +210,5 @@ export default function DashboardPage() {
     
     // Only render the admin dashboard if the user is confirmed to be an admin.
     // Non-admins will have already been redirected by the useEffect.
-    return isAdmin ? <AdminDashboard /> : null;
+    return <AdminDashboard />;
 }
