@@ -28,11 +28,6 @@ import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
 import type { Coupon } from '@/lib/placeholder-data';
 
-type SiteSettings = {
-    deliveryFee?: number;
-};
-
-
 const shippingFormSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
   address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
@@ -66,10 +61,13 @@ export default function CheckoutPage() {
   
   const { data: firestoreUser } = useDoc<FirestoreUser>(userDocRef);
 
-  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
-  const { data: settings } = useDoc<SiteSettings>(settingsRef);
-  const deliveryFee = settings?.deliveryFee ?? 0;
+  const subTotalAfterDiscount = appliedCoupon
+    ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
+    : totalPrice;
+    
+  const deliveryFee = subTotalAfterDiscount >= 4000 ? 200 : 100;
 
+  const finalTotalPrice = subTotalAfterDiscount + deliveryFee;
 
   const shippingForm = useForm<z.infer<typeof shippingFormSchema>>({
     resolver: zodResolver(shippingFormSchema),
@@ -118,13 +116,6 @@ export default function CheckoutPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [step]);
-
-
-  const subTotalAfterDiscount = appliedCoupon
-    ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
-    : totalPrice;
-
-  const finalTotalPrice = subTotalAfterDiscount + deliveryFee;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim() || !firestore) return;
@@ -362,7 +353,7 @@ export default function CheckoutPage() {
                    <div className="space-y-2">
                        <div className="flex justify-between">
                            <span>Sous-total</span>
-                           <span>{formatCurrency(totalPrice)}</span>
+                           <span>{formatCurrency(subTotalAfterDiscount)}</span>
                        </div>
                         {appliedCoupon && (
                           <div className="flex justify-between text-primary">
@@ -399,5 +390,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
