@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2 } from 'lucide-react';
+import { Search, Menu, LogOut, ShoppingBasket, LayoutDashboard, Wand2, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ const navLinks = [
   { key: 'Produits', href: '/products' },
   { key: 'Recettes', href: '/recipes' },
   { key: 'Générer une recette', href: '/generate-recipe', icon: Wand2 },
+  { key: 'Planificateur de Repas', href: '/meal-planner', icon: CalendarDays },
   { key: 'À Propos', href: '/about' },
   { key: 'Contact', href: '/contact' },
 ];
@@ -140,7 +141,7 @@ export default function Header() {
           href={link.href}
           className={cn(
               "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
-              link.icon && "text-primary hover:text-primary/80 font-bold"
+              (link.icon) && "text-primary hover:text-primary/80 font-bold"
             )}
         >
           {link.icon && <link.icon className="h-4 w-4" />}
