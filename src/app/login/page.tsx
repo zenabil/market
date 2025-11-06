@@ -16,14 +16,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth, useUser, useFirestore, errorEmitter, FirestorePermissionError, useMemoFirebase } from '@/firebase';
+import { useAuth, useUser, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
-import { doc, setDoc, getDocs, collection, writeBatch, query, limit, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, writeBatch } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 
@@ -94,7 +94,7 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, isAdmin, isRoleLoading, router]);
 
- const handleCreateUserDocument = async (user: any) => {
+ const handleCreateUserDocument = async (user: any, name?: string) => {
     if (!firestore) throw new Error("Firestore not available");
 
     const userDocRef = doc(firestore, "users", user.uid);
@@ -104,14 +104,17 @@ export default function LoginPage() {
       return; // User document already exists
     }
 
-    // This is a new user, create their document and try to make them an admin.
-    const batch = writeBatch(firestore);
-    const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-    
-    // Base user data
+    const displayName = name || user.displayName;
+
+    // First, update the user's profile in Firebase Auth.
+    if(displayName && displayName !== user.displayName) {
+        await updateProfile(user, { displayName });
+    }
+
+    // Base user data for Firestore document
     const userData = {
       id: user.uid,
-      name: user.displayName,
+      name: displayName,
       email: user.email,
       role: 'User', // Default role
       preferredLanguage: "fr",
@@ -123,28 +126,26 @@ export default function LoginPage() {
       addresses: [],
     };
     
-    batch.set(userDocRef, userData);
-    
-    // Attempt to grant admin role. Security rules will only allow this for the first user.
-    // If it fails, the user document is still created with the 'User' role.
-    batch.set(adminRoleRef, { role: 'admin' });
+    // Create the user document first. This should always succeed if the user is authenticated.
+    await setDoc(userDocRef, userData);
 
+    // After creating the user, attempt to grant admin role.
+    // This will only succeed for the very first user due to security rules.
+    // We wrap this in a try/catch to handle the expected permission error for subsequent users gracefully.
     try {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        const batch = writeBatch(firestore);
+        batch.set(adminRoleRef, { role: 'admin' });
+        batch.update(userDocRef, { role: 'Admin' });
         await batch.commit();
-        // If the batch commit succeeds and the admin role was part of it,
-        // we need one more write to update the user's role field.
-        // This is safe because only the first user can get this far.
-        await updateDoc(userDocRef, { role: 'Admin' });
-
+        // If successful, the user is now an admin.
     } catch (error: any) {
-        // A permission-denied error here is expected for all users except the first one.
-        // We can safely ignore it, as the user document has been created.
+        // A permission-denied error is expected for all users except the first one.
+        // We can safely ignore it, as the user was already created as a regular 'User'.
         if (error.code !== 'permission-denied') {
-          console.error("An unexpected error occurred during user creation batch:", error);
-          // Optionally re-throw or handle other types of errors (e.g., network issues)
-          throw error;
+          console.error("An unexpected error occurred while attempting to grant admin role:", error);
+          // Handle other potential errors (e.g., network issues) if necessary.
         }
-        // If it was a permission error, the user was created as a regular user, which is the correct outcome.
     }
   }
   
@@ -170,10 +171,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      await handleCreateUserDocument({
-          ...userCredential.user,
-          displayName: values.name,
-      });
+      await handleCreateUserDocument(userCredential.user, values.name);
       toast({ title: 'Inscription réussie !' });
     } catch (error: any) {
       if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
