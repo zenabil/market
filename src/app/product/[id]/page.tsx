@@ -183,47 +183,49 @@ function ProductDetails({ productId }: { productId: string }) {
           </div>
           <Separator className="my-6" />
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateQuantity(quantity - 1)}
-                disabled={quantity <= 1}
-              >
-                <Minus className="h-4 w-4" />
+          <div className="mt-auto pt-8">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => updateQuantity(quantity - 1)}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  className="h-10 w-16 text-center"
+                  value={quantity}
+                  onChange={(e) => updateQuantity(parseInt(e.target.value) || 1)}
+                  min="1"
+                  max={product.stock}
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => updateQuantity(quantity + 1)}
+                  disabled={quantity >= product.stock}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                {product.stock === 0 ? 'En rupture de stock' : 'Ajouter au panier'}
               </Button>
-              <Input
-                type="number"
-                className="h-10 w-16 text-center"
-                value={quantity}
-                onChange={(e) => updateQuantity(parseInt(e.target.value) || 1)}
-                min="1"
-                max={product.stock}
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateQuantity(quantity + 1)}
-                disabled={quantity >= product.stock}
-              >
-                <Plus className="h-4 w-4" />
+               <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
+                  <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
               </Button>
             </div>
-            <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              {product.stock === 0 ? 'En rupture de stock' : 'Ajouter au panier'}
-            </Button>
-             <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
-                <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
-            </Button>
+             <p className="text-sm text-muted-foreground mt-2">
+              {product.stock > 0 
+                  ? `En stock: ${product.stock} unités disponibles`
+                  : 'Ce produit est actuellement en rupture de stock.'
+              }
+             </p>
           </div>
-           <p className="text-sm text-muted-foreground mt-2">
-            {product.stock > 0 
-                ? `En stock: ${product.stock} unités disponibles`
-                : 'Ce produit est actuellement en rupture de stock.'
-            }
-           </p>
         </div>
       </div>
     </div>

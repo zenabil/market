@@ -60,7 +60,6 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
     
     try {
         await addDoc(reviewsCollection, reviewData);
-        toast({ title: 'Avis soumis avec succès' });
         
         // --- Start: Update product average rating ---
         const totalReviews = reviews.length + 1;
@@ -74,7 +73,8 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
 
         await updateDoc(productRef, productUpdateData);
         // --- End: Update product average rating ---
-
+        
+        toast({ title: 'Avis soumis avec succès' });
         form.reset({ comment: '', rating: 0 });
         onReviewAdded();
 
@@ -203,7 +203,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
             {!isLoading && reviews && reviews.length > 0 ? (
               reviews.map((review) => <ReviewItem key={review.id} review={review} />)
             ) : (
-              <p className="text-muted-foreground">Aucun avis pour ce produit pour le moment.</p>
+              !isLoading && <p className="text-muted-foreground">Aucun avis pour ce produit pour le moment.</p>
             )}
           </div>
         </div>
