@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -41,7 +42,9 @@ const AlertDialogContent = React.forwardRef<
       )}
       {...props}
     >
-      <AlertDialogTitle className="sr-only">عنوان النافذة</AlertDialogTitle>
+      <VisuallyHidden>
+        <AlertDialogTitle>عنوان مخفي</AlertDialogTitle>
+      </VisuallyHidden>
       {props.children}
     </AlertDialogPrimitive.Content>
   </AlertDialogPortal>
