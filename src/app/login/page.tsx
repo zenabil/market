@@ -18,14 +18,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth, useUser, useFirestore, errorEmitter, FirestorePermissionError, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Logo from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
 import { doc, setDoc, getDocs, collection, writeBatch, query, limit, updateDoc, getDoc } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
-import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -40,6 +40,10 @@ const signupSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Les mots de passe ne correspondent pas.',
   path: ["confirmPassword"],
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email({ message: "Veuillez entrer une adresse e-mail valide." }),
 });
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -59,6 +63,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const firestore = useFirestore();
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -66,11 +71,16 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
   
-
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   });
+  
+  const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { email: '' },
+  });
+
 
   useEffect(() => {
     if (!isUserLoading && user) {
@@ -185,6 +195,26 @@ export default function LoginPage() {
     }
   }
 
+  const handlePasswordReset = async (values: z.infer<typeof resetPasswordSchema>) => {
+    setIsResettingPassword(true);
+    try {
+        await sendPasswordResetEmail(auth, values.email);
+        toast({
+            title: 'Email de réinitialisation envoyé',
+            description: 'Veuillez consulter votre boîte de réception pour les instructions.',
+        });
+    } catch (error: any) {
+        console.error("Password reset error:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erreur',
+            description: "Impossible d'envoyer l'e-mail de réinitialisation. Veuillez vérifier l'adresse e-mail.",
+        });
+    } finally {
+        setIsResettingPassword(false);
+    }
+  }
+
 
   if (isUserLoading || isRoleLoading || user) {
     return (
@@ -258,6 +288,41 @@ export default function LoginPage() {
                         </FormItem>
                       )}
                     />
+                     <div className="text-right text-sm">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="link" className="p-0 h-auto">Mot de passe oublié?</Button>
+                            </DialogTrigger>
+                             <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+                                    <DialogDescription>Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.</DialogDescription>
+                                </DialogHeader>
+                                <Form {...resetPasswordForm}>
+                                <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
+                                    <FormField
+                                        control={resetPasswordForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl><Input type="email" {...field} /></FormControl>
+                                            <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                                </Form>
+                                <DialogFooter>
+                                    <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
+                                    <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
+                                        {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Envoyer l'email
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Se connecter
