@@ -73,6 +73,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({ title: 'Connexion réussie !' });
+      // The useEffect will handle the redirect
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -134,6 +135,7 @@ export default function LoginPage() {
       }
   
       toast({ title: 'Inscription réussie !' });
+      // The useEffect will handle the redirect
     } catch (error: any) {
       // Handle primary account creation errors
       if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
