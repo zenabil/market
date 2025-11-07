@@ -1,3 +1,4 @@
+
 {
     "locale": "fr-FR",
     "header": {
@@ -440,6 +441,26 @@
                 "category": "Veuillez sélectionner une catégorie.",
                 "imageURL": "URL invalide.",
                 "minImage": "Au moins une image est requise."
+            }
+        },
+         "addressDialog": {
+            "addTitle": "Ajouter une nouvelle adresse",
+            "addDescription": "Ajoutez une nouvelle adresse de livraison à votre profil.",
+            "editTitle": "Modifier l'adresse",
+            "editDescription": "Modifiez les détails de votre adresse ci-dessous.",
+            "street": "Rue",
+            "city": "Ville",
+            "zipCode": "Code Postal",
+            "country": "Pays",
+            "toast": {
+                "added": "Adresse ajoutée",
+                "updated": "Adresse mise à jour"
+            },
+            "validation": {
+                "street": "La rue doit comporter au moins 5 caractères.",
+                "city": "La ville doit comporter au moins 2 caractères.",
+                "zipCode": "Le code postal doit comporter au moins 3 caractères.",
+                "country": "Le pays doit comporter au moins 2 caractères."
             }
         }
     }
