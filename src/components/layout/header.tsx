@@ -15,6 +15,7 @@ import {
   GitCompareArrows,
   Globe,
   Star,
+  Camera,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
 import { useLanguage } from '@/contexts/language-provider';
+import ImageSearchDialog from './image-search-dialog';
 
 
 function LanguageSwitcher() {
@@ -353,20 +355,29 @@ export default function Header() {
             <NavLinks />
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-1 md:space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form onSubmit={handleSearch}>
               <div className="relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   name="search"
                   placeholder={t('header.searchPlaceholder')}
                   className="w-full bg-secondary md:w-[200px] lg:w-[300px] pr-9"
                 />
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <span className="sr-only">Search</span>
+                </button>
               </div>
             </form>
           </div>
+          <ImageSearchDialog>
+            <Button variant="ghost" size="icon">
+                <Camera className="h-6 w-6" />
+                <span className="sr-only">Search by image</span>
+            </Button>
+          </ImageSearchDialog>
           <LanguageSwitcher />
           <ThemeSwitcher />
           <NotificationBell />

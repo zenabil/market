@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
   name: 'diagnosePlantPrompt',
   input: {schema: DiagnosePlantInputSchema},
   output: {schema: DiagnosePlantOutputSchema},
-  prompt: `You are an expert botanist specializing diagnosing plant illnesses.
+  prompt: `You are an expert botanist specializing diagnosing plant illnesses. You can also identify products from an image. If the image is not a plant, just identify the product in the 'commonName' field.
 
 You will use this information to diagnose the plant, and any issues it has. You will make a determination as to whether the plant is healthy or not, and what is wrong with it, and set the isHealthy output field appropriately.
 
