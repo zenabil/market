@@ -75,7 +75,7 @@ function OrderDetails() {
                     description: t('dashboard.orders.details.toast.statusUpdated.description').replace('{{status}}', t(`dashboard.orders.status.${newStatus}`)),
                 });
                  createNotification(firestore, order.userId, {
-                    message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${t(`dashboard.orders.status.${newStatus}`)}`,
+                    message: t('dashboard.orders.notification.statusUpdate', {id: order.id.slice(-6), status: t(`dashboard.orders.status.${newStatus}`)}),
                     link: `/dashboard/orders/${order.id}`,
                  }).catch(console.error);
                  refetchOrder();

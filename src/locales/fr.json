@@ -1,4 +1,3 @@
-
 {
     "locale": "fr-FR",
     "defaultSiteName": "Tlemcen Smart Supermarket",
@@ -880,6 +879,9 @@
                 "markAsShipped": "Marquer comme Expédiée",
                 "markAsDelivered": "Marquer comme Livrée",
                 "markAsCancelled": "Marquer comme Annulée"
+            },
+            "notification": {
+                "statusUpdate": "Le statut de votre commande ...{{id}} est maintenant : {{status}}"
             }
         },
         "shoppingLists": {
