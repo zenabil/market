@@ -98,6 +98,8 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
     },
   });
 
+  const { formState: { isDirty } } = form;
+
   useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
       router.replace('/dashboard');
@@ -118,6 +120,19 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
       });
     }
   }, [recipe, form]);
+  
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSaving(true);
@@ -135,6 +150,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
     updateDoc(recipeRef, recipeData)
         .then(() => {
             toast({ title: 'Recette mise à jour' });
+            form.reset(values); // Reset the form to the new saved state, clearing isDirty
         })
         .catch(error => {
             errorEmitter.emit(
@@ -223,7 +239,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
             <Button type="button" variant="outline" asChild>
                 <Link href="/dashboard/recipes">Annuler</Link>
             </Button>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving || !isDirty}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Enregistrer les modifications
             </Button>
