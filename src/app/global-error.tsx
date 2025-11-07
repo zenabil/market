@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { useLanguage } from '@/contexts/language-provider';
 import { TriangleAlert } from 'lucide-react';
 import React from 'react';
 
@@ -18,11 +19,11 @@ export default function GlobalError({
   reset: () => void;
 }) {
   const isPermissionError = error instanceof FirestorePermissionError;
+  const { t } = useLanguage();
 
   const copyToClipboard = () => {
     if (isPermissionError) {
       navigator.clipboard.writeText(JSON.stringify(error.request, null, 2));
-      // In a real app, you'd use a toast notification here.
       alert('Error details copied to clipboard!');
     }
   };
@@ -37,12 +38,12 @@ export default function GlobalError({
                 <TriangleAlert className="h-8 w-8" />
               </div>
               <CardTitle className="mt-4 text-2xl font-headline">
-                {isPermissionError ? 'Firestore Security Rule Error' : 'Application Error'}
+                {isPermissionError ? t('globalError.permissionError.title') : t('globalError.applicationError.title')}
               </CardTitle>
               <CardDescription>
                 {isPermissionError
-                  ? 'The following request was denied by your security rules.'
-                  : 'An unexpected error occurred.'}
+                  ? t('globalError.permissionError.description')
+                  : t('globalError.applicationError.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -57,10 +58,10 @@ export default function GlobalError({
                 </div>
               )}
               <div className="mt-6 flex justify-center gap-4">
-                <Button onClick={() => reset()}>Retry</Button>
+                <Button onClick={() => reset()}>{t('globalError.retry')}</Button>
                 {isPermissionError && (
                   <Button variant="outline" onClick={copyToClipboard}>
-                    Copy Details
+                    {t('globalError.copyDetails')}
                   </Button>
                 )}
               </div>

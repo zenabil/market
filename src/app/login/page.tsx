@@ -27,37 +27,21 @@ import { doc, setDoc, getDoc, writeBatch } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import Image from 'next/image';
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-const signupSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  email: z.string().email(),
-  password: z.string().min(6),
-  confirmPassword: z.string().min(6),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Les mots de passe ne correspondent pas.',
-  path: ["confirmPassword"],
-});
-
-const resetPasswordSchema = z.object({
-  email: z.string().email({ message: "Veuillez entrer une adresse e-mail valide." }),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px" {...props}>
         <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
         <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
         <path fill="#4CAF50" d="M24,44c5.166,0,9.606-1.977,12.796-5.171l-5.617-4.436C29.208,36.65,26.75,38,24,38c-5.223,0-9.651-3.358-11.28-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+
         <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l5.617,4.436C39.712,34.556,44,29.62,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
     </svg>
 );
 
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const { isAdmin, isRoleLoading } = useUserRole();
@@ -66,6 +50,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const firestore = useFirestore();
+
+  const loginSchema = z.object({
+    email: z.string().email({ message: t('login.validation.email') }),
+    password: z.string().min(6, { message: t('login.validation.password') }),
+  });
+  
+  const signupSchema = z.object({
+    name: z.string().min(2, { message: t('login.validation.name') }),
+    email: z.string().email({ message: t('login.validation.email') }),
+    password: z.string().min(6, { message: t('login.validation.password') }),
+    confirmPassword: z.string().min(6),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t('login.validation.passwordMismatch'),
+    path: ["confirmPassword"],
+  });
+  
+  const resetPasswordSchema = z.object({
+    email: z.string().email({ message: t('login.validation.email') }),
+  });
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -155,12 +158,12 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({ title: 'Connexion réussie !' });
+      toast({ title: t('login.toast.loginSuccess') });
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: "L'email ou le mot de passe est incorrect.",
+        title: t('login.toast.error'),
+        description: t('login.toast.invalidCredentials'),
       });
       loginForm.setValue('password', '');
     } finally {
@@ -173,7 +176,7 @@ export default function LoginPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       await handleCreateUserDocument(userCredential.user, values.name);
-      toast({ title: 'Inscription réussie !' });
+      toast({ title: t('login.toast.signupSuccess') });
     } catch (error: any) {
       if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
         const permissionError = new FirestorePermissionError({ 
@@ -185,8 +188,8 @@ export default function LoginPage() {
       } else {
           toast({
               variant: 'destructive',
-              title: 'Erreur',
-              description: "Cet email est déjà utilisé.",
+              title: t('login.toast.error'),
+              description: t('login.toast.emailInUse'),
           });
       }
     } finally {
@@ -200,13 +203,13 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       await handleCreateUserDocument(result.user);
-      toast({ title: 'Connexion avec Google réussie !' });
+      toast({ title: t('login.toast.googleSuccess') });
     } catch (error: any) {
         console.error("Google sign-in error:", error);
         toast({
             variant: 'destructive',
-            title: 'Erreur de connexion avec Google',
-            description: "Une erreur s'est produite. Veuillez réessayer.",
+            title: t('login.toast.googleError.title'),
+            description: t('login.toast.googleError.description'),
         });
     } finally {
         setIsLoading(false);
@@ -218,15 +221,15 @@ export default function LoginPage() {
     try {
         await sendPasswordResetEmail(auth, values.email);
         toast({
-            title: 'Email de réinitialisation envoyé',
-            description: 'Veuillez consulter votre boîte de réception pour les instructions.',
+            title: t('login.toast.resetEmailSent.title'),
+            description: t('login.toast.resetEmailSent.description'),
         });
     } catch (error: any) {
         console.error("Password reset error:", error);
         toast({
             variant: 'destructive',
-            title: 'Erreur',
-            description: "Impossible d'envoyer l'e-mail de réinitialisation. Veuillez vérifier l'adresse e-mail.",
+            title: t('login.toast.error'),
+            description: t('login.toast.resetEmailError'),
         });
     } finally {
         setIsResettingPassword(false);
@@ -253,20 +256,20 @@ export default function LoginPage() {
         <div className="mx-auto grid w-[350px] gap-6">
            <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Connexion</TabsTrigger>
-            <TabsTrigger value="signup">Inscription</TabsTrigger>
+            <TabsTrigger value="login">{t('login.tabs.login')}</TabsTrigger>
+            <TabsTrigger value="signup">{t('login.tabs.signup')}</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
                 <Card className="border-none shadow-none">
                     <CardHeader className="px-0">
-                    <CardTitle>Connexion</CardTitle>
-                    <CardDescription>Connectez-vous à votre compte pour continuer.</CardDescription>
+                    <CardTitle>{t('login.login.title')}</CardTitle>
+                    <CardDescription>{t('login.login.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-0">
                     <div className='space-y-4'>
                         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
                             <GoogleIcon className="mr-2 h-5 w-5" />
-                            Continuer avec Google
+                            {t('login.continueWithGoogle')}
                         </Button>
 
                         <div className="relative">
@@ -275,7 +278,7 @@ export default function LoginPage() {
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                            Ou continuer avec
+                            {t('login.orContinueWith')}
                             </span>
                         </div>
                         </div>
@@ -287,7 +290,7 @@ export default function LoginPage() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>{t('login.email')}</FormLabel>
                                 <FormControl>
                                     <Input type="email" {...field} />
                                 </FormControl>
@@ -300,7 +303,7 @@ export default function LoginPage() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Mot de passe</FormLabel>
+                                <FormLabel>{t('login.password')}</FormLabel>
                                 <FormControl>
                                     <Input type="password" {...field} />
                                 </FormControl>
@@ -311,12 +314,12 @@ export default function LoginPage() {
                             <div className="text-right text-sm">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="link" className="p-0 h-auto">Mot de passe oublié?</Button>
+                                        <Button variant="link" className="p-0 h-auto">{t('login.forgotPassword')}</Button>
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
-                                            <DialogDescription>Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.</DialogDescription>
+                                            <DialogTitle>{t('login.resetPassword.title')}</DialogTitle>
+                                            <DialogDescription>{t('login.resetPassword.description')}</DialogDescription>
                                         </DialogHeader>
                                         <Form {...resetPasswordForm}>
                                         <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
@@ -325,7 +328,7 @@ export default function LoginPage() {
                                                 name="email"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                    <FormLabel>Email</FormLabel>
+                                                    <FormLabel>{t('login.email')}</FormLabel>
                                                     <FormControl><Input type="email" {...field} /></FormControl>
                                                     <FormMessage />
                                                     </FormItem>
@@ -334,10 +337,10 @@ export default function LoginPage() {
                                         </form>
                                         </Form>
                                         <DialogFooter>
-                                            <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
+                                            <DialogClose asChild><Button type="button" variant="outline">{t('login.resetPassword.cancel')}</Button></DialogClose>
                                             <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
                                                 {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                Envoyer l'email
+                                                {t('login.resetPassword.send')}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -345,7 +348,7 @@ export default function LoginPage() {
                             </div>
                             <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Se connecter
+                            {t('login.login.button')}
                             </Button>
                         </form>
                         </Form>
@@ -356,14 +359,14 @@ export default function LoginPage() {
             <TabsContent value="signup">
                 <Card className="border-none shadow-none">
                     <CardHeader className="px-0">
-                        <CardTitle>Créer un compte</CardTitle>
-                        <CardDescription>Rejoignez-nous dès aujourd'hui !</CardDescription>
+                        <CardTitle>{t('login.signup.title')}</CardTitle>
+                        <CardDescription>{t('login.signup.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-0">
                     <div className='space-y-4'>
                         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
                             <GoogleIcon className="mr-2 h-5 w-5" />
-                            Continuer avec Google
+                            {t('login.continueWithGoogle')}
                         </Button>
 
                         <div className="relative">
@@ -372,7 +375,7 @@ export default function LoginPage() {
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                            Ou créer un compte avec
+                            {t('login.orSignupWith')}
                             </span>
                         </div>
                         </div>
@@ -384,7 +387,7 @@ export default function LoginPage() {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Nom</FormLabel>
+                                <FormLabel>{t('login.name')}</FormLabel>
                                 <FormControl>
                                     <Input type="text" {...field} />
                                 </FormControl>
@@ -397,7 +400,7 @@ export default function LoginPage() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>{t('login.email')}</FormLabel>
                                 <FormControl>
                                     <Input type="email" {...field} />
                                 </FormControl>
@@ -410,7 +413,7 @@ export default function LoginPage() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Mot de passe</FormLabel>
+                                <FormLabel>{t('login.password')}</FormLabel>
                                 <FormControl>
                                     <Input type="password" {...field} />
                                 </FormControl>
@@ -421,7 +424,7 @@ export default function LoginPage() {
                             <FormField control={signupForm.control} name="confirmPassword"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Confirmer le mot de passe</FormLabel>
+                                <FormLabel>{t('login.confirmPassword')}</FormLabel>
                                 <FormControl>
                                     <Input type="password" {...field} />
                                 </FormControl>
@@ -431,7 +434,7 @@ export default function LoginPage() {
                             />
                             <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            S'inscrire
+                            {t('login.signup.button')}
                             </Button>
                         </form>
                         </Form>
@@ -445,7 +448,7 @@ export default function LoginPage() {
       <div className="hidden bg-muted lg:block">
         <Image
           src="https://images.unsplash.com/photo-1588964895597-cf29a1a27a8d?q=80&w=1974&auto=format&fit=crop"
-          alt="Image d'une épicerie avec des produits frais"
+          alt={t('login.imageAlt')}
           width="1920"
           height="1080"
           className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"

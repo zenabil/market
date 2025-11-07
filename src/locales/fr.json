@@ -919,5 +919,71 @@
                 "name": "Le nom est requis."
             }
         }
+    },
+    "login": {
+        "imageAlt": "Image d'une épicerie avec des produits frais",
+        "tabs": {
+            "login": "Connexion",
+            "signup": "Inscription"
+        },
+        "login": {
+            "title": "Connexion",
+            "description": "Connectez-vous à votre compte pour continuer.",
+            "button": "Se connecter"
+        },
+        "signup": {
+            "title": "Créer un compte",
+            "description": "Rejoignez-nous dès aujourd'hui !",
+            "button": "S'inscrire"
+        },
+        "continueWithGoogle": "Continuer avec Google",
+        "orContinueWith": "Ou continuer avec",
+        "orSignupWith": "Ou s'inscrire avec",
+        "email": "Email",
+        "password": "Mot de passe",
+        "name": "Nom",
+        "confirmPassword": "Confirmer le mot de passe",
+        "forgotPassword": "Mot de passe oublié ?",
+        "resetPassword": {
+            "title": "Réinitialiser le mot de passe",
+            "description": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+            "cancel": "Annuler",
+            "send": "Envoyer l'email"
+        },
+        "validation": {
+            "email": "Veuillez entrer une adresse email valide.",
+            "password": "Le mot de passe doit contenir au moins 6 caractères.",
+            "name": "Le nom doit comporter au moins 2 caractères.",
+            "passwordMismatch": "Les mots de passe ne correspondent pas."
+        },
+        "toast": {
+            "loginSuccess": "Connexion réussie !",
+            "error": "Erreur",
+            "invalidCredentials": "L'email ou le mot de passe est incorrect.",
+            "signupSuccess": "Inscription réussie !",
+            "emailInUse": "Cet email est déjà utilisé.",
+            "googleSuccess": "Connexion avec Google réussie !",
+            "googleError": {
+                "title": "Erreur de connexion avec Google",
+                "description": "Une erreur s'est produite. Veuillez réessayer."
+            },
+            "resetEmailSent": {
+                "title": "Email de réinitialisation envoyé",
+                "description": "Veuillez consulter votre boîte de réception pour les instructions."
+            },
+            "resetEmailError": "Impossible d'envoyer l'e-mail de réinitialisation. Veuillez vérifier l'adresse e-mail."
+        }
+    },
+    "globalError": {
+        "permissionError": {
+            "title": "Erreur de règle de sécurité Firestore",
+            "description": "La requête suivante a été refusée par vos règles de sécurité."
+        },
+        "applicationError": {
+            "title": "Erreur d'application",
+            "description": "Une erreur inattendue est survenue."
+        },
+        "retry": "Réessayer",
+        "copyDetails": "Copier les détails"
     }
 }
