@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -318,6 +317,8 @@ type SiteSettings = {
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useLanguage();
@@ -336,8 +337,18 @@ export default function Header() {
     const searchQuery = formData.get('search') as string;
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchExpanded(false);
     }
   };
+  
+  const toggleSearch = () => {
+    setIsSearchExpanded(prev => !prev);
+    setTimeout(() => {
+        if (!isSearchExpanded) {
+            searchInputRef.current?.focus();
+        }
+    }, 100);
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -353,22 +364,42 @@ export default function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-1 md:space-x-2">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
+          <form onSubmit={handleSearch} className="hidden md:flex items-center">
+            <div className={cn("flex items-center justify-end transition-all duration-300 ease-in-out", isSearchExpanded ? "w-64" : "w-10")}>
+              <Input
+                ref={searchInputRef}
+                type="search"
+                name="search"
+                placeholder={t('header.searchPlaceholder')}
+                className={cn(
+                    "h-10 pr-10 transition-all duration-300 ease-in-out",
+                    isSearchExpanded ? "w-full opacity-100 pl-4" : "w-0 opacity-0 p-0 border-transparent"
+                )}
+                onBlur={() => setIsSearchExpanded(false)}
+              />
+              <Button type={isSearchExpanded ? 'submit' : 'button'} onClick={!isSearchExpanded ? toggleSearch : undefined} variant="ghost" size="icon" className={cn("absolute transition-all duration-300 ease-in-out", isSearchExpanded ? "text-primary" : "")}>
+                <Search className="h-5 w-5" />
+                <span className="sr-only">Search</span>
+              </Button>
+            </div>
+          </form>
+          
+           {/* Mobile Search */}
+          <div className="relative md:hidden">
+             <form onSubmit={handleSearch}>
                 <Input
                   type="search"
                   name="search"
                   placeholder={t('header.searchPlaceholder')}
-                  className="w-full bg-secondary md:w-[200px] lg:w-[300px] pr-9"
+                  className="w-full bg-secondary pr-9"
                 />
                 <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <span className="sr-only">Search</span>
                 </button>
-              </div>
-            </form>
+             </form>
           </div>
+
           <ImageSearchDialog>
             <Button variant="ghost" size="icon">
                 <Camera className="h-6 w-6" />
