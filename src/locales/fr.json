@@ -954,6 +954,13 @@
                 "threshold": "Seuil pour frais de livraison élevés",
                 "highFee": "Frais de livraison élevés"
             },
+            "social": {
+                "title": "Réseaux Sociaux",
+                "description": "Gérez les liens de vos profils sur les réseaux sociaux.",
+                "facebook": "Facebook",
+                "instagram": "Instagram",
+                "twitter": "Twitter / X"
+            },
             "toast": {
                 "updated": {
                     "title": "Paramètres mis à jour",
@@ -1098,5 +1105,3 @@
         }
     }
 }
-
-    

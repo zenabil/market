@@ -321,6 +321,21 @@
         "deliveryFeeHigh": {
           "type": "number",
           "description": "The delivery fee for orders that meet or exceed the threshold."
+        },
+        "facebookUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Facebook page."
+        },
+        "instagramUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Instagram profile."
+        },
+        "twitterUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Twitter/X profile."
         }
       },
       "required": [
@@ -668,5 +683,3 @@
     }
   }
 }
-
-    

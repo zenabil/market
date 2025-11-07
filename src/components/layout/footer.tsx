@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -14,6 +15,9 @@ type SiteSettings = {
   siteName?: string;
   phone?: string;
   address?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
 }
 
 export default function Footer() {
@@ -57,15 +61,21 @@ export default function Footer() {
               {t('footer.tagline')}
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Facebook size={20} />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Instagram size={20} />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Twitter size={20} />
-              </Link>
+              {settings?.facebookUrl && (
+                <Link href={settings.facebookUrl} className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">
+                    <Facebook size={20} />
+                </Link>
+              )}
+              {settings?.instagramUrl && (
+                <Link href={settings.instagramUrl} className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">
+                    <Instagram size={20} />
+                </Link>
+              )}
+              {settings?.twitterUrl && (
+                <Link href={settings.twitterUrl} className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">
+                    <Twitter size={20} />
+                </Link>
+              )}
             </div>
           </div>
           <div>

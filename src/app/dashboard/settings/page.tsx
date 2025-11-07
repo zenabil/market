@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, ImageIcon, X, ArrowLeft, Loader2 } from 'lucide-react';
+import { Upload, ImageIcon, X, ArrowLeft, Loader2, Facebook, Instagram, Twitter } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -46,6 +46,9 @@ export default function SettingsPage() {
     deliveryFeeBase: z.coerce.number().min(0),
     deliveryFeeThreshold: z.coerce.number().min(0),
     deliveryFeeHigh: z.coerce.number().min(0),
+    facebookUrl: z.string().url().optional().or(z.literal('')),
+    instagramUrl: z.string().url().optional().or(z.literal('')),
+    twitterUrl: z.string().url().optional().or(z.literal('')),
   });
   
   type SiteSettings = z.infer<typeof formSchema>;
@@ -64,6 +67,9 @@ export default function SettingsPage() {
       deliveryFeeBase: 100,
       deliveryFeeThreshold: 4000,
       deliveryFeeHigh: 200,
+      facebookUrl: '',
+      instagramUrl: '',
+      twitterUrl: '',
     },
   });
 
@@ -281,6 +287,48 @@ export default function SettingsPage() {
                         <FormItem>
                             <FormLabel>{t('dashboard.settings.delivery.highFee')}</FormLabel>
                             <FormControl><Input type="number" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('dashboard.settings.social.title')}</CardTitle>
+                    <CardDescription>{t('dashboard.settings.social.description')}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 max-w-2xl">
+                    <FormField
+                        control={form.control}
+                        name="facebookUrl"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="flex items-center gap-2"><Facebook className="h-4 w-4" /> {t('dashboard.settings.social.facebook')}</FormLabel>
+                            <FormControl><Input {...field} placeholder="https://facebook.com/..." /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="instagramUrl"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="flex items-center gap-2"><Instagram className="h-4 w-4" /> {t('dashboard.settings.social.instagram')}</FormLabel>
+                            <FormControl><Input {...field} placeholder="https://instagram.com/..." /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="twitterUrl"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="flex items-center gap-2"><Twitter className="h-4 w-4" /> {t('dashboard.settings.social.twitter')}</FormLabel>
+                            <FormControl><Input {...field} placeholder="https://x.com/..." /></FormControl>
                             <FormMessage />
                         </FormItem>
                         )}

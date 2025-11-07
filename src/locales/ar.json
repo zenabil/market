@@ -954,6 +954,13 @@
                 "threshold": "عتبة رسوم التوصيل المرتفعة",
                 "highFee": "رسوم التوصيل المرتفعة"
             },
+            "social": {
+                "title": "الشبكات الاجتماعية",
+                "description": "أدر روابط ملفاتك الشخصية على الشبكات الاجتماعية.",
+                "facebook": "Facebook",
+                "instagram": "Instagram",
+                "twitter": "Twitter / X"
+            },
             "toast": {
                 "updated": {
                     "title": "تم تحديث الإعدادات",
@@ -1098,5 +1105,3 @@
         }
     }
 }
-
-    
