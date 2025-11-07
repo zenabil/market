@@ -924,6 +924,35 @@
             "validation": {
                 "name": "Le nom est requis."
             }
+        },
+        "settings": {
+            "general": {
+                "title": "Général",
+                "description": "Gérez les paramètres généraux du site.",
+                "siteName": "Nom du site",
+                "logo": "Logo",
+                "uploadLogo": "Télécharger un logo",
+                "phone": "Numéro de téléphone",
+                "address": "Adresse"
+            },
+            "delivery": {
+                "title": "Livraison",
+                "description": "Gérez les frais et les configurations de livraison.",
+                "baseFee": "Frais de livraison de base",
+                "threshold": "Seuil pour frais de livraison élevés",
+                "highFee": "Frais de livraison élevés"
+            },
+            "toast": {
+                "updated": {
+                    "title": "Paramètres mis à jour",
+                    "description": "Les paramètres du site ont été enregistrés avec succès."
+                }
+            },
+            "validation": {
+                "siteName": "Le nom du site est requis.",
+                "phone": "Le numéro de téléphone est requis.",
+                "address": "L'adresse est requise."
+            }
         }
     },
     "login": {
