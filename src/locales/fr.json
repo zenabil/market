@@ -1036,5 +1036,64 @@
     "category": {
         "subtitle": "Découvrez nos produits dans la catégorie {{name}}",
         "noProducts": "Aucun produit trouvé dans cette catégorie."
+    },
+    "privacy": {
+        "title": "Politique de Confidentialité",
+        "lastUpdated": "Dernière mise à jour : 5 novembre 2025",
+        "introduction": {
+            "title": "Introduction",
+            "p1": "Bienvenue au Tlemcen Smart Supermarket. Nous respectons votre vie privée et nous nous engageons à la protéger. Cette politique de confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez notre site web."
+        },
+        "information": {
+            "title": "Informations que nous collectons",
+            "p1": "Nous pouvons collecter des informations personnelles vous concernant telles que :",
+            "listItem1": "Votre nom, votre adresse e-mail et votre numéro de téléphone.",
+            "listItem2": "Les informations de votre commande, y compris l'adresse de livraison.",
+            "listItem3": "Les informations de navigation et d'utilisation du site."
+        },
+        "howWeUse": {
+            "title": "Comment nous utilisons vos informations",
+            "p1": "Nous utilisons les informations que nous collectons pour traiter vos commandes, personnaliser votre expérience d'achat, améliorer notre site web et communiquer avec vous au sujet de nos produits et promotions."
+        },
+        "dataSecurity": {
+            "title": "Sécurité des données",
+            "p1": "Nous mettons en œuvre une variété de mesures de sécurité pour maintenir la sécurité de vos informations personnelles. Vos informations personnelles sont contenues derrière des réseaux sécurisés."
+        },
+        "policyChanges": {
+            "title": "Modifications de cette politique",
+            "p1": "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle politique de confidentialité sur cette page."
+        },
+        "contactUs": {
+            "title": "Contactez-nous",
+            "p1": "Si vous avez des questions concernant cette politique de confidentialité, vous pouvez nous contacter à l'adresse suivante :"
+        }
+    },
+    "terms": {
+        "title": "Conditions d'Utilisation",
+        "lastUpdated": "Dernière mise à jour : 5 novembre 2025",
+        "acceptance": {
+            "title": "1. Acceptation des conditions",
+            "p1": "En accédant à notre site web et en l'utilisant, vous acceptez d'être lié par les présentes conditions d'utilisation et toutes les lois et réglementations applicables."
+        },
+        "siteUsage": {
+            "title": "2. Utilisation du site",
+            "p1": "Vous êtes autorisé à utiliser notre site à des fins personnelles et non commerciales. Vous ne devez pas utiliser notre site à des fins illégales ou interdites par les présentes conditions."
+        },
+        "userAccounts": {
+            "title": "3. Comptes d'utilisateurs",
+            "p1": "Si vous créez un compte sur notre site, vous êtes responsable du maintien de la sécurité de votre compte et vous êtes entièrement responsable de toutes les activités qui se déroulent sous le compte."
+        },
+        "liability": {
+            "title": "4. Limitation de responsabilité",
+            "p1": "En aucun cas, le Tlemcen Smart Supermarket ne sera responsable de tout dommage direct, indirect, spécial, accidentel ou consécutif résultant de l'utilisation ou de l'impossibilité d'utiliser ce site."
+        },
+        "changes": {
+            "title": "5. Modifications des conditions",
+            "p1": "Nous nous réservons le droit de modifier ces conditions à tout moment. Nous vous recommandons de consulter cette page périodiquement pour être informé des changements."
+        },
+        "contactUs": {
+            "title": "Contactez-nous",
+            "p1": "Si vous avez des questions concernant ces conditions, vous pouvez nous contacter à l'adresse suivante :"
+        }
     }
 }
