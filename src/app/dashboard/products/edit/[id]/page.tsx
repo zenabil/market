@@ -46,7 +46,7 @@ function EditProductForm({ productId }: { productId: string }) {
     stock: z.coerce.number().int().min(0, { message: t('dashboard.products.validation.stock') }),
     categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
     discount: z.coerce.number().int().min(0).max(100).optional().default(0),
-    images: z.array(z.string().url({ message: t('dashboard.products.validation.imageURL') })).min(1, { message: t('dashboard.products.validation.minImage')}),
+    images: z.array(z.string().url({ message: t('dashboard.products.validation.imageURL') })).min(1, { message: t('dashboard.products.validation.minImage') }),
   });
 
   const { categories, areCategoriesLoading } = useCategories();
@@ -252,7 +252,7 @@ function EditProductForm({ productId }: { productId: string }) {
                 <CardContent className="space-y-4">
                     {fields.length > 0 && (
                         <div className="relative group aspect-square max-w-sm">
-                            <Image src={form.watch('images.0')} alt="Primary image" layout="fill" className="object-cover rounded-md border" />
+                            <Image src={form.watch('images.0')} alt="Primary image" fill className="object-cover rounded-md border" />
                             <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
                                 <span className='text-white font-bold bg-black/50 px-2 py-1 rounded-sm'>{t('dashboard.products.primaryImage')}</span>
                             </div>
@@ -261,7 +261,7 @@ function EditProductForm({ productId }: { productId: string }) {
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                     {fields.slice(1).map((field, index) => (
                       <div key={field.id} className="relative group aspect-square">
-                        <Image src={form.watch(`images.${index + 1}`)} alt={`Aperçu ${index + 1}`} layout="fill" className="object-cover rounded-md border" />
+                        <Image src={form.watch(`images.${index + 1}`)} alt={`Aperçu ${index + 1}`} fill className="object-cover rounded-md border" />
                         <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1'>
                             <Button
                                 type="button"
@@ -428,7 +428,3 @@ function EditProductForm({ productId }: { productId: string }) {
 export default function EditProductPage({ params }: { params: { id: string } }) {
   return <EditProductForm productId={params.id} />
 }
-
-    
-
-    

@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const Logo = ({ className, logoUrl }: { className?: string; logoUrl?: string | null }) => {
   if (logoUrl) {
-    return <Image src={logoUrl} alt="Logo" width={128} height={32} className={className} />;
+    return <Image src={logoUrl} alt="Logo" width={128} height={32} className={className} priority />;
   }
 
   return (
