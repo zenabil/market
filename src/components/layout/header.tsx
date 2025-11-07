@@ -198,7 +198,7 @@ function NotificationBell() {
     if (!user) return null;
 
     return (
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => open && unreadCount > 0 && handleMarkAllAsRead()}>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-6 w-6" />
@@ -212,16 +212,15 @@ function NotificationBell() {
             <DropdownMenuContent className="w-80 md:w-96" align="end">
                 <DropdownMenuLabel className="flex justify-between items-center">
                     {t('header.notifications')}
-                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>{t('header.markAllAsRead')}</Button>}
                 </DropdownMenuLabel>
                 <Separator />
                 <ScrollArea className="h-80">
                     {notifications && notifications.length > 0 ? (
                         notifications.map(notif => (
                             <DropdownMenuItem key={notif.id} asChild>
-                                <Link href={notif.link || '#'} className={cn("flex items-start gap-3 whitespace-normal", !notif.isRead && "bg-primary/10")}>
+                                <Link href={notif.link || '#'} className={cn("flex items-start gap-3 whitespace-normal", !notif.isRead && "font-bold")}>
                                      {!notif.isRead && <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-                                    <div className={cn("flex-grow", notif.isRead && "pr-4")}>
+                                    <div className={cn("flex-grow", notif.isRead && "pl-4")}>
                                         <p className="text-sm">{notif.message}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{timeAgo(notif.createdAt)}</p>
                                     </div>

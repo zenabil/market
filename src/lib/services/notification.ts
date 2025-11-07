@@ -43,7 +43,8 @@ export async function createNotification(
         operation: 'create',
         requestResourceData: notificationData,
       });
-      errorEmitter.emit('permission-error', permissionError);
+      // Do not emit error here, as notifications are best-effort and shouldn't block UI
+      console.warn('Permission denied to create notification:', permissionError.message);
     } else {
         console.error("Failed to create notification:", error);
     }

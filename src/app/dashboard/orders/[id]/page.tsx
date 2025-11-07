@@ -77,7 +77,7 @@ function OrderDetails() {
                  createNotification(firestore, order.userId, {
                     message: t('dashboard.orders.notification.statusUpdate', {id: order.id.slice(-6), status: t(`dashboard.orders.status.${newStatus}`)}),
                     link: `/dashboard/orders/${order.id}`,
-                 }).catch(console.error);
+                 });
                  refetchOrder();
             })
             .catch(error => {
@@ -236,15 +236,17 @@ function OrderDetails() {
                         <CardHeader>
                             <CardTitle className='flex items-center justify-between'>
                                 <span className='flex items-center gap-2'><User /> {t('dashboard.orders.details.customer')}</span>
-                                <AddressDialog 
-                                    userDocRef={userDocRef} 
-                                    firestoreUser={customer}
-                                    onAddressChange={refetchCustomer}
-                                >
-                                    <Button variant="ghost" size="icon" title={t('dashboard.orders.details.editAddresses')}>
-                                        <Home className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                </AddressDialog>
+                                {customer && userDocRef && (
+                                    <AddressDialog 
+                                        userDocRef={userDocRef} 
+                                        firestoreUser={customer}
+                                        onAddressChange={refetchCustomer}
+                                    >
+                                        <Button variant="ghost" size="icon" title={t('dashboard.orders.details.editAddresses')}>
+                                            <Home className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                    </AddressDialog>
+                                )}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
