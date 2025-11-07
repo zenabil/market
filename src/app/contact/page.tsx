@@ -39,7 +39,11 @@ export default function ContactPage() {
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'site');
+  }, [firestore]);
+  
   const { data: settings, isLoading } = useDoc<SiteSettings>(settingsRef);
 
 
@@ -62,19 +66,20 @@ export default function ContactPage() {
         createdAt: new Date().toISOString(),
     };
     
-    try {
-        const contactMessagesCollection = collection(firestore, 'contactMessages');
-        await addDoc(contactMessagesCollection, messageData);
+    const contactMessagesCollection = collection(firestore, 'contactMessages');
+    addDoc(contactMessagesCollection, messageData)
+      .then(() => {
         toast({
           title: 'Message envoyé !',
           description: 'Nous avons bien reçu votre message et nous vous répondrons bientôt.',
         });
         form.reset();
-    } catch (error) {
+      })
+      .catch((error) => {
         errorEmitter.emit(
             'permission-error',
             new FirestorePermissionError({
-                path: 'contactMessages',
+                path: contactMessagesCollection.path,
                 operation: 'create',
                 requestResourceData: messageData
             })
@@ -84,9 +89,10 @@ export default function ContactPage() {
           title: 'Échec de l\'envoi',
           description: 'Impossible d\'envoyer votre message pour le moment.',
         });
-    } finally {
+      })
+      .finally(() => {
         setIsSubmitting(false);
-    }
+      });
   }
 
   return (
@@ -203,5 +209,3 @@ export default function ContactPage() {
     </div>
   );
 }
-
-    
