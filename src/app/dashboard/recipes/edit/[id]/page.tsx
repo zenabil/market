@@ -25,18 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import type { Recipe } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
-
-const formSchema = z.object({
-  title: z.string().min(2),
-  description: z.string().optional(),
-  image: z.string().url(),
-  prepTime: z.coerce.number().int().min(0),
-  cookTime: z.coerce.number().int().min(0),
-  servings: z.coerce.number().int().min(1),
-  ingredients: z.array(z.object({ value: z.string().min(1, { message: "L'ingrédient ne peut pas être vide."}) })),
-  instructions: z.array(z.object({ value: z.string().min(1, { message: "L'instruction ne peut pas être vide."}) })),
-});
-
+import { useLanguage } from '@/contexts/language-provider';
 
 function DynamicFieldArray({ control, name, label, buttonText }: { control: any, name: 'ingredients' | 'instructions', label: string, buttonText: string }) {
     const { fields, append, remove } = useFieldArray({ control, name });
@@ -77,6 +66,19 @@ function DynamicFieldArray({ control, name, label, buttonText }: { control: any,
 }
 
 function EditRecipeForm({ recipeId }: { recipeId: string }) {
+  const { t } = useLanguage();
+  
+  const formSchema = z.object({
+    title: z.string().min(2),
+    description: z.string().optional(),
+    image: z.string().url(),
+    prepTime: z.coerce.number().int().min(0),
+    cookTime: z.coerce.number().int().min(0),
+    servings: z.coerce.number().int().min(1),
+    ingredients: z.array(z.object({ value: z.string().min(1, { message: t('dashboard.recipes.validation.ingredient')}) })),
+    instructions: z.array(z.object({ value: z.string().min(1, { message: t('dashboard.recipes.validation.instruction')}) })),
+  });
+  
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
@@ -149,7 +151,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
 
     updateDoc(recipeRef, recipeData)
         .then(() => {
-            toast({ title: 'Recette mise à jour' });
+            toast({ title: t('dashboard.recipes.toast.updated') });
             form.reset(values); // Reset the form to the new saved state, clearing isDirty
         })
         .catch(error => {
@@ -189,32 +191,32 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">Modifier la recette</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.recipes.editPageTitle')}</h1>
       </div>
 
        <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
-                <CardHeader><CardTitle>Détails de la recette</CardTitle></CardHeader>
+                <CardHeader><CardTitle>{t('dashboard.recipes.detailsTitle')}</CardTitle></CardHeader>
                 <CardContent className="space-y-6">
                     <FormField control={form.control} name="title" render={({ field }) => (
-                        <FormItem><FormLabel>Titre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>{t('dashboard.recipes.title')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="description" render={({ field }) => (
-                        <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>{t('dashboard.recipes.description')}</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="image" render={({ field }) => (
-                        <FormItem><FormLabel>URL de l'image</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>{t('dashboard.recipes.imageUrl')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FormField control={form.control} name="prepTime" render={({ field }) => (
-                            <FormItem><FormLabel>Temps de préparation (min)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('dashboard.recipes.prepTime')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="cookTime" render={({ field }) => (
-                            <FormItem><FormLabel>Temps de cuisson (min)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('dashboard.recipes.cookTime')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="servings" render={({ field }) => (
-                            <FormItem><FormLabel>Portions</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('dashboard.recipes.servings')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                 </CardContent>
@@ -222,26 +224,26 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
 
              <div className="grid md:grid-cols-2 gap-8">
                 <Card>
-                    <CardHeader><CardTitle>Ingrédients</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>{t('dashboard.recipes.ingredients')}</CardTitle></CardHeader>
                     <CardContent>
-                        <DynamicFieldArray control={form.control} name="ingredients" label="Ingrédients" buttonText="Ajouter un ingrédient" />
+                        <DynamicFieldArray control={form.control} name="ingredients" label={t('dashboard.recipes.ingredients')} buttonText={t('dashboard.recipes.addIngredient')} />
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader><CardTitle>Instructions</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>{t('dashboard.recipes.instructions')}</CardTitle></CardHeader>
                     <CardContent>
-                        <DynamicFieldArray control={form.control} name="instructions" label="Instructions" buttonText="Ajouter une instruction" />
+                        <DynamicFieldArray control={form.control} name="instructions" label={t('dashboard.recipes.instructions')} buttonText={t('dashboard.recipes.addInstruction')} />
                     </CardContent>
                 </Card>
             </div>
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/recipes">Annuler</Link>
+                <Link href="/dashboard/recipes">{t('dashboard.common.cancel')}</Link>
             </Button>
             <Button type="submit" disabled={isSaving || !isDirty}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enregistrer les modifications
+              {t('dashboard.common.saveChanges')}
             </Button>
           </div>
         </form>

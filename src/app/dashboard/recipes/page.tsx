@@ -25,8 +25,10 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function RecipesDashboardPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const recipesQuery = useMemoFirebase(() => query(collection(firestore, 'recipes')), [firestore]);
@@ -56,8 +58,8 @@ export default function RecipesDashboardPage() {
     if (!reviewSnapshot.empty) {
         toast({
             variant: 'destructive',
-            title: 'Impossible de supprimer la recette',
-            description: 'Cette recette contient des avis. Veuillez d\'abord supprimer les avis.',
+            title: t('dashboard.recipes.deleteError.title'),
+            description: t('dashboard.recipes.deleteError.description'),
         });
         setIsDeleting(false);
         setIsAlertOpen(false);
@@ -68,7 +70,7 @@ export default function RecipesDashboardPage() {
     const recipeDocRef = doc(firestore, 'recipes', recipeToDelete.id);
     try {
       await deleteDoc(recipeDocRef);
-      toast({ title: 'Recette supprimée' });
+      toast({ title: t('dashboard.recipes.toast.deleted') });
       refetchRecipes();
     } catch (error) {
       errorEmitter.emit(
@@ -80,8 +82,8 @@ export default function RecipesDashboardPage() {
       );
       toast({
         variant: 'destructive',
-        title: 'Erreur de suppression',
-        description: 'Vous n\'avez peut-être pas la permission de faire cela.',
+        title: t('dashboard.common.deleteErrorTitle'),
+        description: t('dashboard.common.permissionError'),
       });
     } finally {
       setIsDeleting(false);
@@ -111,13 +113,13 @@ export default function RecipesDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-                <CardTitle>Recettes</CardTitle>
-                <CardDescription>Gérez vos recettes de cuisine.</CardDescription>
+                <CardTitle>{t('dashboard.layout.recipes')}</CardTitle>
+                <CardDescription>{t('dashboard.recipes.description')}</CardDescription>
             </div>
             <Button asChild size="sm" className="gap-1">
               <Link href="/dashboard/recipes/new">
                 <PlusCircle className="h-4 w-4" />
-                Ajouter une recette
+                {t('dashboard.recipes.addRecipe')}
               </Link>
             </Button>
           </CardHeader>
@@ -125,12 +127,12 @@ export default function RecipesDashboardPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20">Image</TableHead>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Portions</TableHead>
-                  <TableHead>Temps total</TableHead>
+                  <TableHead className="w-20">{t('dashboard.recipes.table.image')}</TableHead>
+                  <TableHead>{t('dashboard.recipes.table.title')}</TableHead>
+                  <TableHead>{t('dashboard.recipes.table.servings')}</TableHead>
+                  <TableHead>{t('dashboard.recipes.table.totalTime')}</TableHead>
                   <TableHead>
-                    <span className="sr-only">Actions</span>
+                    <span className="sr-only">{t('dashboard.common.actions')}</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -157,16 +159,16 @@ export default function RecipesDashboardPage() {
                         <DropdownMenuTrigger asChild>
                           <Button aria-haspopup="true" size="icon" variant="ghost">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Ouvrir le menu</span>
+                            <span className="sr-only">{t('dashboard.common.openMenu')}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/recipes/edit/${recipe.id}`}>Modifier</Link>
+                            <Link href={`/dashboard/recipes/edit/${recipe.id}`}>{t('dashboard.common.edit')}</Link>
                           </DropdownMenuItem>
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(recipe); }} className="text-destructive">
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
+                                {t('dashboard.common.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -177,7 +179,7 @@ export default function RecipesDashboardPage() {
             </Table>
              {!areRecipesLoading && recipes?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
-                    Aucune recette trouvée.
+                    {t('dashboard.recipes.noRecipes')}
                 </div>
             )}
           </CardContent>
@@ -185,16 +187,16 @@ export default function RecipesDashboardPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+              <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Cette action ne peut pas être annulée. Cela supprimera définitivement la recette "{recipeToDelete?.title || ''}".
+                 {t('dashboard.recipes.confirmDeleteDescription').replace('{{name}}', recipeToDelete?.title || '')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setRecipeToDelete(null)}>Annuler</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setRecipeToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteRecipe} disabled={isDeleting}>
                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Supprimer
+                {t('dashboard.common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

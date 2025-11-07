@@ -540,6 +540,49 @@
                 "zipCode": "Le code postal doit comporter au moins 3 caractères.",
                 "country": "Le pays doit comporter au moins 2 caractères."
             }
+        },
+        "recipes": {
+            "pageTitle": "Recettes",
+            "description": "Gérez vos recettes de cuisine.",
+            "addRecipe": "Ajouter une recette",
+            "noRecipes": "Aucune recette trouvée.",
+            "confirmDeleteDescription": "Cette action ne peut pas être annulée. Cela supprimera définitivement la recette '{{name}}'.",
+            "toast": {
+                "deleted": "Recette supprimée",
+                "updated": "Recette mise à jour",
+                "created": "Recette créée"
+            },
+            "deleteError": {
+                "title": "Impossible de supprimer la recette",
+                "description": "Cette recette contient encore des avis. Veuillez d'abord supprimer les avis."
+            },
+            "table": {
+                "image": "Image",
+                "title": "Titre",
+                "servings": "Portions",
+                "totalTime": "Temps total"
+            },
+            "editPageTitle": "Modifier la recette",
+            "newPageTitle": "Ajouter une nouvelle recette",
+            "detailsTitle": "Détails de la recette",
+            "title": "Titre",
+            "description": "Description",
+            "descriptionPlaceholder": "Une brève description de la recette...",
+            "imageUrl": "URL de l'image",
+            "prepTime": "Temps de préparation (min)",
+            "cookTime": "Temps de cuisson (min)",
+            "servings": "Portions",
+            "ingredients": "Ingrédients",
+            "instructions": "Instructions",
+            "addIngredient": "Ajouter un ingrédient",
+            "addInstruction": "Ajouter une instruction",
+            "createAndContinue": "Créer et continuer",
+            "validation": {
+                "title": "Le titre est requis.",
+                "imageUrl": "Veuillez entrer une URL d'image valide.",
+                "ingredient": "L'ingrédient ne peut pas être vide.",
+                "instruction": "L'instruction ne peut pas être vide."
+            }
         }
     }
 }

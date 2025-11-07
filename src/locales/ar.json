@@ -540,6 +540,49 @@
                 "zipCode": "يجب أن يتكون الرمز البريدي من 3 أحرف على الأقل.",
                 "country": "يجب أن تتكون الدولة من حرفين على الأقل."
             }
+        },
+        "recipes": {
+            "pageTitle": "الوصفات",
+            "description": "إدارة وصفات الطبخ الخاصة بك.",
+            "addRecipe": "إضافة وصفة",
+            "noRecipes": "لم يتم العثور على وصفات.",
+            "confirmDeleteDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الوصفة '{{name}}' بشكل دائم.",
+            "toast": {
+                "deleted": "تم حذف الوصفة",
+                "updated": "تم تحديث الوصفة",
+                "created": "تم إنشاء الوصفة"
+            },
+            "deleteError": {
+                "title": "لا يمكن حذف الوصفة",
+                "description": "هذه الوصفة لا تزال تحتوي على مراجعات. يرجى حذف المراجعات أولاً."
+            },
+            "table": {
+                "image": "الصورة",
+                "title": "العنوان",
+                "servings": "حصص",
+                "totalTime": "الوقت الإجمالي"
+            },
+            "editPageTitle": "تعديل الوصفة",
+            "newPageTitle": "إضافة وصفة جديدة",
+            "detailsTitle": "تفاصيل الوصفة",
+            "title": "العنوان",
+            "description": "الوصف",
+            "descriptionPlaceholder": "وصف موجز للوصفة...",
+            "imageUrl": "رابط الصورة",
+            "prepTime": "وقت التحضير (دقائق)",
+            "cookTime": "وقت الطهي (دقائق)",
+            "servings": "حصص",
+            "ingredients": "المكونات",
+            "instructions": "التعليمات",
+            "addIngredient": "إضافة مكون",
+            "addInstruction": "إضافة تعليمات",
+            "createAndContinue": "إنشاء ومتابعة",
+            "validation": {
+                "title": "العنوان مطلوب.",
+                "imageUrl": "الرجاء إدخال رابط صورة صالح.",
+                "ingredient": "لا يمكن أن يكون المكون فارغًا.",
+                "instruction": "لا يمكن أن تكون التعليمات فارغة."
+            }
         }
     }
 }
