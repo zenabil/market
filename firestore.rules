@@ -124,6 +124,13 @@ service cloud.firestore {
      * @allow create: if isSignedIn() && isOwner(userId);
      * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
      * @allow delete: if false; // Generally don't want users to delete their own account record
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
+      allow delete: if false;
 
       /**
        * @description Allows a user to manage their own wishlist.
@@ -159,39 +166,40 @@ service cloud.firestore {
         allow get, list, update, delete: if isSignedIn() && isOwner(userId);
         allow create: if isAdmin();
       }
-    }
 
-    /**
-     * @description Allows a user to manage their own addresses.
-     * @path /users/{userId}/addresses/{addressId}
-     * @allow get, list: if isSignedIn() && isOwner(userId);
-     * @allow create: if isSignedIn() && isOwner(userId);
-     * @allow update: if isSignedIn() && isExistingOwner(userId);
-     * @allow delete: if isSignedIn() && isExistingOwner(userId);
-     * @principle Restricts access to a user's own data tree.
-     */
-    match /users/{userId}/addresses/{addressId} {
-      allow get, list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isExistingOwner(userId);
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-    }
+        /**
+         * @description Allows a user to manage their own addresses.
+         * @path /users/{userId}/addresses/{addressId}
+         * @allow get, list: if isSignedIn() && isOwner(userId);
+         * @allow create: if isSignedIn() && isOwner(userId);
+         * @allow update: if isSignedIn() && isExistingOwner(userId);
+         * @allow delete: if isSignedIn() && isExistingOwner(userId);
+         * @principle Restricts access to a user's own data tree.
+         */
+        match /addresses/{addressId} {
+        allow get, list: if isSignedIn() && isOwner(userId);
+        allow create: if isSignedIn() && isOwner(userId);
+        allow update: if isSignedIn() && isExistingOwner(userId);
+        allow delete: if isSignedIn() && isExistingOwner(userId);
+        }
 
-    /**
-     * @description Allows a user to manage their own orders.
-     * @path /users/{userId}/orders/{orderId}
-     * @allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
-     * @allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-     * @allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
-     * @allow delete: if isSignedIn() && isExistingOwner(userId);
-     * @principle Restricts access to a user's own orders, validates userId on create/update.
-     */
-    match /users/{userId}/orders/{orderId} {
-      allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+        /**
+         * @description Allows a user to manage their own orders.
+         * @path /users/{userId}/orders/{orderId}
+         * @allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
+         * @allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+         * @allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
+         * @allow delete: if isSignedIn() && isExistingOwner(userId);
+         * @principle Restricts access to a user's own orders, validates userId on create/update.
+         */
+        match /orders/{orderId} {
+        allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
+        allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isSignedIn() && isExistingOwner(userId);
+        }
     }
+    
 
     /**
      * @description Allows admins to manage admin roles. The first user in the system can self-assign the admin role.
