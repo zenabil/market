@@ -32,5 +32,27 @@
         "termsOfUse": "Conditions d'utilisation",
         "contactUs": "Contactez-nous",
         "copyright": "© {{year}} {{siteName}}. Tous droits réservés."
+    },
+    "about": {
+        "title": "À Propos de Tlemcen Smart Supermarket",
+        "subtitle": "Apporter fraîcheur et innovation au cœur de Tlemcen.",
+        "storyTitle": "Notre Histoire",
+        "storyP1": "Tlemcen Smart Supermarket a commencé avec une vision simple : rendre les courses une expérience agréable, efficace et pratique pour notre communauté. Fondé au cœur de Tlemcen, nous combinons le charme d'un marché local traditionnel avec la puissance de la technologie intelligente.",
+        "storyP2": "Nous croyons que la qualité ne devrait pas être un luxe. En travaillant directement avec les agriculteurs et producteurs locaux, nous nous assurons que chaque produit sur nos étagères, virtuelles ou physiques, répond aux normes les plus élevées de fraîcheur et de qualité.",
+        "storyP3": "Mais nous sommes plus qu'un simple supermarché. Nous sommes un pôle communautaire, un lieu où la tradition rencontre l'innovation. Notre objectif est de simplifier votre vie, d'inspirer vos aventures culinaires et de soutenir notre économie locale.",
+        "valuesTitle": "Nos Valeurs",
+        "values": {
+            "qualityFreshness": "Qualité & Fraîcheur",
+            "qualityFreshnessDesc": "Notre engagement est de fournir uniquement les produits les plus frais et les plus savoureux.",
+            "smartTechnology": "Technologie Intelligente",
+            "smartTechnologyDesc": "Utiliser l'IA pour améliorer votre expérience d'achat, des recommandations à la gestion des stocks.",
+            "communitySpirit": "Esprit de Communauté",
+            "communitySpiritDesc": "Soutenir les producteurs locaux de Tlemcen et s'engager activement dans notre communauté.",
+            "qualityCommitment": "Engagement Qualité",
+            "qualityCommitmentDesc": "Garantir que chaque produit respecte nos normes élevées avant de vous parvenir."
+        },
+        "teamTitle": "Rencontrez l'Équipe",
+        "teamSubtitle": "Les personnes qui rendent tout cela possible.",
+        "teamComingSoon": "Les membres de notre équipe seront bientôt présentés !"
     }
 }

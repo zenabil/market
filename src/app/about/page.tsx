@@ -1,14 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { ShieldCheck, Code, Users, Leaf, Loader2 } from 'lucide-react';
+import { ShieldCheck, Code, Users, Leaf } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
 import { teamMembers as staticTeamMembers } from '@/lib/team-data.json';
 import { useLanguage } from '@/contexts/language-provider';
-
 
 const values = [
     {
