@@ -48,7 +48,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-provider';
 
 
-function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | null, onActionComplete: () => void }) {
+function TeamMemberDialog({ member, onActionComplete, children }: { member?: TeamMember | null, onActionComplete: () => void, children: React.ReactNode }) {
   const { t } = useLanguage();
   const teamMemberFormSchema = z.object({
     name: z.string().min(2, { message: t('dashboard.team.validation.name') }),
@@ -121,19 +121,7 @@ function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | 
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {member ? (
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Edit className="mr-2 h-4 w-4" />
-                {t('dashboard.common.edit')}
-            </DropdownMenuItem>
-        ) : (
-             <Button size="sm" className="gap-1">
-                <PlusCircle className="h-4 w-4" />
-                {t('dashboard.team.addMember')}
-             </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{member ? t('dashboard.team.editMember') : t('dashboard.team.addMemberTitle')}</DialogTitle>
@@ -242,7 +230,12 @@ export default function TeamPage() {
             <CardTitle>{t('dashboard.team.title')}</CardTitle>
             <CardDescription>{t('dashboard.team.description')}</CardDescription>
             </div>
-            <TeamMemberDialog onActionComplete={refetch} />
+            <TeamMemberDialog onActionComplete={refetch}>
+                <Button size="sm" className="gap-1">
+                    <PlusCircle className="h-4 w-4" />
+                    {t('dashboard.team.addMember')}
+                </Button>
+            </TeamMemberDialog>
         </CardHeader>
         <CardContent>
             <Table>
@@ -279,7 +272,12 @@ export default function TeamPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <TeamMemberDialog member={member} onActionComplete={refetch} />
+                            <TeamMemberDialog member={member} onActionComplete={refetch}>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    {t('dashboard.common.edit')}
+                                </DropdownMenuItem>
+                            </TeamMemberDialog>
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(member);}} className="text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t('dashboard.common.delete')}

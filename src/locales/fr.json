@@ -363,6 +363,7 @@
             "coupons": "Coupons",
             "discounts": "Réductions",
             "settings": "Paramètres",
+            "team": "Équipe",
             "myOrders": "Mes commandes",
             "shoppingLists": "Listes de courses",
             "wishlist": "Liste de souhaits",
@@ -582,6 +583,29 @@
                 "imageUrl": "Veuillez entrer une URL d'image valide.",
                 "ingredient": "L'ingrédient ne peut pas être vide.",
                 "instruction": "L'instruction ne peut pas être vide."
+            }
+        },
+        "team": {
+            "title": "Gestion de l'équipe",
+            "description": "Ajoutez, modifiez ou supprimez des membres de l'équipe.",
+            "addMember": "Ajouter un membre",
+            "editMember": "Modifier le membre",
+            "addMemberTitle": "Ajouter un nouveau membre",
+            "avatar": "Avatar",
+            "name": "Nom",
+            "role": "Rôle",
+            "avatarUrl": "URL de l'avatar",
+            "noMembers": "Aucun membre d'équipe trouvé.",
+            "confirmDeleteDescription": "Cette action est irréversible. Elle supprimera définitivement '{{name}}' de l'équipe.",
+            "toast": {
+                "added": "Membre de l'équipe ajouté",
+                "updated": "Membre de l'équipe mis à jour",
+                "deleted": "Membre de l'équipe supprimé"
+            },
+            "validation": {
+                "name": "Le nom est requis.",
+                "role": "Le rôle est requis.",
+                "avatar": "Veuillez entrer une URL d'avatar valide."
             }
         }
     }
