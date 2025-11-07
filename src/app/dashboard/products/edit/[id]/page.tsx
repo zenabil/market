@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect } from 'react';
@@ -427,5 +428,7 @@ function EditProductForm({ productId }: { productId: string }) {
 export default function EditProductPage({ params }: { params: { id: string } }) {
   return <EditProductForm productId={params.id} />
 }
+
+    
 
     
