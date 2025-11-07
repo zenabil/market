@@ -254,6 +254,7 @@
         "discountCode": "Code de réduction",
         "apply": "Appliquer",
         "discountApplied": "Réduction appliquée : {{code}} ({{percentage}}%)",
+        "originalSubtotal": "Sous-total original",
         "subtotal": "Sous-total",
         "discount": "Réduction",
         "shipping": "Livraison",
@@ -1105,3 +1106,5 @@
         }
     }
 }
+
+    

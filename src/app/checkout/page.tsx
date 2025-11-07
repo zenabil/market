@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -175,7 +176,7 @@ export default function CheckoutPage() {
         }
         
         setAppliedCoupon(couponData);
-        toast({ title: t('checkout.coupon.applied').replace('{{code}}', couponData.code) });
+        toast({ title: t('checkout.coupon.applied', { code: couponData.code }) });
     } catch (error) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'list',
@@ -328,7 +329,7 @@ export default function CheckoutPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>{t('checkout.orderSummary')}</CardTitle>
-                    <CardDescription>{t('checkout.itemsInCart').replace('{{count}}', totalItems.toString())}</CardDescription>
+                    <CardDescription>{t('checkout.itemsInCart', { count: totalItems })}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
@@ -369,24 +370,24 @@ export default function CheckoutPage() {
                       {appliedCoupon && (
                         <p className="text-sm text-primary flex items-center gap-2">
                           <TicketPercent className="h-4 w-4" />
-                          <span>{t('checkout.discountApplied').replace('{{code}}', appliedCoupon.code).replace('{{percentage}}', appliedCoupon.discountPercentage.toString())}</span>
+                          <span>{t('checkout.discountApplied', { code: appliedCoupon.code, percentage: appliedCoupon.discountPercentage })}</span>
                         </p>
                       )}
                     </div>
                    <Separator />
                    <div className="space-y-2">
                         <div className="flex justify-between text-muted-foreground">
-                           <span>Sous-total Original</span>
-                           <span className='line-through'>{formatCurrency(originalSubtotal)}</span>
+                           <span>{t('checkout.originalSubtotal')}</span>
+                           <span className={cn(totalPrice !== originalSubtotal && 'line-through')}>{formatCurrency(originalSubtotal)}</span>
                        </div>
                        <div className="flex justify-between">
                            <span>{t('checkout.subtotal')}</span>
-                           <span>{formatCurrency(subTotalAfterDiscount)}</span>
+                           <span>{formatCurrency(totalPrice)}</span>
                        </div>
                         {appliedCoupon && (
                           <div className="flex justify-between text-primary">
                             <span>{t('checkout.discount')}</span>
-                            <span>- {formatCurrency(totalPrice - subTotalAfterDiscount)}</span>
+                            <span>- {formatCurrency(totalPrice * (appliedCoupon.discountPercentage / 100))}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
@@ -411,10 +412,12 @@ export default function CheckoutPage() {
                 disabled={isProcessing}
             >
                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {step === 'details' ? t('checkout.proceedToPayment') : t('checkout.payNow').replace('{{amount}}', formatCurrency(finalTotalPrice))}
+                {step === 'details' ? t('checkout.proceedToPayment') : t('checkout.payNow', { amount: formatCurrency(finalTotalPrice) })}
             </Button>
         </div>
       </div>
     </div>
   );
 }
+
+    

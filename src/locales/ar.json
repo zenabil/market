@@ -254,6 +254,7 @@
         "discountCode": "كود الخصم",
         "apply": "تطبيق",
         "discountApplied": "تم تطبيق الخصم: {{code}} ({{percentage}}%)",
+        "originalSubtotal": "المجموع الفرعي الأصلي",
         "subtotal": "المجموع الفرعي",
         "discount": "الخصم",
         "shipping": "الشحن",
@@ -1105,3 +1106,5 @@
         }
     }
 }
+
+    
