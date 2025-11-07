@@ -343,6 +343,12 @@ function ProductDetails({ productId }: { productId: string }) {
                         ))}
                     </div>
                 )}
+                 <div className="mt-6 flex justify-end">
+                    <Button size="lg" className="font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        {product.stock === 0 ? t('product.outOfStock') : "Ajouter l'offre au panier"}
+                    </Button>
+                </div>
             </CardContent>
         </Card>
       )}
@@ -363,3 +369,5 @@ function ProductDetails({ productId }: { productId: string }) {
 export default function ProductPage({ params }: { params: { id: string } }) {
     return <ProductDetails productId={params.id} />
 }
+
+    

@@ -254,3 +254,5 @@ function RecipeDetailsPage() {
 export default function RecipePage() {
     return <RecipeDetailsPage />
 }
+
+    

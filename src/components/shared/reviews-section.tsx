@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
+import { collection, query, orderBy, addDoc, updateDoc, doc, runTransaction } from 'firebase/firestore';
 import type { Review } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -32,8 +33,8 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const reviewSchema = z.object({
-    comment: z.string().min(10, t('reviews.validation.comment')),
-    rating: z.number().min(1, t('reviews.validation.rating')).max(5),
+    comment: z.string().min(10, {message: t('reviews.validation.comment')}),
+    rating: z.number().min(1, {message: t('reviews.validation.rating')}).max(5),
   });
 
   const targetRef = useMemoFirebase(() => {
@@ -41,21 +42,17 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
     return doc(firestore, targetCollection, targetId);
   }, [firestore, targetCollection, targetId]);
 
-  const { data: reviews } = useCollection<Review>(
-    useMemoFirebase(() => targetRef ? query(collection(targetRef, 'reviews')) : null, [targetRef])
-  );
-
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
     defaultValues: { comment: '', rating: 0 },
   });
 
   const onSubmit = async (values: z.infer<typeof reviewSchema>) => {
-    if (!user || !firestore || !targetRef || !reviews) return;
+    if (!user || !firestore || !targetRef) return;
 
     setIsSubmitting(true);
     
-    const reviewData = {
+    const newReview = {
         userId: user.uid,
         userName: user.displayName || t('reviews.anonymous'),
         userAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`,
@@ -67,18 +64,26 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
     const reviewsCollection = collection(targetRef, 'reviews');
     
     try {
-        await addDoc(reviewsCollection, reviewData);
-        
-        const totalReviews = reviews.length + 1;
-        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0) + values.rating;
-        const averageRating = totalRating / totalReviews;
+        await runTransaction(firestore, async (transaction) => {
+            // 1. Add the new review
+            const newReviewRef = doc(reviewsCollection);
+            transaction.set(newReviewRef, newReview);
 
-        const targetUpdateData = {
-            reviewCount: totalReviews,
-            averageRating: averageRating
-        };
+            // 2. Get current reviews to calculate new average
+            const reviewsSnapshot = await getDocs(query(reviewsCollection));
+            const existingReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
 
-        await updateDoc(targetRef, targetUpdateData);
+            // 3. Calculate new average rating and count
+            const totalReviews = existingReviews.length + 1;
+            const totalRating = existingReviews.reduce((sum, review) => sum + review.rating, 0) + values.rating;
+            const averageRating = totalRating / totalReviews;
+
+            // 4. Update the parent document (product or recipe)
+            transaction.update(targetRef, {
+                reviewCount: totalReviews,
+                averageRating: averageRating
+            });
+        });
         
         toast({ title: t('reviews.success.title') });
         form.reset({ comment: '', rating: 0 });
@@ -89,7 +94,7 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
              errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: reviewsCollection.path,
                 operation: 'create',
-                requestResourceData: reviewData
+                requestResourceData: newReview
             }));
         } else {
             console.error("An unexpected error occurred:", error);
@@ -219,3 +224,5 @@ export default function ReviewsSection({ targetId, targetCollection, onReviewCha
     </div>
   );
 }
+
+    
