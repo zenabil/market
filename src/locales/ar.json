@@ -1,4 +1,3 @@
-
 {
     "locale": "ar-DZ",
     "home": {
@@ -606,6 +605,88 @@
                 "name": "الاسم مطلوب.",
                 "role": "الدور مطلوب.",
                 "avatar": "الرجاء إدخال رابط صورة رمزية صالح."
+            }
+        },
+        "profile": {
+            "title": "ملفي الشخصي",
+            "description": "إدارة معلومات ملفك الشخصي وعناوينك.",
+            "name": "الاسم الكامل",
+            "email": "البريد الإلكتروني",
+            "phone": "رقم الهاتف",
+            "loyaltyPoints": "نقاط الولاء",
+            "changePasswordTitle": "تغيير كلمة المرور",
+            "changePasswordDescription": "اختر كلمة مرور جديدة قوية.",
+            "newPassword": "كلمة المرور الجديدة",
+            "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+            "updatePassword": "تحديث كلمة المرور",
+            "manageAddressesTitle": "إدارة العناوين",
+            "manageAddressesDescription": "أضف أو أزل عناوين الشحن الخاصة بك.",
+            "addAddress": "إضافة عنوان",
+            "noAddresses": "لم تتم إضافة أي عناوين بعد.",
+            "confirmDeleteAddress": "هل أنت متأكد من رغبتك في حذف هذا العنوان؟",
+            "toast": {
+                "avatarUpdated": "تم تحديث الصورة الرمزية بنجاح.",
+                "avatarError": "فشل تحديث الصورة الرمزية.",
+                "profileUpdated": {
+                    "title": "تم تحديث الملف الشخصي",
+                    "description": "تم حفظ معلوماتك بنجاح."
+                },
+                "profileError": {
+                    "title": "خطأ في تحديث الملف الشخصي",
+                    "description": "حدثت مشكلة أثناء حفظ ملفك الشخصي."
+                },
+                "passwordUpdated": {
+                    "title": "تم تحديث كلمة المرور",
+                    "description": "تم تغيير كلمة المرور الخاصة بك بنجاح."
+                },
+                "addressDeleted": "تم حذف العنوان."
+            },
+            "validation": {
+                "name": "يجب أن يتكون الاسم من حرفين على الأقل.",
+                "passwordLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+                "passwordMismatch": "كلمتا المرور غير متطابقتين."
+            }
+        },
+        "messages": {
+            "description": "عرض الرسائل من نموذج الاتصال.",
+            "date": "التاريخ",
+            "from": "من",
+            "subject": "الموضوع",
+            "noMessages": "لا توجد رسائل لعرضها.",
+            "confirmDeleteDescription": "هل أنت متأكد من رغبتك في حذف هذه الرسالة؟ لا يمكن التراجع عن هذا الإجراء.",
+            "toast": {
+                "deleted": "تم حذف الرسالة."
+            }
+        },
+        "users": {
+            "description": "إدارة المستخدمين وأدوارهم.",
+            "user": "المستخدم",
+            "role": {
+                "title": "الدور",
+                "admin": "مسؤول",
+                "user": "مستخدم"
+            },
+            "registrationDate": "تاريخ التسجيل",
+            "totalSpent": "إجمالي الإنفاق",
+            "noUsers": "لم يتم العثور على مستخدمين.",
+            "editAddresses": "تعديل عناوين المستخدم",
+            "loyaltyDialog": {
+                "title": "تعديل نقاط الولاء لـ {{name}}",
+                "label": "النقاط"
+            },
+            "toast": {
+                "loyaltyUpdated": {
+                    "title": "تم تحديث النقاط",
+                    "description": "لدى {{name}} الآن {{points}} نقطة."
+                },
+                "roleUpdated": {
+                    "title": "تم تحديث الدور",
+                    "description": "{{name}} هو الآن {{role}}."
+                },
+                "roleError": {
+                    "title": "خطأ",
+                    "description": "فشل تحديث الدور."
+                }
             }
         }
     }

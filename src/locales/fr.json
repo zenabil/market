@@ -1,4 +1,3 @@
-
 {
     "locale": "fr-FR",
     "home": {
@@ -606,6 +605,88 @@
                 "name": "Le nom est requis.",
                 "role": "Le rôle est requis.",
                 "avatar": "Veuillez entrer une URL d'avatar valide."
+            }
+        },
+        "profile": {
+            "title": "Mon Profil",
+            "description": "Gérez les informations de votre profil et vos adresses.",
+            "name": "Nom complet",
+            "email": "Adresse e-mail",
+            "phone": "Numéro de téléphone",
+            "loyaltyPoints": "Points de fidélité",
+            "changePasswordTitle": "Changer le mot de passe",
+            "changePasswordDescription": "Choisissez un nouveau mot de passe fort.",
+            "newPassword": "Nouveau mot de passe",
+            "confirmNewPassword": "Confirmer le nouveau mot de passe",
+            "updatePassword": "Mettre à jour le mot de passe",
+            "manageAddressesTitle": "Gérer les adresses",
+            "manageAddressesDescription": "Ajoutez ou supprimez vos adresses de livraison.",
+            "addAddress": "Ajouter une adresse",
+            "noAddresses": "Aucune adresse n'a encore été ajoutée.",
+            "confirmDeleteAddress": "Êtes-vous sûr de vouloir supprimer cette adresse ?",
+            "toast": {
+                "avatarUpdated": "Avatar mis à jour avec succès.",
+                "avatarError": "Échec de la mise à jour de l'avatar.",
+                "profileUpdated": {
+                    "title": "Profil mis à jour",
+                    "description": "Vos informations ont été enregistrées avec succès."
+                },
+                "profileError": {
+                    "title": "Erreur de mise à jour du profil",
+                    "description": "Un problème est survenu lors de l'enregistrement de votre profil."
+                },
+                "passwordUpdated": {
+                    "title": "Mot de passe mis à jour",
+                    "description": "Votre mot de passe a été changé avec succès."
+                },
+                "addressDeleted": "Adresse supprimée."
+            },
+            "validation": {
+                "name": "Le nom doit comporter au moins 2 caractères.",
+                "passwordLength": "Le mot de passe doit comporter au moins 6 caractères.",
+                "passwordMismatch": "Les mots de passe ne correspondent pas."
+            }
+        },
+        "messages": {
+            "description": "Affichez les messages du formulaire de contact.",
+            "date": "Date",
+            "from": "De",
+            "subject": "Sujet",
+            "noMessages": "Aucun message à afficher.",
+            "confirmDeleteDescription": "Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.",
+            "toast": {
+                "deleted": "Message supprimé."
+            }
+        },
+        "users": {
+            "description": "Gérez les utilisateurs et leurs rôles.",
+            "user": "Utilisateur",
+            "role": {
+                "title": "Rôle",
+                "admin": "Admin",
+                "user": "Utilisateur"
+            },
+            "registrationDate": "Date d'inscription",
+            "totalSpent": "Total dépensé",
+            "noUsers": "Aucun utilisateur trouvé.",
+            "editAddresses": "Modifier les adresses de l'utilisateur",
+            "loyaltyDialog": {
+                "title": "Modifier les points de fidélité pour {{name}}",
+                "label": "Points"
+            },
+            "toast": {
+                "loyaltyUpdated": {
+                    "title": "Points mis à jour",
+                    "description": "{{name}} a maintenant {{points}} points."
+                },
+                "roleUpdated": {
+                    "title": "Rôle mis à jour",
+                    "description": "{{name}} est maintenant un {{role}}."
+                },
+                "roleError": {
+                    "title": "Erreur",
+                    "description": "Échec de la mise à jour du rôle."
+                }
             }
         }
     }
