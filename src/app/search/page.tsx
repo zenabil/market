@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSearchParams } from 'next/navigation';
@@ -8,6 +9,13 @@ import { collection, query } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Recherche',
+  description: 'Recherchez parmi des milliers de produits disponibles dans notre supermarché.',
+};
+
 
 function SearchResults() {
   const { t } = useLanguage();
