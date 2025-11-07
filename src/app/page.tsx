@@ -86,6 +86,7 @@ function HomeProducts() {
   const { data: latestRecipes, isLoading: isLoadingRecipes } = useCollection<Recipe>(latestRecipesQuery);
 
   const { categories, areCategoriesLoading } = useCategories();
+  const { t } = useLanguage();
 
   const isLoading = isLoadingBestSellers || isLoadingOffers || areCategoriesLoading || isLoadingNewArrivals || isLoadingRecipes;
 
