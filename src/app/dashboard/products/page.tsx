@@ -30,9 +30,10 @@ export default function ProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
-  const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
+  const { data: products, isLoading: areProductsLoading, refetch } = useCollection<Product>(productsQuery);
   const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
 
@@ -53,10 +54,12 @@ export default function ProductsPage() {
   const handleDeleteProduct = async () => {
     if (!productToDelete || !firestore) return;
     
+    setIsDeleting(true);
     const productDocRef = doc(firestore, 'products', productToDelete.id);
     try {
       await deleteDoc(productDocRef);
       toast({ title: 'Produit supprimé' });
+      refetch(); // Refetch the product list
     } catch (error) {
       errorEmitter.emit(
           'permission-error',
@@ -73,6 +76,7 @@ export default function ProductsPage() {
     } finally {
       setProductToDelete(null);
       setIsAlertOpen(false);
+      setIsDeleting(false);
     }
   };
   
@@ -172,12 +176,15 @@ export default function ProductsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
               <AlertDialogDescription>
-                Cette action ne peut pas être annulée. Cela supprimera définitivelement le produit "{productToDelete?.name || ''}".
+                Cette action ne peut pas être annulée. Cela supprimera définitivement le produit "{productToDelete?.name || ''}".
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setProductToDelete(null)}>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteProduct}>Supprimer</AlertDialogAction>
+              <AlertDialogAction onClick={handleDeleteProduct} disabled={isDeleting}>
+                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Supprimer
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
