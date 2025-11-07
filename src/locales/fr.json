@@ -488,6 +488,12 @@
             "unitsSold": "Unités vendues",
             "noSalesData": "Aucune donnée de vente disponible."
         },
+        "user": {
+            "welcome": "Bienvenue, {{name}} !",
+            "totalOrders": "Commandes totales",
+            "recentOrders": "Commandes récentes",
+            "recentOrdersDescription": "Voici un aperçu de vos dernières commandes."
+        },
         "layout": {
             "dashboard": "Tableau de bord",
             "orders": "Commandes",

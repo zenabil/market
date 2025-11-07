@@ -488,6 +488,12 @@
             "unitsSold": "الوحدات المباعة",
             "noSalesData": "لا توجد بيانات مبيعات متاحة."
         },
+        "user": {
+            "welcome": "مرحباً، {{name}}!",
+            "totalOrders": "إجمالي الطلبات",
+            "recentOrders": "الطلبات الأخيرة",
+            "recentOrdersDescription": "هنا نظرة سريعة على طلباتك الأخيرة."
+        },
         "layout": {
             "dashboard": "لوحة التحكم",
             "orders": "الطلبات",
