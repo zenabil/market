@@ -334,6 +334,11 @@
             "description": "Une erreur inattendue s'est produite lors de la soumission de l'avis."
         }
     },
+    "teamRoles": {
+        "ceo": "Directrice Générale",
+        "coo": "Directeur des Opérations",
+        "productManager": "Responsable des Produits"
+    },
     "dashboard": {
         "common": {
             "edit": "Modifier",

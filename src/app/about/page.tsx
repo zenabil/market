@@ -105,7 +105,7 @@ export default function AboutPage() {
                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <h3 className="font-bold">{member.name}</h3>
-                        <p className="text-sm text-primary">{member.role}</p>
+                        <p className="text-sm text-primary">{t(`teamRoles.${member.roleKey}`)}</p>
                     </div>
                 ))}
             </div>

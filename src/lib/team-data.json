@@ -3,19 +3,19 @@
         {
             "id": "1",
             "name": "Amina Benmoussa",
-            "role": "Directrice Générale",
+            "roleKey": "ceo",
             "avatar": "https://images.unsplash.com/photo-1554151228-14d9def656e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMHdvbWFufGVufDB8fHx8MTc2MjY0MjM5M3ww&ixlib=rb-4.1.0&q=80&w=200"
         },
         {
             "id": "2",
             "name": "Karim Ziani",
-            "role": "Directeur des Opérations",
+            "roleKey": "coo",
             "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMG1hbnxlbnwwfHx8fDE3NjI2NDIzOTN8MA&ixlib=rb-4.1.0&q=80&w=200"
         },
         {
             "id": "3",
             "name": "Fatima Chérif",
-            "role": "Responsable des Produits",
+            "roleKey": "productManager",
             "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NjI2NDIzOTN8MA&ixlib=rb-4.1.0&q=80&w=200"
         }
     ]
