@@ -81,27 +81,32 @@ export default function NewProductPage() {
         const docRef = await addDoc(collection(firestore, 'products'), productData);
         toast({
             title: 'Produit créé',
-            description: `Le produit "${values.name}" a été ajouté. Génération de la description...`,
+            description: `Le produit "${values.name}" a été ajouté. Redirection...`,
         });
 
-        // Generate description and then navigate
+        // Redirect immediately
+        router.push(`/dashboard/products/edit/${docRef.id}`);
+
+        // Generate description in the background
         const categoryName = categories?.find(c => c.id === values.categoryId)?.name || '';
-        const result = await generateProductDescription({
+        generateProductDescription({
             productName: values.name,
             productCategory: categoryName,
             productDetails: '',
+        }).then(result => {
+             if (result.description) {
+                const productDocRef = doc(firestore, 'products', docRef.id);
+                updateDoc(productDocRef, { description: result.description });
+                // Optional: show a success toast for generation
+                 toast({
+                    title: 'Description générée!',
+                    description: `La description pour "${values.name}" a été générée par l'IA.`,
+                });
+            }
+        }).catch(error => {
+            console.error("Failed to generate description:", error);
+            // Don't bother the user if they've already navigated away
         });
-
-        if (result.description) {
-            const productDocRef = doc(firestore, 'products', docRef.id);
-            await updateDoc(productDocRef, { description: result.description });
-            toast({
-                title: 'Description générée!',
-                description: `La description pour "${values.name}" a été générée par l'IA.`,
-            });
-        }
-        
-        router.push(`/dashboard/products/edit/${docRef.id}`);
 
     } catch (error) {
         errorEmitter.emit(
@@ -117,8 +122,7 @@ export default function NewProductPage() {
             title: "Erreur de création",
             description: "Impossible de créer le produit."
         });
-    } finally {
-        setIsSaving(false);
+        setIsSaving(false); // Only set saving to false on error
     }
   }
 
