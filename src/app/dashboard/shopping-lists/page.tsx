@@ -14,7 +14,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
   DialogClose,
   DialogTrigger,
@@ -42,13 +41,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-
-const listFormSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom est requis.' }),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 
 function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList, onActionComplete: () => void, children: React.ReactNode }) {
+    const { t } = useLanguage();
+    const listFormSchema = z.object({
+      name: z.string().min(2, { message: t('dashboard.shoppingLists.validation.name') }),
+    });
+
     const [isOpen, setIsOpen] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
     const { user } = useUser();
@@ -76,7 +77,7 @@ function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList,
             const listRef = doc(firestore, `users/${user.uid}/shopping-lists`, list.id);
             updateDoc(listRef, { name: values.name })
                 .then(() => {
-                    toast({ title: 'Liste renommée' });
+                    toast({ title: t('dashboard.shoppingLists.toast.renamed') });
                     onActionComplete();
                 })
                 .catch(error => {
@@ -100,7 +101,7 @@ function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList,
             const listsCollection = collection(firestore, `users/${user.uid}/shopping-lists`);
             addDoc(listsCollection, listData)
                 .then(() => {
-                    toast({ title: 'Liste créée' });
+                    toast({ title: t('dashboard.shoppingLists.toast.created') });
                     onActionComplete();
                 })
                 .catch(error => {
@@ -122,22 +123,22 @@ function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList,
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Renommer la liste' : 'Créer une nouvelle liste de courses'}</DialogTitle>
+                    <DialogTitle>{isEditing ? t('dashboard.shoppingLists.dialog.editTitle') : t('dashboard.shoppingLists.dialog.newTitle')}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id={`list-dialog-form-${list?.id || 'new'}`}>
                     <div className="space-y-2">
-                        <Label htmlFor="name">Nom de la liste</Label>
-                        <Input id="name" {...form.register('name')} placeholder={isEditing ? '' : "Ex: Courses de la semaine"} />
+                        <Label htmlFor="name">{t('dashboard.shoppingLists.dialog.listName')}</Label>
+                        <Input id="name" {...form.register('name')} placeholder={isEditing ? '' : t('dashboard.shoppingLists.dialog.placeholder')} />
                         {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
                     </div>
                 </form>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">Annuler</Button>
+                        <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
                     </DialogClose>
                     <Button type="submit" disabled={isSaving} form={`list-dialog-form-${list?.id || 'new'}`}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEditing ? 'Enregistrer' : 'Créer'}
+                        {isEditing ? t('dashboard.common.save') : t('dashboard.shoppingLists.dialog.createButton')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -147,6 +148,7 @@ function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList,
 
 
 export default function ShoppingListsPage() {
+    const { t } = useLanguage();
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
@@ -169,7 +171,7 @@ export default function ShoppingListsPage() {
     }, [user, isUserLoading, router]);
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateString).toLocaleDateString(t('locale'), { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     const handleDeleteList = async () => {
@@ -180,7 +182,7 @@ export default function ShoppingListsPage() {
 
         deleteDoc(listDocRef)
             .then(() => {
-                toast({ title: 'Liste supprimée' });
+                toast({ title: t('dashboard.shoppingLists.toast.deleted') });
                 refetch();
             })
             .catch(error => {
@@ -221,13 +223,13 @@ export default function ShoppingListsPage() {
         <div className="container py-8 md:py-12">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
                 <div>
-                    <h1 className='font-headline text-3xl'>Mes listes de courses</h1>
-                    <p className="text-muted-foreground mt-1">Gérez vos listes de courses pour vous organiser.</p>
+                    <h1 className='font-headline text-3xl'>{t('dashboard.shoppingLists.title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('dashboard.shoppingLists.description')}</p>
                 </div>
                 <ListDialog onActionComplete={refetch}>
                      <Button size="sm" className="gap-1">
                         <PlusCircle className="h-4 w-4" />
-                        Créer une liste
+                        {t('dashboard.shoppingLists.createList')}
                     </Button>
                 </ListDialog>
             </div>
@@ -241,7 +243,7 @@ export default function ShoppingListsPage() {
                                     <CardTitle className="hover:text-primary transition-colors">
                                         <Link href={`/dashboard/shopping-lists/${list.id}`}>{list.name}</Link>
                                     </CardTitle>
-                                    <CardDescription>Créée le {formatDate(list.createdAt)}</CardDescription>
+                                    <CardDescription>{t('dashboard.shoppingLists.createdOn')} {formatDate(list.createdAt)}</CardDescription>
                                 </div>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -253,25 +255,25 @@ export default function ShoppingListsPage() {
                                         <DropdownMenuItem asChild>
                                             <Link href={`/dashboard/shopping-lists/${list.id}`}>
                                                 <Edit className="mr-2 h-4 w-4" />
-                                                Ouvrir
+                                                {t('dashboard.shoppingLists.open')}
                                             </Link>
                                         </DropdownMenuItem>
                                         <ListDialog list={list} onActionComplete={refetch}>
                                             <button className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 w-full">
                                                 <Edit className="mr-2 h-4 w-4" />
-                                                Renommer
+                                                {t('dashboard.shoppingLists.rename')}
                                             </button>
                                         </ListDialog>
                                         <DropdownMenuItem onSelect={() => openDeleteDialog(list)} className="text-destructive">
                                             <Trash2 className="mr-2 h-4 w-4" />
-                                            Supprimer
+                                            {t('dashboard.common.delete')}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </CardHeader>
                             <CardContent className="flex-grow">
                                 <p className="text-sm text-muted-foreground italic">
-                                    {list.items.length > 0 ? `${list.items.length} article(s)` : "Cette liste est vide."}
+                                    {list.items.length > 0 ? t('dashboard.shoppingLists.itemCount').replace('{{count}}', list.items.length.toString()) : t('dashboard.shoppingLists.empty')}
                                 </p>
                             </CardContent>
                         </Card>
@@ -279,24 +281,24 @@ export default function ShoppingListsPage() {
                 </div>
             ) : (
                 <div className="text-center p-16 border-2 border-dashed rounded-lg">
-                    <h3 className="text-xl font-semibold">Aucune liste de courses trouvée</h3>
-                    <p className="text-muted-foreground mt-2">Commencez par créer votre première liste !</p>
+                    <h3 className="text-xl font-semibold">{t('dashboard.shoppingLists.noLists.title')}</h3>
+                    <p className="text-muted-foreground mt-2">{t('dashboard.shoppingLists.noLists.description')}</p>
                 </div>
             )}
 
             <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Cette action ne peut pas être annulée. Cela supprimera définitivement la liste "{listToDelete?.name || ''}".
+                           {t('dashboard.shoppingLists.confirmDelete').replace('{{name}}', listToDelete?.name || '')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setListToDelete(null)}>Annuler</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setListToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDeleteList} disabled={isDeleting}>
                             {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Supprimer
+                            {t('dashboard.common.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

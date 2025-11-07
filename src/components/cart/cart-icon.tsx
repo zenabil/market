@@ -4,12 +4,14 @@ import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
+import { useLanguage } from '@/contexts/language-provider';
 
 interface CartIconProps {
   onClick: () => void;
 }
 
 export default function CartIcon({ onClick }: CartIconProps) {
+  const { t } = useLanguage();
   const { totalItems } = useCart();
 
   return (
@@ -20,7 +22,7 @@ export default function CartIcon({ onClick }: CartIconProps) {
           {totalItems}
         </span>
       )}
-      <span className="sr-only">View shopping cart</span>
+      <span className="sr-only">{t('cart.view')}</span>
     </Button>
   );
 }

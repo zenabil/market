@@ -114,6 +114,63 @@
             "ingredients": "Veuillez lister au moins quelques ingrédients."
         }
     },
+    "mealPlanner": {
+        "title": "Planificateur de Repas IA",
+        "subtitle": "Laissez notre IA créer un plan de repas personnalisé pour votre semaine, avec une liste de courses prête à l'emploi.",
+        "preferences": {
+            "title": "Vos Préférences",
+            "description": "Aidez-nous à personnaliser votre plan de repas.",
+            "diet": "Régime Alimentaire",
+            "dietPlaceholder": "Choisissez un régime",
+            "people": "Nombre de personnes"
+        },
+        "diets": {
+            "balanced": "Équilibré",
+            "vegetarian": "Végétarien",
+            "lowCalorie": "Peu calorique",
+            "mediterranean": "Méditerranéen"
+        },
+        "buttons": {
+            "generate": "Générer mon plan de repas",
+            "generating": "Génération en cours...",
+            "addAllToCart": "Ajouter tout au panier"
+        },
+        "yourPlan": "Votre Plan de la Semaine",
+        "lunch": "Déjeuner",
+        "dinner": "Dîner",
+        "shoppingList": "Liste de Courses",
+        "days": {
+            "monday": "Lundi",
+            "tuesday": "Mardi",
+            "wednesday": "Mercredi",
+            "thursday": "Jeudi",
+            "friday": "Vendredi",
+            "saturday": "Samedi",
+            "sunday": "Dimanche"
+        },
+        "toast": {
+            "generating": {
+                "title": "Génération en cours...",
+                "description": "Veuillez patienter pendant que nous préparons votre plan de repas personnalisé."
+            },
+            "failed": {
+                "title": "Échec de la génération",
+                "description": "Impossible de générer un plan de repas pour le moment."
+            },
+            "added": {
+                "title": "Ingrédients ajoutés au panier",
+                "description": "{{count}} ingrédient(s) ont été ajoutés à votre panier."
+            },
+            "notFound": {
+                "title": "Certains ingrédients non trouvés",
+                "description": "Nous n'avons pas pu trouver"
+            },
+            "error": "Impossible d'ajouter les ingrédients au panier."
+        },
+        "validation": {
+            "people": "Il doit y avoir au moins 1 personne."
+        }
+    },
     "header": {
         "home": "Accueil",
         "products": "Produits",
@@ -257,6 +314,11 @@
             "reviewCount": "Nombre d'avis",
             "discount": "Réduction",
             "stock": "Stock"
+        },
+        "bar": {
+            "title": "Comparer les produits",
+            "compareButton": "Comparer ({{count}})",
+            "clear": "Effacer"
         }
     },
     "contact": {
@@ -343,9 +405,18 @@
     },
     "cart": {
         "title": "Panier",
+        "view": "Voir le panier",
         "empty": "Votre panier est vide.",
         "subtotal": "Sous-total",
         "checkout": "Paiement"
+    },
+    "chatbot": {
+        "title": "Assistant IA",
+        "welcome": "Bienvenue au Supermarché Intelligent de Tlemcen ! Comment puis-je vous aider aujourd'hui ?",
+        "error": "Désolé, une erreur est survenue.",
+        "open": "Ouvrir le chatbot",
+        "placeholder": "Posez une question...",
+        "send": "Envoyer"
     },
     "reviews": {
         "leaveReview": "Laisser un avis",
@@ -795,6 +866,57 @@
                 "markAsShipped": "Marquer comme Expédiée",
                 "markAsDelivered": "Marquer comme Livrée",
                 "markAsCancelled": "Marquer comme Annulée"
+            }
+        },
+        "shoppingLists": {
+            "title": "Mes listes de courses",
+            "description": "Gérez vos listes de courses pour vous organiser.",
+            "createList": "Créer une liste",
+            "createdOn": "Créée le",
+            "open": "Ouvrir",
+            "rename": "Renommer",
+            "itemCount": "{{count}} article(s)",
+            "empty": "Cette liste est vide.",
+            "noLists": {
+                "title": "Aucune liste de courses trouvée",
+                "description": "Commencez par créer votre première liste !"
+            },
+            "confirmDelete": "Cette action est irréversible. La liste '{{name}}' sera supprimée définitivement.",
+            "dialog": {
+                "newTitle": "Créer une nouvelle liste de courses",
+                "editTitle": "Renommer la liste",
+                "listName": "Nom de la liste",
+                "placeholder": "Ex: Courses de la semaine",
+                "createButton": "Créer"
+            },
+            "detail": {
+                "content": "Contenu de la liste",
+                "placeholder": "Écrivez chaque article sur une nouvelle ligne...",
+                "analyze": "Analyser la liste",
+                "foundProducts": "Produits trouvés",
+                "analyzePrompt": "Analysez votre liste pour voir les produits correspondants ici.",
+                "toast": {
+                    "saved": "Liste enregistrée",
+                    "emptyList": "La liste est vide",
+                    "analysisComplete": {
+                        "title": "Analyse terminée",
+                        "description": "{{count}} produits potentiels identifiés.",
+                        "noProducts": "Aucun produit n'a pu être identifié."
+                    },
+                    "analysisError": "Erreur d'analyse",
+                    "addedToCart": {
+                        "title": "Ajouté au panier",
+                        "description": "{{name}} a été ajouté à votre panier."
+                    }
+                }
+            },
+            "toast": {
+                "renamed": "Liste renommée",
+                "created": "Liste créée",
+                "deleted": "Liste supprimée"
+            },
+            "validation": {
+                "name": "Le nom est requis."
             }
         }
     }

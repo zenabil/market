@@ -7,8 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { X, GitCompareArrows } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function ComparisonBar() {
+  const { t } = useLanguage();
   const { items, removeFromComparison, clearComparison } = useComparison();
 
   if (items.length === 0) {
@@ -20,7 +22,7 @@ export default function ComparisonBar() {
       <Card className="container mx-auto shadow-2xl">
         <CardContent className="p-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <h3 className="text-lg font-semibold hidden sm:block">Comparer les produits</h3>
+            <h3 className="text-lg font-semibold hidden sm:block">{t('compare.bar.title')}</h3>
             <div className="flex items-center gap-2">
               {items.map(item => (
                 <div key={item.id} className="relative group">
@@ -47,11 +49,11 @@ export default function ComparisonBar() {
             <Button asChild disabled={items.length < 2}>
               <Link href="/compare">
                 <GitCompareArrows className="mr-2 h-4 w-4" />
-                Comparer ({items.length})
+                {t('compare.bar.compareButton').replace('{{count}}', items.length.toString())}
               </Link>
             </Button>
             <Button variant="ghost" onClick={clearComparison}>
-              Effacer
+              {t('compare.bar.clear')}
             </Button>
           </div>
         </CardContent>

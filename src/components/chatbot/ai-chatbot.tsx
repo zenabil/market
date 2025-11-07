@@ -14,6 +14,7 @@ import { MessageSquare, Send, Bot, User, Loader2 } from 'lucide-react';
 import { aiSupportChatbot } from '@/ai/flows/ai-support-chatbot';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-provider';
 
 type Message = {
   id: string;
@@ -21,13 +22,16 @@ type Message = {
   sender: 'user' | 'bot';
 };
 
-const initialMessage: Message = {
-    id: 'initial-bot-message',
-    text: "Bienvenue au Supermarché Intelligent de Tlemcen ! Comment puis-je vous aider aujourd'hui ?",
-    sender: 'bot'
-};
 
 export default function AiChatbot() {
+  const { t } = useLanguage();
+  
+  const initialMessage: Message = {
+    id: 'initial-bot-message',
+    text: t('chatbot.welcome'),
+    sender: 'bot'
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState('');
@@ -58,7 +62,7 @@ export default function AiChatbot() {
       console.error("Chatbot error:", error);
       const errorMessage: Message = {
         id: `${Date.now()}-error`,
-        text: 'Désolé, une erreur est survenue.',
+        text: t('chatbot.error'),
         sender: 'bot',
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -76,12 +80,12 @@ export default function AiChatbot() {
       <DialogTrigger asChild>
         <Button className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg" size="icon">
           <MessageSquare className="h-8 w-8" />
-          <span className="sr-only">Ouvrir le chatbot</span>
+          <span className="sr-only">{t('chatbot.open')}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] h-[70vh] flex flex-col p-0">
         <DialogTitle className="font-headline text-2xl flex items-center gap-2 p-6 pb-2">
-            <Bot /> Assistant IA
+            <Bot /> {t('chatbot.title')}
         </DialogTitle>
         <ScrollArea className="flex-1 px-6">
           <div className="space-y-4">
@@ -122,13 +126,13 @@ export default function AiChatbot() {
             <Input
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Posez une question..."
+              placeholder={t('chatbot.placeholder')}
               className="flex-1"
               disabled={isLoading}
             />
             <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
               <Send className="h-4 w-4" />
-              <span className="sr-only">Envoyer</span>
+              <span className="sr-only">{t('chatbot.send')}</span>
             </Button>
           </form>
         </div>

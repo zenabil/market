@@ -19,12 +19,14 @@ import { analyzeShoppingList } from '@/ai/flows/analyze-shopping-list';
 import Image from 'next/image';
 import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
+import { useLanguage } from '@/contexts/language-provider';
 
 const listContentSchema = z.object({
   items: z.string(),
 });
 
 function ShoppingListDetail() {
+    const { t } = useLanguage();
     const { id: listId } = useParams();
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
@@ -77,7 +79,7 @@ function ShoppingListDetail() {
         
         updateDoc(listDocRef, updateData)
             .then(() => {
-                toast({ title: 'Liste enregistrée' });
+                toast({ title: t('dashboard.shoppingLists.detail.toast.saved') });
             })
             .catch(error => {
                  errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -94,7 +96,7 @@ function ShoppingListDetail() {
     const handleAnalyzeList = async () => {
         const listText = form.getValues('items');
         if (!listText.trim()) {
-            toast({ variant: 'destructive', title: 'La liste est vide' });
+            toast({ variant: 'destructive', title: t('dashboard.shoppingLists.detail.toast.emptyList') });
             return;
         }
         setIsAnalyzing(true);
@@ -104,13 +106,13 @@ function ShoppingListDetail() {
             if (result.products && result.products.length > 0) {
                  // Firestore 'in' query is limited to 30 items.
                  setAnalyzedProductNames(result.products.slice(0, 30));
-                 toast({ title: 'Analyse terminée', description: `${result.products.length} produits potentiels identifiés.` });
+                 toast({ title: t('dashboard.shoppingLists.detail.toast.analysisComplete.title'), description: t('dashboard.shoppingLists.detail.toast.analysisComplete.description').replace('{{count}}', result.products.length.toString()) });
             } else {
-                toast({ title: 'Analyse terminée', description: 'Aucun produit n\'a pu être identifié.' });
+                toast({ title: t('dashboard.shoppingLists.detail.toast.analysisComplete.title'), description: t('dashboard.shoppingLists.detail.toast.noProducts') });
             }
         } catch (error) {
             console.error("Failed to analyze list:", error);
-            toast({ variant: 'destructive', title: 'Erreur d\'analyse' });
+            toast({ variant: 'destructive', title: t('dashboard.shoppingLists.detail.toast.analysisError') });
         } finally {
             setIsAnalyzing(false);
         }
@@ -119,8 +121,8 @@ function ShoppingListDetail() {
     const handleAddToCart = (product: Product) => {
         addItem(product);
         toast({
-          title: 'Ajouté au panier',
-          description: `${product.name} a été ajouté à votre panier.`,
+          title: t('dashboard.shoppingLists.detail.toast.addedToCart.title'),
+          description: t('dashboard.shoppingLists.detail.toast.addedToCart.description').replace('{{name}}', product.name),
         });
     }
 
@@ -167,11 +169,11 @@ function ShoppingListDetail() {
                                 name="items"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Contenu de la liste</FormLabel>
+                                        <FormLabel>{t('dashboard.shoppingLists.detail.content')}</FormLabel>
                                         <FormControl>
                                             <Textarea
                                                 rows={15}
-                                                placeholder="Écrivez chaque article sur une nouvelle ligne..."
+                                                placeholder={t('dashboard.shoppingLists.detail.placeholder')}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -186,19 +188,19 @@ function ShoppingListDetail() {
                                     ) : (
                                         <Sparkles className="mr-2 h-4 w-4" />
                                     )}
-                                    Analyser la liste
+                                    {t('dashboard.shoppingLists.detail.analyze')}
                                 </Button>
                                 <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
                                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     <Save className="mr-2 h-4 w-4" />
-                                    Enregistrer
+                                    {t('dashboard.common.save')}
                                 </Button>
                             </div>
                         </form>
                     </Form>
                 </div>
                 <div>
-                    <h3 className="font-headline text-2xl mb-4">Produits trouvés</h3>
+                    <h3 className="font-headline text-2xl mb-4">{t('dashboard.shoppingLists.detail.foundProducts')}</h3>
                     <div className="space-y-4 pr-2 overflow-y-auto max-h-[450px] border rounded-md p-4 bg-muted/40">
                          {(isAnalyzing || areProductsLoading) && Array.from({ length: 3 }).map((_, i) => (
                              <div key={i} className="flex gap-4 items-center">
@@ -229,7 +231,7 @@ function ShoppingListDetail() {
                          )}
                          {!isAnalyzing && !areProductsLoading && (!foundProducts || foundProducts.length === 0) && (
                             <div className="text-center p-8 text-muted-foreground">
-                                <p>Analysez votre liste pour voir les produits correspondants ici.</p>
+                                <p>{t('dashboard.shoppingLists.detail.analyzePrompt')}</p>
                             </div>
                          )}
                     </div>

@@ -32,13 +32,14 @@ import { useFirestore } from '@/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { useCart } from '@/hooks/use-cart';
-
-const formSchema = z.object({
-  diet: z.string().optional(),
-  people: z.coerce.number().min(1, 'Il doit y avoir au moins 1 personne.'),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function MealPlannerPage() {
+  const { t } = useLanguage();
+  const formSchema = z.object({
+    diet: z.string().optional(),
+    people: z.coerce.number().min(1, t('mealPlanner.validation.people')),
+  });
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -88,8 +89,8 @@ export default function MealPlannerPage() {
 
         if (itemsAddedCount > 0) {
             toast({
-                title: 'Ingrédients ajoutés au panier',
-                description: `${itemsAddedCount} ingrédient(s) ont été ajoutés à votre panier.`
+                title: t('mealPlanner.toast.added.title'),
+                description: t('mealPlanner.toast.added.description').replace('{{count}}', itemsAddedCount.toString())
             });
         }
         
@@ -98,8 +99,8 @@ export default function MealPlannerPage() {
         if (notFoundProducts.length > 0) {
              toast({
                 variant: 'destructive',
-                title: 'Certains ingrédients non trouvés',
-                description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+                title: t('mealPlanner.toast.notFound.title'),
+                description: `${t('mealPlanner.toast.notFound.description')}: ${notFoundProducts.join(', ')}`
             });
         }
 
@@ -107,8 +108,8 @@ export default function MealPlannerPage() {
         console.error("Error adding all items to cart:", error);
         toast({
             variant: 'destructive',
-            title: 'Erreur',
-            description: "Impossible d'ajouter les ingrédients au panier."
+            title: t('dashboard.common.error'),
+            description: t('mealPlanner.toast.error')
         });
     } finally {
         setIsAddingToCart(false);
@@ -120,8 +121,8 @@ export default function MealPlannerPage() {
     setIsLoading(true);
     setMealPlan(null);
     toast({
-      title: 'Génération en cours...',
-      description: 'Veuillez patienter pendant que nous préparons votre plan de repas personnalisé.',
+      title: t('mealPlanner.toast.generating.title'),
+      description: t('mealPlanner.toast.generating.description'),
     });
     try {
       const result = await generateWeeklyMealPlan(values);
@@ -130,8 +131,8 @@ export default function MealPlannerPage() {
       console.error("Failed to generate meal plan:", error);
       toast({
         variant: 'destructive',
-        title: 'Échec de la génération',
-        description: 'Impossible de générer un plan de repas pour le moment.',
+        title: t('mealPlanner.toast.failed.title'),
+        description: t('mealPlanner.toast.failed.description'),
       });
     } finally {
       setIsLoading(false);
@@ -139,23 +140,32 @@ export default function MealPlannerPage() {
   }
 
   const weekDays = mealPlan ? Object.keys(mealPlan).filter(k => k !== 'shoppingList') : [];
+  const dayTranslations: { [key: string]: string } = {
+    monday: t('mealPlanner.days.monday'),
+    tuesday: t('mealPlanner.days.tuesday'),
+    wednesday: t('mealPlanner.days.wednesday'),
+    thursday: t('mealPlanner.days.thursday'),
+    friday: t('mealPlanner.days.friday'),
+    saturday: t('mealPlanner.days.saturday'),
+    sunday: t('mealPlanner.days.sunday'),
+  };
 
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12 max-w-3xl mx-auto">
         <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl flex items-center justify-center gap-4">
           <CalendarDays className="h-10 w-10 text-primary" />
-          Planificateur de Repas IA
+          {t('mealPlanner.title')}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Laissez notre IA créer un plan de repas personnalisé pour votre semaine, avec une liste de courses prête à l'emploi.
+          {t('mealPlanner.subtitle')}
         </p>
       </div>
 
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Vos Préférences</CardTitle>
-          <CardDescription>Aidez-nous à personnaliser votre plan de repas.</CardDescription>
+          <CardTitle>{t('mealPlanner.preferences.title')}</CardTitle>
+          <CardDescription>{t('mealPlanner.preferences.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -166,18 +176,18 @@ export default function MealPlannerPage() {
                   name="diet"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Régime Alimentaire</FormLabel>
+                      <FormLabel>{t('mealPlanner.preferences.diet')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Choisissez un régime" />
+                            <SelectValue placeholder={t('mealPlanner.preferences.dietPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="balanced">Équilibré</SelectItem>
-                          <SelectItem value="vegetarian">Végétarien</SelectItem>
-                          <SelectItem value="low-calorie">Peu calorique</SelectItem>
-                          <SelectItem value="mediterranean">Méditerranéen</SelectItem>
+                          <SelectItem value="balanced">{t('mealPlanner.diets.balanced')}</SelectItem>
+                          <SelectItem value="vegetarian">{t('mealPlanner.diets.vegetarian')}</SelectItem>
+                          <SelectItem value="low-calorie">{t('mealPlanner.diets.lowCalorie')}</SelectItem>
+                          <SelectItem value="mediterranean">{t('mealPlanner.diets.mediterranean')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -189,7 +199,7 @@ export default function MealPlannerPage() {
                   name="people"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre de personnes</FormLabel>
+                      <FormLabel>{t('mealPlanner.preferences.people')}</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>
@@ -202,12 +212,12 @@ export default function MealPlannerPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Génération en cours...
+                    {t('mealPlanner.buttons.generating')}
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Générer mon plan de repas
+                    {t('mealPlanner.buttons.generate')}
                   </>
                 )}
               </Button>
@@ -226,27 +236,27 @@ export default function MealPlannerPage() {
       {mealPlan && (
         <div className="mt-12 grid lg:grid-cols-3 gap-8 animate-in fade-in-50 duration-500">
             <div className="lg:col-span-2">
-                 <h2 className="font-headline text-3xl mb-4">Votre Plan de la Semaine</h2>
+                 <h2 className="font-headline text-3xl mb-4">{t('mealPlanner.yourPlan')}</h2>
                  <Tabs defaultValue={weekDays[0]} className="w-full">
                     <TabsList className="grid w-full grid-cols-4 md:grid-cols-7">
                         {weekDays.map(day => (
-                            <TabsTrigger key={day} value={day} className="capitalize">{day.substring(0,3)}</TabsTrigger>
+                            <TabsTrigger key={day} value={day} className="capitalize">{dayTranslations[day].substring(0,3)}</TabsTrigger>
                         ))}
                     </TabsList>
                     {weekDays.map(day => (
                         <TabsContent key={day} value={day}>
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="capitalize font-headline text-2xl">{day}</CardTitle>
+                                    <CardTitle className="capitalize font-headline text-2xl">{dayTranslations[day]}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div>
-                                        <h3 className="font-semibold flex items-center gap-2"><Salad className="h-5 w-5 text-primary"/> Déjeuner</h3>
+                                        <h3 className="font-semibold flex items-center gap-2"><Salad className="h-5 w-5 text-primary"/> {t('mealPlanner.lunch')}</h3>
                                         <p className="text-muted-foreground pl-7">{(mealPlan as any)[day].lunch}</p>
                                     </div>
                                      <Separator />
                                      <div>
-                                        <h3 className="font-semibold flex items-center gap-2"><Beef className="h-5 w-5 text-primary"/> Dîner</h3>
+                                        <h3 className="font-semibold flex items-center gap-2"><Beef className="h-5 w-5 text-primary"/> {t('mealPlanner.dinner')}</h3>
                                         <p className="text-muted-foreground pl-7">{(mealPlan as any)[day].dinner}</p>
                                     </div>
                                 </CardContent>
@@ -258,11 +268,11 @@ export default function MealPlannerPage() {
             <div>
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
                     <h2 className="font-headline text-3xl flex items-center gap-2">
-                        <ShoppingCart className="h-7 w-7"/> Liste de Courses
+                        <ShoppingCart className="h-7 w-7"/> {t('mealPlanner.shoppingList')}
                     </h2>
                      <Button size="sm" onClick={handleAddAllToCart} disabled={isAddingToCart}>
                         {isAddingToCart ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShoppingCart className="mr-2 h-4 w-4"/>}
-                         Ajouter tout au panier
+                         {t('mealPlanner.buttons.addAllToCart')}
                      </Button>
                  </div>
                  <Card>
