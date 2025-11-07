@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -165,7 +166,7 @@ function DashboardSidebar() {
       <SidebarContent className="p-2">
         <SidebarMenu>
           {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
+            <SidebarMenuItem key={item.key}>
               <Link href={item.href}>
                 <SidebarMenuButton
                   isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
