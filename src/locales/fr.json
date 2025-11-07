@@ -618,7 +618,7 @@
             },
             "imagesTitle": "Images",
             "primaryImage": "Image principale",
-            "addImage": "Ajouter",
+            "addImage": "Ajouter une image",
             "setPrimary": "Définir comme image principale",
             "deleteImage": "Supprimer l'image",
             "imageAdded": "Image ajoutée",
