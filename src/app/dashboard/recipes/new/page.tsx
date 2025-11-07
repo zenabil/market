@@ -25,9 +25,9 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
-  title: z.string().min(2),
+  title: z.string().min(2, "Le titre est requis."),
   description: z.string().optional(),
-  image: z.string().url(),
+  image: z.string().url({ message: "Veuillez entrer une URL d'image valide."}),
   prepTime: z.coerce.number().int().min(0),
   cookTime: z.coerce.number().int().min(0),
   servings: z.coerce.number().int().min(1),
@@ -103,7 +103,7 @@ export default function NewRecipePage() {
     setIsSaving(true);
     const recipeData = {
         title: values.title,
-        description: values.description,
+        description: values.description || '',
         image: values.image,
         prepTime: values.prepTime,
         cookTime: values.cookTime,
@@ -163,7 +163,7 @@ export default function NewRecipePage() {
                         <FormItem><FormLabel>Titre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="description" render={({ field }) => (
-                        <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Une brève description de la recette..." {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="image" render={({ field }) => (
                         <FormItem><FormLabel>URL de l'image</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
