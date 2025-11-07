@@ -11,13 +11,14 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '@/components/ui/table';
+import type { Product } from '@/lib/placeholder-data';
 
 export default function ComparePage() {
   const { items, removeFromComparison, clearComparison } = useComparison();
   const { addItem } = useCart();
   const { toast } = useToast();
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addItem(product);
     toast({
       title: 'Ajouté au panier',
@@ -44,9 +45,27 @@ export default function ComparePage() {
   const features = [
     { key: 'price', label: 'Prix' },
     { key: 'averageRating', label: 'Évaluation' },
+    { key: 'reviewCount', label: 'Nombre d\'avis' },
     { key: 'discount', label: 'Réduction' },
     { key: 'stock', label: 'Stock' },
   ];
+
+  const renderFeature = (product: Product, featureKey: string) => {
+    switch(featureKey) {
+        case 'price':
+            return formatCurrency(product.price * (1 - (product.discount || 0) / 100));
+        case 'averageRating':
+            return <StarRating rating={product.averageRating || 0} />;
+        case 'reviewCount':
+            return `${product.reviewCount || 0} avis`;
+        case 'discount':
+            return product.discount > 0 ? `${product.discount}%` : 'Aucune';
+        case 'stock':
+            return product.stock > 0 ? `${product.stock} en stock` : 'En rupture';
+        default:
+            return null;
+    }
+  }
 
   return (
     <div className="container py-8 md:py-12">
@@ -89,12 +108,7 @@ export default function ComparePage() {
                          {features.map(feature => (
                             <TableRow key={feature.key}>
                                 <TableCell className="font-semibold">{feature.label}</TableCell>
-                                <TableCell>
-                                    {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
-                                    {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
-                                    {feature.key === 'discount' && (product.discount > 0 ? `${product.discount}%` : 'Aucune')}
-                                    {feature.key === 'stock' && (product.stock > 0 ? `${product.stock} en stock` : 'En rupture')}
-                                </TableCell>
+                                <TableCell>{renderFeature(product, feature.key)}</TableCell>
                             </TableRow>
                          ))}
                     </TableBody>
@@ -143,10 +157,7 @@ export default function ComparePage() {
                 {items.map(product => (
                   <TableCell key={product.id} className="text-center align-middle h-20">
                     <div className="flex items-center justify-center">
-                      {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
-                      {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
-                      {feature.key === 'discount' && (product.discount > 0 ? `${product.discount}%` : 'Aucune')}
-                      {feature.key === 'stock' && (product.stock > 0 ? `${product.stock} en stock` : 'En rupture')}
+                      {renderFeature(product, feature.key)}
                     </div>
                   </TableCell>
                 ))}
