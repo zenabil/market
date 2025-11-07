@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -123,7 +124,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
       <DialogTrigger asChild>
         {category ? (
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Edit className="ml-2 h-4 w-4" />
+                <Edit className="mr-2 h-4 w-4" />
                 {t('dashboard.common.edit')}
             </DropdownMenuItem>
         ) : (
@@ -154,7 +155,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
               <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
              </DialogClose>
             <Button type="submit" disabled={isSaving} form="category-dialog-form">
-                {isSaving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('dashboard.common.save')}
             </Button>
           </DialogFooter>
@@ -278,7 +279,7 @@ export default function CategoriesPage() {
                         <Image src={category.image} alt={category.name} width={40} height={40} className="rounded-md object-cover" />
                     </TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-left">
+                    <TableCell className="text-right">
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -289,7 +290,7 @@ export default function CategoriesPage() {
                         <DropdownMenuContent align="end">
                             <CategoryDialog category={category} onActionComplete={refetchCategories} />
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
-                            <Trash2 className="ml-2 h-4 w-4" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             {t('dashboard.common.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -318,7 +319,7 @@ export default function CategoriesPage() {
                 <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCategory} disabled={isDeleting}>
-                    {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t('dashboard.common.delete')}
                 </AlertDialogAction>
                 </AlertDialogFooter>
