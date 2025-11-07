@@ -23,7 +23,7 @@ type Message = {
 
 const initialMessage: Message = {
     id: 'initial-bot-message',
-    text: ' أهلاً بك في سوبرماركت تلمسان الذكي! كيف يمكنني مساعدتك اليوم؟',
+    text: "Bienvenue au Supermarché Intelligent de Tlemcen ! Comment puis-je vous aider aujourd'hui ?",
     sender: 'bot'
 };
 
