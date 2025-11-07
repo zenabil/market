@@ -122,7 +122,7 @@ service cloud.firestore {
      * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow list: if isAdmin();
      * @allow create: if isSignedIn() && isOwner(userId);
-     * @allow update: if isSignedIn() && (isOwner(userId) && isUpdatingOwnData() || isAdmin() && isUpdatingAllowedAdminFields());
+     * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
      * @allow delete: if false; // Generally don't want users to delete their own account record
 
       /**
