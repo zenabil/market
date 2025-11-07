@@ -8,13 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Award, Leaf, Truck, type LucideProps } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-provider';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Nos Atouts',
-    description: 'Découvrez pourquoi Tlemcen Smart Supermarket est votre meilleur choix pour faire vos courses : fraîcheur, rapidité et qualité supérieure.',
-};
-
 
 type StoreFeature = {
     id: string;

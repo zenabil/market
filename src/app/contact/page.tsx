@@ -5,10 +5,6 @@ import ContactPageClient from './contact-client';
 export const metadata: Metadata = {
   title: 'Contactez-nous',
   description: 'Contactez Tlemcen Smart Supermarket pour toute question, suggestion ou demande d\'assistance.',
-  openGraph: {
-      title: 'Contactez Tlemcen Smart Supermarket',
-      description: 'Nous sommes là pour vous aider.',
-  },
 };
 
 export default function ContactPage() {

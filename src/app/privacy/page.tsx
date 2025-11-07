@@ -5,15 +5,6 @@ import { useLanguage } from '@/contexts/language-provider';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Metadata } from 'next';
-
-// Note: This is static metadata, but defined here for co-location.
-// For dynamic metadata based on fetched content, you would use the async generateMetadata function.
-export const metadata: Metadata = {
-  title: 'Politique de Confidentialité',
-  description: 'Consultez notre politique de confidentialité pour comprendre comment nous collectons, utilisons et protégeons vos données personnelles.',
-};
-
 
 type PageContent = {
     title_fr: string;

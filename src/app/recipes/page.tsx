@@ -7,10 +7,6 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Recettes',
   description: 'Inspirez-vous pour votre prochain repas avec nos délicieuses recettes, faciles à suivre et parfaites pour toutes les occasions.',
-  openGraph: {
-    title: 'Recettes | Tlemcen Smart Supermarket',
-    description: 'Découvrez des dizaines de recettes, du plat principal au dessert, et ajoutez les ingrédients à votre panier en un clic.',
-  },
 };
 
 export default function RecipesPage() {

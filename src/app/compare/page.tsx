@@ -14,12 +14,6 @@ import StarRating from '@/components/product/star-rating';
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '@/components/ui/table';
 import type { Product } from '@/lib/placeholder-data';
 import { useLanguage } from '@/contexts/language-provider';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Comparer les produits',
-  description: 'Comparez les caractéristiques, les prix et les évaluations de différents produits pour faire le meilleur choix.',
-};
 
 
 export default function ComparePage() {

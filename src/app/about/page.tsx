@@ -7,10 +7,6 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'À Propos',
   description: 'Apprenez-en plus sur l\'histoire, les valeurs et l\'équipe de Tlemcen Smart Supermarket.',
-  openGraph: {
-      title: 'À Propos de Tlemcen Smart Supermarket',
-      description: 'Découvrez notre engagement envers la qualité, la communauté et l\'innovation.',
-  },
 };
 
 export default function AboutPage() {

@@ -5,13 +5,6 @@ import { useLanguage } from '@/contexts/language-provider';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Conditions d\'Utilisation',
-  description: 'Lisez nos conditions d\'utilisation pour connaître les règles et directives d\'utilisation de notre site web et de nos services.',
-};
-
 
 type PageContent = {
     title_fr: string;
