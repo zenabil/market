@@ -252,5 +252,3 @@ export default function ProductReviews({ productId }: { productId: string }) {
     </div>
   );
 }
-
-    
