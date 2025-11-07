@@ -43,52 +43,52 @@ import { useUserRole } from '@/hooks/use-user-role';
 
 const adminMenuItems = [
   {
-    key: 'Tableau de bord',
+    key: 'لوحة التحكم',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    key: 'Commandes',
+    key: 'الطلبات',
     href: '/dashboard/orders',
     icon: ShoppingBasket,
   },
   {
-    key: 'Produits',
+    key: 'المنتجات',
     href: '/dashboard/products',
     icon: Package,
   },
   {
-    key: 'Recettes',
+    key: 'الوصفات',
     href: '/dashboard/recipes',
     icon: BookOpen,
   },
   {
-    key: 'Catégories',
+    key: 'الفئات',
     href: '/dashboard/categories',
     icon: LayoutGrid,
   },
   {
-    key: 'Utilisateurs',
+    key: 'المستخدمون',
     href: '/dashboard/users',
     icon: Users,
   },
     {
-    key: 'Messages',
+    key: 'الرسائل',
     href: '/dashboard/messages',
     icon: Mail,
   },
   {
-    key: 'Coupons',
+    key: 'الكوبونات',
     href: '/dashboard/coupons',
     icon: Ticket,
   },
   {
-    key: 'Réductions',
+    key: 'الخصومات',
     href: '/dashboard/discounts',
     icon: Percent,
   },
   {
-    key: 'Paramètres',
+    key: 'الإعدادات',
     href: '/dashboard/settings',
     icon: Settings,
   },
@@ -96,22 +96,22 @@ const adminMenuItems = [
 
 const userMenuItems = [
     {
-        key: 'Mes commandes',
+        key: 'طلباتي',
         href: '/dashboard/orders',
         icon: ShoppingBasket,
     },
     {
-        key: 'Mes listes de courses',
+        key: 'قوائم التسوق',
         href: '/dashboard/shopping-lists',
         icon: List,
     },
     {
-        key: 'Ma liste de souhaits',
+        key: 'قائمة الرغبات',
         href: '/dashboard/wishlist',
         icon: Heart,
     },
     {
-        key: 'Mon profil',
+        key: 'ملفي الشخصي',
         href: '/dashboard/profile',
         icon: User,
     }
@@ -181,7 +181,7 @@ function DashboardSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} className={cn(isCollapsed && 'justify-center')}>
                     <LogOut />
-                    <span className={cn(isCollapsed && 'hidden')}>Déconnexion</span>
+                    <span className={cn(isCollapsed && 'hidden')}>تسجيل الخروج</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

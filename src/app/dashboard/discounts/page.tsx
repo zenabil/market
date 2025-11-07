@@ -35,8 +35,8 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
         if (newDiscount < 0 || newDiscount > 100) {
             toast({
                 variant: 'destructive',
-                title: 'Réduction invalide',
-                description: 'Le pourcentage de réduction doit être compris entre 0 et 100.',
+                title: 'خصم غير صالح',
+                description: 'يجب أن تكون نسبة الخصم بين 0 و 100.',
             });
             return;
         }
@@ -45,8 +45,8 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
         updateDoc(productRef, updateData)
             .then(() => {
                 toast({
-                    title: 'Réduction mise à jour',
-                    description: `La réduction pour ${product.name} est maintenant de ${newDiscount}%.`,
+                    title: 'تم تحديث الخصم',
+                    description: `خصم ${product.name} هو الآن ${newDiscount}%.`,
                 });
                 onUpdate();
             })
@@ -66,7 +66,7 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const originalPrice = product.price;
@@ -97,12 +97,12 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
             </TableCell>
             <TableCell className="text-right space-x-2">
                 <Button size="sm" onClick={() => handleUpdateDiscount(discount)} disabled={discount === (product.discount || 0) || isUpdating}>
-                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mettre à jour'}
+                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'تحديث'}
                 </Button>
                  {hasDiscount && (
                     <Button size="sm" variant="ghost" onClick={() => handleUpdateDiscount(0)} disabled={isUpdating}>
                         {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                        <span className="sr-only">Supprimer</span>
+                        <span className="sr-only">حذف</span>
                     </Button>
                  )}
             </TableCell>
@@ -120,20 +120,20 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
 
     const handleApplyDiscount = async () => {
         if (!firestore || !selectedCategoryId) {
-            toast({ variant: 'destructive', title: 'Veuillez sélectionner une catégorie.' });
+            toast({ variant: 'destructive', title: 'الرجاء تحديد فئة.' });
             return;
         }
          if (discount < 0 || discount > 100) {
-            toast({ variant: 'destructive', title: 'Réduction invalide', description: 'Le pourcentage doit être compris entre 0 et 100.' });
+            toast({ variant: 'destructive', title: 'خصم غير صالح', description: 'يجب أن تكون النسبة بين 0 و 100.' });
             return;
         }
         setIsApplying(true);
         try {
             const count = await applyDiscountToCategory(firestore, selectedCategoryId, discount);
-            toast({ title: 'Réduction appliquée', description: `${count} produits dans la catégorie ont été mis à jour.` });
+            toast({ title: 'تم تطبيق الخصم', description: `تم تحديث ${count} منتجات في الفئة.` });
             onUpdate();
         } catch (error: any) {
-             toast({ variant: 'destructive', title: 'Erreur', description: error.message });
+             toast({ variant: 'destructive', title: 'خطأ', description: error.message });
         } finally {
             setIsApplying(false);
         }
@@ -142,14 +142,14 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
     return (
         <Card className="mb-8">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Percent /> Appliquer une réduction à une catégorie</CardTitle>
-                <CardDescription>Appliquez rapidement une réduction à tous les produits d'une catégorie sélectionnée.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Percent /> تطبيق خصم على فئة</CardTitle>
+                <CardDescription>قم بتطبيق خصم بسرعة على جميع المنتجات في فئة محددة.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <Select onValueChange={setSelectedCategoryId} disabled={areCategoriesLoading}>
                         <SelectTrigger className="sm:w-[250px]">
-                            <SelectValue placeholder={areCategoriesLoading ? "Chargement..." : "Sélectionner une catégorie"} />
+                            <SelectValue placeholder={areCategoriesLoading ? "جاري التحميل..." : "اختر فئة"} />
                         </SelectTrigger>
                         <SelectContent>
                             {categories?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -168,7 +168,7 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
                     </div>
                     <Button onClick={handleApplyDiscount} disabled={!selectedCategoryId || isApplying}>
                         {isApplying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Appliquer
+                        تطبيق
                     </Button>
                 </div>
             </CardContent>
@@ -207,26 +207,26 @@ export default function DiscountsPage() {
     return (
         <div className="container py-8 md:py-12">
             <div className="mb-8">
-                <h1 className='font-headline text-3xl'>Réductions</h1>
-                <p className="text-muted-foreground">Gérez les réductions pour les produits et les catégories.</p>
+                <h1 className='font-headline text-3xl'>الخصومات</h1>
+                <p className="text-muted-foreground">إدارة الخصومات للمنتجات والفئات.</p>
             </div>
             
             <CategoryDiscountManager onUpdate={refetch} />
             
             <Card>
                 <CardHeader>
-                    <CardTitle>Réductions par produit</CardTitle>
-                    <CardDescription>Ajustez les réductions pour des produits spécifiques.</CardDescription>
+                    <CardTitle>الخصومات حسب المنتج</CardTitle>
+                    <CardDescription>اضبط الخصومات لمنتجات معينة.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Produit</TableHead>
-                                <TableHead>Prix original</TableHead>
-                                <TableHead>Prix réduit</TableHead>
-                                <TableHead>Réduction (%)</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>المنتج</TableHead>
+                                <TableHead>السعر الأصلي</TableHead>
+                                <TableHead>السعر بعد الخصم</TableHead>
+                                <TableHead>الخصم (%)</TableHead>
+                                <TableHead className="text-right">الإجراءات</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -246,7 +246,7 @@ export default function DiscountsPage() {
                     </Table>
                     {!areProductsLoading && products?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
-                            Aucun produit trouvé.
+                            لم يتم العثور على منتجات.
                         </div>
                     )}
                 </CardContent>

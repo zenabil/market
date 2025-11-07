@@ -49,9 +49,9 @@ import { Switch } from '@/components/ui/switch';
 
 
 const couponFormSchema = z.object({
-    code: z.string().min(4, { message: 'Le code doit comporter au moins 4 caractères.' }).max(20),
+    code: z.string().min(4, { message: 'يجب أن يتكون الرمز من 4 أحرف على الأقل.' }).max(20),
     discountPercentage: z.coerce.number().min(1).max(100),
-    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'Date invalide' }),
+    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'تاريخ غير صالح' }),
     isActive: z.boolean().default(true),
 });
 
@@ -105,7 +105,7 @@ function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, on
 
     actionPromise
       .then(() => {
-          toast({ title: isEditing ? 'Coupon mis à jour' : 'Coupon créé' });
+          toast({ title: isEditing ? 'تم تحديث الكوبون' : 'تم إنشاء الكوبون' });
           form.reset();
           setIsOpen(false);
           onActionComplete();
@@ -131,51 +131,51 @@ function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, on
       <DialogTrigger asChild>
         {isEditing ? (
             <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                <Edit className="mr-2 h-4 w-4" />
-                Modifier
+                <Edit className="ml-2 h-4 w-4" />
+                تعديل
             </DropdownMenuItem>
         ) : (
             <Button size="sm" className="gap-1">
               <PlusCircle className="h-4 w-4" />
-              Ajouter un coupon
+              إضافة كوبون
             </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Modifier le coupon' : 'Ajouter un nouveau coupon'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'تعديل الكوبون' : 'إضافة كوبون جديد'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Modifiez les détails du coupon ci-dessous.' : 'Créez un nouveau code de réduction pour vos clients.'}
+            {isEditing ? 'قم بتعديل تفاصيل الكوبون أدناه.' : 'أنشئ رمز خصم جديد لعملائك.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="coupon-dialog-form">
           <div className="space-y-2">
-            <Label htmlFor="code">Code</Label>
+            <Label htmlFor="code">الرمز</Label>
             <Input id="code" {...form.register('code')} />
             {form.formState.errors.code && <p className="text-sm text-destructive">{form.formState.errors.code.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="discountPercentage">Pourcentage de réduction</Label>
+            <Label htmlFor="discountPercentage">نسبة الخصم</Label>
             <Input id="discountPercentage" type="number" {...form.register('discountPercentage')} />
             {form.formState.errors.discountPercentage && <p className="text-sm text-destructive">{form.formState.errors.discountPercentage.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="expiryDate">Date d'expiration</Label>
+            <Label htmlFor="expiryDate">تاريخ انتهاء الصلاحية</Label>
             <Input id="expiryDate" type="date" {...form.register('expiryDate')} />
             {form.formState.errors.expiryDate && <p className="text-sm text-destructive">{form.formState.errors.expiryDate.message}</p>}
           </div>
           <div className="flex items-center space-x-2">
             <Switch id="isActive" {...form.register('isActive')} checked={form.watch('isActive')} onCheckedChange={(checked) => form.setValue('isActive', checked)} />
-            <Label htmlFor="isActive">Actif</Label>
+            <Label htmlFor="isActive">نشط</Label>
           </div>
         </form>
          <DialogFooter>
            <DialogClose asChild>
-            <Button type="button" variant="outline">Annuler</Button>
+            <Button type="button" variant="outline">إلغاء</Button>
            </DialogClose>
           <Button type="submit" disabled={isSaving} form="coupon-dialog-form">
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Enregistrer les modifications' : 'Enregistrer le coupon'}
+              {isSaving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'حفظ التغييرات' : 'حفظ الكوبون'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -201,7 +201,7 @@ export default function CouponsPage() {
   }, [isAdmin, isRoleLoading, router]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString('ar-DZ', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -209,9 +209,9 @@ export default function CouponsPage() {
   };
   
   const getStatus = (coupon: Coupon) => {
-    if (!coupon.isActive) return { text: 'Inactif', variant: 'destructive' as const };
-    if (new Date(coupon.expiryDate) < new Date()) return { text: 'Expiré', variant: 'destructive' as const };
-    return { text: 'Actif', variant: 'default' as const };
+    if (!coupon.isActive) return { text: 'غير نشط', variant: 'destructive' as const };
+    if (new Date(coupon.expiryDate) < new Date()) return { text: 'منتهي الصلاحية', variant: 'destructive' as const };
+    return { text: 'نشط', variant: 'default' as const };
   }
 
   const handleDeleteCoupon = async () => {
@@ -223,7 +223,7 @@ export default function CouponsPage() {
     try {
         await deleteDoc(couponDocRef);
         refetchCoupons();
-        toast({ title: 'Coupon supprimé' });
+        toast({ title: 'تم حذف الكوبون' });
     } catch (error) {
         errorEmitter.emit(
             'permission-error',
@@ -234,8 +234,8 @@ export default function CouponsPage() {
         );
         toast({
             variant: 'destructive',
-            title: 'Erreur de suppression',
-            description: 'Vous n\'avez peut-être pas la permission de faire cela.',
+            title: 'خطأ في الحذف',
+            description: 'قد لا يكون لديك الإذن للقيام بذلك.',
         });
     } finally {
         setIsDeleting(false);
@@ -264,8 +264,8 @@ export default function CouponsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Coupons</CardTitle>
-              <CardDescription>Gérez vos codes de réduction.</CardDescription>
+              <CardTitle>الكوبونات</CardTitle>
+              <CardDescription>إدارة رموز الخصم الخاصة بك.</CardDescription>
             </div>
             <CouponDialog onActionComplete={refetchCoupons} />
           </CardHeader>
@@ -273,11 +273,11 @@ export default function CouponsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Réduction</TableHead>
-                  <TableHead>Date d'expiration</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead><span className="sr-only">Actions</span></TableHead>
+                  <TableHead>الرمز</TableHead>
+                  <TableHead>الخصم</TableHead>
+                  <TableHead>تاريخ انتهاء الصلاحية</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead><span className="sr-only">الإجراءات</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -307,14 +307,14 @@ export default function CouponsPage() {
                           <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                               <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Ouvrir le menu</span>
+                              <span className="sr-only">فتح القائمة</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                              <CouponDialog coupon={coupon} onActionComplete={refetchCoupons} />
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Supprimer
+                              <Trash2 className="ml-2 h-4 w-4" />
+                              حذف
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -325,7 +325,7 @@ export default function CouponsPage() {
             </Table>
             {!areCouponsLoading && coupons?.length === 0 && (
               <div className="text-center p-8 text-muted-foreground">
-                Aucun coupon trouvé.
+                لم يتم العثور على كوبونات.
               </div>
             )}
           </CardContent>
@@ -333,16 +333,16 @@ export default function CouponsPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+                <AlertDialogTitle>هل أنت متأكد من رغبتك في الحذف؟</AlertDialogTitle>
                 <AlertDialogDescription>
-                Cette action ne peut pas être annulée. Cela supprimera définitivement le coupon "{couponToDelete?.code || ''}".
+                لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الكوبون "{couponToDelete?.code || ''}" بشكل دائم.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>Annuler</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>إلغاء</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCoupon} disabled={isDeleting}>
-                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Supprimer
+                  {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                  حذف
                 </AlertDialogAction>
             </AlertDialogFooter>
             </AlertDialogContent>
