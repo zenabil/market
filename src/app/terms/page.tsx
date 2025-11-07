@@ -46,9 +46,9 @@ export default function TermsPage() {
 
   return (
     <div className="container py-8 md:py-12">
-       <div className="prose dark:prose-invert mx-auto max-w-3xl">
+       <div className="prose dark:prose-invert mx-auto max-w-3xl" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
         <h1>{isContentLoading ? <Skeleton className="h-10 w-3/4" /> : title}</h1>
-        <p>{t('terms.lastUpdated')}</p>
+        <p className="text-muted-foreground">{t('terms.lastUpdated')}</p>
         
         {isContentLoading ? (
             <div className="space-y-4 mt-8">
@@ -66,5 +66,3 @@ export default function TermsPage() {
     </div>
   );
 }
-
-    
