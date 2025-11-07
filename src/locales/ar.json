@@ -307,7 +307,7 @@
         "compareTitle": "مقارنة",
         "clearAll": "مسح الكل",
         "addToCart": {
-            "title": "أضيف إلى السلة",
+            "title": "تمت إضافة إلى السلة",
             "description": "تمت إضافة {{name}} إلى سلتك.",
             "button": "أضف إلى السلة"
         },
@@ -374,7 +374,7 @@
         "compare": "قارن هذا المنتج",
         "removeFromComparison": "إزالة من المقارنة",
         "addToCart": {
-            "title": "أضيف إلى السلة",
+            "title": "تمت الإضافة إلى السلة",
             "description": "تمت إضافة {{quantity}} x {{name}} إلى سلتك.",
             "button": "أضف إلى السلة"
         },
@@ -390,7 +390,7 @@
     },
     "productCard": {
         "addToCart": {
-            "title": "أضيف إلى السلة",
+            "title": "تمت الإضافة إلى السلة",
             "description": "تمت إضافة {{name}} إلى سلتك.",
             "button": "أضف إلى السلة"
         },
@@ -507,6 +507,7 @@
             "settings": "الإعدادات",
             "team": "الفريق",
             "content": "المحتوى",
+            "images": "الصور",
             "myOrders": "طلباتي",
             "shoppingLists": "قوائم التسوق",
             "wishlist": "قائمة الرغبات",

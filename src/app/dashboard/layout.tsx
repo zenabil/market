@@ -35,6 +35,7 @@ import {
   Mail,
   UserSquare,
   FileText,
+  Image,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -100,6 +101,11 @@ const adminMenuItems = [
     key: 'team',
     href: '/dashboard/team',
     icon: UserSquare,
+  },
+  {
+    key: 'images',
+    href: '/dashboard/images',
+    icon: Image,
   },
   {
     key: 'settings',

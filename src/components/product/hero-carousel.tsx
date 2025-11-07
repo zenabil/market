@@ -10,12 +10,21 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Autoplay from "embla-carousel-autoplay";
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/language-provider';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, limit } from 'firebase/firestore';
+import type { SiteImage } from '@/lib/placeholder-data';
+import { Skeleton } from '../ui/skeleton';
 
-const slides = [
+type SlideContent = {
+  id: string;
+  headingKey: string;
+  subheadingKey: string;
+};
+
+const slides: SlideContent[] = [
   {
     id: 'hero-1',
     headingKey: 'hero1.heading',
@@ -35,9 +44,27 @@ const slides = [
 
 export default function HeroCarousel() {
   const { t } = useLanguage();
+  const firestore = useFirestore();
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
+
+  const heroImageIds = slides.map(s => s.id);
+  const heroImagesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'siteImages'), where('id', 'in', heroImageIds), limit(heroImageIds.length));
+  }, [firestore]);
+
+  const { data: heroImages, isLoading } = useCollection<SiteImage>(heroImagesQuery);
+  
+  const heroImagesMap = React.useMemo(() => {
+    if (!heroImages) return new Map();
+    return new Map(heroImages.map(img => [img.id, img]));
+  }, [heroImages]);
+
+  if (isLoading) {
+    return <Skeleton className="aspect-[2/1] md:aspect-[3/1] lg:aspect-[3.5/1] w-full" />;
+  }
 
   return (
     <Carousel
@@ -49,7 +76,7 @@ export default function HeroCarousel() {
     >
       <CarouselContent>
         {slides.map((slide) => {
-          const imageData = PlaceHolderImages.find((img) => img.id === slide.id);
+          const imageData = heroImagesMap.get(slide.id);
           if (!imageData) return null;
 
           return (

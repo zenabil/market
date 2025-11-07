@@ -123,6 +123,13 @@ export type TeamMember = {
   avatar: string;
 }
 
+export type SiteImage = {
+  id: string;
+  imageUrl: string;
+  description: string;
+  imageHint: string;
+};
+
 
 // Placeholder data is no longer the source of truth for products, categories, or users.
 // It will be fetched from Firestore. This array can be kept for reference or removed.
