@@ -14,18 +14,18 @@ import { Card, CardContent } from '@/components/ui/card';
 const features = [
     {
         icon: Leaf,
-        title: "Fraîcheur Garantie",
-        description: "Nous travaillons directement avec les agriculteurs locaux pour vous apporter des produits de saison."
+        title: "نضارة مضمونة",
+        description: "نعمل مباشرة مع المزارعين المحليين لنقدم لكم منتجات موسمية طازجة."
     },
     {
         icon: Truck,
-        title: "Livraison Rapide",
-        description: "Recevez vos courses à votre porte en un temps record, partout à Tlemcen."
+        title: "توصيل سريع",
+        description: "استلم مشترياتك عند باب منزلك في وقت قياسي، في أي مكان في تلمسان."
     },
     {
         icon: Award,
-        title: "Qualité Supérieure",
-        description: "Une sélection rigoureuse pour garantir que seuls les meilleurs produits arrivent chez vous."
+        title: "جودة فائقة",
+        description: "اختيار دقيق لضمان وصول أفضل المنتجات فقط إلى منزلك."
     }
 ];
 
@@ -33,7 +33,7 @@ function WhyChooseUs() {
     return (
         <div className="bg-background">
             <div className="container py-12 md:py-24">
-                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">Pourquoi nous choisir ?</h2>
+                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">لماذا تختارنا؟</h2>
                  <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature) => {
                         const Icon = feature.icon;

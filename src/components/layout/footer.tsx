@@ -10,15 +10,15 @@ import { doc } from 'firebase/firestore';
 
 
 const navLinks = [
-  { key: 'Accueil', href: '/' },
-  { key: 'Produits', href: '/products' },
-  { key: 'À Propos', href: '/about' },
-  { key: 'Contact', href: '/contact' },
+  { key: 'الرئيسية', href: '/' },
+  { key: 'المنتجات', href: '/products' },
+  { key: 'من نحن', href: '/about' },
+  { key: 'اتصل بنا', href: '/contact' },
 ];
 
 const legalLinks = [
-  { key: 'Politique de Confidentialité', href: '/privacy' },
-  { key: 'Conditions d\'Utilisation', href: '/terms' },
+  { key: 'سياسة الخصوصية', href: '/privacy' },
+  { key: 'شروط الاستخدام', href: '/terms' },
 ];
 
 type SiteSettings = {
@@ -49,7 +49,7 @@ export default function Footer() {
               <Logo className="h-8" />
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
-              Votre supermarché local, réinventé pour le shopping en ligne.
+              متجرك المحلي، مع تجربة تسوق إلكتروني مبتكرة.
             </p>
             <div className="flex space-x-4">
               <Link href="#" className="text-muted-foreground hover:text-foreground">
@@ -64,7 +64,7 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">Liens rapides</h4>
+            <h4 className="font-headline text-lg mb-4">روابط سريعة</h4>
             <ul className="space-y-2">
               {navLinks.map((link) => (
                 <li key={link.key}>
@@ -76,7 +76,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">Légal</h4>
+            <h4 className="font-headline text-lg mb-4">قانوني</h4>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.key}>
@@ -88,7 +88,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">Contactez-nous</h4>
+            <h4 className="font-headline text-lg mb-4">اتصل بنا</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
                 {settings?.phone && (
                     <li className='flex items-start gap-2'>
@@ -107,7 +107,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} {settings?.siteName || 'Tlemcen Smart Supermarket'}. Tous droits réservés.
+            &copy; {currentYear} {settings?.siteName || 'متجر تلمسان الذكي'}. جميع الحقوق محفوظة.
           </p>
         </div>
       </div>

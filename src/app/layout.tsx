@@ -23,8 +23,8 @@ export async function generateMetadata(
   {},
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  let siteName = 'Tlemcen Smart Supermarket';
-  let siteDescription = 'Votre supermarché local à Tlemcen, maintenant en ligne avec des fonctionnalités intelligentes.';
+  let siteName = 'متجر تلمسان الذكي';
+  let siteDescription = 'متجرك المحلي في تلمسان، الآن متصل بالإنترنت مع ميزات ذكية.';
 
   try {
     const db = getFirestore();
@@ -55,11 +55,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" dir="ltr" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-muted/40')}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

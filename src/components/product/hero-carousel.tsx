@@ -17,18 +17,18 @@ import Link from 'next/link';
 const slides = [
   {
     id: 'hero-1',
-    heading: 'Produits Frais, Directement à Votre Porte',
-    subheading: 'Découvrez notre sélection de fruits, légumes et produits locaux de première qualité.',
+    heading: 'منتجات طازجة، مباشرة إلى باب منزلك',
+    subheading: 'اكتشف مجموعتنا المختارة من الفواكه والخضروات والمنتجات المحلية عالية الجودة.',
   },
   {
     id: 'hero-2',
-    heading: 'Des Offres Incontournables Chaque Semaine',
-    subheading: 'Économisez sur vos marques préférées avec nos promotions exclusives.',
+    heading: 'عروض لا تفوت كل أسبوع',
+    subheading: 'وفّر على علاماتك التجارية المفضلة مع عروضنا الحصرية.',
   },
   {
     id: 'hero-3',
-    heading: 'La Boulangerie, Comme à la Maison',
-    subheading: 'Goûtez à nos pains et pâtisseries artisanales, préparés chaque jour.',
+    heading: 'المخبز، وكأنه في المنزل',
+    subheading: 'تذوق الخبز والمعجنات الحرفية التي نعدها يوميًا.',
   },
 ];
 
@@ -71,7 +71,7 @@ export default function HeroCarousel() {
                       {slide.subheading}
                     </p>
                     <Button size="lg" className="mt-8 font-bold text-base" asChild>
-                      <Link href="/products">Acheter maintenant</Link>
+                      <Link href="/products">تسوق الآن</Link>
                     </Button>
                   </div>
                 </div>

@@ -78,7 +78,7 @@ function RecommendedProducts() {
     if (finalIsLoading) {
          return (
             <div className="mt-12 md:mt-16">
-                <h2 className="font-headline text-3xl md:text-4xl mb-8">Recommandé pour vous</h2>
+                <h2 className="font-headline text-3xl md:text-4xl mb-8">نوصي به لك</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                 </div>
@@ -88,7 +88,7 @@ function RecommendedProducts() {
 
     return (
         <div className="mt-12 md:mt-16">
-            <ProductGrid title="Recommandé pour vous" products={recommendedProducts || []} />
+            <ProductGrid title="نوصي به لك" products={recommendedProducts || []} />
         </div>
     );
 }
@@ -97,15 +97,15 @@ export default function HomePageClient({ categories, bestSellers, exclusiveOffer
 
   return (
     <div className="container py-8 md:py-12">
-      <CategoryShowcase title="Parcourir les catégories" categories={categories} />
+      <CategoryShowcase title="تصفح الفئات" categories={categories} />
       <div className="mt-12 md:mt-16">
-        <ProductGrid title="Meilleures ventes" products={bestSellers} />
+        <ProductGrid title="الأكثر مبيعاً" products={bestSellers} />
       </div>
       <div className="mt-12 md:mt-16">
-        <ProductGrid title="Nouveautés" products={newArrivals} />
+        <ProductGrid title="وصل حديثاً" products={newArrivals} />
       </div>
        <div className="mt-12 md:mt-16">
-        <ProductGrid title="Offres exclusives" products={exclusiveOffers} />
+        <ProductGrid title="عروض حصرية" products={exclusiveOffers} />
       </div>
       <RecommendedProducts />
     </div>

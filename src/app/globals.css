@@ -66,4 +66,7 @@
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
   }
+  [dir="rtl"] .recharts-y-axis.yAxis {
+    transform: translateX(-10px);
+  }
 }

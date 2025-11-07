@@ -41,14 +41,14 @@ import { ScrollArea } from '../ui/scroll-area';
 
 
 const navLinks = [
-  { key: 'Accueil', href: '/' },
-  { key: 'Produits', href: '/products' },
-  { key: 'Recettes', href: '/recipes' },
-  { key: 'Comparer', href: '/compare', icon: GitCompareArrows },
-  { key: 'Générer une recette', href: '/generate-recipe', icon: Wand2 },
-  { key: 'Planificateur de Repas', href: '/meal-planner', icon: CalendarDays },
-  { key: 'À Propos', href: '/about' },
-  { key: 'Contact', href: '/contact' },
+  { key: 'الرئيسية', href: '/' },
+  { key: 'المنتجات', href: '/products' },
+  { key: 'الوصفات', href: '/recipes' },
+  { key: 'مقارنة', href: '/compare', icon: GitCompareArrows },
+  { key: 'أنشئ وصفة', href: '/generate-recipe', icon: Wand2 },
+  { key: 'منظم الوجبات', href: '/meal-planner', icon: CalendarDays },
+  { key: 'من نحن', href: '/about' },
+  { key: 'اتصل بنا', href: '/contact' },
 ];
 
 function NotificationBell() {
@@ -84,16 +84,16 @@ function NotificationBell() {
         const date = new Date(dateString);
         const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
         let interval = seconds / 31536000;
-        if (interval > 1) return Math.floor(interval) + " a";
+        if (interval > 1) return `منذ ${Math.floor(interval)} سنة`;
         interval = seconds / 2592000;
-        if (interval > 1) return Math.floor(interval) + " m";
+        if (interval > 1) return `منذ ${Math.floor(interval)} شهر`;
         interval = seconds / 86400;
-        if (interval > 1) return Math.floor(interval) + " j";
+        if (interval > 1) return `منذ ${Math.floor(interval)} يوم`;
         interval = seconds / 3600;
-        if (interval > 1) return Math.floor(interval) + " h";
+        if (interval > 1) return `منذ ${Math.floor(interval)} ساعة`;
         interval = seconds / 60;
-        if (interval > 1) return Math.floor(interval) + " min";
-        return Math.floor(seconds) + " s";
+        if (interval > 1) return `منذ ${Math.floor(interval)} دقيقة`;
+        return `منذ ${Math.floor(seconds)} ثانية`;
     };
 
     if (!user) return null;
@@ -112,8 +112,8 @@ function NotificationBell() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 md:w-96" align="end">
                 <DropdownMenuLabel className="flex justify-between items-center">
-                    Notifications
-                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>Marquer comme lu</Button>}
+                    الإشعارات
+                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>وضع علامة "مقروء" على الكل</Button>}
                 </DropdownMenuLabel>
                 <Separator />
                 <ScrollArea className="h-80">
@@ -122,7 +122,7 @@ function NotificationBell() {
                             <DropdownMenuItem key={notif.id} asChild>
                                 <Link href={notif.link || '#'} className={cn("flex items-start gap-3 whitespace-normal", !notif.isRead && "bg-primary/10")}>
                                      {!notif.isRead && <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-                                    <div className={cn("flex-grow", notif.isRead && "pl-4")}>
+                                    <div className={cn("flex-grow", notif.isRead && "pr-4")}>
                                         <p className="text-sm">{notif.message}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{timeAgo(notif.createdAt)}</p>
                                     </div>
@@ -131,7 +131,7 @@ function NotificationBell() {
                         ))
                     ) : (
                         <div className="p-4 text-center text-sm text-muted-foreground">
-                            Vous n'avez aucune notification.
+                            ليس لديك أي إشعارات.
                         </div>
                     )}
                 </ScrollArea>
@@ -166,7 +166,7 @@ function UserNav() {
   if (!authUser) {
     return (
       <Button asChild>
-        <Link href="/login">Connexion / Inscription</Link>
+        <Link href="/login">تسجيل الدخول / إنشاء حساب</Link>
       </Button>
     );
   }
@@ -184,7 +184,7 @@ function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'Bienvenue'}</p>
+            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'مرحباً'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {authUser.email}
             </p>
@@ -193,22 +193,22 @@ function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
             <Link href="/dashboard/orders">
-                <ShoppingBasket className="mr-2 h-4 w-4" />
-                <span>Mes commandes</span>
+                <ShoppingBasket className="ml-2 h-4 w-4" />
+                <span>طلباتي</span>
             </Link>
         </DropdownMenuItem>
         {isAdmin && (
             <DropdownMenuItem asChild>
                 <Link href="/dashboard">
-                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Tableau de bord</span>
+                     <LayoutDashboard className="ml-2 h-4 w-4" />
+                    <span>لوحة التحكم</span>
                 </Link>
             </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Déconnexion</span>
+          <LogOut className="ml-2 h-4 w-4" />
+          <span>تسجيل الخروج</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -240,12 +240,12 @@ function MobileNav() {
     return (
         <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="mr-4 md:hidden">
+              <Button variant="ghost" size="icon" className="ml-4 md:hidden">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Ouvrir le menu</span>
+                <span className="sr-only">افتح القائمة</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <Link href="/" className="mb-8 block">
                 <Logo className="h-8" />
               </Link>
@@ -294,7 +294,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <MobileNav />
         
-        <Link href="/" className="mr-6 hidden md:flex">
+        <Link href="/" className="ml-6 hidden md:flex">
           <Logo className="h-8 w-auto" />
         </Link>
 
@@ -302,16 +302,16 @@ export default function Header() {
             <NavLinks />
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-start space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form onSubmit={handleSearch}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   name="search"
-                  placeholder="Rechercher des produits..."
-                  className="w-full bg-secondary md:w-[200px] lg:w-[300px] pl-9"
+                  placeholder="ابحث عن منتجات..."
+                  className="w-full bg-secondary md:w-[200px] lg:w-[300px] pr-9"
                 />
               </div>
             </form>

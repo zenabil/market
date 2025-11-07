@@ -27,7 +27,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { items, removeItem, updateQuantity, totalPrice } = useCart();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('ar-DZ', {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -37,12 +37,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle className="font-headline text-2xl">Panier</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">سلة التسوق</SheetTitle>
         </SheetHeader>
         <Separator />
         {items.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">Votre panier est vide.</p>
+            <p className="text-muted-foreground">سلة التسوق الخاصة بك فارغة.</p>
           </div>
         ) : (
           <>
@@ -102,12 +102,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
             <Separator />
             <SheetFooter className="mt-4 sm:flex-col sm:space-x-0 space-y-2">
               <div className="flex justify-between font-bold text-lg">
-                <span>Sous-total</span>
+                <span>المجموع الفرعي</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <SheetClose asChild>
                 <Button asChild className="w-full font-bold text-base py-6">
-                  <Link href="/checkout">Paiement</Link>
+                  <Link href="/checkout">الدفع</Link>
                 </Button>
               </SheetClose>
             </SheetFooter>
