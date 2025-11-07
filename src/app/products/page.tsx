@@ -29,16 +29,21 @@ export default function ProductsPage() {
 
   const sortedAndFilteredProducts = useMemo(() => {
     if (!products) return [];
+
+    const productsWithDiscountedPrice = products.map(p => ({
+      ...p,
+      finalPrice: p.price * (1 - (p.discount || 0) / 100)
+    }));
     
     let filtered = selectedCategoryId
-      ? products.filter(p => p.categoryId === selectedCategoryId)
-      : products;
+      ? productsWithDiscountedPrice.filter(p => p.categoryId === selectedCategoryId)
+      : productsWithDiscountedPrice;
 
     switch (sortOption) {
       case 'price-asc':
-        return filtered.sort((a, b) => (a.price * (1 - a.discount / 100)) - (b.price * (1 - b.discount / 100)));
+        return filtered.sort((a, b) => a.finalPrice - b.finalPrice);
       case 'price-desc':
-        return filtered.sort((a, b) => (b.price * (1 - b.discount / 100)) - (a.price * (1 - a.discount / 100)));
+        return filtered.sort((a, b) => b.finalPrice - a.finalPrice);
       case 'name-asc':
         return filtered.sort((a, b) => a.name.localeCompare(b.name));
       case 'popularity':
