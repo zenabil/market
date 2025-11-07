@@ -22,7 +22,6 @@
  * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
  * - `/settings/site`: Global site settings, publicly readable.
  * - `/contactMessages/{messageId}`: Contact form submissions, write-only for users.
- * - `/teamMembers/{memberId}`: Team member information, publicly readable, admin-writable.
  *
  * Key Security Decisions:
  * - Products, Categories, and Reviews are publicly readable.
@@ -253,17 +252,6 @@ service cloud.firestore {
         allow read, update, delete: if isAdmin();
     }
     
-    /**
-     * @description Allows public read access to team members, but write access only to admins.
-     * @path /teamMembers/{memberId}
-     * @allow get, list: if true;
-     * @allow create, update, delete: if isAdmin();
-     * @principle Public read, admin write for team.
-     */
-    match /teamMembers/{memberId} {
-        allow get, list: if true;
-        allow create, update, delete: if isAdmin();
-    }
   }
 
   // Helper functions
@@ -325,5 +313,3 @@ service cloud.firestore {
     return request.resource.data.type == resource.data.type;
   }
 }
-
-    

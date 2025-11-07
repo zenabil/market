@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Product": {
@@ -643,10 +644,6 @@
     "/contactMessages/{messageId}": {
       "schema": { "$ref": "#/entities/ContactMessage" },
       "description": "Stores messages submitted through the contact form. Writable by anyone, but not readable by clients."
-    },
-    "/teamMembers/{memberId}": {
-      "schema": { "$ref": "#/entities/TeamMember" },
-      "description": "Stores information about team members. Publicly readable, admin writable."
     }
   }
 }

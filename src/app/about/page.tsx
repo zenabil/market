@@ -9,6 +9,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { TeamMember } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { teamMembers } from '@/lib/team-data';
 
 
 const values = [
@@ -37,9 +38,8 @@ const values = [
 const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket-interior');
 
 export default function AboutPage() {
-  const firestore = useFirestore();
-  const teamQuery = useMemoFirebase(() => query(collection(firestore, 'teamMembers')), [firestore]);
-  const { data: team, isLoading: areMembersLoading } = useCollection<TeamMember>(teamQuery);
+  const team = teamMembers;
+  const areMembersLoading = false;
 
   return (
     <div className="container py-8 md:py-12">

@@ -72,11 +72,6 @@ const adminMenuItems = [
     href: '/dashboard/users',
     icon: Users,
   },
-  {
-    key: 'Équipe',
-    href: '/dashboard/team',
-    icon: UserSquare,
-  },
     {
     key: 'Messages',
     href: '/dashboard/messages',
