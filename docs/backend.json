@@ -74,7 +74,7 @@
         },
         "bundleItems": {
             "type": "array",
-            "description": "A list of product IDs included in this bundle. Only applicable if type is 'bundle'.",
+            "description": "An array of product document IDs. Only applicable if type is 'bundle'.",
             "items": {
                 "type": "string"
             }

@@ -52,7 +52,7 @@ service cloud.firestore {
       allow get: if true;
       allow list: if true;
       allow create: if isAdmin() && request.resource.data.purchasePrice != null;
-      allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent() && request.resource.data.purchasePrice != null;
+      allow update: if isAdmin() && isNotUpdatingCalculatedFields();
       allow delete: if isAdmin();
 
 
@@ -356,10 +356,5 @@ service cloud.firestore {
            (request.resource.data.averageRating == resource.data.averageRating &&
             request.resource.data.reviewCount == resource.data.reviewCount &&
             request.resource.data.sold == resource.data.sold);
-  }
-  
-  function isProductTypeConsistent() {
-    // The 'type' of a product (standard or bundle) should not be changed after creation.
-    return request.resource.data.type == resource.data.type;
   }
 }

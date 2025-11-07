@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
-import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows, Box } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, where, limit, documentId, getDoc } from 'firebase/firestore';
@@ -26,6 +26,8 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
+import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 // Server-side metadata generation
 if (!getApps().length) {
@@ -93,6 +95,14 @@ function ProductDetails({ productId }: { productId: string }) {
       return doc(firestore, 'products', productId);
   }, [firestore, productId]);
   const { data: product, isLoading: isLoadingProduct, refetch } = useDoc<Product>(productRef);
+
+  // Fetch details of bundled items if the product is a bundle
+  const bundledItemsQuery = useMemoFirebase(() => {
+    if (!firestore || product?.type !== 'bundle' || !product.bundleItems || product.bundleItems.length === 0) return null;
+    return query(collection(firestore, 'products'), where(documentId(), 'in', product.bundleItems));
+  }, [firestore, product]);
+  const { data: bundledItems, isLoading: areBundledItemsLoading } = useCollection<Product>(bundledItemsQuery);
+
 
   const isWishlisted = !!wishlist?.find(item => item.id === productId);
   const isComparing = !!comparisonItems.find(item => item.id === productId);
@@ -258,50 +268,84 @@ function ProductDetails({ productId }: { productId: string }) {
                 <GitCompareArrows className={cn("mr-2 h-4 w-4", isComparing && "text-primary-foreground")} />
                 {isComparing ? t('product.removeFromComparison') : t('product.compare')}
              </Button>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => updateQuantity(quantity - 1)}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="h-4 w-4" />
+
+            {product.type === 'standard' && (
+                <>
+                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => updateQuantity(quantity - 1)}
+                    disabled={quantity <= 1}
+                    >
+                    <Minus className="h-4 w-4" />
+                    </Button>
+                    <Input
+                    type="number"
+                    className="h-10 w-16 text-center"
+                    value={quantity}
+                    onChange={(e) => updateQuantity(parseInt(e.target.value) || 1)}
+                    min="1"
+                    max={product.stock}
+                    />
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => updateQuantity(quantity + 1)}
+                    disabled={quantity >= product.stock}
+                    >
+                    <Plus className="h-4 w-4" />
+                    </Button>
+                </div>
+                <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    {product.stock === 0 ? t('product.outOfStock') : t('product.addToCart.button')}
                 </Button>
-                <Input
-                  type="number"
-                  className="h-10 w-16 text-center"
-                  value={quantity}
-                  onChange={(e) => updateQuantity(parseInt(e.target.value) || 1)}
-                  min="1"
-                  max={product.stock}
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => updateQuantity(quantity + 1)}
-                  disabled={quantity >= product.stock}
-                >
-                  <Plus className="h-4 w-4" />
+                <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
+                    <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
                 </Button>
-              </div>
-              <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                {product.stock === 0 ? t('product.outOfStock') : t('product.addToCart.button')}
-              </Button>
-               <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
-                  <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
-              </Button>
-            </div>
-             <p className="text-sm text-muted-foreground mt-2">
-              {product.stock > 0 
-                  ? t('product.inStock').replace('{{count}}', product.stock.toString())
-                  : t('product.outOfStockFull')
-              }
-             </p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                {product.stock > 0 
+                    ? t('product.inStock').replace('{{count}}', product.stock.toString())
+                    : t('product.outOfStockFull')
+                }
+                </p>
+                </>
+            )}
+
           </div>
         </div>
       </div>
+
+       {product.type === 'bundle' && (
+        <Card className="mt-12">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Box /> Contenu de l'offre groupée</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {areBundledItemsLoading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </div>
+                ) : (
+                    <div className="divide-y">
+                        {bundledItems?.map(item => (
+                            <Link key={item.id} href={`/product/${item.id}`} className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-6 px-6">
+                                <Image src={item.images[0]} alt={item.name} width={64} height={64} className="rounded-md border object-cover" />
+                                <div className="flex-grow">
+                                    <p className="font-semibold">{item.name}</p>
+                                    <p className="text-sm text-muted-foreground">{formatCurrency(item.price)}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+      )}
     </div>
     
     <ReviewsSection targetId={productId} targetCollection="products" onReviewChange={refetch} />
