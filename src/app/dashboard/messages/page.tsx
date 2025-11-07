@@ -143,21 +143,20 @@ export default function MessagesPage() {
                             ))}
                             {messages?.map(message => (
                                 <TableRow key={message.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedMessage(message)}>
-                                    <TableCell>{new Date(message.createdAt).toLocaleDateString('fr-FR')}</TableCell>
+                                    <TableCell>{new Date(message.createdAt).toLocaleString('fr-FR')}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{message.name}</div>
                                         <div className="text-sm text-muted-foreground">{message.email}</div>
                                     </TableCell>
                                     <TableCell>{message.subject}</TableCell>
                                     <TableCell className="text-right">
-                                        <AlertDialog onOpenChange={(isOpen) => !isOpen && setMessageToDelete(null)}>
+                                        <AlertDialog onOpenChange={(isOpen) => !isOpen && messageToDelete && setMessageToDelete(null)}>
                                             <AlertDialogTrigger asChild>
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon"
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // Prevent dialog from opening
-                                                        setMessageToDelete(message);
                                                     }}
                                                 >
                                                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -172,7 +171,7 @@ export default function MessagesPage() {
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={handleDeleteMessage} disabled={isDeleting}>
+                                                    <AlertDialogAction onClick={() => handleDeleteMessage()} disabled={isDeleting}>
                                                         {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Supprimer'}
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
