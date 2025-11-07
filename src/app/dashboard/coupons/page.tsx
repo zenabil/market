@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -271,7 +272,12 @@ export default function CouponsPage() {
               <CardTitle>{t('dashboard.layout.coupons')}</CardTitle>
               <CardDescription>{t('dashboard.coupons.description')}</CardDescription>
             </div>
-            <CouponDialog onActionComplete={refetchCoupons} />
+            <CouponDialog onActionComplete={refetchCoupons}>
+                <Button size="sm" className="gap-1">
+                    <PlusCircle className="h-4 w-4" />
+                    {t('dashboard.coupons.addCoupon')}
+                </Button>
+            </CouponDialog>
           </CardHeader>
           <CardContent>
             <Table>
@@ -315,7 +321,12 @@ export default function CouponsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                             <CouponDialog coupon={coupon} onActionComplete={refetchCoupons} />
+                             <CouponDialog coupon={coupon} onActionComplete={refetchCoupons}>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Edit className="ml-2 h-4 w-4" />
+                                    {t('dashboard.common.edit')}
+                                </DropdownMenuItem>
+                             </CouponDialog>
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
                               <Trash2 className="ml-2 h-4 w-4" />
                               {t('dashboard.common.delete')}
@@ -354,3 +365,5 @@ export default function CouponsPage() {
     </div>
   );
 }
+
+    
