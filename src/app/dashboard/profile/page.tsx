@@ -26,29 +26,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { AddressDialog } from '@/components/dashboard/address-dialog';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const profileFormSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  email: z.string().email(),
-  phone: z.string().optional(),
-});
-
-const passwordFormSchema = z.object({
-    newPassword: z.string().min(6, { message: 'Le mot de passe doit comporter au moins 6 caractères.' }),
-    confirmPassword: z.string().min(6),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Les mots de passe ne correspondent pas.',
-    path: ["confirmPassword"],
-});
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const { user: authUser, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = React.useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const profileFormSchema = z.object({
+    name: z.string().min(2, { message: t('dashboard.profile.validation.name') }),
+    email: z.string().email(),
+    phone: z.string().optional(),
+  });
+  
+  const passwordFormSchema = z.object({
+      newPassword: z.string().min(6, { message: t('dashboard.profile.validation.passwordLength') }),
+      confirmPassword: z.string().min(6),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+      message: t('dashboard.profile.validation.passwordMismatch'),
+      path: ["confirmPassword"],
+  });
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !authUser) return null;
@@ -103,11 +105,11 @@ export default function ProfilePage() {
                 }));
             }
         });
-        toast({ title: 'Avatar mis à jour' });
+        toast({ title: t('dashboard.profile.toast.avatarUpdated') });
         refetch();
       } catch (error) {
         console.error("Avatar update failed:", error);
-        toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
+        toast({ variant: 'destructive', title: t('dashboard.common.error'), description: t('dashboard.profile.toast.avatarError') });
       }
     };
     reader.readAsDataURL(file);
@@ -127,8 +129,8 @@ export default function ProfilePage() {
         await updateDoc(userDocRef, updateData);
         refetch();
         toast({
-            title: 'Profil mis à jour',
-            description: 'Vos informations ont été enregistrées.',
+            title: t('dashboard.profile.toast.profileUpdated.title'),
+            description: t('dashboard.profile.toast.profileUpdated.description'),
         });
 
     } catch (error: any) {
@@ -142,8 +144,8 @@ export default function ProfilePage() {
             console.error(error);
             toast({
                 variant: "destructive",
-                title: "Échec de la mise à jour",
-                description: "Nous n'avons pas pu enregistrer vos modifications."
+                title: t('dashboard.profile.toast.profileError.title'),
+                description: t('dashboard.profile.toast.profileError.description')
             });
         }
     } finally {
@@ -157,14 +159,14 @@ export default function ProfilePage() {
       try {
           await updatePassword(authUser, values.newPassword);
           toast({
-              title: 'Mot de passe mis à jour',
-              description: 'Votre mot de passe a été modifié avec succès.',
+              title: t('dashboard.profile.toast.passwordUpdated.title'),
+              description: t('dashboard.profile.toast.passwordUpdated.description'),
           });
           passwordForm.reset({ newPassword: '', confirmPassword: '' });
       } catch (error: any) {
           toast({
               variant: "destructive",
-              title: "Erreur",
+              title: t('dashboard.common.error'),
               description: error.message,
           });
       } finally {
@@ -184,7 +186,7 @@ export default function ProfilePage() {
 
     updateDoc(userDocRef, updateData)
     .then(() => {
-      toast({ title: 'Adresse supprimée' });
+      toast({ title: t('dashboard.profile.toast.addressDeleted') });
       refetch();
     })
     .catch((error) => {
@@ -205,8 +207,8 @@ export default function ProfilePage() {
     <div className="container py-8 md:py-12 space-y-8">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>Mon Profil</CardTitle>
-          <CardDescription>Gérez les informations de votre profil.</CardDescription>
+          <CardTitle>{t('dashboard.profile.title')}</CardTitle>
+          <CardDescription>{t('dashboard.profile.description')}</CardDescription>
         </CardHeader>
         <CardContent>
             {isLoading ? (
@@ -253,7 +255,7 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-2 pt-2">
                                 <Gem className="h-5 w-5 text-accent"/>
                                 <span className="font-bold text-lg">{firestoreUser?.loyaltyPoints || 0}</span>
-                                <span className="text-sm text-muted-foreground">Points de fidélité</span>
+                                <span className="text-sm text-muted-foreground">{t('dashboard.profile.loyaltyPoints')}</span>
                             </div>
                         </div>
                     </div>
@@ -262,7 +264,7 @@ export default function ProfilePage() {
                         name="name"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Nom</FormLabel>
+                            <FormLabel>{t('dashboard.profile.name')}</FormLabel>
                             <FormControl>
                             <Input {...field} />
                             </FormControl>
@@ -276,7 +278,7 @@ export default function ProfilePage() {
                         name="email"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t('dashboard.profile.email')}</FormLabel>
                             <FormControl>
                             <Input {...field} disabled />
                             </FormControl>
@@ -290,7 +292,7 @@ export default function ProfilePage() {
                         name="phone"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Téléphone</FormLabel>
+                            <FormLabel>{t('dashboard.profile.phone')}</FormLabel>
                             <FormControl>
                             <Input type="tel" {...field} />
                             </FormControl>
@@ -302,7 +304,7 @@ export default function ProfilePage() {
                     <div className="flex justify-end">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Enregistrer les modifications
+                            {t('dashboard.common.saveChanges')}
                         </Button>
                     </div>
                     </form>
@@ -313,8 +315,8 @@ export default function ProfilePage() {
 
     <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>Changer le mot de passe</CardTitle>
-          <CardDescription>Mettez à jour votre mot de passe pour des raisons de sécurité.</CardDescription>
+          <CardTitle>{t('dashboard.profile.changePasswordTitle')}</CardTitle>
+          <CardDescription>{t('dashboard.profile.changePasswordDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
              <Form {...passwordForm}>
@@ -324,7 +326,7 @@ export default function ProfilePage() {
                         name="newPassword"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Nouveau mot de passe</FormLabel>
+                            <FormLabel>{t('dashboard.profile.newPassword')}</FormLabel>
                             <FormControl>
                             <Input type="password" {...field} />
                             </FormControl>
@@ -337,7 +339,7 @@ export default function ProfilePage() {
                         name="confirmPassword"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Confirmer le nouveau mot de passe</FormLabel>
+                            <FormLabel>{t('dashboard.profile.confirmNewPassword')}</FormLabel>
                             <FormControl>
                             <Input type="password" {...field} />
                             </FormControl>
@@ -348,7 +350,7 @@ export default function ProfilePage() {
                      <div className="flex justify-end">
                         <Button type="submit" disabled={isPasswordSaving}>
                             {isPasswordSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Mettre à jour le mot de passe
+                            {t('dashboard.profile.updatePassword')}
                         </Button>
                     </div>
                 </form>
@@ -359,13 +361,13 @@ export default function ProfilePage() {
     <Card className="max-w-4xl mx-auto">
         <CardHeader className="flex-row items-center justify-between">
           <div>
-            <CardTitle>Gérer les adresses</CardTitle>
-            <CardDescription>Ajoutez ou supprimez vos adresses de livraison.</CardDescription>
+            <CardTitle>{t('dashboard.profile.manageAddressesTitle')}</CardTitle>
+            <CardDescription>{t('dashboard.profile.manageAddressesDescription')}</CardDescription>
           </div>
           <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser} onAddressChange={refetch}>
             <Button size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Ajouter une adresse
+                {t('dashboard.profile.addAddress')}
             </Button>
           </AddressDialog>
         </CardHeader>
@@ -385,12 +387,12 @@ export default function ProfilePage() {
                                 </AlertDialogTrigger>
                                  <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                                        <AlertDialogDescription>Voulez-vous vraiment supprimer cette adresse ?</AlertDialogDescription>
+                                        <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
+                                        <AlertDialogDescription>{t('dashboard.profile.confirmDeleteAddress')}</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => deleteAddress(addr)}>Supprimer</AlertDialogAction>
+                                        <AlertDialogCancel>{t('dashboard.common.cancel')}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteAddress(addr)}>{t('dashboard.common.delete')}</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -398,7 +400,7 @@ export default function ProfilePage() {
                     </div>
                 ))
             ) : (
-                <p className="text-sm text-center text-muted-foreground py-4">Aucune adresse enregistrée.</p>
+                <p className="text-sm text-center text-muted-foreground py-4">{t('dashboard.profile.noAddresses')}</p>
             )}
            </div>
         </CardContent>

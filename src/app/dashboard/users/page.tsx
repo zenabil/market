@@ -27,8 +27,10 @@ import { Label } from '@/components/ui/label';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { AddressDialog } from '@/components/dashboard/address-dialog';
+import { useLanguage } from '@/contexts/language-provider';
 
 function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPointsUpdate: () => void }) {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -45,8 +47,8 @@ function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPoints
     updateDoc(userRef, updateData)
       .then(() => {
         toast({
-          title: 'Points de fidélité mis à jour',
-          description: `${user.name} a maintenant ${points} points.`,
+          title: t('dashboard.users.toast.loyaltyUpdated.title'),
+          description: t('dashboard.users.toast.loyaltyUpdated.description').replace('{{name}}', user.name).replace('{{points}}', points.toString()),
         });
         onPointsUpdate();
         setIsOpen(false);
@@ -76,10 +78,10 @@ function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPoints
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{`Modifier les points de fidélité de ${user.name}`}</DialogTitle>
+          <DialogTitle>{t('dashboard.users.loyaltyDialog.title').replace('{{name}}', user.name)}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="loyaltyPoints">Points de fidélité</Label>
+          <Label htmlFor="loyaltyPoints">{t('dashboard.users.loyaltyDialog.label')}</Label>
           <Input 
             id="loyaltyPoints"
             type="number"
@@ -89,11 +91,11 @@ function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPoints
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="outline">Annuler</Button>
+            <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
           </DialogClose>
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enregistrer les modifications
+            {t('dashboard.common.saveChanges')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -103,6 +105,7 @@ function LoyaltyDialog({ user, onPointsUpdate }: { user: FirestoreUser, onPoints
 
 
 function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange: () => void }) {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   
@@ -132,8 +135,8 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
       })
       .then(() => {
         toast({
-          title: 'Rôle mis à jour',
-          description: `${user.name} est maintenant ${newRole}.`,
+          title: t('dashboard.users.toast.roleUpdated.title'),
+          description: t('dashboard.users.toast.roleUpdated.description').replace('{{name}}', user.name).replace('{{role}}', newRole),
         });
         onRoleChange();
       })
@@ -146,8 +149,8 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
         errorEmitter.emit('permission-error', permissionError);
         toast({
           variant: "destructive",
-          title: "Échec de la mise à jour du rôle",
-          description: "Vous n'avez peut-être pas la permission d'effectuer cette action.",
+          title: t('dashboard.users.toast.roleError.title'),
+          description: t('dashboard.users.toast.roleError.description'),
         });
       })
       .finally(() => {
@@ -163,13 +166,14 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
             aria-label={`Toggle admin status for ${user.name}`}
             disabled={isLoading}
         />
-        <span>{isAdmin ? <Badge variant="secondary">Admin</Badge> : 'Utilisateur'}</span>
+        <span>{isAdmin ? <Badge variant="secondary">{t('dashboard.users.role.admin')}</Badge> : t('dashboard.users.role.user')}</span>
     </div>
   );
 }
 
 
 export default function UsersPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
@@ -192,7 +196,7 @@ export default function UsersPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(t('locale'), {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -200,7 +204,7 @@ export default function UsersPage() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(t('locale'), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -222,18 +226,18 @@ export default function UsersPage() {
     <div className="container py-8 md:py-12">
       <Card>
         <CardHeader>
-          <CardTitle className='font-headline text-3xl'>Utilisateurs</CardTitle>
-          <CardDescription>Gérez les utilisateurs et leurs permissions.</CardDescription>
+          <CardTitle className='font-headline text-3xl'>{t('dashboard.layout.users')}</CardTitle>
+          <CardDescription>{t('dashboard.users.description')}</CardDescription>
         </CardHeader>
         <CardContent>
            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Utilisateur</TableHead>
-                  <TableHead>Rôle</TableHead>
-                  <TableHead>Date d'inscription</TableHead>
-                  <TableHead>Total dépensé</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('dashboard.users.user')}</TableHead>
+                  <TableHead>{t('dashboard.users.role.title')}</TableHead>
+                  <TableHead>{t('dashboard.users.registrationDate')}</TableHead>
+                  <TableHead>{t('dashboard.users.totalSpent')}</TableHead>
+                  <TableHead className="text-right">{t('dashboard.common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -281,7 +285,7 @@ export default function UsersPage() {
                           firestoreUser={user}
                           onAddressChange={handleUpdate}
                         >
-                            <Button variant="ghost" size="icon" title="Modifier les adresses">
+                            <Button variant="ghost" size="icon" title={t('dashboard.users.editAddresses')}>
                                 <Home className="h-4 w-4 text-muted-foreground" />
                             </Button>
                         </AddressDialog>
@@ -293,7 +297,7 @@ export default function UsersPage() {
             </Table>
             {!isLoading && users?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
-                    Aucun utilisateur trouvé.
+                    {t('dashboard.users.noUsers')}
                 </div>
             )}
         </CardContent>
@@ -301,5 +305,3 @@ export default function UsersPage() {
     </div>
   );
 }
-
-    

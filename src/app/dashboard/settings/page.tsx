@@ -26,26 +26,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { Separator } from '@/components/ui/separator';
-
-const formSchema = z.object({
-  siteName: z.string().min(2, { message: 'Le nom du site doit comporter au moins 2 caractères.' }),
-  logoUrl: z.string().url().optional().or(z.literal('')),
-  phone: z.string().min(10, { message: 'Le numéro de téléphone doit comporter au moins 10 chiffres.' }),
-  address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
-  deliveryFeeBase: z.coerce.number().min(0),
-  deliveryFeeThreshold: z.coerce.number().min(0),
-  deliveryFeeHigh: z.coerce.number().min(0),
-});
-
-type SiteSettings = z.infer<typeof formSchema>;
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
+
+  const formSchema = z.object({
+    siteName: z.string().min(2, { message: t('dashboard.settings.validation.siteName') }),
+    logoUrl: z.string().url().optional().or(z.literal('')),
+    phone: z.string().min(10, { message: t('dashboard.settings.validation.phone') }),
+    address: z.string().min(10, { message: t('dashboard.settings.validation.address') }),
+    deliveryFeeBase: z.coerce.number().min(0),
+    deliveryFeeThreshold: z.coerce.number().min(0),
+    deliveryFeeHigh: z.coerce.number().min(0),
+  });
+  
+  type SiteSettings = z.infer<typeof formSchema>;
 
   const firestore = useFirestore();
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
@@ -101,8 +103,8 @@ export default function SettingsPage() {
     setDoc(settingsRef, values, { merge: true })
         .then(() => {
             toast({
-                title: 'Paramètres mis à jour',
-                description: 'Les paramètres du site ont été enregistrés.',
+                title: t('dashboard.settings.toast.updated.title'),
+                description: t('dashboard.settings.toast.updated.description'),
             });
         })
         .catch(error => {
@@ -138,14 +140,14 @@ export default function SettingsPage() {
                 <ArrowLeft className="h-4 w-4" />
             </Link>
             </Button>
-            <h1 className="font-headline text-3xl md:text-4xl">Paramètres</h1>
+            <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.layout.settings')}</h1>
         </div>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Paramètres Généraux</CardTitle>
-                    <CardDescription>Gérez les paramètres globaux de votre site.</CardDescription>
+                    <CardTitle>{t('dashboard.settings.general.title')}</CardTitle>
+                    <CardDescription>{t('dashboard.settings.general.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 max-w-2xl">
                     <FormField
@@ -153,7 +155,7 @@ export default function SettingsPage() {
                         name="siteName"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Nom du site</FormLabel>
+                            <FormLabel>{t('dashboard.settings.general.siteName')}</FormLabel>
                             <FormControl>
                             <Input {...field} />
                             </FormControl>
@@ -167,7 +169,7 @@ export default function SettingsPage() {
                         name="logoUrl"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Logo</FormLabel>
+                            <FormLabel>{t('dashboard.settings.general.logo')}</FormLabel>
                             <FormControl>
                             <div className="flex items-center gap-4">
                                 {logoPreview ? (
@@ -197,7 +199,7 @@ export default function SettingsPage() {
                                 )}
                                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
                                 <Upload className="mr-2 h-4 w-4" />
-                                    Télécharger le logo
+                                    {t('dashboard.settings.general.uploadLogo')}
                                 </Button>
                                 <Input 
                                     type="file" 
@@ -218,7 +220,7 @@ export default function SettingsPage() {
                         name="phone"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Téléphone</FormLabel>
+                            <FormLabel>{t('dashboard.settings.general.phone')}</FormLabel>
                             <FormControl>
                             <Input {...field} />
                             </FormControl>
@@ -232,7 +234,7 @@ export default function SettingsPage() {
                         name="address"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Adresse</FormLabel>
+                            <FormLabel>{t('dashboard.settings.general.address')}</FormLabel>
                             <FormControl>
                             <Input {...field} />
                             </FormControl>
@@ -245,8 +247,8 @@ export default function SettingsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Paramètres de Livraison</CardTitle>
-                    <CardDescription>Configurez les frais de livraison pour votre boutique.</CardDescription>
+                    <CardTitle>{t('dashboard.settings.delivery.title')}</CardTitle>
+                    <CardDescription>{t('dashboard.settings.delivery.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 max-w-2xl">
                     <FormField
@@ -254,7 +256,7 @@ export default function SettingsPage() {
                         name="deliveryFeeBase"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Frais de base</FormLabel>
+                            <FormLabel>{t('dashboard.settings.delivery.baseFee')}</FormLabel>
                             <FormControl><Input type="number" {...field} /></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -265,7 +267,7 @@ export default function SettingsPage() {
                         name="deliveryFeeThreshold"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Seuil de commande pour frais élevés</FormLabel>
+                            <FormLabel>{t('dashboard.settings.delivery.threshold')}</FormLabel>
                             <FormControl><Input type="number" {...field} /></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -276,7 +278,7 @@ export default function SettingsPage() {
                         name="deliveryFeeHigh"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Frais pour commandes élevées</FormLabel>
+                            <FormLabel>{t('dashboard.settings.delivery.highFee')}</FormLabel>
                             <FormControl><Input type="number" {...field} /></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -288,7 +290,7 @@ export default function SettingsPage() {
             <div className="flex justify-end">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Enregistrer les modifications
+                    {t('dashboard.common.saveChanges')}
                 </Button>
             </div>
             </form>

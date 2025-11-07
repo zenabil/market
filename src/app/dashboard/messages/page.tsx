@@ -23,6 +23,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLanguage } from '@/contexts/language-provider';
 
 
 type ContactMessage = {
@@ -35,6 +36,7 @@ type ContactMessage = {
 };
 
 function MessageViewDialog({ message }: { message: ContactMessage | null }) {
+    const { t } = useLanguage();
     if (!message) return null;
 
     return (
@@ -42,7 +44,7 @@ function MessageViewDialog({ message }: { message: ContactMessage | null }) {
             <DialogHeader>
                 <DialogTitle>{message.subject}</DialogTitle>
                 <DialogDescription>
-                    De : {message.name} &lt;{message.email}&gt; le {new Date(message.createdAt).toLocaleString('fr-FR')}
+                    De : {message.name} &lt;{message.email}&gt; le {new Date(message.createdAt).toLocaleString(t('locale'))}
                 </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[60vh] my-4">
@@ -50,7 +52,7 @@ function MessageViewDialog({ message }: { message: ContactMessage | null }) {
             </ScrollArea>
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button type="button" variant="secondary">Fermer</Button>
+                    <Button type="button" variant="secondary">{t('dashboard.common.cancel')}</Button>
                 </DialogClose>
             </DialogFooter>
         </DialogContent>
@@ -59,6 +61,7 @@ function MessageViewDialog({ message }: { message: ContactMessage | null }) {
 
 
 export default function MessagesPage() {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
@@ -88,7 +91,7 @@ export default function MessagesPage() {
 
         try {
             await deleteDoc(messageRef);
-            toast({ title: 'Message supprimé' });
+            toast({ title: t('dashboard.messages.toast.deleted') });
             refetch();
         } catch(error) {
             errorEmitter.emit(
@@ -119,17 +122,17 @@ export default function MessagesPage() {
         <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedMessage(null)}>
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline text-3xl'>Messages</CardTitle>
-                    <CardDescription>Consultez les messages envoyés via le formulaire de contact.</CardDescription>
+                    <CardTitle className='font-headline text-3xl'>{t('dashboard.layout.messages')}</CardTitle>
+                    <CardDescription>{t('dashboard.messages.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>De</TableHead>
-                                <TableHead>Sujet</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>{t('dashboard.messages.date')}</TableHead>
+                                <TableHead>{t('dashboard.messages.from')}</TableHead>
+                                <TableHead>{t('dashboard.messages.subject')}</TableHead>
+                                <TableHead className="text-right">{t('dashboard.common.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -143,7 +146,7 @@ export default function MessagesPage() {
                             ))}
                             {messages?.map(message => (
                                 <TableRow key={message.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedMessage(message)}>
-                                    <TableCell>{new Date(message.createdAt).toLocaleString('fr-FR')}</TableCell>
+                                    <TableCell>{new Date(message.createdAt).toLocaleString(t('locale'))}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{message.name}</div>
                                         <div className="text-sm text-muted-foreground">{message.email}</div>
@@ -157,6 +160,7 @@ export default function MessagesPage() {
                                                     size="icon"
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // Prevent dialog from opening
+                                                        setMessageToDelete(message);
                                                     }}
                                                 >
                                                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -164,15 +168,15 @@ export default function MessagesPage() {
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                                    <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.
+                                                        {t('dashboard.messages.confirmDeleteDescription')}
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                                    <AlertDialogCancel>{t('dashboard.common.cancel')}</AlertDialogCancel>
                                                     <AlertDialogAction onClick={() => handleDeleteMessage()} disabled={isDeleting}>
-                                                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Supprimer'}
+                                                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('dashboard.common.delete')}
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
@@ -184,7 +188,7 @@ export default function MessagesPage() {
                     </Table>
                     {!areMessagesLoading && messages?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
-                            Aucun message trouvé.
+                            {t('dashboard.messages.noMessages')}
                         </div>
                     )}
                 </CardContent>

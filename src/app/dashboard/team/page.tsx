@@ -45,15 +45,17 @@ import { useCollection, useMemoFirebase } from '@/firebase';
 import type { TeamMember } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const teamMemberFormSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom est requis.' }),
-  role: z.string().min(2, { message: 'Le rôle est requis.' }),
-  avatar: z.string().url({ message: 'Veuillez entrer une URL d\'image valide.' }),
-});
 
 function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | null, onActionComplete: () => void }) {
+  const { t } = useLanguage();
+  const teamMemberFormSchema = z.object({
+    name: z.string().min(2, { message: t('dashboard.team.validation.name') }),
+    role: z.string().min(2, { message: t('dashboard.team.validation.role') }),
+    avatar: z.string().url({ message: t('dashboard.team.validation.avatar') }),
+  });
+  
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
@@ -97,7 +99,7 @@ function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | 
 
     actionPromise
       .then(() => {
-          toast({ title: member ? 'Membre mis à jour' : 'Membre ajouté' });
+          toast({ title: member ? t('dashboard.team.toast.updated') : t('dashboard.team.toast.added') });
           setIsOpen(false);
           onActionComplete();
       })
@@ -123,43 +125,43 @@ function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | 
         {member ? (
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <Edit className="mr-2 h-4 w-4" />
-                Modifier
+                {t('dashboard.common.edit')}
             </DropdownMenuItem>
         ) : (
              <Button size="sm" className="gap-1">
                 <PlusCircle className="h-4 w-4" />
-                Ajouter un membre
+                {t('dashboard.team.addMember')}
              </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{member ? 'Modifier le membre' : 'Ajouter un nouveau membre'}</DialogTitle>
+          <DialogTitle>{member ? t('dashboard.team.editMember') : t('dashboard.team.addMemberTitle')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id={`team-member-dialog-form-${member?.id || 'new'}`}>
           <div className="space-y-2">
-            <Label>Nom</Label>
+            <Label>{t('dashboard.team.name')}</Label>
             <Input {...form.register('name')} />
             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label>Rôle</Label>
+            <Label>{t('dashboard.team.role')}</Label>
             <Input {...form.register('role')} />
             {form.formState.errors.role && <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label>URL de l'avatar</Label>
+            <Label>{t('dashboard.team.avatarUrl')}</Label>
             <Input {...form.register('avatar')} />
             {form.formState.errors.avatar && <p className="text-sm text-destructive">{form.formState.errors.avatar.message}</p>}
           </div>
         </form>
            <DialogFooter>
              <DialogClose asChild>
-              <Button type="button" variant="outline">Annuler</Button>
+              <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
              </DialogClose>
             <Button type="submit" disabled={isSaving} form={`team-member-dialog-form-${member?.id || 'new'}`}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enregistrer
+                {t('dashboard.common.save')}
             </Button>
           </DialogFooter>
       </DialogContent>
@@ -169,6 +171,7 @@ function TeamMemberDialog({ member, onActionComplete }: { member?: TeamMember | 
 
 
 export default function TeamPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const teamQuery = useMemoFirebase(() => query(collection(firestore, 'teamMembers')), [firestore]);
@@ -195,7 +198,7 @@ export default function TeamPage() {
     try {
       await deleteDoc(memberDocRef);
       refetch();
-      toast({ title: 'Membre supprimé' });
+      toast({ title: t('dashboard.team.toast.deleted') });
     } catch (error) {
       errorEmitter.emit(
         'permission-error',
@@ -206,8 +209,8 @@ export default function TeamPage() {
       );
       toast({
         variant: 'destructive',
-        title: 'Erreur de suppression',
-        description: "Vous n'avez peut-être pas la permission de faire cela.",
+        title: t('dashboard.common.deleteErrorTitle'),
+        description: t('dashboard.common.permissionError'),
       });
     } finally {
       setIsDeleting(false);
@@ -236,8 +239,8 @@ export default function TeamPage() {
         <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
-            <CardTitle>Équipe</CardTitle>
-            <CardDescription>Gérez les membres de l'équipe affichés sur la page "À propos".</CardDescription>
+            <CardTitle>{t('dashboard.team.title')}</CardTitle>
+            <CardDescription>{t('dashboard.team.description')}</CardDescription>
             </div>
             <TeamMemberDialog onActionComplete={refetch} />
         </CardHeader>
@@ -245,10 +248,10 @@ export default function TeamPage() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead>Avatar</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead>{t('dashboard.team.avatar')}</TableHead>
+                <TableHead>{t('dashboard.team.name')}</TableHead>
+                <TableHead>{t('dashboard.team.role')}</TableHead>
+                <TableHead><span className="sr-only">{t('dashboard.common.actions')}</span></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -272,14 +275,14 @@ export default function TeamPage() {
                         <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Ouvrir le menu</span>
+                            <span className="sr-only">{t('dashboard.common.openMenu')}</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <TeamMemberDialog member={member} onActionComplete={refetch} />
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(member);}} className="text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer
+                            {t('dashboard.common.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
@@ -290,7 +293,7 @@ export default function TeamPage() {
             </Table>
             {!areMembersLoading && teamMembers?.length === 0 && (
             <div className="text-center p-8 text-muted-foreground">
-                Aucun membre d'équipe trouvé.
+                {t('dashboard.team.noMembers')}
             </div>
             )}
         </CardContent>
@@ -299,16 +302,16 @@ export default function TeamPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+                <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Cette action ne peut pas être annulée. Cela supprimera définitivement le membre de l'équipe "{memberToDelete?.name || ''}".
+                    {t('dashboard.team.confirmDeleteDescription').replace('{{name}}', memberToDelete?.name || '')}
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setMemberToDelete(null)}>Annuler</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setMemberToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteMember} disabled={isDeleting}>
                     {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Supprimer
+                    {t('dashboard.common.delete')}
                 </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
