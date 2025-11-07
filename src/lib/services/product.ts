@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -61,3 +62,4 @@ export async function applyDiscountToCategory(
     throw new Error(error.message || "Impossible d'appliquer la réduction.");
   }
 }
+
