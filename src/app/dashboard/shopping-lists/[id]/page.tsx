@@ -22,10 +22,6 @@ import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/language-provider';
 
-const listContentSchema = z.object({
-  items: z.string(),
-});
-
 function ShoppingListDetail() {
     const { t } = useLanguage();
     const { id: listId } = useParams();
@@ -38,6 +34,10 @@ function ShoppingListDetail() {
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const [analyzedProductNames, setAnalyzedProductNames] = React.useState<string[]>([]);
     
+    const listContentSchema = z.object({
+      items: z.string(),
+    });
+
     const listDocRef = useMemoFirebase(() => {
         if (!user || !firestore || !listId) return null;
         return doc(firestore, `users/${user.uid}/shopping-lists`, listId as string);
@@ -109,7 +109,7 @@ function ShoppingListDetail() {
                  setAnalyzedProductNames(result.products.slice(0, 30));
                  toast({ title: t('dashboard.shoppingLists.detail.toast.analysisComplete.title'), description: t('dashboard.shoppingLists.detail.toast.analysisComplete.description').replace('{{count}}', result.products.length.toString()) });
             } else {
-                toast({ title: t('dashboard.shoppingLists.detail.toast.analysisComplete.title'), description: t('dashboard.shoppingLists.detail.toast.noProducts') });
+                toast({ title: t('dashboard.shoppingLists.detail.toast.analysisComplete.title'), description: t('dashboard.shoppingLists.detail.toast.analysisComplete.noProducts') });
             }
         } catch (error) {
             console.error("Failed to analyze list:", error);

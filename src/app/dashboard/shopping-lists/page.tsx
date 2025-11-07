@@ -47,6 +47,7 @@ import { useLanguage } from '@/contexts/language-provider';
 
 function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList, onActionComplete: () => void, children: React.ReactNode }) {
     const { t } = useLanguage();
+    
     const listFormSchema = z.object({
       name: z.string().min(2, { message: t('dashboard.shoppingLists.validation.name') }),
     });
