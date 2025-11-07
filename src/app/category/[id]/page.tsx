@@ -12,8 +12,10 @@ import { useLanguage } from '@/contexts/language-provider';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
+import { getFirestore } from 'firebase/firestore';
 
-// Server-side metadata generation
+
+// This needs to be outside the component to work on the server
 if (!getApps().length) {
   initializeApp(firebaseConfig);
 }
@@ -22,10 +24,12 @@ type Props = {
   params: { id: string }
 }
 
+// Note: This function runs on the server, NOT on the client.
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  // We need a server-side instance of Firestore
   const db = getFirestore();
   const categoryRef = doc(db, 'categories', params.id);
   const categorySnap = await getDoc(categoryRef);
@@ -37,6 +41,7 @@ export async function generateMetadata(
   }
 
   const category = categorySnap.data() as Category;
+  // We can optionally resolve parent metadata to extend it
   const previousImages = (await parent).openGraph?.images || []
 
   return {

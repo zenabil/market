@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -18,6 +19,7 @@ import { useLanguage } from '@/contexts/language-provider';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
+import { getFirestore } from 'firebase/firestore';
 
 // Server-side metadata generation
 if (!getApps().length) {
