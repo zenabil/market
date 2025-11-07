@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
-import { teamMembers as staticTeamMembers } from '@/lib/team-data';
+import { teamMembers as staticTeamMembers } from '@/lib/team-data.json';
 import { useLanguage } from '@/contexts/language-provider';
 
 
