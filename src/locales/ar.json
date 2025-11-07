@@ -1,0 +1,36 @@
+{
+    "header": {
+        "home": "الرئيسية",
+        "products": "المنتجات",
+        "recipes": "الوصفات",
+        "compare": "مقارنة",
+        "generateRecipe": "أنشئ وصفة",
+        "mealPlanner": "منظم الوجبات",
+        "about": "من نحن",
+        "contact": "اتصل بنا",
+        "searchPlaceholder": "ابحث عن منتجات...",
+        "loginRegister": "تسجيل الدخول / إنشاء حساب",
+        "myOrders": "طلباتي",
+        "dashboard": "لوحة التحكم",
+        "logout": "تسجيل الخروج",
+        "welcome": "مرحباً",
+        "notifications": "الإشعارات",
+        "markAllAsRead": "وضع علامة \"مقروء\" على الكل",
+        "noNotifications": "ليس لديك أي إشعارات.",
+        "sinceYear": "منذ {{count}} سنة",
+        "sinceMonth": "منذ {{count}} شهر",
+        "sinceDay": "منذ {{count}} يوم",
+        "sinceHour": "منذ {{count}} ساعة",
+        "sinceMinute": "منذ {{count}} دقيقة",
+        "sinceSecond": "منذ {{count}} ثانية"
+    },
+    "footer": {
+        "tagline": "متجرك المحلي، مع تجربة تسوق إلكتروني مبتكرة.",
+        "quickLinks": "روابط سريعة",
+        "legal": "قانوني",
+        "privacyPolicy": "سياسة الخصوصية",
+        "termsOfUse": "شروط الاستخدام",
+        "contactUs": "اتصل بنا",
+        "copyright": "© {{year}} {{siteName}}. جميع الحقوق محفوظة."
+    }
+}

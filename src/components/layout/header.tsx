@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Bell,
   GitCompareArrows,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,6 @@ import Logo from '@/components/icons/logo';
 import { ThemeSwitcher } from './theme-switcher';
 import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser, useAuth, useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -38,20 +38,113 @@ import { doc, collection, query, orderBy, writeBatch } from 'firebase/firestore'
 import { useUserRole } from '@/hooks/use-user-role';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
+import { useLanguage } from '@/contexts/language-provider';
 
 
-const navLinks = [
-  { key: 'الرئيسية', href: '/' },
-  { key: 'المنتجات', href: '/products' },
-  { key: 'الوصفات', href: '/recipes' },
-  { key: 'مقارنة', href: '/compare', icon: GitCompareArrows },
-  { key: 'أنشئ وصفة', href: '/generate-recipe', icon: Wand2 },
-  { key: 'منظم الوجبات', href: '/meal-planner', icon: CalendarDays },
-  { key: 'من نحن', href: '/about' },
-  { key: 'اتصل بنا', href: '/contact' },
-];
+function LanguageSwitcher() {
+    const { locale, setLocale, t } = useLanguage();
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Globe className="h-6 w-6" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLocale('ar')} disabled={locale === 'ar'}>
+                    العربية
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocale('fr')} disabled={locale === 'fr'}>
+                    Français
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
+
+function NavLinks({ className }: { className?: string }) {
+    const { t } = useLanguage();
+    
+    const navLinks = [
+      { key: 'home', href: '/' },
+      { key: 'products', href: '/products' },
+      { key: 'recipes', href: '/recipes' },
+      { key: 'compare', href: '/compare', icon: GitCompareArrows },
+      { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
+      { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },
+      { key: 'about', href: '/about' },
+      { key: 'contact', href: '/contact' },
+    ];
+
+    return (
+        <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
+        {navLinks.map((link) => (
+            <Link
+            key={link.key}
+            href={link.href}
+            className={cn(
+                "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
+                (link.icon) && "text-primary hover:text-primary/80 font-bold"
+                )}
+            >
+            {link.icon && <link.icon className="h-4 w-4" />}
+            {t(`header.${link.key}`)}
+            </Link>
+        ))}
+        </nav>
+    )
+}
+
+function MobileNav() {
+    const { t } = useLanguage();
+        const navLinks = [
+      { key: 'home', href: '/' },
+      { key: 'products', href: '/products' },
+      { key: 'recipes', href: '/recipes' },
+      { key: 'compare', href: '/compare', icon: GitCompareArrows },
+      { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
+      { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },
+      { key: 'about', href: '/about' },
+      { key: 'contact', href: '/contact' },
+    ];
+
+    return (
+        <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-4 md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Ouvrir le menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <Link href="/" className="mb-8 block">
+                <Logo className="h-8" />
+              </Link>
+              <div className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                   <SheetClose asChild key={link.key}>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "text-lg font-medium text-foreground flex items-center gap-2",
+                         link.icon && "text-primary"
+                        )}
+                    >
+                       {link.icon && <link.icon className="h-5 w-5" />}
+                       {t(`header.${link.key}`)}
+                    </Link>
+                  </SheetClose>
+                ))}
+              </div>
+            </SheetContent>
+        </Sheet>
+    )
+}
+
 
 function NotificationBell() {
+    const { t } = useLanguage();
     const { user } = useUser();
     const firestore = useFirestore();
     const notificationsQuery = useMemoFirebase(() => {
@@ -84,16 +177,16 @@ function NotificationBell() {
         const date = new Date(dateString);
         const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
         let interval = seconds / 31536000;
-        if (interval > 1) return `منذ ${Math.floor(interval)} سنة`;
+        if (interval > 1) return t('header.sinceYear').replace('{{count}}', Math.floor(interval).toString());
         interval = seconds / 2592000;
-        if (interval > 1) return `منذ ${Math.floor(interval)} شهر`;
+        if (interval > 1) return t('header.sinceMonth').replace('{{count}}', Math.floor(interval).toString());
         interval = seconds / 86400;
-        if (interval > 1) return `منذ ${Math.floor(interval)} يوم`;
+        if (interval > 1) return t('header.sinceDay').replace('{{count}}', Math.floor(interval).toString());
         interval = seconds / 3600;
-        if (interval > 1) return `منذ ${Math.floor(interval)} ساعة`;
+        if (interval > 1) return t('header.sinceHour').replace('{{count}}', Math.floor(interval).toString());
         interval = seconds / 60;
-        if (interval > 1) return `منذ ${Math.floor(interval)} دقيقة`;
-        return `منذ ${Math.floor(seconds)} ثانية`;
+        if (interval > 1) return t('header.sinceMinute').replace('{{count}}', Math.floor(interval).toString());
+        return t('header.sinceSecond').replace('{{count}}', Math.floor(seconds).toString());
     };
 
     if (!user) return null;
@@ -112,8 +205,8 @@ function NotificationBell() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 md:w-96" align="end">
                 <DropdownMenuLabel className="flex justify-between items-center">
-                    الإشعارات
-                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>وضع علامة "مقروء" على الكل</Button>}
+                    {t('header.notifications')}
+                    {unreadCount > 0 && <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleMarkAllAsRead}>{t('header.markAllAsRead')}</Button>}
                 </DropdownMenuLabel>
                 <Separator />
                 <ScrollArea className="h-80">
@@ -131,7 +224,7 @@ function NotificationBell() {
                         ))
                     ) : (
                         <div className="p-4 text-center text-sm text-muted-foreground">
-                            ليس لديك أي إشعارات.
+                            {t('header.noNotifications')}
                         </div>
                     )}
                 </ScrollArea>
@@ -141,6 +234,7 @@ function NotificationBell() {
 }
 
 function UserNav() {
+  const { t } = useLanguage();
   const { user: authUser, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
@@ -166,7 +260,7 @@ function UserNav() {
   if (!authUser) {
     return (
       <Button asChild>
-        <Link href="/login">تسجيل الدخول / إنشاء حساب</Link>
+        <Link href="/login">{t('header.loginRegister')}</Link>
       </Button>
     );
   }
@@ -184,7 +278,7 @@ function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{firestoreUser?.name || 'مرحباً'}</p>
+            <p className="text-sm font-medium leading-none">{firestoreUser?.name || t('header.welcome')}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {authUser.email}
             </p>
@@ -194,21 +288,21 @@ function UserNav() {
         <DropdownMenuItem asChild>
             <Link href="/dashboard/orders">
                 <ShoppingBasket className="ml-2 h-4 w-4" />
-                <span>طلباتي</span>
+                <span>{t('header.myOrders')}</span>
             </Link>
         </DropdownMenuItem>
         {isAdmin && (
             <DropdownMenuItem asChild>
                 <Link href="/dashboard">
                      <LayoutDashboard className="ml-2 h-4 w-4" />
-                    <span>لوحة التحكم</span>
+                    <span>{t('header.dashboard')}</span>
                 </Link>
             </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="ml-2 h-4 w-4" />
-          <span>تسجيل الخروج</span>
+          <span>{t('header.logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -216,65 +310,11 @@ function UserNav() {
 }
 
 
-function NavLinks({ className }: { className?: string }) {
-    return (
-        <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
-        {navLinks.map((link) => (
-            <Link
-            key={link.key}
-            href={link.href}
-            className={cn(
-                "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
-                (link.icon) && "text-primary hover:text-primary/80 font-bold"
-                )}
-            >
-            {link.icon && <link.icon className="h-4 w-4" />}
-            {link.key}
-            </Link>
-        ))}
-        </nav>
-    )
-}
-
-function MobileNav() {
-    return (
-        <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-4 md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">افتح القائمة</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <Link href="/" className="mb-8 block">
-                <Logo className="h-8" />
-              </Link>
-              <div className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                   <SheetClose asChild key={link.key}>
-                    <Link
-                      href={link.href}
-                      className={cn(
-                        "text-lg font-medium text-foreground flex items-center gap-2",
-                         link.icon && "text-primary"
-                        )}
-                    >
-                       {link.icon && <link.icon className="h-5 w-5" />}
-                       {link.key}
-                    </Link>
-                  </SheetClose>
-                ))}
-              </div>
-            </SheetContent>
-        </Sheet>
-    )
-}
-
-
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useLanguage();
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
@@ -310,12 +350,13 @@ export default function Header() {
                 <Input
                   type="search"
                   name="search"
-                  placeholder="ابحث عن منتجات..."
+                  placeholder={t('header.searchPlaceholder')}
                   className="w-full bg-secondary md:w-[200px] lg:w-[300px] pr-9"
                 />
               </div>
             </form>
           </div>
+          <LanguageSwitcher />
           <ThemeSwitcher />
           <NotificationBell />
           <UserNav />

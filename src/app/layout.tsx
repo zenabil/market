@@ -13,6 +13,7 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { ComparisonProvider } from '@/contexts/comparison-provider';
 import ComparisonBar from '@/components/product/comparison-bar';
+import { LanguageProvider } from '@/contexts/language-provider';
 
 // Initialize a temporary Firebase app instance for server-side data fetching
 if (!getApps().length) {
@@ -63,6 +64,7 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-muted/40')}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+         <LanguageProvider>
           <CartProvider>
             <FirebaseClientProvider>
                 <ComparisonProvider>
@@ -75,6 +77,7 @@ export default function RootLayout({
                 </ComparisonProvider>
             </FirebaseClientProvider>
           </CartProvider>
+         </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

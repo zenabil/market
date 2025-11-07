@@ -1,0 +1,36 @@
+{
+    "header": {
+        "home": "Accueil",
+        "products": "Produits",
+        "recipes": "Recettes",
+        "compare": "Comparer",
+        "generateRecipe": "Générer une recette",
+        "mealPlanner": "Planificateur de repas",
+        "about": "À propos",
+        "contact": "Contact",
+        "searchPlaceholder": "Rechercher des produits...",
+        "loginRegister": "Connexion / Inscription",
+        "myOrders": "Mes commandes",
+        "dashboard": "Tableau de bord",
+        "logout": "Déconnexion",
+        "welcome": "Bienvenue",
+        "notifications": "Notifications",
+        "markAllAsRead": "Tout marquer comme lu",
+        "noNotifications": "Vous n'avez aucune notification.",
+        "sinceYear": "Il y a {{count}} an",
+        "sinceMonth": "Il y a {{count}} mois",
+        "sinceDay": "Il y a {{count}} jour",
+        "sinceHour": "Il y a {{count}} heure",
+        "sinceMinute": "Il y a {{count}} minute",
+        "sinceSecond": "Il y a {{count}} seconde"
+    },
+    "footer": {
+        "tagline": "Votre magasin local, avec une expérience d'achat en ligne innovante.",
+        "quickLinks": "Liens rapides",
+        "legal": "Légal",
+        "privacyPolicy": "Politique de confidentialité",
+        "termsOfUse": "Conditions d'utilisation",
+        "contactUs": "Contactez-nous",
+        "copyright": "© {{year}} {{siteName}}. Tous droits réservés."
+    }
+}

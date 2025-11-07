@@ -7,19 +7,8 @@ import Logo from '../icons/logo';
 import { usePathname } from 'next/navigation';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const navLinks = [
-  { key: 'الرئيسية', href: '/' },
-  { key: 'المنتجات', href: '/products' },
-  { key: 'من نحن', href: '/about' },
-  { key: 'اتصل بنا', href: '/contact' },
-];
-
-const legalLinks = [
-  { key: 'سياسة الخصوصية', href: '/privacy' },
-  { key: 'شروط الاستخدام', href: '/terms' },
-];
 
 type SiteSettings = {
   siteName?: string;
@@ -28,12 +17,28 @@ type SiteSettings = {
 }
 
 export default function Footer() {
+  const { t } = useLanguage();
+
+  const navLinks = [
+    { key: 'home', href: '/' },
+    { key: 'products', href: '/products' },
+    { key: 'about', href: '/about' },
+    { key: 'contact', href: '/contact' },
+  ];
+
+  const legalLinks = [
+    { key: 'privacyPolicy', href: '/privacy' },
+    { key: 'termsOfUse', href: '/terms' },
+  ];
+  
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
   const firestore = useFirestore();
 
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
   const { data: settings } = useDoc<SiteSettings>(settingsRef);
+
+  const siteName = settings?.siteName || 'Tlemcen Smart Supermarket';
 
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
@@ -49,7 +54,7 @@ export default function Footer() {
               <Logo className="h-8" />
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
-              متجرك المحلي، مع تجربة تسوق إلكتروني مبتكرة.
+              {t('footer.tagline')}
             </p>
             <div className="flex space-x-4">
               <Link href="#" className="text-muted-foreground hover:text-foreground">
@@ -64,31 +69,31 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">روابط سريعة</h4>
+            <h4 className="font-headline text-lg mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2">
               {navLinks.map((link) => (
                 <li key={link.key}>
                   <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground">
-                    {link.key}
+                    {t(`header.${link.key}`)}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">قانوني</h4>
+            <h4 className="font-headline text-lg mb-4">{t('footer.legal')}</h4>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.key}>
                   <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground">
-                    {link.key}
+                    {t(`footer.${link.key}`)}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h4 className="font-headline text-lg mb-4">اتصل بنا</h4>
+            <h4 className="font-headline text-lg mb-4">{t('footer.contactUs')}</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
                 {settings?.phone && (
                     <li className='flex items-start gap-2'>
@@ -107,7 +112,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} {settings?.siteName || 'متجر تلمسان الذكي'}. جميع الحقوق محفوظة.
+            {t('footer.copyright').replace('{{year}}', currentYear.toString()).replace('{{siteName}}', siteName)}
           </p>
         </div>
       </div>
