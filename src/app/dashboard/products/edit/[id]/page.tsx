@@ -31,6 +31,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import Image from 'next/image';
 import { ImageDialog } from '@/components/dashboard/image-dialog';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
@@ -175,6 +176,14 @@ function EditProductForm({ productId }: { productId: string }) {
   if (!product) {
     return notFound();
   }
+  
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   return (
     <div className="container py-8 md:py-12">
@@ -377,6 +386,21 @@ function EditProductForm({ productId }: { productId: string }) {
                       </FormItem>
                     )}
                   />
+                  <Separator />
+                  <div className="space-y-3 text-sm">
+                    <div className='flex justify-between'>
+                      <span className="text-muted-foreground">Date de création:</span>
+                      <span className="font-medium">{formatDate(product.createdAt)}</span>
+                    </div>
+                     <div className='flex justify-between'>
+                      <span className="text-muted-foreground">Unités vendues:</span>
+                      <span className="font-medium">{product.sold || 0}</span>
+                    </div>
+                     <div className='flex justify-between'>
+                      <span className="text-muted-foreground">SKU:</span>
+                      <span className="font-mono text-xs">{product.sku}</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
