@@ -308,6 +308,18 @@
         "address": {
           "type": "string",
           "description": "Physical address of the business."
+        },
+        "deliveryFeeBase": {
+          "type": "number",
+          "description": "The base delivery fee for orders below the threshold."
+        },
+        "deliveryFeeThreshold": {
+          "type": "number",
+          "description": "The order total threshold to qualify for the high-tier delivery fee."
+        },
+        "deliveryFeeHigh": {
+          "type": "number",
+          "description": "The delivery fee for orders that meet or exceed the threshold."
         }
       },
       "required": [

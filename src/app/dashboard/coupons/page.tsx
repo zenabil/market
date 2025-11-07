@@ -3,10 +3,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, Loader2, Edit } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { doc, addDoc, deleteDoc, collection } from 'firebase/firestore';
+import { doc, addDoc, deleteDoc, collection, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -45,27 +45,47 @@ import { useCoupons } from '@/hooks/use-coupons';
 import type { Coupon } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { Switch } from '@/components/ui/switch';
 
 
-function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
+const couponFormSchema = z.object({
+    code: z.string().min(4, { message: 'Le code doit comporter au moins 4 caractères.' }).max(20),
+    discountPercentage: z.coerce.number().min(1).max(100),
+    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'Date invalide' }),
+    isActive: z.boolean().default(true),
+});
+
+function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, onActionComplete: () => void }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
-
-  const couponFormSchema = z.object({
-    code: z.string().min(4, { message: 'Le code doit comporter au moins 4 caractères.' }).max(20),
-    discountPercentage: z.coerce.number().min(1).max(100),
-    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'Date invalide' }),
-  });
+  
+  const isEditing = !!coupon;
 
   const form = useForm<z.infer<typeof couponFormSchema>>({
     resolver: zodResolver(couponFormSchema),
-    defaultValues: {
-      code: '',
-      discountPercentage: 10,
-    },
   });
+  
+  React.useEffect(() => {
+    if (isOpen) {
+      if (coupon) {
+        form.reset({
+            code: coupon.code,
+            discountPercentage: coupon.discountPercentage,
+            expiryDate: coupon.expiryDate.split('T')[0], // Format for date input
+            isActive: coupon.isActive,
+        });
+      } else {
+        form.reset({
+            code: '',
+            discountPercentage: 10,
+            expiryDate: '',
+            isActive: true,
+        });
+      }
+    }
+  }, [isOpen, coupon, form]);
 
   async function onSubmit(values: z.infer<typeof couponFormSchema>) {
     if (!firestore) return;
@@ -73,25 +93,30 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
     setIsSaving(true);
     const expiryDate = new Date(values.expiryDate);
     const couponData = {
-        ...values,
-        isActive: expiryDate > new Date(),
+        code: values.code,
+        discountPercentage: values.discountPercentage,
         expiryDate: expiryDate.toISOString(),
+        isActive: values.isActive,
     };
     
-    const couponsCollection = collection(firestore, 'coupons');
-    addDoc(couponsCollection, couponData)
+    const actionPromise = isEditing
+        ? updateDoc(doc(firestore, 'coupons', coupon.id), couponData)
+        : addDoc(collection(firestore, 'coupons'), couponData);
+
+    actionPromise
       .then(() => {
-          toast({ title: 'Coupon créé' });
+          toast({ title: isEditing ? 'Coupon mis à jour' : 'Coupon créé' });
           form.reset();
           setIsOpen(false);
-          onCouponCreated();
+          onActionComplete();
       })
       .catch(error => {
+          const path = isEditing ? `coupons/${coupon.id}` : 'coupons';
           errorEmitter.emit(
             'permission-error',
             new FirestorePermissionError({
-              path: couponsCollection.path,
-              operation: 'create',
+              path: path,
+              operation: isEditing ? 'update' : 'create',
               requestResourceData: couponData,
             })
           );
@@ -104,15 +129,24 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
-          <PlusCircle className="h-4 w-4" />
-          Ajouter un coupon
-        </Button>
+        {isEditing ? (
+            <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier
+            </DropdownMenuItem>
+        ) : (
+            <Button size="sm" className="gap-1">
+              <PlusCircle className="h-4 w-4" />
+              Ajouter un coupon
+            </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajouter un nouveau coupon</DialogTitle>
-          <DialogDescription>Créez un nouveau code de réduction pour vos clients.</DialogDescription>
+          <DialogTitle>{isEditing ? 'Modifier le coupon' : 'Ajouter un nouveau coupon'}</DialogTitle>
+          <DialogDescription>
+            {isEditing ? 'Modifiez les détails du coupon ci-dessous.' : 'Créez un nouveau code de réduction pour vos clients.'}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="coupon-dialog-form">
           <div className="space-y-2">
@@ -130,6 +164,10 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
             <Input id="expiryDate" type="date" {...form.register('expiryDate')} />
             {form.formState.errors.expiryDate && <p className="text-sm text-destructive">{form.formState.errors.expiryDate.message}</p>}
           </div>
+          <div className="flex items-center space-x-2">
+            <Switch id="isActive" {...form.register('isActive')} checked={form.watch('isActive')} onCheckedChange={(checked) => form.setValue('isActive', checked)} />
+            <Label htmlFor="isActive">Actif</Label>
+          </div>
         </form>
          <DialogFooter>
            <DialogClose asChild>
@@ -137,7 +175,7 @@ function NewCouponDialog({ onCouponCreated }: { onCouponCreated: () => void }) {
            </DialogClose>
           <Button type="submit" disabled={isSaving} form="coupon-dialog-form">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enregistrer le coupon
+              {isEditing ? 'Enregistrer les modifications' : 'Enregistrer le coupon'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -169,6 +207,12 @@ export default function CouponsPage() {
       day: 'numeric',
     });
   };
+  
+  const getStatus = (coupon: Coupon) => {
+    if (!coupon.isActive) return { text: 'Inactif', variant: 'destructive' as const };
+    if (new Date(coupon.expiryDate) < new Date()) return { text: 'Expiré', variant: 'destructive' as const };
+    return { text: 'Actif', variant: 'default' as const };
+  }
 
   const handleDeleteCoupon = async () => {
     if (!couponToDelete || !firestore) return;
@@ -223,7 +267,7 @@ export default function CouponsPage() {
               <CardTitle>Coupons</CardTitle>
               <CardDescription>Gérez vos codes de réduction.</CardDescription>
             </div>
-            <NewCouponDialog onCouponCreated={refetchCoupons} />
+            <CouponDialog onActionComplete={refetchCoupons} />
           </CardHeader>
           <CardContent>
             <Table>
@@ -246,14 +290,16 @@ export default function CouponsPage() {
                     <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))}
-                {coupons && coupons.map(coupon => (
+                {coupons && coupons.map(coupon => {
+                  const status = getStatus(coupon);
+                  return (
                   <TableRow key={coupon.id}>
                     <TableCell className="font-mono">{coupon.code}</TableCell>
                     <TableCell>{coupon.discountPercentage}%</TableCell>
                     <TableCell>{formatDate(coupon.expiryDate)}</TableCell>
                     <TableCell>
-                      <Badge variant={coupon.isActive ? 'default' : 'destructive'}>
-                        {coupon.isActive ? 'Actif' : 'Expiré'}
+                      <Badge variant={status.variant}>
+                        {status.text}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -265,6 +311,7 @@ export default function CouponsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                             <CouponDialog coupon={coupon} onActionComplete={refetchCoupons} />
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
@@ -273,7 +320,7 @@ export default function CouponsPage() {
                         </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                )})}
               </TableBody>
             </Table>
             {!areCouponsLoading && coupons?.length === 0 && (
