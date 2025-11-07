@@ -8,6 +8,53 @@ import type { Product, Recipe } from '@/lib/placeholder-data';
 import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
 import ShopByRecipe from '@/components/product/shop-by-recipe';
+import { Award, Leaf, Truck } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+
+const features = [
+    {
+        icon: Leaf,
+        title: "Fraîcheur Garantie",
+        description: "Nous travaillons directement avec les agriculteurs locaux pour vous apporter des produits de saison."
+    },
+    {
+        icon: Truck,
+        title: "Livraison Rapide",
+        description: "Recevez vos courses à votre porte en un temps record, partout à Tlemcen."
+    },
+    {
+        icon: Award,
+        title: "Qualité Supérieure",
+        description: "Une sélection rigoureuse pour garantir que seuls les meilleurs produits arrivent chez vous."
+    }
+];
+
+function WhyChooseUs() {
+    return (
+        <div className="bg-background">
+            <div className="container py-12 md:py-24">
+                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">Pourquoi nous choisir ?</h2>
+                 <div className="grid md:grid-cols-3 gap-8">
+                    {features.map((feature) => {
+                        const Icon = feature.icon;
+                        return (
+                            <Card key={feature.title} className="text-center border-none shadow-none bg-transparent">
+                                <CardContent className="p-6">
+                                    <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                                        <Icon className="h-8 w-8"/>
+                                    </div>
+                                    <h3 className="font-bold text-xl">{feature.title}</h3>
+                                    <p className="mt-2 text-muted-foreground">{feature.description}</p>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 
 function HomeProducts() {
   const firestore = useFirestore();
@@ -77,6 +124,7 @@ function HomeProducts() {
                 </div>
             </div>
         )}
+        <WhyChooseUs />
     </>
   );
 }
