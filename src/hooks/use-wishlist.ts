@@ -28,7 +28,7 @@ export function useWishlist() {
             deleteDoc(wishlistItemRef)
                 .then(() => {
                     toast({
-                        title: 'Retiré de la liste de souhaits',
+                        title: 'أزيل من قائمة الرغبات',
                     });
                 })
                 .catch(err => {
@@ -45,7 +45,7 @@ export function useWishlist() {
             setDoc(wishlistItemRef, newItem)
                 .then(() => {
                     toast({
-                        title: 'Ajouté à la liste de souhaits',
+                        title: 'أضيف إلى قائمة الرغبات',
                     });
                 })
                 .catch(err => {

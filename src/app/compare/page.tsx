@@ -21,33 +21,33 @@ export default function ComparePage() {
   const handleAddToCart = (product: Product) => {
     addItem(product);
     toast({
-      title: 'Ajouté au panier',
-      description: `${product.name} a été ajouté à votre panier.`,
+      title: 'أضيف إلى السلة',
+      description: `تمت إضافة ${product.name} إلى سلتك.`,
     });
   };
   
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   if (items.length === 0) {
     return (
       <div className="container py-8 md:py-12 text-center">
-        <h1 className="font-headline text-4xl md:text-5xl">Comparer les produits</h1>
-        <p className="mt-4 text-lg text-muted-foreground">Aucun produit à comparer.</p>
+        <h1 className="font-headline text-4xl md:text-5xl">مقارنة المنتجات</h1>
+        <p className="mt-4 text-lg text-muted-foreground">لا توجد منتجات للمقارنة.</p>
         <Button asChild className="mt-8">
-          <Link href="/products">Parcourir les produits</Link>
+          <Link href="/products">تصفح المنتجات</Link>
         </Button>
       </div>
     );
   }
   
   const features = [
-    { key: 'price', label: 'Prix' },
-    { key: 'averageRating', label: 'Évaluation' },
-    { key: 'reviewCount', label: 'Nombre d\'avis' },
-    { key: 'discount', label: 'Réduction' },
-    { key: 'stock', label: 'Stock' },
+    { key: 'price', label: 'السعر' },
+    { key: 'averageRating', label: 'التقييم' },
+    { key: 'reviewCount', label: 'عدد المراجعات' },
+    { key: 'discount', label: 'الخصم' },
+    { key: 'stock', label: 'المخزون' },
   ];
 
   const renderFeature = (product: Product, featureKey: string) => {
@@ -57,11 +57,11 @@ export default function ComparePage() {
         case 'averageRating':
             return <StarRating rating={product.averageRating || 0} />;
         case 'reviewCount':
-            return `${product.reviewCount || 0} avis`;
+            return `${product.reviewCount || 0} مراجعات`;
         case 'discount':
-            return product.discount > 0 ? `${product.discount}%` : 'Aucune';
+            return product.discount > 0 ? `${product.discount}%` : 'لا يوجد';
         case 'stock':
-            return product.stock > 0 ? `${product.stock} en stock` : 'En rupture';
+            return product.stock > 0 ? `${product.stock} في المخزون` : 'نفذ من المخزون';
         default:
             return null;
     }
@@ -70,11 +70,11 @@ export default function ComparePage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="font-headline text-4xl md:text-5xl">Comparer</h1>
+        <h1 className="font-headline text-4xl md:text-5xl">مقارنة</h1>
         {items.length > 0 && (
           <Button variant="outline" onClick={clearComparison} size="sm">
             <Trash2 className="mr-2 h-4 w-4" />
-            Effacer tout
+            مسح الكل
           </Button>
         )}
       </div>
@@ -117,7 +117,7 @@ export default function ComparePage() {
             <CardFooter>
                  <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    Ajouter au panier
+                    أضف إلى السلة
                 </Button>
             </CardFooter>
           </Card>
@@ -129,7 +129,7 @@ export default function ComparePage() {
         <Table className="border rounded-lg">
           <TableHeader>
             <TableRow>
-              <TableHead className="font-headline text-lg w-[200px]">Caractéristiques</TableHead>
+              <TableHead className="font-headline text-lg w-[200px]">الميزات</TableHead>
               {items.map(product => (
                 <TableHead key={product.id}>
                   <div className="flex flex-col items-center text-center gap-2">
@@ -169,7 +169,7 @@ export default function ComparePage() {
                   <TableCell key={product.id} className="text-center p-4">
                      <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                         <ShoppingCart className="mr-2 h-4 w-4" />
-                        Ajouter
+                        إضافة
                     </Button>
                   </TableCell>
                 ))}

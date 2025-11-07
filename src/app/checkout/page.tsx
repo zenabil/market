@@ -29,17 +29,17 @@ import { cn } from '@/lib/utils';
 import type { Coupon } from '@/lib/placeholder-data';
 
 const shippingFormSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  address: z.string().min(10, { message: 'L\'adresse doit comporter au moins 10 caractères.' }),
-  city: z.string().min(2, { message: 'La ville doit comporter au moins 2 caractères.' }),
-  phone: z.string().min(10, { message: 'Le téléphone doit comporter au moins 10 caractères.' }),
+  name: z.string().min(2, { message: 'يجب أن يتكون الاسم من حرفين على الأقل.' }),
+  address: z.string().min(10, { message: 'يجب أن يتكون العنوان من 10 أحرف على الأقل.' }),
+  city: z.string().min(2, { message: 'يجب أن تتكون المدينة من حرفين على الأقل.' }),
+  phone: z.string().min(10, { message: 'يجب أن يتكون الهاتف من 10 أحرف على الأقل.' }),
 });
 
 // Dummy schema for payment simulation
 const paymentFormSchema = z.object({
-    cardNumber: z.string().min(16, "Numéro de carte invalide.").max(16, "Numéro de carte invalide."),
-    expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Format MM/YY invalide."),
-    cvc: z.string().min(3, "CVC invalide.").max(4, "CVC invalide."),
+    cardNumber: z.string().min(16, "رقم البطاقة غير صالح.").max(16, "رقم البطاقة غير صالح."),
+    expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "تنسيق MM/YY غير صالح."),
+    cvc: z.string().min(3, "CVC غير صالح.").max(4, "CVC غير صالح."),
 });
 
 type SiteSettings = {
@@ -148,7 +148,7 @@ export default function CheckoutPage() {
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-            toast({ variant: 'destructive', title: 'Coupon invalide', description: "Ce code promo n'existe pas ou a été mal saisi." });
+            toast({ variant: 'destructive', title: 'كوبون غير صالح', description: "هذا الكود الترويجي غير موجود أو تم إدخاله بشكل غير صحيح." });
             return;
         }
 
@@ -160,17 +160,17 @@ export default function CheckoutPage() {
         const expiryDate = (couponData.expiryDate as any).toDate ? (couponData.expiryDate as any).toDate() : new Date(couponData.expiryDate);
 
         if (!couponData.isActive) {
-            toast({ variant: 'destructive', title: 'Coupon inactif', description: "Ce code promo n'est plus actif." });
+            toast({ variant: 'destructive', title: 'كوبون غير نشط', description: "هذا الكود الترويجي لم يعد نشطًا." });
             return;
         }
         
         if (now > expiryDate) {
-            toast({ variant: 'destructive', title: 'Coupon expiré', description: "Ce code promo a expiré." });
+            toast({ variant: 'destructive', title: 'كوبون منتهي الصلاحية', description: "انتهت صلاحية هذا الكود الترويجي." });
             return;
         }
         
         setAppliedCoupon(couponData);
-        toast({ title: `Coupon appliqué : ${couponData.code}` });
+        toast({ title: `تم تطبيق الكوبون: ${couponData.code}` });
     } catch (error) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'list',
@@ -178,8 +178,8 @@ export default function CheckoutPage() {
         }));
         toast({
             variant: 'destructive',
-            title: 'Erreur de coupon',
-            description: "Impossible de vérifier le coupon. Vous n'avez peut-être pas la permission.",
+            title: 'خطأ في الكوبون',
+            description: "تعذر التحقق من الكوبون. ربما لا تملك الإذن.",
         });
     } finally {
         setIsApplyingCoupon(false);
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
 
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   const handleProceedToPayment = () => {
@@ -210,8 +210,8 @@ export default function CheckoutPage() {
       });
 
       toast({
-        title: 'Commande passée !',
-        description: 'Votre commande a été enregistrée avec succès.',
+        title: 'تم تقديم الطلب!',
+        description: 'تم تسجيل طلبك بنجاح.',
       });
       
       clearCart();
@@ -220,8 +220,8 @@ export default function CheckoutPage() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: 'Échec de la commande',
-        description: error.message || 'Nous n\'avons pas pu traiter votre commande.',
+        title: 'فشل الطلب',
+        description: error.message || 'لم نتمكن من معالجة طلبك.',
       });
     } finally {
       setIsProcessing(false);
@@ -237,21 +237,21 @@ export default function CheckoutPage() {
           <form onSubmit={shippingForm.handleSubmit(handleProceedToPayment)} id="shipping-form">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Informations de livraison</CardTitle>
+                    <CardTitle>معلومات الشحن</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <div className="space-y-6">
                         <FormField control={shippingForm.control} name="name" render={({ field }) => (
-                            <FormItem><FormLabel>Nom complet</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>الاسم الكامل</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={shippingForm.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Adresse</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>العنوان</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={shippingForm.control} name="city" render={({ field }) => (
-                            <FormItem><FormLabel>Ville</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>المدينة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                          <FormField control={shippingForm.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Téléphone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>الهاتف</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                       </div>
                   </CardContent>
@@ -265,13 +265,13 @@ export default function CheckoutPage() {
           <form onSubmit={paymentForm.handleSubmit(onFinalSubmit)} id="payment-form">
              <Card>
                 <CardHeader>
-                    <CardTitle>Détails de paiement</CardTitle>
-                    <CardDescription>Ceci est une simulation. N'entrez pas de vraies informations.</CardDescription>
+                    <CardTitle>تفاصيل الدفع</CardTitle>
+                    <CardDescription>هذه محاكاة. لا تدخل معلومات حقيقية.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <FormField control={paymentForm.control} name="cardNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Numéro de carte</FormLabel>
+                            <FormLabel>رقم البطاقة</FormLabel>
                             <div className="relative">
                                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input {...field} placeholder="0000 0000 0000 0000" className="pl-10" />
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
                      <div className="grid grid-cols-2 gap-4">
                         <FormField control={paymentForm.control} name="expiryDate" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Date d'expiration</FormLabel>
+                                <FormLabel>تاريخ انتهاء الصلاحية</FormLabel>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input {...field} placeholder="MM/YY" className="pl-10"/>
@@ -310,9 +310,9 @@ export default function CheckoutPage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">Paiement</h1>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">الدفع</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-            Étape {step === 'details' ? '1 sur 2 : Détails de la livraison' : '2 sur 2 : Paiement'}
+            الخطوة {step === 'details' ? '1 من 2: تفاصيل الشحن' : '2 من 2: الدفع'}
         </p>
       </div>
       <div className="grid lg:grid-cols-2 gap-12">
@@ -322,8 +322,8 @@ export default function CheckoutPage() {
         <div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Résumé de la commande</CardTitle>
-                    <CardDescription>{`${totalItems} article(s) dans votre panier`}</CardDescription>
+                    <CardTitle>ملخص الطلب</CardTitle>
+                    <CardDescription>{`${totalItems} منتج(ات) في سلتك`}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
@@ -335,7 +335,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div>
                                     <p className="font-medium text-sm">{item.name}</p>
-                                    <p className="text-sm text-muted-foreground">Quantité: {item.quantity}</p>
+                                    <p className="text-sm text-muted-foreground">الكمية: {item.quantity}</p>
                                 </div>
                             </div>
                             <p className="font-medium text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
@@ -346,7 +346,7 @@ export default function CheckoutPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Input 
-                          placeholder="Code promo"
+                          placeholder="كود الخصم"
                           value={couponCode}
                           onChange={(e) => setCouponCode(e.target.value)}
                           className='flex-grow'
@@ -358,38 +358,38 @@ export default function CheckoutPage() {
                           disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
                         >
                           {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                          Appliquer
+                          تطبيق
                         </Button>
                       </div>
                       {appliedCoupon && (
                         <p className="text-sm text-primary flex items-center gap-2">
                           <TicketPercent className="h-4 w-4" />
-                          <span>{`Réduction appliquée : ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
+                          <span>{`تم تطبيق الخصم: ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
                         </p>
                       )}
                     </div>
                    <Separator />
                    <div className="space-y-2">
                        <div className="flex justify-between">
-                           <span>Sous-total</span>
+                           <span>المجموع الفرعي</span>
                            <span>{formatCurrency(subTotalAfterDiscount)}</span>
                        </div>
                         {appliedCoupon && (
                           <div className="flex justify-between text-primary">
-                            <span>Réduction</span>
+                            <span>الخصم</span>
                             <span>- {formatCurrency(totalPrice - subTotalAfterDiscount)}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                           <span>Livraison</span>
+                           <span>الشحن</span>
                            <span className={cn(deliveryFee === 0 && 'font-semibold')}>
-                                {deliveryFee > 0 ? formatCurrency(deliveryFee) : 'Gratuit'}
+                                {deliveryFee > 0 ? formatCurrency(deliveryFee) : 'مجاني'}
                            </span>
                        </div>
                    </div>
                    <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                       <span>Total</span>
+                       <span>الإجمالي</span>
                        <span>{formatCurrency(finalTotalPrice)}</span>
                    </div>
                 </CardContent>
@@ -402,7 +402,7 @@ export default function CheckoutPage() {
                 disabled={isProcessing}
             >
                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {step === 'details' ? 'Continuer vers le paiement' : `Payer ${formatCurrency(finalTotalPrice)}`}
+                {step === 'details' ? 'المتابعة إلى الدفع' : `ادفع ${formatCurrency(finalTotalPrice)}`}
             </Button>
         </div>
       </div>

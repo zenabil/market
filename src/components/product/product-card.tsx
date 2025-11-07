@@ -37,8 +37,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (isOutOfStock) return;
     addItem(product);
     toast({
-      title: 'Ajouté au panier',
-      description: `${product.name} a été ajouté à votre panier.`,
+      title: 'أضيف إلى السلة',
+      description: `تمت إضافة ${product.name} إلى سلتك.`,
     });
   };
 
@@ -48,8 +48,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: 'Connexion requise',
-        description: 'Vous devez être connecté pour ajouter des articles à votre liste de souhaits.',
+        title: 'تسجيل الدخول مطلوب',
+        description: 'يجب عليك تسجيل الدخول لإضافة عناصر إلى قائمة الرغبات الخاصة بك.',
       });
       return;
     }
@@ -63,7 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
   };
   
   const discountedPrice = product.price * (1 - product.discount / 100);
@@ -83,7 +83,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {isOutOfStock && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <Badge variant="outline" className="text-white bg-black/50 border-white/50 text-sm">
-                        Épuisé
+                        نفذ من المخزون
                     </Badge>
                 </div>
             )}
@@ -94,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   className="bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75 h-8 w-8"
                   onClick={handleWishlistToggle}
                   disabled={isWishlistLoading}
-                  title={isWishlisted ? 'Retirer de la liste de souhaits' : 'Ajouter à la liste de souhaits'}
+                  title={isWishlisted ? 'إزالة من قائمة الرغبات' : 'إضافة إلى قائمة الرغبات'}
                 >
                   <Heart className={cn("h-4 w-4 text-muted-foreground", isWishlisted && "fill-destructive text-destructive")} />
                 </Button>
@@ -107,7 +107,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
                   onClick={handleCompareToggle}
                   disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
-                  title={isComparing ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'}
+                  title={isComparing ? 'إزالة من المقارنة' : 'إضافة إلى المقارنة'}
                 >
                   <GitCompareArrows className={cn("h-4 w-4", isComparing ? "text-primary-foreground" : "text-muted-foreground")} />
                 </Button>
@@ -135,7 +135,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <CardFooter className="p-2 md:p-4 mt-auto">
           <Button className="w-full font-bold" onClick={handleAddToCart} disabled={isOutOfStock}>
             <ShoppingCart className="mr-2 h-4 w-4" />
-            {isOutOfStock ? 'Épuisé' : 'Ajouter au panier'}
+            {isOutOfStock ? 'نفذ من المخزون' : 'أضف إلى السلة'}
           </Button>
         </CardFooter>
       </Link>

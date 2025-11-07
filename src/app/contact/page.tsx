@@ -22,10 +22,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  email: z.string().email({ message: 'Veuillez saisir une adresse e-mail valide.' }),
-  subject: z.string().min(5, { message: 'Le sujet doit comporter au moins 5 caractères.' }),
-  message: z.string().min(10, { message: 'Le message doit comporter au moins 10 caractères.' }),
+  name: z.string().min(2, { message: 'يجب أن يتكون الاسم من حرفين على الأقل.' }),
+  email: z.string().email({ message: 'الرجاء إدخال عنوان بريد إلكتروني صالح.' }),
+  subject: z.string().min(5, { message: 'يجب أن يتكون الموضوع من 5 أحرف على الأقل.' }),
+  message: z.string().min(10, { message: 'يجب أن تتكون الرسالة من 10 أحرف على الأقل.' }),
 });
 
 type SiteSettings = {
@@ -70,8 +70,8 @@ export default function ContactPage() {
     addDoc(contactMessagesCollection, messageData)
       .then(() => {
         toast({
-          title: 'Message envoyé !',
-          description: 'Nous avons bien reçu votre message et nous vous répondrons bientôt.',
+          title: 'تم إرسال الرسالة!',
+          description: 'لقد استلمنا رسالتك وسنرد عليك قريبًا.',
         });
         form.reset();
       })
@@ -86,8 +86,8 @@ export default function ContactPage() {
         );
         toast({
           variant: 'destructive',
-          title: 'Échec de l\'envoi',
-          description: 'Impossible d\'envoyer votre message pour le moment.',
+          title: 'فشل الإرسال',
+          description: 'تعذر إرسال رسالتك في الوقت الحالي.',
         });
       })
       .finally(() => {
@@ -98,13 +98,13 @@ export default function ContactPage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">Contactez-nous</h1>
-        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">Nous sommes là pour vous aider. Contactez-nous pour toute question.</p>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">اتصل بنا</h1>
+        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">نحن هنا لمساعدتك. اتصل بنا لأي سؤال.</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12">
         <div>
-          <h2 className="font-headline text-2xl mb-6">Envoyer un message</h2>
+          <h2 className="font-headline text-2xl mb-6">أرسل رسالة</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -112,9 +112,9 @@ export default function ContactPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom</FormLabel>
+                    <FormLabel>الاسم</FormLabel>
                     <FormControl>
-                      <Input placeholder="Votre nom" {...field} />
+                      <Input placeholder="اسمك" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -125,9 +125,9 @@ export default function ContactPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>البريد الإلكتروني</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Votre adresse e-mail" {...field} />
+                      <Input type="email" placeholder="عنوان بريدك الإلكتروني" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,9 +138,9 @@ export default function ContactPage() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sujet</FormLabel>
+                    <FormLabel>الموضوع</FormLabel>
                     <FormControl>
-                      <Input placeholder="Le sujet de votre message" {...field} />
+                      <Input placeholder="موضوع رسالتك" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,9 +151,9 @@ export default function ContactPage() {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Message</FormLabel>
+                    <FormLabel>الرسالة</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Écrivez votre message ici..." rows={5} {...field} />
+                      <Textarea placeholder="اكتب رسالتك هنا..." rows={5} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,33 +161,33 @@ export default function ContactPage() {
               />
               <Button type="submit" size="lg" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Envoyer le Message
+                إرسال الرسالة
               </Button>
             </form>
           </Form>
         </div>
         <div className="space-y-8">
             <div>
-                 <h2 className="font-headline text-2xl mb-6">Nos Coordonnées</h2>
+                 <h2 className="font-headline text-2xl mb-6">معلومات الاتصال</h2>
                  <div className="space-y-4 text-muted-foreground">
                     <div className="flex items-start gap-4">
                         <MapPin className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">Adresse</h3>
-                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || 'Non disponible'}</p>}
+                            <h3 className="font-semibold text-foreground">العنوان</h3>
+                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || 'غير متوفر'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Phone className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">Téléphone</h3>
-                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || 'Non disponible'}</p>}
+                            <h3 className="font-semibold text-foreground">الهاتف</h3>
+                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || 'غير متوفر'}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Mail className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">Email</h3>
+                            <h3 className="font-semibold text-foreground">البريد الإلكتروني</h3>
                             <p>contact@tlemcensmart.dz</p>
                         </div>
                     </div>

@@ -16,10 +16,10 @@ export default function ShopByRecipe({ recipes }: ShopByRecipeProps) {
   return (
     <section>
       <div className="flex items-center justify-between mb-8">
-        <h2 className="font-headline text-3xl md:text-4xl">Achetez par Recette</h2>
+        <h2 className="font-headline text-3xl md:text-4xl">تسوق حسب الوصفة</h2>
         <Button variant="ghost" asChild>
             <Link href="/recipes">
-                Voir tout <ArrowRight className="ml-2 h-4 w-4" />
+                عرض الكل <ArrowRight className="mr-2 h-4 w-4" />
             </Link>
         </Button>
       </div>

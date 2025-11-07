@@ -38,7 +38,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
         {isLoading || !category ? (
             <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
         ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{`Découvrez nos produits dans la catégorie ${category.name}`}</p>
+            <p className="mt-2 text-lg text-muted-foreground">{`اكتشف منتجاتنا في فئة ${category.name}`}</p>
         )}
       </div>
       {isLoading ? (
@@ -53,7 +53,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
             <ProductGrid title="" products={products} />
           ) : (
              <div className="text-center p-8 text-muted-foreground">
-                Aucun produit trouvé dans cette catégorie.
+                لم يتم العثور على منتجات في هذه الفئة.
             </div>
           )}
         </>

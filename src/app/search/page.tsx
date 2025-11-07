@@ -36,11 +36,11 @@ function SearchResults() {
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">
-          {searchQuery ? `Résultats pour "${searchQuery}"` : 'Recherche de produits'}
+          {searchQuery ? `نتائج البحث عن "${searchQuery}"` : 'بحث عن منتجات'}
         </h1>
         {filteredProducts && (
             <p className="mt-2 text-lg text-muted-foreground">
-                {`${filteredProducts.length} produits trouvés`}
+                {`${filteredProducts.length} منتجات تم العثور عليها`}
             </p>
         )}
       </div>
@@ -56,7 +56,7 @@ function SearchResults() {
                  <ProductGrid title="" products={filteredProducts} />
             ) : (
                 <div className="text-center p-8 text-muted-foreground">
-                    Aucun résultat trouvé.
+                    لم يتم العثور على نتائج.
                 </div>
             )}
         </>

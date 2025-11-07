@@ -53,8 +53,8 @@ export default function ProductsPage() {
   }, [products, selectedCategoryId, sortOption]);
 
   const selectedCategoryName = useMemo(() => {
-    if (!selectedCategoryId) return 'Tous les produits';
-    return categories?.find(c => c.id === selectedCategoryId)?.name || 'Produits';
+    if (!selectedCategoryId) return 'جميع المنتجات';
+    return categories?.find(c => c.id === selectedCategoryId)?.name || 'المنتجات';
   }, [selectedCategoryId, categories]);
 
 
@@ -64,8 +64,8 @@ export default function ProductsPage() {
         <h1 className="font-headline text-4xl md:text-5xl">{selectedCategoryName}</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           {selectedCategoryId 
-            ? `Découvrez nos produits dans la catégorie ${selectedCategoryName}`
-            : 'Parcourez notre sélection complète de produits frais et de qualité.'
+            ? `اكتشف منتجاتنا في فئة ${selectedCategoryName}`
+            : 'تصفح تشكيلتنا الكاملة من المنتجات الطازجة وعالية الجودة.'
           }
         </p>
       </div>
@@ -76,7 +76,7 @@ export default function ProductsPage() {
           onClick={() => setSelectedCategoryId(null)}
           size="sm"
         >
-          Tous les produits
+          جميع المنتجات
         </Button>
         {categories?.map(category => (
           <Button 
@@ -93,13 +93,13 @@ export default function ProductsPage() {
        <div className="flex justify-end mb-8">
         <Select onValueChange={setSortOption} defaultValue={sortOption}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Trier par" />
+            <SelectValue placeholder="الترتيب حسب" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="popularity">Popularité</SelectItem>
-            <SelectItem value="price-asc">Prix: croissant</SelectItem>
-            <SelectItem value="price-desc">Prix: décroissant</SelectItem>
-            <SelectItem value="name-asc">Nom (A-Z)</SelectItem>
+            <SelectItem value="popularity">الشعبية</SelectItem>
+            <SelectItem value="price-asc">السعر: من الأقل إلى الأعلى</SelectItem>
+            <SelectItem value="price-desc">السعر: من الأعلى إلى الأقل</SelectItem>
+            <SelectItem value="name-asc">الاسم (أ-ي)</SelectItem>
           </SelectContent>
         </Select>
       </div>
