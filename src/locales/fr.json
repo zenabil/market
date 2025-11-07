@@ -693,6 +693,63 @@
                     "description": "Échec de la mise à jour du rôle."
                 }
             }
+        },
+        "orders": {
+            "admin": {
+                "title": "Commandes",
+                "description": "Gérez toutes les commandes des clients."
+            },
+            "user": {
+                "title": "Mes commandes",
+                "description": "Consultez l'historique de vos commandes."
+            },
+            "table": {
+                "orderId": "ID de commande",
+                "customer": "Client",
+                "date": "Date",
+                "status": "Statut",
+                "total": "Total"
+            },
+            "noOrders": {
+                "admin": "Aucune commande trouvée.",
+                "user": "Vous n'avez pas encore passé de commande."
+            },
+            "details": {
+                "title": "Détails de la commande",
+                "id": "ID",
+                "changeStatus": "Changer le statut",
+                "items": "Articles",
+                "total": "Total",
+                "customer": "Client",
+                "editAddresses": "Modifier les adresses du client",
+                "notFound": "Client non trouvé",
+                "summary": "Résumé",
+                "date": "Date",
+                "status": "Statut",
+                "shippingAddress": "Adresse de livraison",
+                "toast": {
+                    "statusUpdated": {
+                        "title": "Statut de la commande mis à jour",
+                        "description": "La commande est maintenant {{status}}."
+                    }
+                }
+            },
+            "status": {
+                "Pending": "En attente",
+                "Confirmed": "Confirmée",
+                "Shipped": "Expédiée",
+                "Delivered": "Livrée",
+                "Cancelled": "Annulée"
+            },
+            "actions": {
+                "viewDetails": "Voir les détails",
+                "changeStatus": "Changer le statut",
+                "markAsPending": "Marquer comme En attente",
+                "markAsConfirmed": "Marquer como Confirmée",
+                "markAsShipped": "Marquer comme Expédiée",
+                "markAsDelivered": "Marquer comme Livrée",
+                "markAsCancelled": "Marquer comme Annulée"
+            }
         }
     }
 }

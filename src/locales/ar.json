@@ -693,6 +693,63 @@
                     "description": "فشل تحديث الدور."
                 }
             }
+        },
+        "orders": {
+            "admin": {
+                "title": "الطلبات",
+                "description": "إدارة جميع طلبات العملاء."
+            },
+            "user": {
+                "title": "طلباتي",
+                "description": "عرض سجل طلباتك."
+            },
+            "table": {
+                "orderId": "معرف الطلب",
+                "customer": "العميل",
+                "date": "التاريخ",
+                "status": "الحالة",
+                "total": "الإجمالي"
+            },
+            "noOrders": {
+                "admin": "لم يتم العثور على طلبات.",
+                "user": "لم تقم بأي طلبات بعد."
+            },
+            "details": {
+                "title": "تفاصيل الطلب",
+                "id": "المعرف",
+                "changeStatus": "تغيير الحالة",
+                "items": "العناصر",
+                "total": "الإجمالي",
+                "customer": "العميل",
+                "editAddresses": "تعديل عناوين العميل",
+                "notFound": "لم يتم العثور على العميل",
+                "summary": "ملخص",
+                "date": "التاريخ",
+                "status": "الحالة",
+                "shippingAddress": "عنوان الشحن",
+                "toast": {
+                    "statusUpdated": {
+                        "title": "تم تحديث حالة الطلب",
+                        "description": "الطلب الآن {{status}}."
+                    }
+                }
+            },
+            "status": {
+                "Pending": "قيد الانتظار",
+                "Confirmed": "مؤكد",
+                "Shipped": "تم الشحن",
+                "Delivered": "تم التوصيل",
+                "Cancelled": "ملغى"
+            },
+            "actions": {
+                "viewDetails": "عرض التفاصيل",
+                "changeStatus": "تغيير الحالة",
+                "markAsPending": "وضع علامة \"قيد الانتظار\"",
+                "markAsConfirmed": "وضع علامة \"مؤكد\"",
+                "markAsShipped": "وضع علامة \"تم الشحن\"",
+                "markAsDelivered": "وضع علامة \"تم التوصيل\"",
+                "markAsCancelled": "وضع علامة \"ملغى\""
+            }
         }
     }
 }

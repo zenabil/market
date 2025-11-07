@@ -17,25 +17,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useToast } from '@/hooks/use-toast';
 import { AddressDialog } from '@/components/dashboard/address-dialog';
 import { createNotification } from '@/lib/services/notification';
+import { useLanguage } from '@/contexts/language-provider';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
-const statusTranslations: { [key: string]: string } = {
-    Pending: 'En attente',
-    Confirmed: 'Confirmée',
-    Shipped: 'Expédiée',
-    Delivered: 'Livrée',
-    Cancelled: 'Annulée',
-};
-const markAsTranslations: { [key: string]: string } = {
-    Pending: 'Marquer comme En attente',
-    Confirmed: 'Marquer como Confirmée',
-    Shipped: 'Marquer comme Expédiée',
-    Delivered: 'Marquer comme Livrée',
-    Cancelled: 'Marquer comme Annulée',
-};
-
 function OrderDetails() {
+    const { t } = useLanguage();
     const { id: orderId } = useParams();
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -84,11 +71,11 @@ function OrderDetails() {
         updateDoc(orderRef, updateData)
             .then(() => {
                 toast({
-                    title: 'Statut de la commande mis à jour',
-                    description: `La commande est maintenant ${statusTranslations[newStatus]}.`,
+                    title: t('dashboard.orders.details.toast.statusUpdated.title'),
+                    description: t('dashboard.orders.details.toast.statusUpdated.description').replace('{{status}}', t(`dashboard.orders.status.${newStatus}`)),
                 });
                  createNotification(firestore, order.userId, {
-                    message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
+                    message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${t(`dashboard.orders.status.${newStatus}`)}`,
                     link: `/dashboard/orders/${order.id}`,
                  }).catch(console.error);
                  refetchOrder();
@@ -109,12 +96,12 @@ function OrderDetails() {
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+        return new Intl.DateTimeFormat(t('locale'), { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     };
     
     const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
@@ -180,9 +167,9 @@ function OrderDetails() {
                     </Link>
                     </Button>
                     <div>
-                        <h1 className="font-headline text-3xl md:text-4xl">Détails de la commande</h1>
+                        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.orders.details.title')}</h1>
                          <p className="text-muted-foreground font-mono text-sm">
-                            ID: {order.id}
+                            {t('dashboard.orders.details.id')}: {order.id}
                         </p>
                     </div>
                 </div>
@@ -190,11 +177,11 @@ function OrderDetails() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" disabled={isUpdatingStatus}>
                             {getStatusIcon(order.status)}
-                            {statusTranslations[order.status] || order.status}
+                            {t(`dashboard.orders.status.${order.status}`)}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Changer le statut</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('dashboard.orders.details.changeStatus')}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {orderStatuses.map(status => (
                             <DropdownMenuItem
@@ -202,7 +189,7 @@ function OrderDetails() {
                                 disabled={order.status === status || isUpdatingStatus}
                                 onClick={() => handleStatusChange(status)}
                             >
-                                {markAsTranslations[status]}
+                                {t(`dashboard.orders.actions.markAs${status}`)}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
@@ -213,7 +200,7 @@ function OrderDetails() {
                 <div className="lg:col-span-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><Package /> Articles ({order.items.length})</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><Package /> {t('dashboard.orders.details.items')} ({order.items.length})</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -238,7 +225,7 @@ function OrderDetails() {
                                 })}
                                  <Separator />
                                 <div className="flex justify-end font-bold text-lg">
-                                    <span>Total: {formatCurrency(order.totalAmount)}</span>
+                                    <span>{t('dashboard.orders.details.total')}: {formatCurrency(order.totalAmount)}</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -248,13 +235,13 @@ function OrderDetails() {
                      <Card>
                         <CardHeader>
                             <CardTitle className='flex items-center justify-between'>
-                                <span className='flex items-center gap-2'><User /> Client</span>
+                                <span className='flex items-center gap-2'><User /> {t('dashboard.orders.details.customer')}</span>
                                 <AddressDialog 
                                     userDocRef={userDocRef} 
                                     firestoreUser={customer}
                                     onAddressChange={refetchCustomer}
                                 >
-                                    <Button variant="ghost" size="icon" title="Modifier les adresses du client">
+                                    <Button variant="ghost" size="icon" title={t('dashboard.orders.details.editAddresses')}>
                                         <Home className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </AddressDialog>
@@ -272,26 +259,26 @@ function OrderDetails() {
                                  <p className="text-sm text-muted-foreground">{customer.email}</p>
                                 </>
                            ): (
-                               <p className="text-sm text-muted-foreground">Client non trouvé</p>
+                               <p className="text-sm text-muted-foreground">{t('dashboard.orders.details.notFound')}</p>
                            )}
                         </CardContent>
                     </Card>
                      <Card>
                         <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><FileText/> Résumé</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><FileText/> {t('dashboard.orders.details.summary')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Date</span>
+                                <span className="text-muted-foreground">{t('dashboard.orders.details.date')}</span>
                                 <span>{formatDate(order.orderDate)}</span>
                             </div>
                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Statut</span>
-                                <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
+                                <span className="text-muted-foreground">{t('dashboard.orders.details.status')}</span>
+                                <Badge variant={getStatusVariant(order.status)}>{t(`dashboard.orders.status.${order.status}`)}</Badge>
                             </div>
                              <Separator />
                              <div>
-                                 <h4 className="font-semibold mb-2">Adresse de livraison</h4>
+                                 <h4 className="font-semibold mb-2">{t('dashboard.orders.details.shippingAddress')}</h4>
                                  <p className='text-sm text-muted-foreground whitespace-pre-line'>{order.shippingAddress.replace(/, /g, '\n')}</p>
                              </div>
                         </CardContent>
