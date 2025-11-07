@@ -1,13 +1,13 @@
 
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, PlusCircle, Trash2 } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, query, doc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,8 +25,10 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-provider';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCategories } from '@/hooks/use-categories';
 
 export default function ProductsPage() {
   const { t } = useLanguage();
@@ -40,11 +42,25 @@ export default function ProductsPage() {
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
 
+  const { categories, areCategoriesLoading } = useCategories();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
   React.useEffect(() => {
     if (!isRoleLoading && !isAdmin) {
         router.replace('/dashboard');
     }
   }, [isAdmin, isRoleLoading, router]);
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = !selectedCategoryId || product.categoryId === selectedCategoryId;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, selectedCategoryId]);
 
   const formatCurrency = (amount: number) => {
     if (typeof amount !== 'number') return 'N/A';
@@ -88,7 +104,12 @@ export default function ProductsPage() {
     setIsAlertOpen(true);
   }
   
-  const isLoading = areProductsLoading || isRoleLoading;
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedCategoryId(null);
+  }
+  
+  const isLoading = areProductsLoading || isRoleLoading || areCategoriesLoading;
 
   if (isLoading || !isAdmin) {
       return (
@@ -102,14 +123,49 @@ export default function ProductsPage() {
     <div className="container py-8 md:py-12">
         <div className="overflow-x-auto">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('dashboard.products.pageTitle')}</CardTitle>
-                <Button asChild size="sm" className="gap-1">
-                  <Link href="/dashboard/products/new">
-                    <PlusCircle className="h-4 w-4" />
-                    {t('dashboard.products.addProduct')}
-                  </Link>
-                </Button>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div>
+                    <CardTitle>{t('dashboard.products.pageTitle')}</CardTitle>
+                    <CardDescription>
+                      {t('dashboard.products.pageDescription', { count: filteredProducts.length, total: products?.length || 0 })}
+                    </CardDescription>
+                  </div>
+                  <Button asChild size="sm" className="gap-1">
+                    <Link href="/dashboard/products/new">
+                      <PlusCircle className="h-4 w-4" />
+                      {t('dashboard.products.addProduct')}
+                    </Link>
+                  </Button>
+                </div>
+                 <div className="mt-4 flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-grow">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                          placeholder={t('dashboard.products.searchPlaceholder')}
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                      />
+                  </div>
+                   <Select
+                        value={selectedCategoryId || 'all'}
+                        onValueChange={(value) => setSelectedCategoryId(value === 'all' ? null : value)}
+                    >
+                        <SelectTrigger className="sm:w-[200px]">
+                            <SelectValue placeholder={t('dashboard.products.filterByCategory')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">{t('dashboard.products.allCategories')}</SelectItem>
+                            {categories?.map(category => (
+                                <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {(searchTerm || selectedCategoryId) && (
+                        <Button variant="ghost" onClick={resetFilters}>{t('dashboard.products.resetFilters')}</Button>
+                    )}
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -136,7 +192,7 @@ export default function ProductsPage() {
                         <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                       </TableRow>
                     ))}
-                    {products && products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{formatCurrency(product.purchasePrice)}</TableCell>
@@ -166,9 +222,12 @@ export default function ProductsPage() {
                     ))}
                   </TableBody>
                 </Table>
-                 {!areProductsLoading && products?.length === 0 && (
+                 {!areProductsLoading && filteredProducts.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        {t('dashboard.products.noProducts')}
+                        {products && products.length > 0
+                            ? t('dashboard.products.noFilterResults')
+                            : t('dashboard.products.noProducts')
+                        }
                     </div>
                 )}
               </CardContent>
@@ -194,7 +253,6 @@ export default function ProductsPage() {
       </div>
   )
 }
-
     
-
+    
     

@@ -605,6 +605,11 @@
         },
         "products": {
             "pageTitle": "Gérer les produits",
+            "pageDescription": "Affichage de {{count}} sur {{total}} produits.",
+            "searchPlaceholder": "Rechercher par nom...",
+            "filterByCategory": "Filtrer par catégorie",
+            "allCategories": "Toutes les catégories",
+            "resetFilters": "Réinitialiser",
             "addProduct": "Ajouter un produit",
             "purchasePrice": "Prix d'achat",
             "sellingPrice": "Prix de vente",
@@ -621,6 +626,7 @@
                 "deleted": "Produit supprimé"
             },
             "noProducts": "Aucun produit trouvé.",
+            "noFilterResults": "Aucun produit ne correspond à vos filtres.",
             "editPageTitle": "Modifier le produit",
             "detailsTitle": "Détails du produit",
             "productName": "Nom du produit",

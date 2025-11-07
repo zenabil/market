@@ -605,6 +605,11 @@
         },
         "products": {
             "pageTitle": "إدارة المنتجات",
+            "pageDescription": "عرض {{count}} من أصل {{total}} منتجات.",
+            "searchPlaceholder": "البحث بالاسم...",
+            "filterByCategory": "فلترة حسب الفئة",
+            "allCategories": "جميع الفئات",
+            "resetFilters": "إعادة تعيين",
             "addProduct": "إضافة منتج",
             "purchasePrice": "سعر الشراء",
             "sellingPrice": "سعر البيع",
@@ -621,6 +626,7 @@
                 "deleted": "تم حذف المنتج"
             },
             "noProducts": "لم يتم العثور على منتجات.",
+            "noFilterResults": "لم يتم العثور على منتجات تطابق الفلاتر الخاصة بك.",
             "editPageTitle": "تعديل المنتج",
             "detailsTitle": "تفاصيل المنتج",
             "productName": "اسم المنتج",
