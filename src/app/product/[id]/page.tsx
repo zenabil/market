@@ -16,7 +16,7 @@ import { doc, collection, query, where, limit, documentId } from 'firebase/fires
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
-import ProductReviews from '@/components/product/product-reviews';
+import ReviewsSection from '@/components/shared/reviews-section';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { cn } from '@/lib/utils';
 import { useComparison } from '@/hooks/use-comparison';
@@ -34,7 +34,7 @@ function ProductDetails({ productId }: { productId: string }) {
       if (!firestore || !productId) return null;
       return doc(firestore, 'products', productId);
   }, [firestore, productId]);
-  const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
+  const { data: product, isLoading: isLoadingProduct, refetch } = useDoc<Product>(productRef);
 
   const isWishlisted = !!wishlist?.find(item => item.id === productId);
   const isComparing = !!comparisonItems.find(item => item.id === productId);
@@ -246,7 +246,7 @@ function ProductDetails({ productId }: { productId: string }) {
       </div>
     </div>
     
-    <ProductReviews productId={productId} />
+    <ReviewsSection targetId={productId} targetCollection="products" onReviewChange={refetch} />
 
     {relatedProducts && relatedProducts.length > 0 && (
     <div className="container mt-16 md:mt-24 pb-12">

@@ -8,13 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
-import type { Review, Product, Recipe } from '@/lib/placeholder-data';
+import { useUser, useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { collection, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import type { Review } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import StarRating from './star-rating';
-import { Separator } from '../ui/separator';
+import StarRating from '../product/star-rating';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,40 +22,26 @@ const reviewSchema = z.object({
   rating: z.number().min(1, 'Une note est requise.').max(5),
 });
 
-const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewAdded: () => void }) => {
+interface ReviewFormProps {
+    targetId: string;
+    targetCollection: 'products' | 'recipes';
+    onReviewAdded: () => void;
+}
+
+const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormProps) => {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [collectionName, setCollectionName] = useState<'products' | 'recipes' | null>(null);
 
-  // Check which collection the ID belongs to
-   useEffect(() => {
-    async function determineCollection() {
-      if (!firestore) return;
-      const productDoc = await getDoc(doc(firestore, 'products', productId));
-      if (productDoc.exists()) {
-        setCollectionName('products');
-        return;
-      }
-      const recipeDoc = await getDoc(doc(firestore, 'recipes', productId));
-      if (recipeDoc.exists()) {
-        setCollectionName('recipes');
-        return;
-      }
-    }
-    determineCollection();
-  }, [firestore, productId]);
-  
   const targetRef = useMemoFirebase(() => {
-    if (!firestore || !collectionName) return null;
-    return doc(firestore, collectionName, productId);
-  }, [firestore, collectionName, productId]);
+    if (!firestore) return null;
+    return doc(firestore, targetCollection, targetId);
+  }, [firestore, targetCollection, targetId]);
 
   const { data: reviews } = useCollection<Review>(
     useMemoFirebase(() => targetRef ? query(collection(targetRef, 'reviews')) : null, [targetRef])
   );
-
 
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
@@ -64,7 +49,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
   });
 
   const onSubmit = async (values: z.infer<typeof reviewSchema>) => {
-    if (!user || !firestore || !targetRef || !collectionName || !reviews) return;
+    if (!user || !firestore || !targetRef || !reviews) return;
 
     setIsSubmitting(true);
     
@@ -86,12 +71,12 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0) + values.rating;
         const averageRating = totalRating / totalReviews;
 
-        const productUpdateData = {
+        const targetUpdateData = {
             reviewCount: totalReviews,
             averageRating: averageRating
         };
 
-        await updateDoc(targetRef, productUpdateData);
+        await updateDoc(targetRef, targetUpdateData);
         
         toast({ title: 'Avis soumis avec succès' });
         form.reset({ comment: '', rating: 0 });
@@ -126,10 +111,6 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
     )
   }
   
-  if (!collectionName) {
-      return <Skeleton className="h-64 w-full" />
-  }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -149,7 +130,7 @@ const ReviewForm = ({ productId, onReviewAdded }: { productId: string, onReviewA
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Textarea placeholder="Partagez votre avis sur le produit..." {...field} />
+                <Textarea placeholder="Partagez votre avis..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -187,46 +168,28 @@ const ReviewItem = ({ review }: { review: Review }) => {
     )
 }
 
-export default function ProductReviews({ productId }: { productId: string }) {
-  const firestore = useFirestore();
-  const [key, setKey] = useState(0);
-  const [collectionName, setCollectionName] = useState<'products' | 'recipes' | null>(null);
+interface ReviewsSectionProps {
+    targetId: string;
+    targetCollection: 'products' | 'recipes';
+    onReviewChange: () => void;
+}
 
-  // Determine collection name
-  useEffect(() => {
-    async function determineCollection() {
-      if (!firestore) return;
-      const productDoc = await getDoc(doc(firestore, 'products', productId));
-      if (productDoc.exists()) {
-        setCollectionName('products');
-        return;
-      }
-      const recipeDoc = await getDoc(doc(firestore, 'recipes', productId));
-      if (recipeDoc.exists()) {
-        setCollectionName('recipes');
-        return;
-      }
-    }
-    determineCollection();
-  }, [firestore, productId]);
+export default function ReviewsSection({ targetId, targetCollection, onReviewChange }: ReviewsSectionProps) {
+  const firestore = useFirestore();
 
   const reviewsQuery = useMemoFirebase(() => {
-    if (!firestore || !collectionName) return null;
-    return query(collection(firestore, `${collectionName}/${productId}/reviews`), orderBy('createdAt', 'desc'));
-  }, [firestore, collectionName, productId, key]);
+    if (!firestore) return null;
+    return query(collection(firestore, `${targetCollection}/${targetId}/reviews`), orderBy('createdAt', 'desc'));
+  }, [firestore, targetCollection, targetId, onReviewChange]);
 
   const { data: reviews, isLoading } = useCollection<Review>(reviewsQuery);
   
-  const handleReviewAdded = () => {
-    setKey(prev => prev + 1); 
-  }
-
   return (
     <div className="bg-muted/40 py-12 md:py-16">
       <div className="container grid md:grid-cols-2 gap-12">
         <div>
           <h3 className="font-headline text-2xl md:text-3xl mb-6">Laisser un avis</h3>
-          <ReviewForm productId={productId} onReviewAdded={handleReviewAdded} />
+          <ReviewForm targetId={targetId} targetCollection={targetCollection} onReviewAdded={onReviewChange} />
         </div>
         <div>
           <h3 className="font-headline text-2xl md:text-3xl mb-6">Avis des clients</h3>
@@ -244,7 +207,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
             {!isLoading && reviews && reviews.length > 0 ? (
               reviews.map((review) => <ReviewItem key={review.id} review={review} />)
             ) : (
-              !isLoading && <p className="text-muted-foreground">Aucun avis pour ce produit pour le moment.</p>
+              !isLoading && <p className="text-muted-foreground">Aucun avis pour le moment.</p>
             )}
           </div>
         </div>

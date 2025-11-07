@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
-import ProductReviews from '@/components/product/product-reviews';
+import ReviewsSection from '@/components/shared/reviews-section';
 
 function RecipeDetailsPage() {
     const { id: recipeId } = useParams();
@@ -27,7 +27,7 @@ function RecipeDetailsPage() {
         return doc(firestore, 'recipes', recipeId as string);
     }, [firestore, recipeId]);
 
-    const { data: recipe, isLoading } = useDoc<Recipe>(recipeRef);
+    const { data: recipe, isLoading, refetch } = useDoc<Recipe>(recipeRef);
 
     const handleAddAllToCart = async () => {
         if (!firestore || !recipe?.ingredients || recipe.ingredients.length === 0) return;
@@ -48,7 +48,7 @@ function RecipeDetailsPage() {
             const q = query(productsRef, where('name', 'in', productsToQuery));
             const querySnapshot = await getDocs(q);
             const foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-            const foundProductNames = foundProducts.map(p => p.name);
+            const foundProductNames = foundProducts.map(p => p.name.toLowerCase());
             
             let itemsAddedCount = 0;
             foundProducts.forEach(product => {
@@ -187,7 +187,7 @@ function RecipeDetailsPage() {
                     </div>
                 </div>
             </div>
-            <ProductReviews productId={recipeId as string} />
+            <ReviewsSection targetId={recipeId as string} targetCollection="recipes" onReviewChange={refetch} />
         </>
     )
 }
