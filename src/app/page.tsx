@@ -1,52 +1,62 @@
+
 'use client';
 
 import HeroCarousel from '@/components/product/hero-carousel';
 import HomePageClient from '@/components/layout/home-page-client';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, limit, orderBy, where } from 'firebase/firestore';
-import type { Product, Recipe } from '@/lib/placeholder-data';
+import type { Product, Recipe, StoreFeature } from '@/lib/placeholder-data';
 import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
 import ShopByRecipe from '@/components/product/shop-by-recipe';
-import { Award, Leaf, Truck } from 'lucide-react';
+import { Award, Leaf, Truck, Sparkles, type LucideProps } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/language-provider';
 
+// Map icon names to actual components
+const iconMap: { [key: string]: React.FC<LucideProps> } = {
+    Leaf: Leaf,
+    Truck: Truck,
+    Award: Award,
+    Sparkles: Sparkles,
+};
+
+
 function WhyChooseUs() {
-    const { t } = useLanguage();
-    const features = [
-        {
-            icon: Leaf,
-            titleKey: "freshnessGuaranteed",
-            descriptionKey: "freshnessGuaranteedDesc"
-        },
-        {
-            icon: Truck,
-            titleKey: "fastDelivery",
-            descriptionKey: "fastDeliveryDesc"
-        },
-        {
-            icon: Award,
-            titleKey: "superiorQuality",
-            "descriptionKey": "superiorQualityDesc"
-        }
-    ];
+    const { t, locale } = useLanguage();
+    const firestore = useFirestore();
+
+    const featuresQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'storeFeatures'));
+    }, [firestore]);
+
+    const { data: features, isLoading } = useCollection<StoreFeature>(featuresQuery);
 
     return (
         <div className="bg-background">
             <div className="container py-12 md:py-24">
                  <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">{t('home.whyChooseUs')}</h2>
                  <div className="grid md:grid-cols-3 gap-8">
-                    {features.map((feature) => {
-                        const Icon = feature.icon;
+                    {isLoading && Array.from({length: 3}).map((_, i) => (
+                         <Card key={i} className="text-center border-none shadow-none bg-transparent">
+                            <CardContent className="p-6">
+                                <Skeleton className="h-16 w-16 rounded-full mx-auto mb-4" />
+                                <Skeleton className="h-6 w-3/4 mx-auto mb-2" />
+                                <Skeleton className="h-4 w-full mx-auto" />
+                            </CardContent>
+                        </Card>
+                    ))}
+                    {!isLoading && features?.map((feature) => {
+                        const Icon = iconMap[feature.icon] || Leaf;
                         return (
-                            <Card key={feature.titleKey} className="text-center border-none shadow-none bg-transparent">
+                            <Card key={feature.id} className="text-center border-none shadow-none bg-transparent">
                                 <CardContent className="p-6">
                                     <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                                         <Icon className="h-8 w-8"/>
                                     </div>
-                                    <h3 className="font-bold text-xl">{t(`home.features.${feature.titleKey}`)}</h3>
-                                    <p className="mt-2 text-muted-foreground">{t(`home.features.${feature.descriptionKey}`)}</p>
+                                    <h3 className="font-bold text-xl">{locale === 'ar' ? feature.title_ar : feature.title_fr}</h3>
+                                    <p className="mt-2 text-muted-foreground">{locale === 'ar' ? feature.description_ar : feature.description_fr}</p>
                                 </CardContent>
                             </Card>
                         )

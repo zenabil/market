@@ -6,7 +6,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Award, Leaf, Truck, type LucideProps } from 'lucide-react';
+import { Award, Leaf, Truck, type LucideProps, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-provider';
 
 type StoreFeature = {
@@ -23,6 +23,7 @@ const iconMap: { [key: string]: React.FC<LucideProps> } = {
     Leaf: Leaf,
     Truck: Truck,
     Award: Award,
+    Sparkles: Sparkles,
 };
 
 
