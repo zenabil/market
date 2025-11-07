@@ -192,12 +192,12 @@ function ProductDetails({ productId }: { productId: string }) {
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           <div className="mt-auto pt-8 space-y-4">
              <Button 
-                variant="outline"
+                variant={isComparing ? "default" : "outline"}
                 className="w-full"
                 onClick={handleCompareToggle}
                 disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
              >
-                <GitCompareArrows className={cn("mr-2 h-4 w-4", isComparing && "text-primary")} />
+                <GitCompareArrows className={cn("mr-2 h-4 w-4", isComparing && "text-primary-foreground")} />
                 {isComparing ? 'Retirer de la comparaison' : 'Comparer ce produit'}
              </Button>
             <div className="flex items-center gap-4">
