@@ -45,14 +45,17 @@ import { useCategories } from '@/hooks/use-categories';
 import type { Category } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const categoryFormSchema = z.object({
-  name: z.string().min(2, { message: 'الاسم مطلوب.' }),
-  image: z.string().url({ message: 'الرجاء إدخال رابط صورة صالح.' }),
-});
 
 function CategoryDialog({ category, onActionComplete }: { category?: Category | null, onActionComplete: () => void }) {
+  const { t } = useLanguage();
+
+  const categoryFormSchema = z.object({
+    name: z.string().min(2, { message: t('dashboard.categories.validation.nameRequired') }),
+    image: z.string().url({ message: t('dashboard.categories.validation.imageInvalid') }),
+  });
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
@@ -95,7 +98,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
 
     actionPromise
       .then(() => {
-          toast({ title: category ? 'تم تحديث الفئة' : 'تم إنشاء الفئة' });
+          toast({ title: category ? t('dashboard.categories.toast.updated') : t('dashboard.categories.toast.created') });
           setIsOpen(false);
           onActionComplete();
       })
@@ -121,38 +124,38 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
         {category ? (
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <Edit className="ml-2 h-4 w-4" />
-                تعديل
+                {t('dashboard.common.edit')}
             </DropdownMenuItem>
         ) : (
              <Button size="sm" className="gap-1">
-                <PlusCircle className="h-4 w-4 ml-1" />
-                إضافة فئة
+                <PlusCircle className="h-4 w-4" />
+                {t('dashboard.categories.addCategory')}
              </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{category ? 'تعديل الفئة' : 'إضافة فئة'}</DialogTitle>
+          <DialogTitle>{category ? t('dashboard.categories.editCategory') : t('dashboard.categories.addCategory')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="category-dialog-form">
           <div className="space-y-2">
-            <Label>الاسم</Label>
+            <Label>{t('dashboard.categories.name')}</Label>
             <Input {...form.register('name')} />
             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label>رابط الصورة</Label>
+            <Label>{t('dashboard.categories.imageUrl')}</Label>
             <Input {...form.register('image')} />
             {form.formState.errors.image && <p className="text-sm text-destructive">{form.formState.errors.image.message}</p>}
           </div>
         </form>
            <DialogFooter>
              <DialogClose asChild>
-              <Button type="button" variant="outline">إلغاء</Button>
+              <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
              </DialogClose>
             <Button type="submit" disabled={isSaving} form="category-dialog-form">
                 {isSaving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                حفظ
+                {t('dashboard.common.save')}
             </Button>
           </DialogFooter>
       </DialogContent>
@@ -162,6 +165,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
 
 
 export default function CategoriesPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { categories, areCategoriesLoading, refetchCategories } = useCategories();
@@ -190,8 +194,8 @@ export default function CategoriesPage() {
     if (!productSnapshot.empty) {
       toast({
         variant: 'destructive',
-        title: 'لا يمكن حذف الفئة',
-        description: 'هذه الفئة لا تزال تحتوي على منتجات. يرجى نقل المنتجات أو حذفها أولاً.',
+        title: t('dashboard.categories.deleteError.title'),
+        description: t('dashboard.categories.deleteError.description'),
       });
       setIsDeleting(false);
       setIsAlertOpen(false);
@@ -205,7 +209,7 @@ export default function CategoriesPage() {
     try {
       await deleteDoc(categoryDocRef);
       refetchCategories();
-      toast({ title: 'تم حذف الفئة' });
+      toast({ title: t('dashboard.categories.toast.deleted') });
     } catch (error) {
       errorEmitter.emit(
         'permission-error',
@@ -216,8 +220,8 @@ export default function CategoriesPage() {
       );
       toast({
         variant: 'destructive',
-        title: 'خطأ في الحذف',
-        description: "قد لا يكون لديك الإذن للقيام بذلك.",
+        title: t('dashboard.common.deleteErrorTitle'),
+        description: t('dashboard.common.permissionError'),
       });
     } finally {
       setIsDeleting(false);
@@ -246,8 +250,8 @@ export default function CategoriesPage() {
         <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
-            <CardTitle>الفئات</CardTitle>
-            <CardDescription>إدارة فئات المنتجات الخاصة بك.</CardDescription>
+            <CardTitle>{t('dashboard.layout.categories')}</CardTitle>
+            <CardDescription>{t('dashboard.categories.description')}</CardDescription>
             </div>
             <CategoryDialog onActionComplete={refetchCategories} />
         </CardHeader>
@@ -255,9 +259,9 @@ export default function CategoriesPage() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead>الصورة</TableHead>
-                <TableHead>الاسم</TableHead>
-                <TableHead><span className="sr-only">الإجراءات</span></TableHead>
+                <TableHead>{t('dashboard.categories.image')}</TableHead>
+                <TableHead>{t('dashboard.categories.name')}</TableHead>
+                <TableHead><span className="sr-only">{t('dashboard.common.actions')}</span></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -265,7 +269,7 @@ export default function CategoriesPage() {
                 <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 mr-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
                 ))}
                 {categories && categories.map(category => (
@@ -279,14 +283,14 @@ export default function CategoriesPage() {
                         <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">فتح القائمة</span>
+                            <span className="sr-only">{t('dashboard.common.openMenu')}</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <CategoryDialog category={category} onActionComplete={refetchCategories} />
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
                             <Trash2 className="ml-2 h-4 w-4" />
-                            حذف
+                            {t('dashboard.common.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
@@ -297,7 +301,7 @@ export default function CategoriesPage() {
             </Table>
             {!areCategoriesLoading && categories?.length === 0 && (
             <div className="text-center p-8 text-muted-foreground">
-                لم يتم العثور على فئات.
+                {t('dashboard.categories.noCategories')}
             </div>
             )}
         </CardContent>
@@ -306,16 +310,16 @@ export default function CategoriesPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                <AlertDialogTitle>هل أنت متأكد من رغبتك في الحذف؟</AlertDialogTitle>
+                <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                    لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الفئة بشكل دائم "{categoryToDelete?.name || ''}".
+                    {t('dashboard.categories.confirmDeleteDescription').replace('{{name}}', categoryToDelete?.name || '')}
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>إلغاء</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCategory} disabled={isDeleting}>
                     {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                    حذف
+                    {t('dashboard.common.delete')}
                 </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

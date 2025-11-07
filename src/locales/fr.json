@@ -255,5 +255,114 @@
             "title": "Erreur",
             "description": "Une erreur inattendue s'est produite lors de la soumission de l'avis."
         }
+    },
+    "dashboard": {
+        "common": {
+            "edit": "Modifier",
+            "cancel": "Annuler",
+            "save": "Enregistrer",
+            "actions": "Actions",
+            "openMenu": "Ouvrir le menu",
+            "delete": "Supprimer",
+            "confirmDeleteTitle": "Êtes-vous sûr de vouloir supprimer ?",
+            "deleteErrorTitle": "Erreur de suppression",
+            "permissionError": "Vous n'avez peut-être pas la permission d'effectuer cette action.",
+            "loading": "Chargement...",
+            "apply": "Appliquer",
+            "update": "Mettre à jour",
+            "saveChanges": "Enregistrer les modifications",
+            "error": "Erreur"
+        },
+        "layout": {
+            "dashboard": "Tableau de bord",
+            "orders": "Commandes",
+            "products": "Produits",
+            "recipes": "Recettes",
+            "categories": "Catégories",
+            "users": "Utilisateurs",
+            "messages": "Messages",
+            "coupons": "Coupons",
+            "discounts": "Réductions",
+            "settings": "Paramètres",
+            "myOrders": "Mes commandes",
+            "shoppingLists": "Listes de courses",
+            "wishlist": "Liste de souhaits",
+            "profile": "Mon profil",
+            "logout": "Déconnexion"
+        },
+        "categories": {
+            "addCategory": "Ajouter une catégorie",
+            "editCategory": "Modifier la catégorie",
+            "name": "Nom",
+            "imageUrl": "URL de l'image",
+            "description": "Gérez les catégories de vos produits.",
+            "image": "Image",
+            "noCategories": "Aucune catégorie trouvée.",
+            "confirmDeleteDescription": "Cette action ne peut pas être annulée. Cela supprimera définitivement la catégorie \"{{name}}\".",
+            "toast": {
+                "updated": "Catégorie mise à jour",
+                "created": "Catégorie créée",
+                "deleted": "Catégorie supprimée"
+            },
+            "validation": {
+                "nameRequired": "Le nom est requis.",
+                "imageInvalid": "Veuillez entrer une URL d'image valide."
+            },
+            "deleteError": {
+                "title": "Impossible de supprimer la catégorie",
+                "description": "Cette catégorie contient encore des produits. Veuillez d'abord déplacer ou supprimer les produits."
+            }
+        },
+        "coupons": {
+            "addCoupon": "Ajouter un coupon",
+            "addCouponTitle": "Ajouter un nouveau coupon",
+            "addDescription": "Créez un nouveau code de réduction pour vos clients.",
+            "editCoupon": "Modifier le coupon",
+            "editDescription": "Modifiez les détails du coupon ci-dessous.",
+            "description": "Gérez vos codes de réduction.",
+            "code": "Code",
+            "discount": "Réduction",
+            "discountPercentage": "Pourcentage de réduction",
+            "expiryDate": "Date d'expiration",
+            "status": "Statut",
+            "active": "Actif",
+            "inactive": "Inactif",
+            "expired": "Expiré",
+            "noCoupons": "Aucun coupon trouvé.",
+            "confirmDeleteDescription": "Cette action ne peut pas être annulée. Cela supprimera définitivement le coupon \"{{code}}\".",
+            "toast": {
+                "updated": "Coupon mis à jour",
+                "created": "Coupon créé",
+                "deleted": "Coupon supprimé"
+            },
+            "validation": {
+                "code": "Le code doit comporter au moins 4 caractères.",
+                "date": "Date invalide"
+            }
+        },
+        "discounts": {
+            "pageDescription": "Gérez les réductions pour les produits et les catégories.",
+            "applyToCategory": "Appliquer une réduction à une catégorie",
+            "applyToCategoryDescription": "Appliquez rapidement une réduction à tous les produits d'une catégorie spécifique.",
+            "selectCategory": "Sélectionnez une catégorie",
+            "byProductTitle": "Réductions par produit",
+            "byProductDescription": "Ajustez les réductions pour des produits spécifiques.",
+            "product": "Produit",
+            "originalPrice": "Prix original",
+            "discountedPrice": "Prix réduit",
+            "discountPercentage": "Réduction (%)",
+            "noProducts": "Aucun produit trouvé.",
+            "validation": {
+                "invalidTitle": "Réduction invalide",
+                "invalidDescription": "Le pourcentage de réduction doit être compris entre 0 et 100.",
+                "selectCategory": "Veuillez sélectionner une catégorie."
+            },
+            "toast": {
+                "updatedTitle": "Réduction mise à jour",
+                "updatedDescription": "La réduction pour {{name}} est maintenant de {{discount}}%.",
+                "appliedTitle": "Réduction appliquée",
+                "appliedDescription": "{{count}} produits ont été mis à jour dans la catégorie."
+            }
+        }
     }
 }

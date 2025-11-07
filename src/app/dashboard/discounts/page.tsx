@@ -18,8 +18,10 @@ import { useCategories } from '@/hooks/use-categories';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { applyDiscountToCategory } from '@/lib/services/product';
 import { Separator } from '@/components/ui/separator';
+import { useLanguage } from '@/contexts/language-provider';
 
 function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => void }) {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [discount, setDiscount] = React.useState(product.discount || 0);
@@ -35,8 +37,8 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
         if (newDiscount < 0 || newDiscount > 100) {
             toast({
                 variant: 'destructive',
-                title: 'خصم غير صالح',
-                description: 'يجب أن تكون نسبة الخصم بين 0 و 100.',
+                title: t('dashboard.discounts.validation.invalidTitle'),
+                description: t('dashboard.discounts.validation.invalidDescription'),
             });
             return;
         }
@@ -45,8 +47,8 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
         updateDoc(productRef, updateData)
             .then(() => {
                 toast({
-                    title: 'تم تحديث الخصم',
-                    description: `خصم ${product.name} هو الآن ${newDiscount}%.`,
+                    title: t('dashboard.discounts.toast.updatedTitle'),
+                    description: t('dashboard.discounts.toast.updatedDescription').replace('{{name}}', product.name).replace('{{discount}}', newDiscount.toString()),
                 });
                 onUpdate();
             })
@@ -66,7 +68,7 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
+        return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
     };
 
     const originalPrice = product.price;
@@ -97,12 +99,12 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
             </TableCell>
             <TableCell className="text-right space-x-2">
                 <Button size="sm" onClick={() => handleUpdateDiscount(discount)} disabled={discount === (product.discount || 0) || isUpdating}>
-                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'تحديث'}
+                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : t('dashboard.common.update')}
                 </Button>
                  {hasDiscount && (
                     <Button size="sm" variant="ghost" onClick={() => handleUpdateDiscount(0)} disabled={isUpdating}>
                         {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                        <span className="sr-only">حذف</span>
+                        <span className="sr-only">{t('dashboard.common.delete')}</span>
                     </Button>
                  )}
             </TableCell>
@@ -111,6 +113,7 @@ function DiscountRow({ product, onUpdate }: { product: Product, onUpdate: () => 
 }
 
 function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
     const { categories, areCategoriesLoading } = useCategories();
@@ -120,20 +123,20 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
 
     const handleApplyDiscount = async () => {
         if (!firestore || !selectedCategoryId) {
-            toast({ variant: 'destructive', title: 'الرجاء تحديد فئة.' });
+            toast({ variant: 'destructive', title: t('dashboard.discounts.validation.selectCategory') });
             return;
         }
          if (discount < 0 || discount > 100) {
-            toast({ variant: 'destructive', title: 'خصم غير صالح', description: 'يجب أن تكون النسبة بين 0 و 100.' });
+            toast({ variant: 'destructive', title: t('dashboard.discounts.validation.invalidTitle'), description: t('dashboard.discounts.validation.invalidDescription') });
             return;
         }
         setIsApplying(true);
         try {
             const count = await applyDiscountToCategory(firestore, selectedCategoryId, discount);
-            toast({ title: 'تم تطبيق الخصم', description: `تم تحديث ${count} منتجات في الفئة.` });
+            toast({ title: t('dashboard.discounts.toast.appliedTitle'), description: t('dashboard.discounts.toast.appliedDescription').replace('{{count}}', count.toString()) });
             onUpdate();
         } catch (error: any) {
-             toast({ variant: 'destructive', title: 'خطأ', description: error.message });
+             toast({ variant: 'destructive', title: t('dashboard.common.error'), description: error.message });
         } finally {
             setIsApplying(false);
         }
@@ -142,14 +145,14 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
     return (
         <Card className="mb-8">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Percent /> تطبيق خصم على فئة</CardTitle>
-                <CardDescription>قم بتطبيق خصم بسرعة على جميع المنتجات في فئة محددة.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Percent /> {t('dashboard.discounts.applyToCategory')}</CardTitle>
+                <CardDescription>{t('dashboard.discounts.applyToCategoryDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <Select onValueChange={setSelectedCategoryId} disabled={areCategoriesLoading}>
                         <SelectTrigger className="sm:w-[250px]">
-                            <SelectValue placeholder={areCategoriesLoading ? "جاري التحميل..." : "اختر فئة"} />
+                            <SelectValue placeholder={areCategoriesLoading ? t('dashboard.common.loading') : t('dashboard.discounts.selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                             {categories?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -168,7 +171,7 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
                     </div>
                     <Button onClick={handleApplyDiscount} disabled={!selectedCategoryId || isApplying}>
                         {isApplying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        تطبيق
+                        {t('dashboard.common.apply')}
                     </Button>
                 </div>
             </CardContent>
@@ -177,6 +180,7 @@ function CategoryDiscountManager({ onUpdate }: { onUpdate: () => void }) {
 }
 
 export default function DiscountsPage() {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { isAdmin, isRoleLoading } = useUserRole();
     const router = useRouter();
@@ -207,26 +211,26 @@ export default function DiscountsPage() {
     return (
         <div className="container py-8 md:py-12">
             <div className="mb-8">
-                <h1 className='font-headline text-3xl'>الخصومات</h1>
-                <p className="text-muted-foreground">إدارة الخصومات للمنتجات والفئات.</p>
+                <h1 className='font-headline text-3xl'>{t('dashboard.layout.discounts')}</h1>
+                <p className="text-muted-foreground">{t('dashboard.discounts.pageDescription')}</p>
             </div>
             
             <CategoryDiscountManager onUpdate={refetch} />
             
             <Card>
                 <CardHeader>
-                    <CardTitle>الخصومات حسب المنتج</CardTitle>
-                    <CardDescription>اضبط الخصومات لمنتجات معينة.</CardDescription>
+                    <CardTitle>{t('dashboard.discounts.byProductTitle')}</CardTitle>
+                    <CardDescription>{t('dashboard.discounts.byProductDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>المنتج</TableHead>
-                                <TableHead>السعر الأصلي</TableHead>
-                                <TableHead>السعر بعد الخصم</TableHead>
-                                <TableHead>الخصم (%)</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
+                                <TableHead>{t('dashboard.discounts.product')}</TableHead>
+                                <TableHead>{t('dashboard.discounts.originalPrice')}</TableHead>
+                                <TableHead>{t('dashboard.discounts.discountedPrice')}</TableHead>
+                                <TableHead>{t('dashboard.discounts.discountPercentage')}</TableHead>
+                                <TableHead className="text-right">{t('dashboard.common.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -246,7 +250,7 @@ export default function DiscountsPage() {
                     </Table>
                     {!areProductsLoading && products?.length === 0 && (
                         <div className="text-center p-8 text-muted-foreground">
-                            لم يتم العثور على منتجات.
+                            {t('dashboard.discounts.noProducts')}
                         </div>
                     )}
                 </CardContent>

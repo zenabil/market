@@ -46,16 +46,19 @@ import type { Coupon } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const couponFormSchema = z.object({
-    code: z.string().min(4, { message: 'يجب أن يتكون الرمز من 4 أحرف على الأقل.' }).max(20),
-    discountPercentage: z.coerce.number().min(1).max(100),
-    expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: 'تاريخ غير صالح' }),
-    isActive: z.boolean().default(true),
-});
 
 function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, onActionComplete: () => void }) {
+  const { t } = useLanguage();
+
+  const couponFormSchema = z.object({
+      code: z.string().min(4, { message: t('dashboard.coupons.validation.code') }).max(20),
+      discountPercentage: z.coerce.number().min(1).max(100),
+      expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: t('dashboard.coupons.validation.date') }),
+      isActive: z.boolean().default(true),
+  });
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const firestore = useFirestore();
@@ -105,7 +108,7 @@ function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, on
 
     actionPromise
       .then(() => {
-          toast({ title: isEditing ? 'تم تحديث الكوبون' : 'تم إنشاء الكوبون' });
+          toast({ title: isEditing ? t('dashboard.coupons.toast.updated') : t('dashboard.coupons.toast.created') });
           form.reset();
           setIsOpen(false);
           onActionComplete();
@@ -132,50 +135,50 @@ function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, on
         {isEditing ? (
             <DropdownMenuItem onSelect={e => e.preventDefault()}>
                 <Edit className="ml-2 h-4 w-4" />
-                تعديل
+                {t('dashboard.common.edit')}
             </DropdownMenuItem>
         ) : (
             <Button size="sm" className="gap-1">
               <PlusCircle className="h-4 w-4" />
-              إضافة كوبون
+              {t('dashboard.coupons.addCoupon')}
             </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'تعديل الكوبون' : 'إضافة كوبون جديد'}</DialogTitle>
+          <DialogTitle>{isEditing ? t('dashboard.coupons.editCoupon') : t('dashboard.coupons.addCouponTitle')}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'قم بتعديل تفاصيل الكوبون أدناه.' : 'أنشئ رمز خصم جديد لعملائك.'}
+            {isEditing ? t('dashboard.coupons.editDescription') : t('dashboard.coupons.addDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="coupon-dialog-form">
           <div className="space-y-2">
-            <Label htmlFor="code">الرمز</Label>
+            <Label htmlFor="code">{t('dashboard.coupons.code')}</Label>
             <Input id="code" {...form.register('code')} />
             {form.formState.errors.code && <p className="text-sm text-destructive">{form.formState.errors.code.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="discountPercentage">نسبة الخصم</Label>
+            <Label htmlFor="discountPercentage">{t('dashboard.coupons.discountPercentage')}</Label>
             <Input id="discountPercentage" type="number" {...form.register('discountPercentage')} />
             {form.formState.errors.discountPercentage && <p className="text-sm text-destructive">{form.formState.errors.discountPercentage.message}</p>}
           </div>
            <div className="space-y-2">
-            <Label htmlFor="expiryDate">تاريخ انتهاء الصلاحية</Label>
+            <Label htmlFor="expiryDate">{t('dashboard.coupons.expiryDate')}</Label>
             <Input id="expiryDate" type="date" {...form.register('expiryDate')} />
             {form.formState.errors.expiryDate && <p className="text-sm text-destructive">{form.formState.errors.expiryDate.message}</p>}
           </div>
           <div className="flex items-center space-x-2">
             <Switch id="isActive" {...form.register('isActive')} checked={form.watch('isActive')} onCheckedChange={(checked) => form.setValue('isActive', checked)} />
-            <Label htmlFor="isActive">نشط</Label>
+            <Label htmlFor="isActive">{t('dashboard.coupons.active')}</Label>
           </div>
         </form>
          <DialogFooter>
            <DialogClose asChild>
-            <Button type="button" variant="outline">إلغاء</Button>
+            <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
            </DialogClose>
           <Button type="submit" disabled={isSaving} form="coupon-dialog-form">
               {isSaving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'حفظ التغييرات' : 'حفظ الكوبون'}
+              {isEditing ? t('dashboard.common.saveChanges') : t('dashboard.common.save')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -185,6 +188,7 @@ function CouponDialog({ coupon, onActionComplete }: { coupon?: Coupon | null, on
 
 
 export default function CouponsPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { coupons, isLoading: areCouponsLoading, refetchCoupons } = useCoupons();
@@ -201,7 +205,7 @@ export default function CouponsPage() {
   }, [isAdmin, isRoleLoading, router]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-DZ', {
+    return new Date(dateString).toLocaleDateString(t('locale'), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -209,9 +213,9 @@ export default function CouponsPage() {
   };
   
   const getStatus = (coupon: Coupon) => {
-    if (!coupon.isActive) return { text: 'غير نشط', variant: 'destructive' as const };
-    if (new Date(coupon.expiryDate) < new Date()) return { text: 'منتهي الصلاحية', variant: 'destructive' as const };
-    return { text: 'نشط', variant: 'default' as const };
+    if (!coupon.isActive) return { text: t('dashboard.coupons.inactive'), variant: 'destructive' as const };
+    if (new Date(coupon.expiryDate) < new Date()) return { text: t('dashboard.coupons.expired'), variant: 'destructive' as const };
+    return { text: t('dashboard.coupons.active'), variant: 'default' as const };
   }
 
   const handleDeleteCoupon = async () => {
@@ -223,7 +227,7 @@ export default function CouponsPage() {
     try {
         await deleteDoc(couponDocRef);
         refetchCoupons();
-        toast({ title: 'تم حذف الكوبون' });
+        toast({ title: t('dashboard.coupons.toast.deleted') });
     } catch (error) {
         errorEmitter.emit(
             'permission-error',
@@ -234,8 +238,8 @@ export default function CouponsPage() {
         );
         toast({
             variant: 'destructive',
-            title: 'خطأ في الحذف',
-            description: 'قد لا يكون لديك الإذن للقيام بذلك.',
+            title: t('dashboard.common.deleteErrorTitle'),
+            description: t('dashboard.common.permissionError'),
         });
     } finally {
         setIsDeleting(false);
@@ -264,8 +268,8 @@ export default function CouponsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>الكوبونات</CardTitle>
-              <CardDescription>إدارة رموز الخصم الخاصة بك.</CardDescription>
+              <CardTitle>{t('dashboard.layout.coupons')}</CardTitle>
+              <CardDescription>{t('dashboard.coupons.description')}</CardDescription>
             </div>
             <CouponDialog onActionComplete={refetchCoupons} />
           </CardHeader>
@@ -273,11 +277,11 @@ export default function CouponsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الرمز</TableHead>
-                  <TableHead>الخصم</TableHead>
-                  <TableHead>تاريخ انتهاء الصلاحية</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead><span className="sr-only">الإجراءات</span></TableHead>
+                  <TableHead>{t('dashboard.coupons.code')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.discount')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.expiryDate')}</TableHead>
+                  <TableHead>{t('dashboard.coupons.status')}</TableHead>
+                  <TableHead><span className="sr-only">{t('dashboard.common.actions')}</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -307,14 +311,14 @@ export default function CouponsPage() {
                           <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                               <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">فتح القائمة</span>
+                              <span className="sr-only">{t('dashboard.common.openMenu')}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                              <CouponDialog coupon={coupon} onActionComplete={refetchCoupons} />
                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(coupon);}} className="text-destructive">
                               <Trash2 className="ml-2 h-4 w-4" />
-                              حذف
+                              {t('dashboard.common.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -325,7 +329,7 @@ export default function CouponsPage() {
             </Table>
             {!areCouponsLoading && coupons?.length === 0 && (
               <div className="text-center p-8 text-muted-foreground">
-                لم يتم العثور على كوبونات.
+                {t('dashboard.coupons.noCoupons')}
               </div>
             )}
           </CardContent>
@@ -333,16 +337,16 @@ export default function CouponsPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>هل أنت متأكد من رغبتك في الحذف؟</AlertDialogTitle>
+                <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الكوبون "{couponToDelete?.code || ''}" بشكل دائم.
+                  {t('dashboard.coupons.confirmDeleteDescription').replace('{{code}}', couponToDelete?.code || '')}
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>إلغاء</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setCouponToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCoupon} disabled={isDeleting}>
                   {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                  حذف
+                  {t('dashboard.common.delete')}
                 </AlertDialogAction>
             </AlertDialogFooter>
             </AlertDialogContent>

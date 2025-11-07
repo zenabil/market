@@ -125,7 +125,6 @@
         "noProducts": "لا توجد منتجات للمقارنة.",
         "browseProducts": "تصفح المنتجات",
         "compareTitle": "مقارنة",
-
         "clearAll": "مسح الكل",
         "addToCart": {
             "title": "أضيف إلى السلة",
@@ -179,22 +178,22 @@
         }
     },
     "product": {
-        "reviews": "avis",
-        "relatedProducts": "Produits similaires",
-        "compare": "Comparer ce produit",
-        "removeFromComparison": "Retirer de la comparaison",
+        "reviews": "مراجعات",
+        "relatedProducts": "منتجات ذات صلة",
+        "compare": "قارن هذا المنتج",
+        "removeFromComparison": "إزالة من المقارنة",
         "addToCart": {
-            "title": "Ajouté au panier",
-            "description": "{{quantity}} x {{name}} a été ajouté à votre panier.",
-            "button": "Ajouter au panier"
+            "title": "أضيف إلى السلة",
+            "description": "تمت إضافة {{quantity}} x {{name}} إلى سلتك.",
+            "button": "أضف إلى السلة"
         },
-        "outOfStock": "En rupture de stock",
-        "outOfStockFull": "Ce produit est actuellement en rupture de stock.",
-        "inStock": "En stock: {{count}} unités disponibles",
+        "outOfStock": "نفذ من المخزون",
+        "outOfStockFull": "هذا المنتج غير متوفر حاليًا.",
+        "inStock": "في المخزون: {{count}} وحدة متاحة",
         "wishlist": {
             "loginRequired": {
-                "title": "Connexion requise",
-                "description": "Vous devez être connecté pour ajouter des articles à votre liste de souhaits."
+                "title": "تسجيل الدخول مطلوب",
+                "description": "يجب عليك تسجيل الدخول لإضافة عناصر إلى قائمة الرغبات الخاصة بك."
             }
         }
     },
@@ -255,6 +254,115 @@
         "error": {
             "title": "خطأ",
             "description": "حدث خطأ غير متوقع أثناء تقديم المراجعة."
+        }
+    },
+    "dashboard": {
+        "common": {
+            "edit": "تعديل",
+            "cancel": "إلغاء",
+            "save": "حفظ",
+            "actions": "الإجراءات",
+            "openMenu": "فتح القائمة",
+            "delete": "حذف",
+            "confirmDeleteTitle": "هل أنت متأكد من رغبتك في الحذف؟",
+            "deleteErrorTitle": "خطأ في الحذف",
+            "permissionError": "قد لا يكون لديك الإذن للقيام بذلك.",
+            "loading": "جاري التحميل...",
+            "apply": "تطبيق",
+            "update": "تحديث",
+            "saveChanges": "حفظ التغييرات",
+            "error": "خطأ"
+        },
+        "layout": {
+            "dashboard": "لوحة التحكم",
+            "orders": "الطلبات",
+            "products": "المنتجات",
+            "recipes": "الوصفات",
+            "categories": "الفئات",
+            "users": "المستخدمون",
+            "messages": "الرسائل",
+            "coupons": "الكوبونات",
+            "discounts": "الخصومات",
+            "settings": "الإعدادات",
+            "myOrders": "طلباتي",
+            "shoppingLists": "قوائم التسوق",
+            "wishlist": "قائمة الرغبات",
+            "profile": "ملفي الشخصي",
+            "logout": "تسجيل الخروج"
+        },
+        "categories": {
+            "addCategory": "إضافة فئة",
+            "editCategory": "تعديل الفئة",
+            "name": "الاسم",
+            "imageUrl": "رابط الصورة",
+            "description": "إدارة فئات المنتجات الخاصة بك.",
+            "image": "الصورة",
+            "noCategories": "لم يتم العثور على فئات.",
+            "confirmDeleteDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الفئة بشكل دائم \"{{name}}\".",
+            "toast": {
+                "updated": "تم تحديث الفئة",
+                "created": "تم إنشاء الفئة",
+                "deleted": "تم حذف الفئة"
+            },
+            "validation": {
+                "nameRequired": "الاسم مطلوب.",
+                "imageInvalid": "الرجاء إدخال رابط صورة صالح."
+            },
+            "deleteError": {
+                "title": "لا يمكن حذف الفئة",
+                "description": "هذه الفئة لا تزال تحتوي على منتجات. يرجى نقل المنتجات أو حذفها أولاً."
+            }
+        },
+        "coupons": {
+            "addCoupon": "إضافة كوبون",
+            "addCouponTitle": "إضافة كوبون جديد",
+            "addDescription": "أنشئ رمز خصم جديد لعملائك.",
+            "editCoupon": "تعديل الكوبون",
+            "editDescription": "قم بتعديل تفاصيل الكوبون أدناه.",
+            "description": "إدارة رموز الخصم الخاصة بك.",
+            "code": "الرمز",
+            "discount": "الخصم",
+            "discountPercentage": "نسبة الخصم",
+            "expiryDate": "تاريخ انتهاء الصلاحية",
+            "status": "الحالة",
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "expired": "منتهي الصلاحية",
+            "noCoupons": "لم يتم العثور على كوبونات.",
+            "confirmDeleteDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الكوبون \"{{code}}\" بشكل دائم.",
+            "toast": {
+                "updated": "تم تحديث الكوبون",
+                "created": "تم إنشاء الكوبون",
+                "deleted": "تم حذف الكوبون"
+            },
+            "validation": {
+                "code": "يجب أن يتكون الرمز من 4 أحرف على الأقل.",
+                "date": "تاريخ غير صالح"
+            }
+        },
+        "discounts": {
+            "pageDescription": "إدارة الخصومات للمنتجات والفئات.",
+            "applyToCategory": "تطبيق خصم على فئة",
+            "applyToCategoryDescription": "قم بتطبيق خصم بسرعة على جميع المنتجات في فئة محددة.",
+            "selectCategory": "اختر فئة",
+            "byProductTitle": "الخصومات حسب المنتج",
+            "byProductDescription": "اضبط الخصومات لمنتجات معينة.",
+            "product": "المنتج",
+            "originalPrice": "السعر الأصلي",
+            "discountedPrice": "السعر بعد الخصم",
+            "discountPercentage": "الخصم (%)",
+            "noProducts": "لم يتم العثور على منتجات.",
+            "validation": {
+                "invalidTitle": "خصم غير صالح",
+                "invalidDescription": "يجب أن تكون نسبة الخصم بين 0 و 100.",
+                "selectCategory": "الرجاء تحديد فئة."
+            },
+            "toast": {
+                "updatedTitle": "تم تحديث الخصم",
+                "updatedDescription": "خصم {{name}} هو الآن {{discount}}%.",
+                "appliedTitle": "تم تطبيق الخصم",
+                "appliedDescription": "تم تحديث {{count}} منتجات في الفئة."
+            }
         }
     }
 }
