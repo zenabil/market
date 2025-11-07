@@ -25,8 +25,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function ProductsPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { toast } = useToast();
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
@@ -45,7 +47,7 @@ export default function ProductsPage() {
 
   const formatCurrency = (amount: number) => {
     if (typeof amount !== 'number') return 'N/A';
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(t('locale'), {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -58,7 +60,7 @@ export default function ProductsPage() {
     const productDocRef = doc(firestore, 'products', productToDelete.id);
     try {
       await deleteDoc(productDocRef);
-      toast({ title: 'Produit supprimé' });
+      toast({ title: t('dashboard.products.toast.deleted') });
       refetch(); // Refetch the product list
     } catch (error) {
       errorEmitter.emit(
@@ -70,8 +72,8 @@ export default function ProductsPage() {
       );
       toast({
         variant: 'destructive',
-        title: 'Erreur de suppression',
-        description: 'Vous n\'avez peut-être pas la permission de faire cela.',
+        title: t('dashboard.products.deleteError.title'),
+        description: t('dashboard.products.deleteError.description'),
       });
     } finally {
       setProductToDelete(null);
@@ -100,11 +102,11 @@ export default function ProductsPage() {
         <div className="overflow-x-auto">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Gérer les produits</CardTitle>
+                <CardTitle>{t('dashboard.products.pageTitle')}</CardTitle>
                 <Button asChild size="sm" className="gap-1">
                   <Link href="/dashboard/products/new">
                     <PlusCircle className="h-4 w-4" />
-                    Ajouter un produit
+                    {t('dashboard.products.addProduct')}
                   </Link>
                 </Button>
               </CardHeader>
@@ -112,13 +114,13 @@ export default function ProductsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Produit</TableHead>
-                      <TableHead>Prix d'achat</TableHead>
-                      <TableHead>Prix de vente</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Vendus</TableHead>
+                      <TableHead>{t('dashboard.discounts.product')}</TableHead>
+                      <TableHead>{t('dashboard.products.purchasePrice')}</TableHead>
+                      <TableHead>{t('dashboard.products.sellingPrice')}</TableHead>
+                      <TableHead>{t('dashboard.products.stock')}</TableHead>
+                      <TableHead>{t('dashboard.products.sold')}</TableHead>
                       <TableHead>
-                        <span className="sr-only">Actions</span>
+                        <span className="sr-only">{t('dashboard.common.actions')}</span>
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -145,16 +147,16 @@ export default function ProductsPage() {
                             <DropdownMenuTrigger asChild>
                               <Button aria-haspopup="true" size="icon" variant="ghost">
                                 <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Ouvrir le menu</span>
+                                <span className="sr-only">{t('dashboard.common.openMenu')}</span>
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/products/edit/${product.id}`}>Modifier</Link>
+                                <Link href={`/dashboard/products/edit/${product.id}`}>{t('dashboard.products.edit')}</Link>
                               </DropdownMenuItem>
                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
                                  <Trash2 className="mr-2 h-4 w-4" />
-                                 Supprimer
+                                 {t('dashboard.products.delete')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -165,7 +167,7 @@ export default function ProductsPage() {
                 </Table>
                  {!areProductsLoading && products?.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        Aucun produit trouvé.
+                        {t('dashboard.products.noProducts')}
                     </div>
                 )}
               </CardContent>
@@ -174,16 +176,16 @@ export default function ProductsPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+              <AlertDialogTitle>{t('dashboard.common.confirmDeleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Cette action ne peut pas être annulée. Cela supprimera définitivement le produit "{productToDelete?.name || ''}".
+                {t('dashboard.products.deleteConfirm').replace('{{name}}', productToDelete?.name || '')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setProductToDelete(null)}>Annuler</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setProductToDelete(null)}>{t('dashboard.common.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteProduct} disabled={isDeleting}>
                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Supprimer
+                {t('dashboard.products.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -191,3 +193,5 @@ export default function ProductsPage() {
       </div>
   )
 }
+
+    

@@ -32,19 +32,22 @@ import Image from 'next/image';
 import { ImageDialog } from '@/components/dashboard/image-dialog';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  description: z.string().optional(),
-  purchasePrice: z.coerce.number().min(0, { message: 'Le prix ne peut pas être négatif.' }),
-  price: z.coerce.number().positive({ message: 'Le prix doit être un nombre positif.' }),
-  stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
-  categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
-  discount: z.coerce.number().int().min(0).max(100).optional().default(0),
-  images: z.array(z.string().url({ message: 'URL invalide.' })).min(1, { message: 'Au moins une image est requise.'}),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 function EditProductForm({ productId }: { productId: string }) {
+  const { t } = useLanguage();
+
+  const formSchema = z.object({
+    name: z.string().min(2, { message: t('dashboard.products.validation.name') }),
+    description: z.string().optional(),
+    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }),
+    price: z.coerce.number().positive({ message: t('dashboard.products.validation.pricePositive') }),
+    stock: z.coerce.number().int().min(0, { message: t('dashboard.products.validation.stock') }),
+    categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
+    discount: z.coerce.number().int().min(0).max(100).optional().default(0),
+    images: z.array(z.string().url({ message: t('dashboard.products.validation.imageURL') })).min(1, { message: t('dashboard.products.validation.minImage')}),
+  });
+
   const { categories, areCategoriesLoading } = useCategories();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -99,8 +102,8 @@ function EditProductForm({ productId }: { productId: string }) {
     updateDoc(productRef, dataToUpdate)
         .then(() => {
             toast({
-                title: 'Produit mis à jour',
-                description: `Le produit "${values.name}" a été mis à jour avec succès.`,
+                title: t('dashboard.products.toastUpdate.title'),
+                description: t('dashboard.products.toastUpdate.description').replace('{{name}}', values.name),
             });
         })
         .catch(error => {
@@ -123,8 +126,8 @@ function EditProductForm({ productId }: { productId: string }) {
     if (!name || !categoryId) {
       toast({
         variant: 'destructive',
-        title: 'Erreur de génération',
-        description: 'Veuillez renseigner le nom et la catégorie du produit.',
+        title: t('dashboard.products.generationError.title'),
+        description: t('dashboard.products.generationError.description'),
       });
       return;
     }
@@ -141,15 +144,15 @@ function EditProductForm({ productId }: { productId: string }) {
       if(result.description) form.setValue('description', result.description);
 
       toast({
-        title: 'Description générée avec succès',
+        title: t('dashboard.products.generationSuccess.title'),
       });
 
     } catch(error) {
       console.error("Failed to generate description:", error);
       toast({
         variant: 'destructive',
-        title: 'Échec de la génération',
-        description: 'Impossible de générer une description pour le moment.',
+        title: t('dashboard.products.generationFailed.title'),
+        description: t('dashboard.products.generationFailed.description'),
       });
     } finally {
       setIsGenerating(false);
@@ -159,7 +162,7 @@ function EditProductForm({ productId }: { productId: string }) {
   const handleSetPrimaryImage = (index: number) => {
     if (index > 0) {
       move(index, 0);
-      toast({ title: "Image principale mise à jour" });
+      toast({ title: t('dashboard.products.primaryImageUpdated') });
     }
   };
 
@@ -178,7 +181,7 @@ function EditProductForm({ productId }: { productId: string }) {
   }
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(t('locale'), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -193,7 +196,7 @@ function EditProductForm({ productId }: { productId: string }) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">Modifier le produit</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.products.editPageTitle')}</h1>
       </div>
 
       <Form {...form}>
@@ -202,7 +205,7 @@ function EditProductForm({ productId }: { productId: string }) {
             <div className="lg:col-span-2 space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Détails du produit</CardTitle>
+                  <CardTitle>{t('dashboard.products.detailsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <FormField
@@ -210,9 +213,9 @@ function EditProductForm({ productId }: { productId: string }) {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nom du produit</FormLabel>
+                          <FormLabel>{t('dashboard.products.productName')}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Nom du produit" {...field} />
+                            <Input placeholder={t('dashboard.products.productNamePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -221,10 +224,10 @@ function EditProductForm({ productId }: { productId: string }) {
                   
                   <div className="space-y-2">
                     <div className='flex justify-between items-center'>
-                      <h3 className='text-sm font-medium'>Description du produit</h3>
+                      <h3 className='text-sm font-medium'>{t('dashboard.products.descriptionTitle')}</h3>
                       <Button type="button" size="sm" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating || !form.watch('name') || !form.watch('categoryId')}>
                         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isGenerating ? 'Génération...' : 'Générer avec l\'IA'}
+                        {isGenerating ? t('dashboard.products.generating') : t('dashboard.products.generateWithAI')}
                       </Button>
                     </div>
                      <FormField
@@ -233,7 +236,7 @@ function EditProductForm({ productId }: { productId: string }) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea placeholder="Description du produit" {...field} />
+                            <Textarea placeholder={t('dashboard.products.descriptionTitle')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -244,13 +247,13 @@ function EditProductForm({ productId }: { productId: string }) {
               </Card>
 
               <Card>
-                <CardHeader><CardTitle>Images</CardTitle></CardHeader>
+                <CardHeader><CardTitle>{t('dashboard.products.imagesTitle')}</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     {fields.length > 0 && (
                         <div className="relative group aspect-square max-w-sm">
                             <Image src={form.watch('images.0')} alt="Primary image" layout="fill" className="object-cover rounded-md border" />
                             <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
-                                <span className='text-white font-bold bg-black/50 px-2 py-1 rounded-sm'>Image principale</span>
+                                <span className='text-white font-bold bg-black/50 px-2 py-1 rounded-sm'>{t('dashboard.products.primaryImage')}</span>
                             </div>
                         </div>
                     )}
@@ -265,7 +268,7 @@ function EditProductForm({ productId }: { productId: string }) {
                                 size="icon"
                                 className="h-8 w-8 text-white hover:bg-white/20"
                                 onClick={() => handleSetPrimaryImage(index + 1)}
-                                title="Définir comme image principale"
+                                title={t('dashboard.products.setPrimary')}
                             >
                                 <Star className="h-5 w-5" />
                             </Button>
@@ -275,7 +278,7 @@ function EditProductForm({ productId }: { productId: string }) {
                                 size="icon"
                                 className="h-8 w-8 text-white hover:bg-white/20 hover:text-destructive"
                                 onClick={() => remove(index + 1)}
-                                title="Supprimer l'image"
+                                title={t('dashboard.products.deleteImage')}
                             >
                                 <Trash2 className="h-5 w-5" />
                             </Button>
@@ -288,7 +291,7 @@ function EditProductForm({ productId }: { productId: string }) {
                         className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
                       >
                         <PlusCircle className="h-8 w-8" />
-                        <span className="text-xs mt-2">Ajouter</span>
+                        <span className="text-xs mt-2">{t('dashboard.products.addImage')}</span>
                       </button>
                     </ImageDialog>
                   </div>
@@ -300,7 +303,7 @@ function EditProductForm({ productId }: { productId: string }) {
             <div className="space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Organisation</CardTitle>
+                  <CardTitle>{t('dashboard.products.organizationTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
@@ -308,11 +311,11 @@ function EditProductForm({ productId }: { productId: string }) {
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Catégorie</FormLabel>
+                        <FormLabel>{t('dashboard.products.category')}</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez une catégorie" />
+                              <SelectValue placeholder={t('dashboard.products.selectCategory')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -331,7 +334,7 @@ function EditProductForm({ productId }: { productId: string }) {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Tarification & Stock</CardTitle>
+                  <CardTitle>{t('dashboard.products.pricingStockTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <FormField
@@ -339,7 +342,7 @@ function EditProductForm({ productId }: { productId: string }) {
                     name="purchasePrice"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Prix d'achat</FormLabel>
+                        <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="80.00" {...field} />
                         </FormControl>
@@ -352,7 +355,7 @@ function EditProductForm({ productId }: { productId: string }) {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Prix de vente</FormLabel>
+                        <FormLabel>{t('dashboard.products.sellingPrice')}</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="100.00" {...field} />
                         </FormControl>
@@ -365,7 +368,7 @@ function EditProductForm({ productId }: { productId: string }) {
                     name="discount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Réduction (%)</FormLabel>
+                        <FormLabel>{t('dashboard.products.discount')}</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="10" {...field} />
                         </FormControl>
@@ -378,7 +381,7 @@ function EditProductForm({ productId }: { productId: string }) {
                     name="stock"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stock</FormLabel>
+                        <FormLabel>{t('dashboard.products.stock')}</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="50" {...field} />
                         </FormControl>
@@ -389,15 +392,15 @@ function EditProductForm({ productId }: { productId: string }) {
                   <Separator />
                   <div className="space-y-3 text-sm">
                     <div className='flex justify-between'>
-                      <span className="text-muted-foreground">Date de création:</span>
+                      <span className="text-muted-foreground">{t('dashboard.products.creationDate')}</span>
                       <span className="font-medium">{formatDate(product.createdAt)}</span>
                     </div>
                      <div className='flex justify-between'>
-                      <span className="text-muted-foreground">Unités vendues:</span>
+                      <span className="text-muted-foreground">{t('dashboard.products.unitsSold')}</span>
                       <span className="font-medium">{product.sold || 0}</span>
                     </div>
                      <div className='flex justify-between'>
-                      <span className="text-muted-foreground">SKU:</span>
+                      <span className="text-muted-foreground">{t('dashboard.products.sku')}</span>
                       <span className="font-mono text-xs">{product.sku}</span>
                     </div>
                   </div>
@@ -407,11 +410,11 @@ function EditProductForm({ productId }: { productId: string }) {
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/products">Annuler</Link>
+                <Link href="/dashboard/products">{t('dashboard.products.cancel')}</Link>
             </Button>
             <Button type="submit" disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enregistrer les modifications
+              {t('dashboard.products.saveChanges')}
             </Button>
           </div>
         </form>
@@ -424,3 +427,5 @@ function EditProductForm({ productId }: { productId: string }) {
 export default function EditProductPage({ params }: { params: { id: string } }) {
   return <EditProductForm productId={params.id} />
 }
+
+    

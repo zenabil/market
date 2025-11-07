@@ -363,6 +363,86 @@
                 "appliedTitle": "تم تطبيق الخصم",
                 "appliedDescription": "تم تحديث {{count}} منتجات في الفئة."
             }
+        },
+        "products": {
+            "pageTitle": "إدارة المنتجات",
+            "addProduct": "إضافة منتج",
+            "purchasePrice": "سعر الشراء",
+            "sellingPrice": "سعر البيع",
+            "stock": "المخزون",
+            "sold": "مباع",
+            "edit": "تعديل",
+            "delete": "حذف",
+            "deleteConfirm": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف المنتج \"{{name}}\" نهائيًا.",
+            "deleteError": {
+                "title": "خطأ في الحذف",
+                "description": "قد لا يكون لديك الإذن للقيام بذلك."
+            },
+            "toast": {
+                "deleted": "تم حذف المنتج"
+            },
+            "noProducts": "لم يتم العثور على منتجات.",
+            "editPageTitle": "تعديل المنتج",
+            "detailsTitle": "تفاصيل المنتج",
+            "productName": "اسم المنتج",
+            "productNamePlaceholder": "اسم المنتج",
+            "descriptionTitle": "وصف المنتج",
+            "generateWithAI": "إنشاء باستخدام الذكاء الاصطناعي",
+            "generating": "جارٍ الإنشاء...",
+            "generationError": {
+                "title": "خطأ في الإنشاء",
+                "description": "الرجاء إدخال اسم المنتج وفئته."
+            },
+            "generationSuccess": {
+                "title": "تم إنشاء الوصف بنجاح"
+            },
+            "generationFailed": {
+                "title": "فشل الإنشاء",
+                "description": "تعذر إنشاء وصف في الوقت الحالي."
+            },
+            "imagesTitle": "الصور",
+            "primaryImage": "صورة أساسية",
+            "addImage": "إضافة",
+            "setPrimary": "تعيين كصورة أساسية",
+            "deleteImage": "حذف الصورة",
+            "imageAdded": "تمت إضافة الصورة",
+            "primaryImageUpdated": "تم تحديث الصورة الأساسية",
+            "organizationTitle": "التنظيم",
+            "category": "الفئة",
+            "selectCategory": "اختر فئة",
+            "pricingStockTitle": "التسعير والمخزون",
+            "discount": "خصم (%)",
+            "creationDate": "تاريخ الإنشاء:",
+            "unitsSold": "الوحدات المباعة:",
+            "sku": "SKU:",
+            "cancel": "إلغاء",
+            "saveChanges": "حفظ التغييرات",
+            "toastUpdate": {
+                "title": "تم تحديث المنتج",
+                "description": "تم تحديث المنتج \"{{name}}\" بنجاح."
+            },
+            "newPageTitle": "إضافة منتج جديد",
+            "basicInfoTitle": "معلومات أساسية",
+            "createAndContinue": "إنشاء ومتابعة",
+            "toastCreate": {
+                "title": "تم إنشاء المنتج",
+                "description": "تمت إضافة المنتج \"{{name}}\". جارٍ إعادة التوجيه..."
+            },
+            "toastGenerateDesc": {
+                "title": "تم إنشاء الوصف!",
+                "description": "تم إنشاء وصف \"{{name}}\" بواسطة الذكاء الاصطناعي."
+            },
+            "validation": {
+                "name": "يجب أن يتكون الاسم من حرفين على الأقل.",
+                "priceNegative": "لا يمكن أن يكون السعر سالبًا.",
+                "pricePositive": "يجب أن يكون السعر رقمًا موجبًا.",
+                "stock": "لا يمكن أن يكون المخزون سالبًا.",
+                "category": "الرجاء تحديد فئة.",
+                "imageURL": "عنوان URL غير صالح.",
+                "minImage": "مطلوب صورة واحدة على الأقل."
+            }
         }
     }
 }
+
+    

@@ -363,6 +363,86 @@
                 "appliedTitle": "Réduction appliquée",
                 "appliedDescription": "{{count}} produits ont été mis à jour dans la catégorie."
             }
+        },
+        "products": {
+            "pageTitle": "Gérer les produits",
+            "addProduct": "Ajouter un produit",
+            "purchasePrice": "Prix d'achat",
+            "sellingPrice": "Prix de vente",
+            "stock": "Stock",
+            "sold": "Vendus",
+            "edit": "Modifier",
+            "delete": "Supprimer",
+            "deleteConfirm": "Cette action ne peut être annulée. Cela supprimera définitivement le produit \"{{name}}\".",
+            "deleteError": {
+                "title": "Erreur de suppression",
+                "description": "Vous n'avez peut-être pas la permission de faire cela."
+            },
+            "toast": {
+                "deleted": "Produit supprimé"
+            },
+            "noProducts": "Aucun produit trouvé.",
+            "editPageTitle": "Modifier le produit",
+            "detailsTitle": "Détails du produit",
+            "productName": "Nom du produit",
+            "productNamePlaceholder": "Nom du produit",
+            "descriptionTitle": "Description du produit",
+            "generateWithAI": "Générer avec l'IA",
+            "generating": "Génération...",
+            "generationError": {
+                "title": "Erreur de génération",
+                "description": "Veuillez renseigner le nom et la catégorie du produit."
+            },
+            "generationSuccess": {
+                "title": "Description générée avec succès"
+            },
+            "generationFailed": {
+                "title": "Échec de la génération",
+                "description": "Impossible de générer une description pour le moment."
+            },
+            "imagesTitle": "Images",
+            "primaryImage": "Image principale",
+            "addImage": "Ajouter",
+            "setPrimary": "Définir comme image principale",
+            "deleteImage": "Supprimer l'image",
+            "imageAdded": "Image ajoutée",
+            "primaryImageUpdated": "Image principale mise à jour",
+            "organizationTitle": "Organisation",
+            "category": "Catégorie",
+            "selectCategory": "Sélectionnez une catégorie",
+            "pricingStockTitle": "Tarification & Stock",
+            "discount": "Réduction (%)",
+            "creationDate": "Date de création:",
+            "unitsSold": "Unités vendues:",
+            "sku": "SKU:",
+            "cancel": "Annuler",
+            "saveChanges": "Enregistrer les modifications",
+            "toastUpdate": {
+                "title": "Produit mis à jour",
+                "description": "Le produit \"{{name}}\" a été mis à jour avec succès."
+            },
+            "newPageTitle": "Ajouter un nouveau produit",
+            "basicInfoTitle": "Informations de base",
+            "createAndContinue": "Créer et continuer",
+            "toastCreate": {
+                "title": "Produit créé",
+                "description": "Le produit \"{{name}}\" a été ajouté. Redirection..."
+            },
+            "toastGenerateDesc": {
+                "title": "Description générée !",
+                "description": "La description pour \"{{name}}\" a été générée par l'IA."
+            },
+            "validation": {
+                "name": "Le nom doit comporter au moins 2 caractères.",
+                "priceNegative": "Le prix ne peut pas être négatif.",
+                "pricePositive": "Le prix doit être un nombre positif.",
+                "stock": "Le stock ne peut pas être négatif.",
+                "category": "Veuillez sélectionner une catégorie.",
+                "imageURL": "URL invalide.",
+                "minImage": "Au moins une image est requise."
+            }
         }
     }
 }
+
+    

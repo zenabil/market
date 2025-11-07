@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -19,10 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-
-const imageFormSchema = z.object({
-    url: z.string().url({ message: "Veuillez entrer une URL d'image valide."}),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 interface ImageDialogProps {
     onImageAdd: (url: string) => void;
@@ -30,6 +27,12 @@ interface ImageDialogProps {
 }
 
 export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
+    const { t } = useLanguage();
+    
+    const imageFormSchema = z.object({
+        url: z.string().url({ message: t('dashboard.products.validation.imageURL')}),
+    });
+
     const { toast } = useToast();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -46,7 +49,7 @@ export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
 
     function onSubmit(values: z.infer<typeof imageFormSchema>) {
         onImageAdd(values.url);
-        toast({ title: 'Image ajoutée' });
+        toast({ title: t('dashboard.products.imageAdded') });
         setIsOpen(false);
     }
 
@@ -55,8 +58,8 @@ export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Ajouter une nouvelle image</DialogTitle>
-                    <DialogDescription>Collez l'URL de l'image que vous souhaitez ajouter.</DialogDescription>
+                    <DialogTitle>{t('dashboard.products.imagesTitle')}</DialogTitle>
+                    <DialogDescription>{t('dashboard.products.validation.imageURL')}</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="image-dialog-form">
@@ -71,13 +74,15 @@ export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
                 </Form>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">Annuler</Button>
+                        <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
                     </DialogClose>
                     <Button type="submit" form="image-dialog-form">
-                        Ajouter l'image
+                        {t('dashboard.products.addImage')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
+
+    

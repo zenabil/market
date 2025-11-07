@@ -25,17 +25,20 @@ import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
+import { useLanguage } from '@/contexts/language-provider';
 
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom doit comporter au moins 2 caractères.' }),
-  purchasePrice: z.coerce.number().min(0, { message: 'Le prix ne peut pas être négatif.' }),
-  price: z.coerce.number().positive({ message: 'Le prix doit être un nombre positif.' }),
-  stock: z.coerce.number().int().min(0, { message: 'Le stock ne peut pas être négatif.' }),
-  categoryId: z.string({ required_error: 'Veuillez sélectionner une catégorie.' }),
-});
 
 export default function NewProductPage() {
+  const { t } = useLanguage();
+  
+  const formSchema = z.object({
+    name: z.string().min(2, { message: t('dashboard.products.validation.name') }),
+    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }),
+    price: z.coerce.number().positive({ message: t('dashboard.products.validation.pricePositive') }),
+    stock: z.coerce.number().int().min(0, { message: t('dashboard.products.validation.stock') }),
+    categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
+  });
+  
   const { categories, areCategoriesLoading } = useCategories();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -80,8 +83,8 @@ export default function NewProductPage() {
     try {
         const docRef = await addDoc(collection(firestore, 'products'), productData);
         toast({
-            title: 'Produit créé',
-            description: `Le produit "${values.name}" a été ajouté. Redirection...`,
+            title: t('dashboard.products.toastCreate.title'),
+            description: t('dashboard.products.toastCreate.description').replace('{{name}}', values.name),
         });
 
         // Redirect immediately
@@ -99,8 +102,8 @@ export default function NewProductPage() {
                 updateDoc(productDocRef, { description: result.description });
                 // Optional: show a success toast for generation
                  toast({
-                    title: 'Description générée!',
-                    description: `La description pour "${values.name}" a été générée par l'IA.`,
+                    title: t('dashboard.products.toastGenerateDesc.title'),
+                    description: t('dashboard.products.toastGenerateDesc.description').replace('{{name}}', values.name),
                 });
             }
         }).catch(error => {
@@ -119,8 +122,8 @@ export default function NewProductPage() {
         );
         toast({
             variant: "destructive",
-            title: "Erreur de création",
-            description: "Impossible de créer le produit."
+            title: t('dashboard.common.error'),
+            description: t('dashboard.common.permissionError')
         });
         setIsSaving(false); // Only set saving to false on error
     }
@@ -142,14 +145,14 @@ export default function NewProductPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">Ajouter un nouveau produit</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.products.newPageTitle')}</h1>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" id="new-product-form">
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle>Informations de base</CardTitle>
+              <CardTitle>{t('dashboard.products.basicInfoTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <FormField
@@ -157,9 +160,9 @@ export default function NewProductPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom du produit</FormLabel>
+                      <FormLabel>{t('dashboard.products.productName')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du produit" {...field} />
+                        <Input placeholder={t('dashboard.products.productNamePlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -170,14 +173,14 @@ export default function NewProductPage() {
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Catégorie</FormLabel>
+                      <FormLabel>{t('dashboard.products.category')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={areCategoriesLoading}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
                               areCategoriesLoading 
-                                ? 'Chargement...' 
-                                : 'Sélectionnez une catégorie'
+                                ? t('dashboard.common.loading')
+                                : t('dashboard.products.selectCategory')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -198,7 +201,7 @@ export default function NewProductPage() {
                   name="purchasePrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prix d'achat</FormLabel>
+                      <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="80.00" {...field} />
                       </FormControl>
@@ -211,7 +214,7 @@ export default function NewProductPage() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prix de vente</FormLabel>
+                      <FormLabel>{t('dashboard.products.sellingPrice')}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100.00" {...field} />
                       </FormControl>
@@ -224,7 +227,7 @@ export default function NewProductPage() {
                   name="stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Stock</FormLabel>
+                      <FormLabel>{t('dashboard.products.stock')}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="50" {...field} />
                       </FormControl>
@@ -236,11 +239,11 @@ export default function NewProductPage() {
           </Card>
           <div className="flex justify-end gap-2 max-w-2xl mx-auto">
             <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/products">Annuler</Link>
+                <Link href="/dashboard/products">{t('dashboard.products.cancel')}</Link>
             </Button>
             <Button type="submit" disabled={isSaving} form='new-product-form'>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Créer et continuer
+                {t('dashboard.products.createAndContinue')}
             </Button>
           </div>
         </form>
@@ -248,3 +251,5 @@ export default function NewProductPage() {
     </div>
   );
 }
+
+    
