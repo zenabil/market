@@ -34,7 +34,7 @@ function RecipeDetailsPage() {
         setIsAddingToCart(true);
 
         try {
-            const productsToQuery = recipe.ingredients.map(name => name.toLowerCase()).slice(0, 30);
+            const productsToQuery = recipe.ingredients.slice(0, 30);
             if (productsToQuery.length === 0) {
                  toast({
                     variant: 'destructive',
@@ -45,21 +45,15 @@ function RecipeDetailsPage() {
             }
 
             const productsRef = collection(firestore, 'products');
-            const q = query(productsRef);
+            const q = query(productsRef, where('name', 'in', productsToQuery));
             const querySnapshot = await getDocs(q);
-            const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            const foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            const foundProductNames = foundProducts.map(p => p.name);
             
             let itemsAddedCount = 0;
-            const notFoundProducts: string[] = [];
-
-            recipe.ingredients.forEach(ingredientName => {
-                const foundProduct = allProducts.find(p => p.name.toLowerCase() === ingredientName.toLowerCase());
-                if (foundProduct) {
-                    addItem(foundProduct);
-                    itemsAddedCount++;
-                } else {
-                    notFoundProducts.push(ingredientName);
-                }
+            foundProducts.forEach(product => {
+                addItem(product);
+                itemsAddedCount++;
             });
     
             if (itemsAddedCount > 0) {
@@ -69,6 +63,10 @@ function RecipeDetailsPage() {
                 });
             }
     
+            const notFoundProducts = productsToQuery.filter(
+                ingredientName => !foundProductNames.some(foundName => foundName.toLowerCase() === ingredientName.toLowerCase())
+            );
+
             if (notFoundProducts.length > 0) {
                  toast({
                     variant: 'destructive',
