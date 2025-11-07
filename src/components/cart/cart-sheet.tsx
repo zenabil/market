@@ -85,7 +85,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <p className="font-semibold text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
+                      <p className="font-semibold text-sm">{formatCurrency(item.price * (1 - (item.discount || 0) / 100) * item.quantity)}</p>
                       <Button
                         variant="ghost"
                         size="icon"
