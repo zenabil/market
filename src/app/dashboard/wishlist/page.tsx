@@ -9,8 +9,10 @@ import { collection, query, where, documentId } from 'firebase/firestore';
 import ProductGrid from '@/components/product/product-grid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HeartCrack } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function WishlistPage() {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { wishlist, isWishlistLoading } = useWishlist();
 
@@ -33,8 +35,8 @@ export default function WishlistPage() {
         <div className="container py-8 md:py-12">
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline text-3xl'>Ma liste de souhaits</CardTitle>
-                    <CardDescription>Vos produits préférés, tous au même endroit.</CardDescription>
+                    <CardTitle className='font-headline text-3xl'>{t('dashboard.layout.wishlist')}</CardTitle>
+                    <CardDescription>{t('dashboard.wishlist.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -50,8 +52,8 @@ export default function WishlistPage() {
                             ) : (
                                 <div className="text-center p-16 text-muted-foreground flex flex-col items-center gap-4">
                                     <HeartCrack className="h-16 w-16" />
-                                    <p className="text-lg font-medium">Votre liste de souhaits est vide</p>
-                                    <p>Ajoutez des produits que vous aimez pour les retrouver facilement plus tard.</p>
+                                    <p className="text-lg font-medium">{t('dashboard.wishlist.emptyTitle')}</p>
+                                    <p>{t('dashboard.wishlist.emptyDescription')}</p>
                                 </div>
                             )}
                         </>

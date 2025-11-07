@@ -953,6 +953,11 @@
                 "phone": "Le numéro de téléphone est requis.",
                 "address": "L'adresse est requise."
             }
+        },
+        "wishlist": {
+            "description": "Vos produits préférés, tous au même endroit.",
+            "emptyTitle": "Votre liste de souhaits est vide",
+            "emptyDescription": "Ajoutez des produits que vous aimez pour les retrouver facilement plus tard."
         }
     },
     "login": {
