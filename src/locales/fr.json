@@ -36,6 +36,7 @@
     "products": {
         "allProducts": "Tous les produits",
         "products": "Produits",
+        "noProducts": "Aucun produit trouvé.",
         "subtitle": {
             "all": "Parcourez notre gamme complète de produits frais et de haute qualité.",
             "category": "Découvrez nos produits dans la catégorie {{name}}"
@@ -1022,14 +1023,10 @@
         }
     },
     "globalError": {
-        "permissionError": {
-            "title": "Erreur de règle de sécurité Firestore",
-            "description": "La requête suivante a été refusée par vos règles de sécurité."
-        },
-        "applicationError": {
-            "title": "Erreur d'application",
-            "description": "Une erreur inattendue est survenue."
-        },
+        "permissionErrorTitle": "Erreur de Règle de Sécurité Firestore",
+        "permissionErrorDesc": "La requête suivante a été refusée par vos règles de sécurité.",
+        "applicationErrorTitle": "Erreur d'Application",
+        "applicationErrorDesc": "Une erreur inattendue est survenue.",
         "retry": "Réessayer",
         "copyDetails": "Copier les détails"
     },

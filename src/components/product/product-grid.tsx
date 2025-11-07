@@ -21,7 +21,7 @@ export default function ProductGrid({ title, products }: ProductGridProps) {
         </div>
       ) : (
         <div className="text-center p-8 text-muted-foreground">
-            {t('dashboard.products.noProducts')}
+            {t('products.noProducts')}
         </div>
       )}
     </section>

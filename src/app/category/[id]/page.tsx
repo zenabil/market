@@ -41,7 +41,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
         {isLoading || !category ? (
             <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
         ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle').replace('{{name}}', category.name)}</p>
+            <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle', { name: category.name })}</p>
         )}
       </div>
       {isLoading ? (
@@ -70,4 +70,3 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
     // We validate the category exists inside the CategoryDetails component now
     return <CategoryDetails categoryId={params.id} />
 }
-

@@ -23,10 +23,20 @@ export default function GlobalError({
   // This is a workaround since hooks can't be used conditionally.
   // We'll manually select the language or default to French.
   let lang: 'fr' | 'ar' = 'fr';
-  if (typeof window !== 'undefined' && localStorage.getItem('locale') === 'ar') {
-    lang = 'ar';
+  let t: (key: string) => string = (key: string) => key; // Dummy translator
+  
+  try {
+    const languageHook = useLanguage();
+    lang = languageHook.locale;
+    t = (key: string) => languageHook.t(key);
+  } catch (e) {
+    // This will fail if useLanguage is used outside its provider context, which can happen with errors.
+    // We already have a robust fallback.
+    if (typeof window !== 'undefined' && localStorage.getItem('locale') === 'ar') {
+      lang = 'ar';
+    }
   }
-
+  
   const translations = {
     fr: {
       permissionErrorTitle: "Erreur de Règle de Sécurité Firestore",
@@ -46,7 +56,8 @@ export default function GlobalError({
     }
   }
   
-  const t = translations[lang];
+  const selectedTranslations = translations[lang];
+
 
   const copyToClipboard = () => {
     if (isPermissionError) {
@@ -65,10 +76,10 @@ export default function GlobalError({
                 <TriangleAlert className="h-8 w-8" />
               </div>
               <CardTitle className="mt-4 text-2xl font-headline">
-                {isPermissionError ? t.permissionErrorTitle : t.applicationErrorTitle}
+                {isPermissionError ? selectedTranslations.permissionErrorTitle : selectedTranslations.applicationErrorTitle}
               </CardTitle>
               <CardDescription>
-                {isPermissionError ? t.permissionErrorDesc : t.applicationErrorDesc}
+                {isPermissionError ? selectedTranslations.permissionErrorDesc : selectedTranslations.applicationErrorDesc}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -83,10 +94,10 @@ export default function GlobalError({
                 </div>
               )}
               <div className="mt-6 flex justify-center gap-4">
-                <Button onClick={() => reset()}>{t.retry}</Button>
+                <Button onClick={() => reset()}>{selectedTranslations.retry}</Button>
                 {isPermissionError && (
                   <Button variant="outline" onClick={copyToClipboard}>
-                    {t.copyDetails}
+                    {selectedTranslations.copyDetails}
                   </Button>
                 )}
               </div>

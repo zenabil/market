@@ -36,6 +36,7 @@
     "products": {
         "allProducts": "جميع المنتجات",
         "products": "المنتجات",
+        "noProducts": "لم يتم العثور على منتجات.",
         "subtitle": {
             "all": "تصفح تشكيلتنا الكاملة من المنتجات الطازجة وعالية الجودة.",
             "category": "اكتشف منتجاتنا في فئة {{name}}"
@@ -1022,14 +1023,10 @@
         }
     },
     "globalError": {
-        "permissionError": {
-            "title": "خطأ في قواعد أمان Firestore",
-            "description": "تم رفض الطلب التالي بواسطة قواعد الأمان الخاصة بك."
-        },
-        "applicationError": {
-            "title": "خطأ في التطبيق",
-            "description": "حدث خطأ غير متوقع."
-        },
+        "permissionErrorTitle": "خطأ في قواعد أمان Firestore",
+        "permissionErrorDesc": "تم رفض الطلب التالي بواسطة قواعد الأمان الخاصة بك.",
+        "applicationErrorTitle": "خطأ في التطبيق",
+        "applicationErrorDesc": "حدث خطأ غير متوقع.",
         "retry": "إعادة المحاولة",
         "copyDetails": "نسخ التفاصيل"
     },

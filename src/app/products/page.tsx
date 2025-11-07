@@ -66,7 +66,7 @@ export default function ProductsPage() {
         <h1 className="font-headline text-4xl md:text-5xl">{selectedCategoryName}</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           {selectedCategoryId 
-            ? t('products.subtitle.category').replace('{{name}}', selectedCategoryName)
+            ? t('products.subtitle.category', { name: selectedCategoryName })
             : t('products.subtitle.all')
           }
         </p>
