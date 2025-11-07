@@ -1,6 +1,7 @@
 
 {
     "locale": "fr-FR",
+    "defaultSiteName": "Tlemcen Smart Supermarket",
     "home": {
         "browseCategories": "Parcourir les catégories",
         "bestSellers": "Meilleures ventes",
@@ -186,12 +187,14 @@
         "notifications": "Notifications",
         "markAllAsRead": "Tout marquer comme lu",
         "noNotifications": "Vous n'avez aucune notification.",
-        "sinceYear": "Il y a {{count}} an",
-        "sinceMonth": "Il y a {{count}} mois",
-        "sinceDay": "Il y a {{count}} jour",
-        "sinceHour": "Il y a {{count}} heure",
-        "sinceMinute": "Il y a {{count}} minute",
-        "sinceSecond": "Il y a {{count}} seconde"
+        "time": {
+            "yearsAgo": "Il y a {{count}} ans",
+            "monthsAgo": "Il y a {{count}} mois",
+            "daysAgo": "Il y a {{count}} jours",
+            "hoursAgo": "Il y a {{count}} heures",
+            "minutesAgo": "Il y a {{count}} minutes",
+            "secondsAgo": "Il y a {{count}} secondes"
+        }
     },
     "footer": {
         "tagline": "Votre magasin local, avec une expérience d'achat en ligne innovante.",
@@ -1023,5 +1026,3 @@
         "noProducts": "Aucun produit trouvé dans cette catégorie."
     }
 }
-
-    

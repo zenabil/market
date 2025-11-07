@@ -24,8 +24,8 @@ export async function generateMetadata(
   {},
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  let siteName = 'متجر تلمسان الذكي';
-  let siteDescription = 'متجرك المحلي في تلمسان، الآن متصل بالإنترنت مع ميزات ذكية.';
+  let siteName = 'Tlemcen Smart Supermarket'; // Default in English for crawlers
+  let siteDescription = 'Your local Tlemcen grocery store, now online with smart features.';
 
   try {
     const db = getFirestore();

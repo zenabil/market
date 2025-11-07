@@ -9,10 +9,10 @@ type Locale = 'ar' | 'fr';
 interface LanguageContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, options?: { [key: string]: string | number }) => string;
 }
 
-const translations = {
+const translations: { [key in Locale]: any } = {
   ar: arTranslations,
   fr: frTranslations,
 };
@@ -42,21 +42,33 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr';
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, options?: { [key: string]: string | number }): string => {
     const keys = key.split('.');
-    let result: any = translations[locale];
-    for (const k of keys) {
-      result = result?.[k];
-      if (result === undefined) {
-        // Fallback to Arabic if key not found in current locale
-        let fallbackResult: any = translations.ar;
-        for (const fk of keys) {
-            fallbackResult = fallbackResult?.[fk];
+    
+    const findTranslation = (localeToUse: Locale): string | undefined => {
+        let result: any = translations[localeToUse];
+        for (const k of keys) {
+            result = result?.[k];
+            if (result === undefined) {
+                return undefined;
+            }
         }
-        return fallbackResult || key;
-      }
+        return result;
+    };
+
+    let translation = findTranslation(locale) ?? findTranslation('ar'); // Fallback to arabic
+
+    if (translation === undefined) {
+        return key; // Return key if not found in either language
     }
-    return result || key;
+
+    if (options) {
+        Object.keys(options).forEach(optionKey => {
+            translation = translation.replace(new RegExp(`{{${optionKey}}}`, 'g'), String(options[optionKey]));
+        });
+    }
+
+    return translation;
   };
 
   return (

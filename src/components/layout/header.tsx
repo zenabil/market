@@ -177,16 +177,16 @@ function NotificationBell() {
         const date = new Date(dateString);
         const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
         let interval = seconds / 31536000;
-        if (interval > 1) return t('header.sinceYear').replace('{{count}}', Math.floor(interval).toString());
+        if (interval > 1) return t('header.time.yearsAgo', { count: Math.floor(interval) });
         interval = seconds / 2592000;
-        if (interval > 1) return t('header.sinceMonth').replace('{{count}}', Math.floor(interval).toString());
+        if (interval > 1) return t('header.time.monthsAgo', { count: Math.floor(interval) });
         interval = seconds / 86400;
-        if (interval > 1) return t('header.sinceDay').replace('{{count}}', Math.floor(interval).toString());
+        if (interval > 1) return t('header.time.daysAgo', { count: Math.floor(interval) });
         interval = seconds / 3600;
-        if (interval > 1) return t('header.sinceHour').replace('{{count}}', Math.floor(interval).toString());
+        if (interval > 1) return t('header.time.hoursAgo', { count: Math.floor(interval) });
         interval = seconds / 60;
-        if (interval > 1) return t('header.sinceMinute').replace('{{count}}', Math.floor(interval).toString());
-        return t('header.sinceSecond').replace('{{count}}', Math.floor(seconds).toString());
+        if (interval > 1) return t('header.time.minutesAgo', { count: Math.floor(interval) });
+        return t('header.time.secondsAgo', { count: Math.floor(seconds) });
     };
 
     if (!user) return null;

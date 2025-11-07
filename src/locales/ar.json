@@ -1,6 +1,7 @@
 
 {
     "locale": "ar-DZ",
+    "defaultSiteName": "متجر تلمسان الذكي",
     "home": {
         "browseCategories": "تصفح الفئات",
         "bestSellers": "الأكثر مبيعاً",
@@ -186,12 +187,14 @@
         "notifications": "الإشعارات",
         "markAllAsRead": "وضع علامة \"مقروء\" على الكل",
         "noNotifications": "ليس لديك أي إشعارات.",
-        "sinceYear": "منذ {{count}} سنة",
-        "sinceMonth": "منذ {{count}} شهر",
-        "sinceDay": "منذ {{count}} يوم",
-        "sinceHour": "منذ {{count}} ساعة",
-        "sinceMinute": "منذ {{count}} دقيقة",
-        "sinceSecond": "منذ {{count}} ثانية"
+        "time": {
+            "yearsAgo": "منذ {{count}} سنوات",
+            "monthsAgo": "منذ {{count}} أشهر",
+            "daysAgo": "منذ {{count}} أيام",
+            "hoursAgo": "منذ {{count}} ساعات",
+            "minutesAgo": "منذ {{count}} دقائق",
+            "secondsAgo": "منذ {{count}} ثوان"
+        }
     },
     "footer": {
         "tagline": "متجرك المحلي، مع تجربة تسوق إلكتروني مبتكرة.",
@@ -1023,7 +1026,3 @@
         "noProducts": "لم يتم العثور على منتجات في هذه الفئة."
     }
 }
-
-
-
-    

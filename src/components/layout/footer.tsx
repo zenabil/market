@@ -38,7 +38,7 @@ export default function Footer() {
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
   const { data: settings } = useDoc<SiteSettings>(settingsRef);
 
-  const siteName = settings?.siteName || 'Tlemcen Smart Supermarket';
+  const siteName = settings?.siteName || t('defaultSiteName');
 
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
