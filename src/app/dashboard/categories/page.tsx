@@ -48,8 +48,8 @@ import { useRouter } from 'next/navigation';
 
 
 const categoryFormSchema = z.object({
-  name: z.string().min(2, { message: 'Le nom est requis.' }),
-  image: z.string().url({ message: 'Veuillez entrer une URL d\'image valide.' }),
+  name: z.string().min(2, { message: 'الاسم مطلوب.' }),
+  image: z.string().url({ message: 'الرجاء إدخال رابط صورة صالح.' }),
 });
 
 function CategoryDialog({ category, onActionComplete }: { category?: Category | null, onActionComplete: () => void }) {
@@ -95,7 +95,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
 
     actionPromise
       .then(() => {
-          toast({ title: category ? 'Catégorie mise à jour' : 'Catégorie créée' });
+          toast({ title: category ? 'تم تحديث الفئة' : 'تم إنشاء الفئة' });
           setIsOpen(false);
           onActionComplete();
       })
@@ -120,39 +120,39 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
       <DialogTrigger asChild>
         {category ? (
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Edit className="mr-2 h-4 w-4" />
-                Modifier
+                <Edit className="ml-2 h-4 w-4" />
+                تعديل
             </DropdownMenuItem>
         ) : (
              <Button size="sm" className="gap-1">
-                <PlusCircle className="h-4 w-4" />
-                Ajouter une catégorie
+                <PlusCircle className="h-4 w-4 ml-1" />
+                إضافة فئة
              </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{category ? 'Modifier la catégorie' : 'Ajouter une catégorie'}</DialogTitle>
+          <DialogTitle>{category ? 'تعديل الفئة' : 'إضافة فئة'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="category-dialog-form">
           <div className="space-y-2">
-            <Label>Nom</Label>
+            <Label>الاسم</Label>
             <Input {...form.register('name')} />
             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label>URL de l'image</Label>
+            <Label>رابط الصورة</Label>
             <Input {...form.register('image')} />
             {form.formState.errors.image && <p className="text-sm text-destructive">{form.formState.errors.image.message}</p>}
           </div>
         </form>
            <DialogFooter>
              <DialogClose asChild>
-              <Button type="button" variant="outline">Annuler</Button>
+              <Button type="button" variant="outline">إلغاء</Button>
              </DialogClose>
             <Button type="submit" disabled={isSaving} form="category-dialog-form">
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enregistrer
+                {isSaving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                حفظ
             </Button>
           </DialogFooter>
       </DialogContent>
@@ -190,8 +190,8 @@ export default function CategoriesPage() {
     if (!productSnapshot.empty) {
       toast({
         variant: 'destructive',
-        title: 'Impossible de supprimer la catégorie',
-        description: 'Cette catégorie contient encore des produits. Veuillez d\'abord déplacer ou supprimer les produits.',
+        title: 'لا يمكن حذف الفئة',
+        description: 'هذه الفئة لا تزال تحتوي على منتجات. يرجى نقل المنتجات أو حذفها أولاً.',
       });
       setIsDeleting(false);
       setIsAlertOpen(false);
@@ -205,7 +205,7 @@ export default function CategoriesPage() {
     try {
       await deleteDoc(categoryDocRef);
       refetchCategories();
-      toast({ title: 'Catégorie supprimée' });
+      toast({ title: 'تم حذف الفئة' });
     } catch (error) {
       errorEmitter.emit(
         'permission-error',
@@ -216,8 +216,8 @@ export default function CategoriesPage() {
       );
       toast({
         variant: 'destructive',
-        title: 'Erreur de suppression',
-        description: "Vous n'avez peut-être pas la permission de faire cela.",
+        title: 'خطأ في الحذف',
+        description: "قد لا يكون لديك الإذن للقيام بذلك.",
       });
     } finally {
       setIsDeleting(false);
@@ -246,8 +246,8 @@ export default function CategoriesPage() {
         <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
-            <CardTitle>Catégories</CardTitle>
-            <CardDescription>Gérez les catégories de vos produits.</CardDescription>
+            <CardTitle>الفئات</CardTitle>
+            <CardDescription>إدارة فئات المنتجات الخاصة بك.</CardDescription>
             </div>
             <CategoryDialog onActionComplete={refetchCategories} />
         </CardHeader>
@@ -255,9 +255,9 @@ export default function CategoriesPage() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead>الصورة</TableHead>
+                <TableHead>الاسم</TableHead>
+                <TableHead><span className="sr-only">الإجراءات</span></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -265,7 +265,7 @@ export default function CategoriesPage() {
                 <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 mr-auto" /></TableCell>
                 </TableRow>
                 ))}
                 {categories && categories.map(category => (
@@ -274,19 +274,19 @@ export default function CategoriesPage() {
                         <Image src={category.image} alt={category.name} width={40} height={40} className="rounded-md object-cover" />
                     </TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-left">
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Ouvrir le menu</span>
+                            <span className="sr-only">فتح القائمة</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <CategoryDialog category={category} onActionComplete={refetchCategories} />
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(category);}} className="text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer
+                            <Trash2 className="ml-2 h-4 w-4" />
+                            حذف
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
@@ -297,7 +297,7 @@ export default function CategoriesPage() {
             </Table>
             {!areCategoriesLoading && categories?.length === 0 && (
             <div className="text-center p-8 text-muted-foreground">
-                Aucune catégorie trouvée.
+                لم يتم العثور على فئات.
             </div>
             )}
         </CardContent>
@@ -306,16 +306,16 @@ export default function CategoriesPage() {
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ?</AlertDialogTitle>
+                <AlertDialogTitle>هل أنت متأكد من رغبتك في الحذف؟</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Cette action ne peut pas être annulée. Cela supprimera définitivement la catégorie "{categoryToDelete?.name || ''}".
+                    لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الفئة بشكل دائم "{categoryToDelete?.name || ''}".
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>Annuler</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>إلغاء</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCategory} disabled={isDeleting}>
-                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Supprimer
+                    {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                    حذف
                 </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

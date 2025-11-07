@@ -24,10 +24,10 @@ import type { User as FirestoreUser, Address } from '@/lib/placeholder-data';
 import { Loader2 } from 'lucide-react';
 
 const addressFormSchema = z.object({
-    street: z.string().min(5, { message: "La rue doit comporter au moins 5 caractères."}),
-    city: z.string().min(2, { message: "La ville doit comporter au moins 2 caractères."}),
-    zipCode: z.string().min(3, { message: "Le code postal doit comporter au moins 3 caractères."}),
-    country: z.string().min(2, { message: "Le pays doit comporter au moins 2 caractères."}),
+    street: z.string().min(5, { message: "يجب أن يتكون الشارع من 5 أحرف على الأقل."}),
+    city: z.string().min(2, { message: "يجب أن تتكون المدينة من حرفين على الأقل."}),
+    zipCode: z.string().min(3, { message: "يجب أن يتكون الرمز البريدي من 3 أحرف على الأقل."}),
+    country: z.string().min(2, { message: "يجب أن تتكون الدولة من حرفين على الأقل."}),
 });
 
 interface AddressDialogProps {
@@ -70,7 +70,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, onAddr
             
             updateDoc(userDocRef, { addresses: updatedAddresses })
                 .then(() => {
-                    toast({ title: 'Adresse mise à jour' });
+                    toast({ title: 'تم تحديث العنوان' });
                     onAddressChange?.();
                     setIsOpen(false);
                 })
@@ -91,7 +91,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, onAddr
             const newAddress: Address = { id: `addr_${Date.now()}`, ...values };
             updateDoc(userDocRef, { addresses: arrayUnion(newAddress) })
                 .then(() => {
-                    toast({ title: 'Adresse ajoutée' });
+                    toast({ title: 'تمت إضافة العنوان' });
                     onAddressChange?.();
                     setIsOpen(false);
                 })
@@ -116,34 +116,34 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, onAddr
             <DialogTrigger asChild onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(true); }}>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{addressToEdit ? 'Modifier l\'adresse' : 'Ajouter une nouvelle adresse'}</DialogTitle>
-                    <DialogDescription>{addressToEdit ? 'Modifiez les détails de votre adresse ci-dessous.' : 'Ajoutez une nouvelle adresse de livraison à votre profil.'}</DialogDescription>
+                    <DialogTitle>{addressToEdit ? 'تعديل العنوان' : 'إضافة عنوان جديد'}</DialogTitle>
+                    <DialogDescription>{addressToEdit ? 'قم بتعديل تفاصيل عنوانك أدناه.' : 'أضف عنوان شحن جديدًا إلى ملفك الشخصي.'}</DialogDescription>
                 </DialogHeader>
                 <Form {...addressForm}>
                     <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4" id="address-dialog-form">
                         <FormField control={addressForm.control} name="street" render={({ field }) => (
-                            <FormItem><FormLabel>Rue</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>الشارع</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField control={addressForm.control} name="city" render={({ field }) => (
-                                <FormItem><FormLabel>Ville</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>المدينة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={addressForm.control} name="zipCode" render={({ field }) => (
-                                <FormItem><FormLabel>Code postal</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>الرمز البريدي</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={addressForm.control} name="country" render={({ field }) => (
-                                <FormItem><FormLabel>Pays</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>الدولة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         </div>
                     </form>
                 </Form>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">Annuler</Button>
+                        <Button type="button" variant="outline">إلغاء</Button>
                     </DialogClose>
                     <Button type="submit" form="address-dialog-form" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Enregistrer les modifications
+                        {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        حفظ التغييرات
                     </Button>
                 </DialogFooter>
             </DialogContent>
