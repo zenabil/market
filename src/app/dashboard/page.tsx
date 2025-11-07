@@ -36,8 +36,11 @@ function AdminDashboard() {
     }, 0);
     
     const totalProfit = products.reduce((acc, product) => {
+        if (typeof product.purchasePrice !== 'number') {
+            return acc; // Skip products without a valid purchase price
+        }
         const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
-        const profitPerUnit = discountedPrice - (product.purchasePrice || 0);
+        const profitPerUnit = discountedPrice - product.purchasePrice;
         return acc + (profitPerUnit * (product.sold || 0));
     }, 0);
 
