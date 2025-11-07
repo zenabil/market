@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -219,7 +220,7 @@ function ShoppingListDetail() {
                                         <Image src={product.images[0]} alt={product.name} width={64} height={64} className="rounded-md border object-cover" />
                                         <div className="flex-grow">
                                             <p className="font-semibold text-sm">{product.name}</p>
-                                            <p className="text-sm text-muted-foreground">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(product.price)}</p>
+                                            <p className="text-sm text-muted-foreground">{new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(product.price)}</p>
                                         </div>
                                         <Button size="icon" onClick={() => handleAddToCart(product)}>
                                             <ShoppingCart className="h-4 w-4" />
