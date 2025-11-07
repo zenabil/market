@@ -157,9 +157,8 @@ service cloud.firestore {
       /**
        * @description Allows a user to manage their own notifications. Admins can create notifications.
        * @path /users/{userId}/notifications/{notificationId}
-       * @allow get, list, update: if isSignedIn() && isOwner(userId);
+       * @allow get, list, update, delete: if isSignedIn() && isOwner(userId);
        * @allow create: if isAdmin(); // Only admins can create notifications for users
-       * @allow delete: if isSignedIn() && isOwner(userId);
        * @principle Restricts access to a user's own notifications.
        */
       match /notifications/{notificationId} {
@@ -277,6 +276,18 @@ service cloud.firestore {
     match /teamMembers/{memberId} {
         allow get, list: if true;
         allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly readable site image information, admin writable.
+     * @path /siteImages/{imageId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for site-wide imagery.
+     */
+    match /siteImages/{imageId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
     
   }

@@ -321,6 +321,21 @@
         "deliveryFeeHigh": {
           "type": "number",
           "description": "The delivery fee for orders that meet or exceed the threshold."
+        },
+        "facebookUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Facebook page."
+        },
+        "instagramUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Instagram profile."
+        },
+        "twitterUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Twitter/X profile."
         }
       },
       "required": [
@@ -569,6 +584,45 @@
         }
       },
       "required": ["name", "role", "avatar"]
+    },
+    "PageContent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Page Content",
+        "type": "object",
+        "description": "Represents the editable content for a static page, in multiple languages.",
+        "properties": {
+            "title_fr": { "type": "string", "description": "The page title in French." },
+            "content_fr": { "type": "string", "description": "The main page content in French (Markdown format)." },
+            "title_ar": { "type": "string", "description": "The page title in Arabic." },
+            "content_ar": { "type": "string", "description": "The main page content in Arabic (Markdown format)." }
+        },
+        "required": ["title_fr", "content_fr", "title_ar", "content_ar"]
+    },
+    "SiteImage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Site Image",
+      "type": "object",
+      "description": "Represents a manageable image used throughout the site.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique slug-like identifier for the image (e.g., 'about-page-hero'). The document ID will be this slug."
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the image."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the image for alt text."
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "A hint for AI to find a similar image (e.g., 'supermarket interior')."
+        }
+      },
+      "required": ["id", "imageUrl", "description", "imageHint"]
     }
   },
   "auth": {
@@ -648,8 +702,14 @@
     "/teamMembers/{memberId}": {
       "schema": { "$ref": "#/entities/TeamMember" },
       "description": "Stores information about team members. Publicly readable, admin writable."
+    },
+    "/pageContent/{pageId}": {
+        "schema": { "$ref": "#/entities/PageContent" },
+        "description": "Stores editable content for static pages. Publicly readable, admin writable. Page ID can be 'about', 'privacy', 'terms'."
+    },
+    "/siteImages/{imageId}": {
+      "schema": { "$ref": "#/entities/SiteImage" },
+      "description": "Stores manageable images for use across the site. Publicly readable, admin writable."
     }
   }
 }
-
-    
