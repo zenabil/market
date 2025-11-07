@@ -68,7 +68,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
   };
   
-  const discountedPrice = product.price * (1 - product.discount / 100);
+  const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full">

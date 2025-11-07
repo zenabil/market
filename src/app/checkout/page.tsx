@@ -72,6 +72,8 @@ export default function CheckoutPage() {
 
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
   const { data: settings } = useDoc<SiteSettings>(settingsRef);
+  
+  const originalSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const subTotalAfterDiscount = appliedCoupon
     ? totalPrice * (1 - appliedCoupon.discountPercentage / 100)
@@ -373,6 +375,10 @@ export default function CheckoutPage() {
                     </div>
                    <Separator />
                    <div className="space-y-2">
+                        <div className="flex justify-between text-muted-foreground">
+                           <span>Sous-total Original</span>
+                           <span className='line-through'>{formatCurrency(originalSubtotal)}</span>
+                       </div>
                        <div className="flex justify-between">
                            <span>{t('checkout.subtotal')}</span>
                            <span>{formatCurrency(subTotalAfterDiscount)}</span>
