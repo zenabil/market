@@ -21,9 +21,15 @@ type Message = {
   sender: 'user' | 'bot';
 };
 
+const initialMessage: Message = {
+    id: 'initial-bot-message',
+    text: ' أهلاً بك في سوبرماركت تلمسان الذكي! كيف يمكنني مساعدتك اليوم؟',
+    sender: 'bot'
+};
+
 export default function AiChatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
