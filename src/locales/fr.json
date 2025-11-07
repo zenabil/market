@@ -798,6 +798,7 @@
             "totalSpent": "Total dépensé",
             "noUsers": "Aucun utilisateur trouvé.",
             "editAddresses": "Modifier les adresses de l'utilisateur",
+            "toggleAdminStatus": "Basculer le statut d'administrateur pour {{name}}",
             "loyaltyDialog": {
                 "title": "Modifier les points de fidélité pour {{name}}",
                 "label": "Points"
@@ -1031,3 +1032,5 @@
         "noProducts": "Aucun produit trouvé dans cette catégorie."
     }
 }
+
+    

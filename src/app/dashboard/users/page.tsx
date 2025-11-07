@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -163,7 +164,7 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
         <Switch
             checked={isAdmin}
             onCheckedChange={handleAdminChange}
-            aria-label={`Toggle admin status for ${user.name}`}
+            aria-label={t('dashboard.users.toggleAdminStatus').replace('{{name}}', user.name)}
             disabled={isLoading}
         />
         <span>{isAdmin ? <Badge variant="secondary">{t('dashboard.users.role.admin')}</Badge> : t('dashboard.users.role.user')}</span>
@@ -305,3 +306,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+    
