@@ -7,7 +7,7 @@ import { Loader2, PlusCircle, MoreHorizontal, Trash2, Edit } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser, useFirestore, useCollection, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { collection, query, orderBy, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { ShoppingList } from '@/lib/placeholder-data';
 import {
   Dialog,
@@ -47,68 +47,87 @@ const listFormSchema = z.object({
   name: z.string().min(2, { message: 'Le nom est requis.' }),
 });
 
-function NewListDialog({ onListCreated }: { onListCreated: () => void }) {
+
+function ListDialog({ list, onActionComplete, children }: { list?: ShoppingList, onActionComplete: () => void, children: React.ReactNode }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
     const { user } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
+    const isEditing = !!list;
 
     const form = useForm<z.infer<typeof listFormSchema>>({
         resolver: zodResolver(listFormSchema),
         defaultValues: { name: '' },
     });
+    
+    React.useEffect(() => {
+        if (isOpen) {
+            form.reset({ name: isEditing ? list.name : '' });
+        }
+    }, [isOpen, list, isEditing, form]);
+
 
     async function onSubmit(values: z.infer<typeof listFormSchema>) {
         if (!firestore || !user) return;
-
         setIsSaving(true);
-        const listData = {
-            name: values.name,
-            userId: user.uid,
-            createdAt: new Date().toISOString(),
-            items: [],
-        };
         
-        const listsCollection = collection(firestore, `users/${user.uid}/shopping-lists`);
-        addDoc(listsCollection, listData)
-            .then(() => {
-                toast({ title: 'Liste créée' });
-                form.reset();
-                setIsOpen(false);
-                onListCreated();
-            })
-            .catch(error => {
-                errorEmitter.emit(
-                    'permission-error',
-                    new FirestorePermissionError({
+        if (isEditing) {
+            const listRef = doc(firestore, `users/${user.uid}/shopping-lists`, list.id);
+            updateDoc(listRef, { name: values.name })
+                .then(() => {
+                    toast({ title: 'Liste renommée' });
+                    onActionComplete();
+                })
+                .catch(error => {
+                    errorEmitter.emit('permission-error', new FirestorePermissionError({
+                        path: listRef.path,
+                        operation: 'update',
+                        requestResourceData: { name: values.name },
+                    }));
+                })
+                .finally(() => {
+                    setIsOpen(false);
+                    setIsSaving(false);
+                });
+        } else {
+             const listData = {
+                name: values.name,
+                userId: user.uid,
+                createdAt: new Date().toISOString(),
+                items: [],
+            };
+            const listsCollection = collection(firestore, `users/${user.uid}/shopping-lists`);
+            addDoc(listsCollection, listData)
+                .then(() => {
+                    toast({ title: 'Liste créée' });
+                    onActionComplete();
+                })
+                .catch(error => {
+                    errorEmitter.emit('permission-error', new FirestorePermissionError({
                         path: listsCollection.path,
                         operation: 'create',
                         requestResourceData: listData,
-                    })
-                );
-            })
-            .finally(() => {
-                setIsSaving(false);
-            });
+                    }));
+                })
+                .finally(() => {
+                    setIsOpen(false);
+                    setIsSaving(false);
+                });
+        }
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button size="sm" className="gap-1">
-                    <PlusCircle className="h-4 w-4" />
-                    Créer une liste
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Créer une nouvelle liste de courses</DialogTitle>
+                    <DialogTitle>{isEditing ? 'Renommer la liste' : 'Créer une nouvelle liste de courses'}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="list-dialog-form">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id={`list-dialog-form-${list?.id || 'new'}`}>
                     <div className="space-y-2">
                         <Label htmlFor="name">Nom de la liste</Label>
-                        <Input id="name" {...form.register('name')} placeholder="Ex: Courses de la semaine" />
+                        <Input id="name" {...form.register('name')} placeholder={isEditing ? '' : "Ex: Courses de la semaine"} />
                         {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
                     </div>
                 </form>
@@ -116,15 +135,16 @@ function NewListDialog({ onListCreated }: { onListCreated: () => void }) {
                     <DialogClose asChild>
                         <Button type="button" variant="outline">Annuler</Button>
                     </DialogClose>
-                    <Button type="submit" disabled={isSaving} form="list-dialog-form">
+                    <Button type="submit" disabled={isSaving} form={`list-dialog-form-${list?.id || 'new'}`}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Créer
+                        {isEditing ? 'Enregistrer' : 'Créer'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
+
 
 export default function ShoppingListsPage() {
     const { user, isUserLoading } = useUser();
@@ -204,7 +224,12 @@ export default function ShoppingListsPage() {
                     <h1 className='font-headline text-3xl'>Mes listes de courses</h1>
                     <p className="text-muted-foreground mt-1">Gérez vos listes de courses pour vous organiser.</p>
                 </div>
-                <NewListDialog onListCreated={refetch} />
+                <ListDialog onActionComplete={refetch}>
+                     <Button size="sm" className="gap-1">
+                        <PlusCircle className="h-4 w-4" />
+                        Créer une liste
+                    </Button>
+                </ListDialog>
             </div>
 
             {shoppingLists && shoppingLists.length > 0 ? (
@@ -228,9 +253,15 @@ export default function ShoppingListsPage() {
                                         <DropdownMenuItem asChild>
                                             <Link href={`/dashboard/shopping-lists/${list.id}`}>
                                                 <Edit className="mr-2 h-4 w-4" />
-                                                Modifier
+                                                Ouvrir
                                             </Link>
                                         </DropdownMenuItem>
+                                        <ListDialog list={list} onActionComplete={refetch}>
+                                            <button className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 w-full">
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Renommer
+                                            </button>
+                                        </ListDialog>
                                         <DropdownMenuItem onSelect={() => openDeleteDialog(list)} className="text-destructive">
                                             <Trash2 className="mr-2 h-4 w-4" />
                                             Supprimer
