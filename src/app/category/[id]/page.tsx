@@ -1,3 +1,4 @@
+
 'use client';
 
 import { notFound } from 'next/navigation';
@@ -69,3 +70,4 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
     // We validate the category exists inside the CategoryDetails component now
     return <CategoryDetails categoryId={params.id} />
 }
+
