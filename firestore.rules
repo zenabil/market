@@ -289,6 +289,18 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
+
+    /**
+     * @description Publicly readable store feature information, admin writable.
+     * @path /storeFeatures/{featureId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for store features.
+     */
+    match /storeFeatures/{featureId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
     
   }
 

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,6 +14,7 @@ import {
   Bell,
   GitCompareArrows,
   Globe,
+  Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -70,6 +72,7 @@ function NavLinks({ className }: { className?: string }) {
       { key: 'home', href: '/' },
       { key: 'products', href: '/products' },
       { key: 'recipes', href: '/recipes' },
+      { key: 'features', href: '/features', icon: Star },
       { key: 'compare', href: '/compare', icon: GitCompareArrows },
       { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
       { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },
@@ -102,6 +105,7 @@ function MobileNav() {
       { key: 'home', href: '/' },
       { key: 'products', href: '/products' },
       { key: 'recipes', href: '/recipes' },
+      { key: 'features', href: '/features', icon: Star },
       { key: 'compare', href: '/compare', icon: GitCompareArrows },
       { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
       { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },

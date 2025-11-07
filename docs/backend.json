@@ -623,6 +623,20 @@
         }
       },
       "required": ["id", "imageUrl", "description", "imageHint"]
+    },
+    "StoreFeature": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Store Feature",
+        "type": "object",
+        "description": "Represents a key feature or selling point of the store.",
+        "properties": {
+            "title_fr": { "type": "string", "description": "The feature title in French." },
+            "description_fr": { "type": "string", "description": "The feature description in French." },
+            "title_ar": { "type": "string", "description": "The feature title in Arabic." },
+            "description_ar": { "type": "string", "description": "The feature description in Arabic." },
+            "icon": { "type": "string", "description": "The name of the lucide-react icon to display." }
+        },
+        "required": ["title_fr", "description_fr", "title_ar", "description_ar", "icon"]
     }
   },
   "auth": {
@@ -710,6 +724,10 @@
     "/siteImages/{imageId}": {
       "schema": { "$ref": "#/entities/SiteImage" },
       "description": "Stores manageable images for use across the site. Publicly readable, admin writable."
+    },
+    "/storeFeatures/{featureId}": {
+        "schema": { "$ref": "#/entities/StoreFeature" },
+        "description": "Stores key features of the store. Publicly readable, admin writable."
     }
   }
 }

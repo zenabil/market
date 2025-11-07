@@ -180,6 +180,7 @@
         "home": "Accueil",
         "products": "Produits",
         "recipes": "Recettes",
+        "features": "Nos atouts",
         "compare": "Comparer",
         "generateRecipe": "Générer une recette",
         "mealPlanner": "Planificateur de repas",
@@ -1126,5 +1127,9 @@
             "title": "Contactez-nous",
             "p1": "Si vous avez des questions concernant ces conditions, vous pouvez nous contacter à l'adresse suivante :"
         }
+    },
+    "features": {
+        "title": "Nos Atouts",
+        "subtitle": "Découvrez pourquoi Tlemcen Smart Supermarket est votre meilleur choix pour les courses."
     }
 }
