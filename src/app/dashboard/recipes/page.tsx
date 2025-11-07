@@ -8,7 +8,7 @@ import { MoreHorizontal, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { collection, query, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, doc, deleteDoc, getDocs, limit } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Recipe } from '@/lib/placeholder-data';
 import Image from 'next/image';
@@ -33,6 +33,7 @@ export default function RecipesDashboardPage() {
   const { data: recipes, isLoading: areRecipesLoading, refetch: refetchRecipes } = useCollection<Recipe>(recipesQuery);
   const [recipeToDelete, setRecipeToDelete] = React.useState<Recipe | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
   
@@ -44,6 +45,25 @@ export default function RecipesDashboardPage() {
 
   const handleDeleteRecipe = async () => {
     if (!recipeToDelete || !firestore) return;
+
+    setIsDeleting(true);
+    
+    // Check for reviews before deleting
+    const reviewsRef = collection(firestore, `recipes/${recipeToDelete.id}/reviews`);
+    const reviewsQuery = query(reviewsRef, limit(1));
+    const reviewSnapshot = await getDocs(reviewsQuery);
+
+    if (!reviewSnapshot.empty) {
+        toast({
+            variant: 'destructive',
+            title: 'Impossible de supprimer la recette',
+            description: 'Cette recette contient des avis. Veuillez d\'abord supprimer les avis.',
+        });
+        setIsDeleting(false);
+        setIsAlertOpen(false);
+        setRecipeToDelete(null);
+        return;
+    }
     
     const recipeDocRef = doc(firestore, 'recipes', recipeToDelete.id);
     try {
@@ -64,6 +84,7 @@ export default function RecipesDashboardPage() {
         description: 'Vous n\'avez peut-être pas la permission de faire cela.',
       });
     } finally {
+      setIsDeleting(false);
       setRecipeToDelete(null);
       setIsAlertOpen(false);
     }
@@ -171,7 +192,10 @@ export default function RecipesDashboardPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setRecipeToDelete(null)}>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteRecipe}>Supprimer</AlertDialogAction>
+              <AlertDialogAction onClick={handleDeleteRecipe} disabled={isDeleting}>
+                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Supprimer
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
