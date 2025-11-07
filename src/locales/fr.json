@@ -109,7 +109,13 @@
                 "title": "Produits non trouvés",
                 "description": "Nous n'avons pas pu trouver"
             },
-            "error": "Impossible d'ajouter les produits au panier."
+            "error": "Impossible d'ajouter les produits au panier.",
+            "analysisComplete": {
+                "title": "Analyse terminée",
+                "description": "{{count}} produits potentiels identifiés.",
+                "noProducts": "Aucun produit n'a pu être identifié."
+            },
+            "analysisError": "Erreur d'analyse"
         }
     },
     "mealPlanner": {

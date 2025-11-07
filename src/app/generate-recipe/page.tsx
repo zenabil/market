@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -104,6 +105,10 @@ export default function GenerateRecipePage() {
                 ingredients: values.ingredients,
             });
             setGeneratedRecipe(result);
+            toast({
+                title: t('generateRecipe.toast.analysisComplete.title'),
+                description: t('generateRecipe.toast.analysisComplete.description').replace('{{count}}', result.missingProducts.length.toString()),
+            });
         } catch (error) {
             console.error("Failed to generate recipe:", error);
             toast({
