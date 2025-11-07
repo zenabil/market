@@ -145,7 +145,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, onAddr
                         <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
                     </DialogClose>
                     <Button type="submit" form="address-dialog-form" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {t('dashboard.common.saveChanges')}
                     </Button>
                 </DialogFooter>

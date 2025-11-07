@@ -748,11 +748,6 @@
             "addAddress": "Ajouter une adresse",
             "noAddresses": "Aucune adresse n'a encore été ajoutée.",
             "confirmDeleteAddress": "Êtes-vous sûr de vouloir supprimer cette adresse ?",
-            "validation": {
-                "name": "Le nom doit comporter au moins 2 caractères.",
-                "passwordLength": "Le mot de passe doit contenir au moins 6 caractères.",
-                "passwordMismatch": "Les mots de passe ne correspondent pas."
-            },
             "toast": {
                 "avatarUpdated": "Avatar mis à jour avec succès.",
                 "avatarError": "Échec de la mise à jour de l'avatar.",
@@ -769,6 +764,11 @@
                     "description": "Votre mot de passe a été changé avec succès."
                 },
                 "addressDeleted": "Adresse supprimée."
+            },
+            "validation": {
+                "name": "Le nom doit comporter au moins 2 caractères.",
+                "passwordLength": "Le mot de passe doit contenir au moins 6 caractères.",
+                "passwordMismatch": "Les mots de passe ne correspondent pas."
             }
         },
         "messages": {
