@@ -19,7 +19,34 @@ export default function GlobalError({
   reset: () => void;
 }) {
   const isPermissionError = error instanceof FirestorePermissionError;
-  const { t } = useLanguage();
+  
+  // This is a workaround since hooks can't be used conditionally.
+  // We'll manually select the language or default to French.
+  let lang: 'fr' | 'ar' = 'fr';
+  if (typeof window !== 'undefined' && localStorage.getItem('locale') === 'ar') {
+    lang = 'ar';
+  }
+
+  const translations = {
+    fr: {
+      permissionErrorTitle: "Erreur de Règle de Sécurité Firestore",
+      permissionErrorDesc: "La requête suivante a été refusée par vos règles de sécurité.",
+      applicationErrorTitle: "Erreur d'Application",
+      applicationErrorDesc: "Une erreur inattendue est survenue.",
+      retry: "Réessayer",
+      copyDetails: "Copier les détails"
+    },
+    ar: {
+      permissionErrorTitle: "خطأ في قواعد أمان Firestore",
+      permissionErrorDesc: "تم رفض الطلب التالي بواسطة قواعد الأمان الخاصة بك.",
+      applicationErrorTitle: "خطأ في التطبيق",
+      applicationErrorDesc: "حدث خطأ غير متوقع.",
+      retry: "إعادة المحاولة",
+      copyDetails: "نسخ التفاصيل"
+    }
+  }
+  
+  const t = translations[lang];
 
   const copyToClipboard = () => {
     if (isPermissionError) {
@@ -30,7 +57,7 @@ export default function GlobalError({
 
   return (
     <html>
-      <body>
+      <body dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="min-h-screen bg-muted/40 flex items-center justify-center p-4">
           <Card className="w-full max-w-2xl text-center shadow-2xl">
             <CardHeader>
@@ -38,12 +65,10 @@ export default function GlobalError({
                 <TriangleAlert className="h-8 w-8" />
               </div>
               <CardTitle className="mt-4 text-2xl font-headline">
-                {isPermissionError ? t('globalError.permissionError.title') : t('globalError.applicationError.title')}
+                {isPermissionError ? t.permissionErrorTitle : t.applicationErrorTitle}
               </CardTitle>
               <CardDescription>
-                {isPermissionError
-                  ? t('globalError.permissionError.description')
-                  : t('globalError.applicationError.description')}
+                {isPermissionError ? t.permissionErrorDesc : t.applicationErrorDesc}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -58,10 +83,10 @@ export default function GlobalError({
                 </div>
               )}
               <div className="mt-6 flex justify-center gap-4">
-                <Button onClick={() => reset()}>{t('globalError.retry')}</Button>
+                <Button onClick={() => reset()}>{t.retry}</Button>
                 {isPermissionError && (
                   <Button variant="outline" onClick={copyToClipboard}>
-                    {t('globalError.copyDetails')}
+                    {t.copyDetails}
                   </Button>
                 )}
               </div>
