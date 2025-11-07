@@ -1,10 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { ShieldCheck, Code, Users, Leaf } from 'lucide-react';
+import { ShieldCheck, Code, Users, Leaf, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import type { TeamMember } from '@/lib/placeholder-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const values = [
@@ -30,27 +34,12 @@ const values = [
     }
 ]
 
-const team = [
-    {
-        name: "Amina Ziani",
-        role: "Fondatrice & PDG",
-        avatar: PlaceHolderImages.find(p => p.id === 'about-amina')?.imageUrl || "https://picsum.photos/seed/amina/200/200"
-    },
-    {
-        name: "Karim Belfodil",
-        role: "Responsable des Opérations",
-        avatar: PlaceHolderImages.find(p => p.id === 'about-karim')?.imageUrl || "https://picsum.photos/seed/karim/200/200"
-    },
-    {
-        name: "Fatima Hadjadj",
-        role: "Chef de Produit",
-        avatar: PlaceHolderImages.find(p => p.id === 'about-fatima')?.imageUrl || "https://picsum.photos/seed/fatima/200/200"
-    }
-]
-
 const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket-interior');
 
 export default function AboutPage() {
+  const firestore = useFirestore();
+  const teamQuery = useMemoFirebase(() => query(collection(firestore, 'teamMembers')), [firestore]);
+  const { data: team, isLoading: areMembersLoading } = useCollection<TeamMember>(teamQuery);
 
   return (
     <div className="container py-8 md:py-12">
@@ -104,7 +93,14 @@ export default function AboutPage() {
             <h2 className="font-headline text-3xl md:text-4xl">Notre Équipe</h2>
             <p className="mt-2 text-muted-foreground">Les visages qui rendent votre expérience d'achat exceptionnelle.</p>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {team.map((member) => (
+                {areMembersLoading && Array.from({length: 3}).map((_, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                        <Skeleton className="h-24 w-24 rounded-full mb-4" />
+                        <Skeleton className="h-6 w-32 mb-1" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                ))}
+                {!areMembersLoading && team && team.map((member) => (
                     <div key={member.name} className="flex flex-col items-center">
                         <Avatar className="h-24 w-24 mb-4">
                             <AvatarImage src={member.avatar} alt={member.name} />
@@ -115,6 +111,9 @@ export default function AboutPage() {
                     </div>
                 ))}
             </div>
+             {!areMembersLoading && (!team || team.length === 0) && (
+                <p className='text-muted-foreground mt-8'>L'équipe sera bientôt présentée.</p>
+             )}
         </section>
     </div>
   );
