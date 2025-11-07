@@ -9,9 +9,8 @@ import { Trash2, ShoppingCart, Star, X } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '@/components/ui/separator';
 import StarRating from '@/components/product/star-rating';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '@/components/ui/table';
 
 export default function ComparePage() {
   const { items, removeFromComparison, clearComparison } = useComparison();
@@ -111,52 +110,61 @@ export default function ComparePage() {
         ))}
       </div>
 
-      {/* Desktop View: Grid */}
-      <div className="hidden sm:grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {items.map(product => (
-          <Card key={product.id} className="flex flex-col">
-            <CardHeader className="p-4">
-                <div className="aspect-square relative mb-4">
-                    <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="rounded-md object-cover"
-                    />
-                     <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-7 w-7 rounded-full"
-                        onClick={() => removeFromComparison(product.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                </div>
-              <CardTitle className="truncate text-lg">{product.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow p-4">
-              <div className="space-y-4">
-                 {features.map(feature => (
-                    <div key={feature.key} className="h-12 border-b last:border-b-0 flex items-center justify-between">
-                        <span className="font-bold">{feature.label}</span>
-                        <span>
-                            {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
-                            {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
-                            {feature.key === 'discount' && (product.discount > 0 ? `${product.discount}%` : 'Aucune')}
-                            {feature.key === 'stock' && (product.stock > 0 ? `${product.stock} en stock` : 'En rupture')}
-                        </span>
+      {/* Desktop View: Comparison Table */}
+      <div className="hidden sm:block">
+        <Table className="border rounded-lg">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-headline text-lg w-[200px]">Caractéristiques</TableHead>
+              {items.map(product => (
+                <TableHead key={product.id}>
+                  <div className="flex flex-col items-center text-center gap-2">
+                     <div className="relative h-24 w-24">
+                        <Image src={product.images[0]} alt={product.name} fill className="object-cover rounded-md" />
+                         <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => removeFromComparison(product.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                     </div>
+                     <h3 className="font-bold text-sm text-foreground">{product.name}</h3>
+                  </div>
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {features.map(feature => (
+              <TableRow key={feature.key}>
+                <TableCell className="font-bold text-base">{feature.label}</TableCell>
+                {items.map(product => (
+                  <TableCell key={product.id} className="text-center align-middle h-20">
+                    <div className="flex items-center justify-center">
+                      {feature.key === 'price' && formatCurrency(product.price * (1 - (product.discount || 0) / 100))}
+                      {feature.key === 'averageRating' && <StarRating rating={product.averageRating || 0} />}
+                      {feature.key === 'discount' && (product.discount > 0 ? `${product.discount}%` : 'Aucune')}
+                      {feature.key === 'stock' && (product.stock > 0 ? `${product.stock} en stock` : 'En rupture')}
                     </div>
-                 ))}
-              </div>
-            </CardContent>
-            <CardFooter className="p-4">
-              <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Ajouter au panier
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+            <TableRow>
+                <TableCell></TableCell>
+                {items.map(product => (
+                  <TableCell key={product.id} className="text-center p-4">
+                     <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Ajouter
+                    </Button>
+                  </TableCell>
+                ))}
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
