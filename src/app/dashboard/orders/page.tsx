@@ -42,7 +42,7 @@ const markAsTranslations: { [key: string]: string } = {
 };
 
 
-function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoading: boolean }) {
+function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | null, isLoading: boolean, onUpdate: () => void }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
@@ -80,6 +80,7 @@ function AdminOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoad
                     message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
                     link: `/dashboard/orders/${order.id}`,
                  }).catch(console.error);
+                 onUpdate();
             })
             .catch(error => {
                 errorEmitter.emit(
@@ -250,7 +251,7 @@ function UserOrdersView({ orders, isLoading }: { orders: Order[] | null, isLoadi
 
 export default function OrdersPage() {
     const { isAdmin, isRoleLoading } = useUserRole();
-    const { orders, isLoading } = useOrders();
+    const { orders, isLoading, refetch } = useOrders();
 
     const effectiveIsLoading = isRoleLoading || isLoading;
 
@@ -272,7 +273,7 @@ export default function OrdersPage() {
 
     return (
         <div className="container py-8 md:py-12">
-            {isAdmin ? <AdminOrdersView orders={orders} isLoading={effectiveIsLoading} /> : <UserOrdersView orders={orders} isLoading={effectiveIsLoading} />}
+            {isAdmin ? <AdminOrdersView orders={orders} isLoading={effectiveIsLoading} onUpdate={refetch} /> : <UserOrdersView orders={orders} isLoading={effectiveIsLoading} />}
         </div>
     );
 }

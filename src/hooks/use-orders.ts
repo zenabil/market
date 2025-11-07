@@ -31,9 +31,9 @@ export function useOrders() {
     }, [firestore, user, isAdmin, isRoleLoading]);
     
     // We can use useCollection for both because a collectionGroup query is also a Query type.
-    const { data: orders, isLoading: areOrdersLoading } = useCollection<Order>(ordersQuery);
+    const { data: orders, isLoading: areOrdersLoading, refetch } = useCollection<Order>(ordersQuery);
     
     const isLoading = isRoleLoading || areOrdersLoading;
 
-    return { orders, isLoading };
+    return { orders, isLoading, refetch };
 }

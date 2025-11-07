@@ -36,9 +36,7 @@ export async function createNotification(
     createdAt: new Date().toISOString(),
   };
 
-  try {
-    await addDoc(notificationsCollection, notificationData);
-  } catch (error) {
+  addDoc(notificationsCollection, notificationData).catch(error => {
     if ((error as any).code === 'permission-denied') {
       const permissionError = new FirestorePermissionError({
         path: notificationsCollection.path,
@@ -49,9 +47,5 @@ export async function createNotification(
     } else {
         console.error("Failed to create notification:", error);
     }
-    // Re-throw the error so the calling function knows something went wrong.
-    throw error;
-  }
+  });
 }
-
-    
