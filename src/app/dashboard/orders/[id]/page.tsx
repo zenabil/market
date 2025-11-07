@@ -8,7 +8,7 @@ import type { Order, Product, User as FirestoreUser } from '@/lib/placeholder-da
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Package, User, Truck, CheckCircle, XCircle, Home } from 'lucide-react';
+import { ArrowLeft, FileText, Package, User, Truck, CheckCircle, XCircle, Home, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +39,7 @@ function OrderDetails() {
     const { id: orderId } = useParams();
     const firestore = useFirestore();
     const { toast } = useToast();
+    const [isUpdatingStatus, setIsUpdatingStatus] = React.useState(false);
 
     const orderQuery = useMemoFirebase(() => {
         if (!firestore || !orderId) return null;
@@ -77,6 +78,7 @@ function OrderDetails() {
 
     const handleStatusChange = (newStatus: string) => {
         if (!firestore || !order) return;
+        setIsUpdatingStatus(true);
         const orderRef = doc(firestore, `users/${order.userId}/orders`, order.id);
         const updateData = { status: newStatus };
         updateDoc(orderRef, updateData)
@@ -100,6 +102,9 @@ function OrderDetails() {
                         requestResourceData: updateData,
                     })
                 );
+            })
+            .finally(() => {
+                setIsUpdatingStatus(false);
             });
     };
 
@@ -124,6 +129,7 @@ function OrderDetails() {
     };
 
     const getStatusIcon = (status: string) => {
+        if (isUpdatingStatus) return <Loader2 className="h-4 w-4 mr-2 animate-spin" />;
         switch (status) {
             case 'Pending': return <User className="h-4 w-4 mr-2" />;
             case 'Confirmed': return <CheckCircle className="h-4 w-4 mr-2" />;
@@ -182,7 +188,7 @@ function OrderDetails() {
                 </div>
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline">
+                        <Button variant="outline" disabled={isUpdatingStatus}>
                             {getStatusIcon(order.status)}
                             {statusTranslations[order.status] || order.status}
                         </Button>
@@ -193,7 +199,7 @@ function OrderDetails() {
                         {orderStatuses.map(status => (
                             <DropdownMenuItem
                                 key={status}
-                                disabled={order.status === status}
+                                disabled={order.status === status || isUpdatingStatus}
                                 onClick={() => handleStatusChange(status)}
                             >
                                 {markAsTranslations[status]}

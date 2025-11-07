@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useUserRole } from '@/hooks/use-user-role';
@@ -45,6 +45,7 @@ const markAsTranslations: { [key: string]: string } = {
 function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | null, isLoading: boolean, onUpdate: () => void }) {
     const firestore = useFirestore();
     const { toast } = useToast();
+    const [updatingStatusId, setUpdatingStatusId] = React.useState<string | null>(null);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
@@ -68,6 +69,7 @@ function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | nu
 
     const handleStatusChange = (order: Order, newStatus: string) => {
         if (!firestore) return;
+        setUpdatingStatusId(order.id);
         const orderRef = doc(firestore, `users/${order.userId}/orders`, order.id);
         const updateData = { status: newStatus };
         updateDoc(orderRef, updateData)
@@ -91,6 +93,9 @@ function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | nu
                         requestResourceData: updateData,
                     })
                 );
+            })
+            .finally(() => {
+                setUpdatingStatusId(null);
             });
     };
 
@@ -129,13 +134,16 @@ function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | nu
                                 <TableCell>{order.shippingAddress.split(',')[0]}</TableCell>
                                 <TableCell>{formatDate(order.orderDate)}</TableCell>
                                 <TableCell>
-                                    <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
+                                    <div className='flex items-center gap-2'>
+                                        {updatingStatusId === order.id && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status] || order.status}</Badge>
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                            <Button aria-haspopup="true" size="icon" variant="ghost" disabled={updatingStatusId === order.id}>
                                                 <MoreHorizontal className="h-4 w-4" />
                                                 <span className="sr-only">Ouvrir le menu</span>
                                             </Button>
@@ -150,7 +158,7 @@ function AdminOrdersView({ orders, isLoading, onUpdate }: { orders: Order[] | nu
                                             {orderStatuses.map(status => (
                                                 <DropdownMenuItem
                                                     key={status}
-                                                    disabled={order.status === status}
+                                                    disabled={order.status === status || !!updatingStatusId}
                                                     onClick={() => handleStatusChange(order, status)}
                                                 >
                                                     {markAsTranslations[status]}
