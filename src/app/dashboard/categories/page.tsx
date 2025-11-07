@@ -217,7 +217,7 @@ export default function CategoriesPage() {
       toast({
         variant: 'destructive',
         title: 'Erreur de suppression',
-        description: 'Vous n\'avez peut-être pas la permission de faire cela.',
+        description: "Vous n'avez peut-être pas la permission de faire cela.",
       });
     } finally {
       setIsDeleting(false);
