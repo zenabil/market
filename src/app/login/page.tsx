@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -28,6 +29,13 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Connexion & Inscription',
+  description: 'Connectez-vous à votre compte ou créez-en un nouveau pour commencer vos achats sur Tlemcen Smart Supermarket.',
+};
+
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px" {...props}>

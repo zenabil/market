@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -33,6 +34,13 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { useCart } from '@/hooks/use-cart';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Planificateur de Repas IA',
+    description: 'Générez un plan de repas hebdomadaire personnalisé avec une liste de courses automatique grâce à notre IA.',
+};
+
 
 export default function MealPlannerPage() {
   const { t } = useLanguage();
@@ -117,7 +125,7 @@ export default function MealPlannerPage() {
   };
 
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>>) {
     setIsLoading(true);
     setMealPlan(null);
     toast({

@@ -29,6 +29,13 @@ import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
 import type { Coupon } from '@/lib/placeholder-data';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Paiement',
+  description: 'Finalisez votre commande en toute sécurité. Entrez vos informations de livraison et de paiement.',
+};
+
 
 type SiteSettings = {
   deliveryFeeBase?: number;

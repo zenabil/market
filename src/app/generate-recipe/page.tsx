@@ -20,6 +20,12 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Générateur de Recettes IA',
+    description: 'Transformez les ingrédients que vous avez à la maison en une délicieuse recette grâce à notre assistant IA.',
+};
 
 
 export default function GenerateRecipePage() {
@@ -97,7 +103,7 @@ export default function GenerateRecipePage() {
     };
 
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>>) {
         setIsLoading(true);
         setGeneratedRecipe(null);
         try {
