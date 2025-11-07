@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
-import { teamMembers as staticTeamMembers } from '@/lib/team-data.json';
 import { useLanguage } from '@/contexts/language-provider';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import type { TeamMember } from '@/lib/placeholder-data';
+import { collection, query } from 'firebase/firestore';
 
 const values = [
     {
@@ -36,8 +38,14 @@ const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket
 
 export default function AboutPage() {
   const { t } = useLanguage();
-  const team = staticTeamMembers;
-  const areMembersLoading = false;
+  const firestore = useFirestore();
+  
+  const teamQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'teamMembers'));
+  }, [firestore]);
+
+  const { data: team, isLoading: areMembersLoading } = useCollection<TeamMember>(teamQuery);
 
   return (
     <div className="container py-8 md:py-12">
@@ -105,7 +113,7 @@ export default function AboutPage() {
                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <h3 className="font-bold">{member.name}</h3>
-                        <p className="text-sm text-primary">{t(`teamRoles.${member.roleKey}`)}</p>
+                        <p className="text-sm text-primary">{member.role}</p>
                     </div>
                 ))}
             </div>
