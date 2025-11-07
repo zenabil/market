@@ -7,8 +7,10 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/contexts/language-provider';
 
 function SearchResults() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const firestore = useFirestore();
@@ -36,11 +38,11 @@ function SearchResults() {
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">
-          {searchQuery ? `نتائج البحث عن "${searchQuery}"` : 'بحث عن منتجات'}
+          {searchQuery ? t('search.resultsFor').replace('{{query}}', searchQuery) : t('search.title')}
         </h1>
         {filteredProducts && (
             <p className="mt-2 text-lg text-muted-foreground">
-                {`${filteredProducts.length} منتجات تم العثور عليها`}
+                {t('search.productsFound').replace('{{count}}', filteredProducts.length.toString())}
             </p>
         )}
       </div>
@@ -56,7 +58,7 @@ function SearchResults() {
                  <ProductGrid title="" products={filteredProducts} />
             ) : (
                 <div className="text-center p-8 text-muted-foreground">
-                    لم يتم العثور على نتائج.
+                    {t('search.noResults')}
                 </div>
             )}
         </>

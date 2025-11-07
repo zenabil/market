@@ -15,12 +15,14 @@ import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import StarRating from './star-rating';
 import { useComparison } from '@/hooks/use-comparison';
+import { useLanguage } from '@/contexts/language-provider';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { t } = useLanguage();
   const { addItem } = useCart();
   const { toast } = useToast();
   const { user } = useUser();
@@ -37,8 +39,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (isOutOfStock) return;
     addItem(product);
     toast({
-      title: 'أضيف إلى السلة',
-      description: `تمت إضافة ${product.name} إلى سلتك.`,
+      title: t('productCard.addToCart.title'),
+      description: t('productCard.addToCart.description').replace('{{name}}', product.name),
     });
   };
 
@@ -48,8 +50,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: 'تسجيل الدخول مطلوب',
-        description: 'يجب عليك تسجيل الدخول لإضافة عناصر إلى قائمة الرغبات الخاصة بك.',
+        title: t('productCard.wishlist.loginRequired.title'),
+        description: t('productCard.wishlist.loginRequired.description'),
       });
       return;
     }
@@ -63,7 +65,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
   };
   
   const discountedPrice = product.price * (1 - product.discount / 100);
@@ -83,7 +85,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {isOutOfStock && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <Badge variant="outline" className="text-white bg-black/50 border-white/50 text-sm">
-                        نفذ من المخزون
+                        {t('productCard.outOfStock')}
                     </Badge>
                 </div>
             )}
@@ -94,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   className="bg-background/50 backdrop-blur-sm rounded-full hover:bg-background/75 h-8 w-8"
                   onClick={handleWishlistToggle}
                   disabled={isWishlistLoading}
-                  title={isWishlisted ? 'إزالة من قائمة الرغبات' : 'إضافة إلى قائمة الرغبات'}
+                  title={isWishlisted ? t('productCard.wishlist.remove') : t('productCard.wishlist.add')}
                 >
                   <Heart className={cn("h-4 w-4 text-muted-foreground", isWishlisted && "fill-destructive text-destructive")} />
                 </Button>
@@ -107,7 +109,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
                   onClick={handleCompareToggle}
                   disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
-                  title={isComparing ? 'إزالة من المقارنة' : 'إضافة إلى المقارنة'}
+                  title={isComparing ? t('productCard.compare.remove') : t('productCard.compare.add')}
                 >
                   <GitCompareArrows className={cn("h-4 w-4", isComparing ? "text-primary-foreground" : "text-muted-foreground")} />
                 </Button>
@@ -135,7 +137,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <CardFooter className="p-2 md:p-4 mt-auto">
           <Button className="w-full font-bold" onClick={handleAddToCart} disabled={isOutOfStock}>
             <ShoppingCart className="mr-2 h-4 w-4" />
-            {isOutOfStock ? 'نفذ من المخزون' : 'أضف إلى السلة'}
+            {isOutOfStock ? t('productCard.outOfStock') : t('productCard.addToCart.button')}
           </Button>
         </CardFooter>
       </Link>

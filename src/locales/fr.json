@@ -1,4 +1,5 @@
 {
+    "locale": "fr-FR",
     "header": {
         "home": "Accueil",
         "products": "Produits",
@@ -54,5 +55,205 @@
         "teamTitle": "Rencontrez l'Équipe",
         "teamSubtitle": "Les personnes qui rendent tout cela possible.",
         "teamComingSoon": "Les membres de notre équipe seront bientôt présentés !"
+    },
+    "checkout": {
+        "title": "Paiement",
+        "step1": "Étape 1 sur 2 : Détails de la livraison",
+        "step2": "Étape 2 sur 2 : Paiement",
+        "shippingInfo": "Informations de livraison",
+        "fullName": "Nom complet",
+        "address": "Adresse",
+        "city": "Ville",
+        "phone": "Téléphone",
+        "paymentDetails": "Détails de paiement",
+        "paymentSimulation": "Ceci est une simulation. N'entrez pas de vraies informations.",
+        "cardNumber": "Numéro de carte",
+        "expiryDate": "Date d'expiration",
+        "cvc": "CVC",
+        "orderSummary": "Résumé de la commande",
+        "itemsInCart": "{{count}} article(s) dans votre panier",
+        "quantity": "Quantité",
+        "discountCode": "Code de réduction",
+        "apply": "Appliquer",
+        "discountApplied": "Réduction appliquée : {{code}} ({{percentage}}%)",
+        "subtotal": "Sous-total",
+        "discount": "Réduction",
+        "shipping": "Livraison",
+        "free": "Gratuit",
+        "total": "Total",
+        "proceedToPayment": "Passer au paiement",
+        "payNow": "Payer {{amount}}",
+        "validation": {
+            "name": "Le nom doit comporter au moins 2 caractères.",
+            "address": "L'adresse doit comporter au moins 10 caractères.",
+            "city": "La ville doit comporter au moins 2 caractères.",
+            "phone": "Le téléphone doit comporter au moins 10 caractères.",
+            "cardNumber": "Numéro de carte invalide.",
+            "expiryDate": "Format MM/AA invalide.",
+            "cvc": "CVC invalide."
+        },
+        "coupon": {
+            "invalid": {
+                "title": "Coupon non valide",
+                "description": "Ce code promotionnel n'existe pas ou a été mal saisi."
+            },
+            "inactive": {
+                "title": "Coupon inactif",
+                "description": "Ce code promotionnel n'est plus actif."
+            },
+            "expired": {
+                "title": "Coupon expiré",
+                "description": "Ce code promotionnel a expiré."
+            },
+            "applied": "Coupon appliqué : {{code}}",
+            "error": {
+                "title": "Erreur de coupon",
+                "description": "Impossible de vérifier le coupon. Vous n'avez peut-être pas la permission."
+            }
+        },
+        "orderSuccess": {
+            "title": "Commande passée !",
+            "description": "Votre commande a été enregistrée avec succès."
+        },
+        "orderFail": {
+            "title": "Échec de la commande",
+            "description": "Nous n'avons pas pu traiter votre commande."
+        }
+    },
+    "compare": {
+        "title": "Comparaison de Produits",
+        "noProducts": "Aucun produit à comparer.",
+        "browseProducts": "Parcourir les produits",
+        "compareTitle": "Comparer",
+        "clearAll": "Tout effacer",
+        "addToCart": {
+            "title": "Ajouté au panier",
+            "description": "{{name}} a été ajouté à votre panier.",
+            "button": "Ajouter au panier"
+        },
+        "add": "Ajouter",
+        "reviews": "{{count}} avis",
+        "noDiscount": "Aucune",
+        "inStock": "{{count}} en stock",
+        "outOfStock": "Épuisé",
+        "features": {
+            "title": "Caractéristiques",
+            "price": "Prix",
+            "rating": "Évaluation",
+            "reviewCount": "Nombre d'avis",
+            "discount": "Réduction",
+            "stock": "Stock"
+        }
+    },
+    "contact": {
+        "title": "Contactez-nous",
+        "subtitle": "Nous sommes là pour vous aider. Contactez-nous pour toute question.",
+        "formTitle": "Envoyer un message",
+        "name": "Nom",
+        "namePlaceholder": "Votre nom",
+        "email": "Email",
+        "emailPlaceholder": "Votre adresse email",
+        "subject": "Sujet",
+        "subjectPlaceholder": "Le sujet de votre message",
+        "message": "Message",
+        "messagePlaceholder": "Écrivez votre message ici...",
+        "submitButton": "Envoyer le message",
+        "contactInfo": "Coordonnées",
+        "address": "Adresse",
+        "phone": "Téléphone",
+        "notAvailable": "Non disponible",
+        "success": {
+            "title": "Message envoyé !",
+            "description": "Nous avons bien reçu votre message et nous vous répondrons bientôt."
+        },
+        "error": {
+            "title": "Échec de l'envoi",
+            "description": "Impossible d'envoyer votre message pour le moment."
+        },
+        "validation": {
+            "name": "Le nom doit comporter au moins 2 caractères.",
+            "email": "Veuillez entrer une adresse email valide.",
+            "subject": "Le sujet doit comporter au moins 5 caractères.",
+            "message": "Le message doit comporter au moins 10 caractères."
+        }
+    },
+    "product": {
+        "reviews": "avis",
+        "relatedProducts": "Produits similaires",
+        "compare": "Comparer ce produit",
+        "removeFromComparison": "Retirer de la comparaison",
+        "addToCart": {
+            "title": "Ajouté au panier",
+            "description": "{{quantity}} x {{name}} a été ajouté à votre panier.",
+            "button": "Ajouter au panier"
+        },
+        "outOfStock": "En rupture de stock",
+        "outOfStockFull": "Ce produit est actuellement en rupture de stock.",
+        "inStock": "En stock: {{count}} unités disponibles",
+        "wishlist": {
+            "loginRequired": {
+                "title": "Connexion requise",
+                "description": "Vous devez être connecté pour ajouter des articles à votre liste de souhaits."
+            }
+        }
+    },
+    "productCard": {
+        "addToCart": {
+            "title": "Ajouté au panier",
+            "description": "{{name}} a été ajouté à votre panier.",
+            "button": "Ajouter au panier"
+        },
+        "outOfStock": "Épuisé",
+        "wishlist": {
+            "add": "Ajouter à la liste de souhaits",
+            "remove": "Retirer de la liste de souhaits",
+            "loginRequired": {
+                "title": "Connexion requise",
+                "description": "Vous devez vous connecter pour ajouter des articles à votre liste de souhaits."
+            }
+        },
+        "compare": {
+            "add": "Ajouter au comparateur",
+            "remove": "Retirer du comparateur"
+        }
+    },
+    "wishlist": {
+        "added": "Ajouté à la liste de souhaits",
+        "removed": "Retiré de la liste de souhaits"
+    },
+    "search": {
+        "title": "Rechercher des produits",
+        "resultsFor": "Résultats de recherche pour \"{{query}}\"",
+        "productsFound": "{{count}} produits trouvés",
+        "noResults": "Aucun résultat trouvé."
+    },
+    "cart": {
+        "title": "Panier",
+        "empty": "Votre panier est vide.",
+        "subtotal": "Sous-total",
+        "checkout": "Paiement"
+    },
+    "reviews": {
+        "leaveReview": "Laisser un avis",
+        "customerReviews": "Avis des clients",
+        "submitButton": "Envoyer l'avis",
+        "commentPlaceholder": "Partagez votre opinion...",
+        "anonymous": "Anonyme",
+        "loginPrompt": {
+            "message": "Veuillez vous connecter pour laisser un avis.",
+            "button": "Se connecter"
+        },
+        "noReviews": "Aucun avis pour l'instant.",
+        "validation": {
+            "comment": "Le commentaire doit contenir au moins 10 caractères.",
+            "rating": "Une évaluation est requise."
+        },
+        "success": {
+            "title": "Avis soumis avec succès"
+        },
+        "error": {
+            "title": "Erreur",
+            "description": "Une erreur inattendue s'est produite lors de la soumission de l'avis."
+        }
     }
 }

@@ -20,9 +20,11 @@ import ReviewsSection from '@/components/shared/reviews-section';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { cn } from '@/lib/utils';
 import { useComparison } from '@/hooks/use-comparison';
+import { useLanguage } from '@/contexts/language-provider';
 
 
 function ProductDetails({ productId }: { productId: string }) {
+  const { t } = useLanguage();
   const { addItem, updateQuantity: updateCartQuantity } = useCart();
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -107,15 +109,15 @@ function ProductDetails({ productId }: { productId: string }) {
   const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   const handleAddToCart = () => {
     addItem(product);
     updateCartQuantity(product.id, quantity);
     toast({
-      title: 'Ajouté au panier',
-      description: `${quantity} x ${product.name} a été ajouté à votre panier.`,
+      title: t('product.addToCart.title'),
+      description: t('product.addToCart.description').replace('{{quantity}}', quantity.toString()).replace('{{name}}', product.name),
     });
   };
 
@@ -123,8 +125,8 @@ function ProductDetails({ productId }: { productId: string }) {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: 'Connexion requise',
-        description: 'Vous devez être connecté pour ajouter des articles à votre liste de souhaits.',
+        title: t('product.wishlist.loginRequired.title'),
+        description: t('product.wishlist.loginRequired.description'),
       });
       return;
     }
@@ -179,7 +181,7 @@ function ProductDetails({ productId }: { productId: string }) {
           <div className="mt-2 flex items-center gap-2">
             <StarRating rating={product.averageRating || 0} />
             <span className="text-sm text-muted-foreground">
-                ({product.reviewCount || 0} avis)
+                ({product.reviewCount || 0} {t('product.reviews')})
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-3">
@@ -198,7 +200,7 @@ function ProductDetails({ productId }: { productId: string }) {
                 disabled={!isComparing && comparisonItems.length >= MAX_COMPARISON_ITEMS}
              >
                 <GitCompareArrows className={cn("mr-2 h-4 w-4", isComparing && "text-primary-foreground")} />
-                {isComparing ? 'Retirer de la comparaison' : 'Comparer ce produit'}
+                {isComparing ? t('product.removeFromComparison') : t('product.compare')}
              </Button>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -229,7 +231,7 @@ function ProductDetails({ productId }: { productId: string }) {
               </div>
               <Button size="lg" className="flex-1 font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                {product.stock === 0 ? 'En rupture de stock' : 'Ajouter au panier'}
+                {product.stock === 0 ? t('product.outOfStock') : t('product.addToCart.button')}
               </Button>
                <Button size="lg" variant="outline" className="px-4 py-6" onClick={handleWishlistToggle} disabled={isWishlistLoading}>
                   <Heart className={cn("h-6 w-6", isWishlisted && "fill-destructive text-destructive")} />
@@ -237,8 +239,8 @@ function ProductDetails({ productId }: { productId: string }) {
             </div>
              <p className="text-sm text-muted-foreground mt-2">
               {product.stock > 0 
-                  ? `En stock: ${product.stock} unités disponibles`
-                  : 'Ce produit est actuellement en rupture de stock.'
+                  ? t('product.inStock').replace('{{count}}', product.stock.toString())
+                  : t('product.outOfStockFull')
               }
              </p>
           </div>
@@ -250,7 +252,7 @@ function ProductDetails({ productId }: { productId: string }) {
 
     {relatedProducts && relatedProducts.length > 0 && (
     <div className="container mt-16 md:mt-24 pb-12">
-        <ProductGrid title="Produits similaires" products={relatedProducts} />
+        <ProductGrid title={t('product.relatedProducts')} products={relatedProducts} />
     </div>
     )}
     </>

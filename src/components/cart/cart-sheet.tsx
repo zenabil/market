@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 import { Input } from '../ui/input';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/language-provider';
 
 interface CartSheetProps {
   open: boolean;
@@ -24,10 +25,11 @@ interface CartSheetProps {
 }
 
 export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
+  const { t } = useLanguage();
   const { items, removeItem, updateQuantity, totalPrice } = useCart();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-DZ', {
+    return new Intl.NumberFormat(t('locale'), {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -37,12 +39,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle className="font-headline text-2xl">سلة التسوق</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">{t('cart.title')}</SheetTitle>
         </SheetHeader>
         <Separator />
         {items.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">سلة التسوق الخاصة بك فارغة.</p>
+            <p className="text-muted-foreground">{t('cart.empty')}</p>
           </div>
         ) : (
           <>
@@ -102,12 +104,12 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
             <Separator />
             <SheetFooter className="mt-4 sm:flex-col sm:space-x-0 space-y-2">
               <div className="flex justify-between font-bold text-lg">
-                <span>المجموع الفرعي</span>
+                <span>{t('cart.subtotal')}</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <SheetClose asChild>
                 <Button asChild className="w-full font-bold text-base py-6">
-                  <Link href="/checkout">الدفع</Link>
+                  <Link href="/checkout">{t('cart.checkout')}</Link>
                 </Button>
               </SheetClose>
             </SheetFooter>

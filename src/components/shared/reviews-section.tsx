@@ -16,11 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import StarRating from '../product/star-rating';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-
-const reviewSchema = z.object({
-  comment: z.string().min(10, 'يجب أن يحتوي التعليق على 10 أحرف على الأقل.'),
-  rating: z.number().min(1, 'التقييم مطلوب.').max(5),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 interface ReviewFormProps {
     targetId: string;
@@ -29,10 +25,16 @@ interface ReviewFormProps {
 }
 
 const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormProps) => {
+  const { t } = useLanguage();
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const reviewSchema = z.object({
+    comment: z.string().min(10, t('reviews.validation.comment')),
+    rating: z.number().min(1, t('reviews.validation.rating')).max(5),
+  });
 
   const targetRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -55,7 +57,7 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
     
     const reviewData = {
         userId: user.uid,
-        userName: user.displayName || 'مجهول',
+        userName: user.displayName || t('reviews.anonymous'),
         userAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`,
         rating: values.rating,
         comment: values.comment,
@@ -78,7 +80,7 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
 
         await updateDoc(targetRef, targetUpdateData);
         
-        toast({ title: 'تم تقديم المراجعة بنجاح' });
+        toast({ title: t('reviews.success.title') });
         form.reset({ comment: '', rating: 0 });
         onReviewAdded();
 
@@ -93,8 +95,8 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
             console.error("An unexpected error occurred:", error);
              toast({
                 variant: 'destructive',
-                title: 'خطأ',
-                description: "حدث خطأ غير متوقع أثناء تقديم المراجعة."
+                title: t('reviews.error.title'),
+                description: t('reviews.error.description')
             });
         }
     } finally {
@@ -105,8 +107,8 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
   if (!user) {
     return (
         <div className="p-4 border-dashed border-2 rounded-lg text-center bg-muted/50">
-            <p className="text-muted-foreground">الرجاء تسجيل الدخول لترك مراجعة.</p>
-            <Button asChild variant="link"><Link href="/login">تسجيل الدخول</Link></Button>
+            <p className="text-muted-foreground">{t('reviews.loginPrompt.message')}</p>
+            <Button asChild variant="link"><Link href="/login">{t('reviews.loginPrompt.button')}</Link></Button>
         </div>
     )
   }
@@ -130,7 +132,7 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Textarea placeholder="شاركنا رأيك..." {...field} />
+                <Textarea placeholder={t('reviews.commentPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -138,7 +140,7 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
         />
         <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            إرسال المراجعة
+            {t('reviews.submitButton')}
         </Button>
       </form>
     </Form>
@@ -146,8 +148,9 @@ const ReviewForm = ({ targetId, targetCollection, onReviewAdded }: ReviewFormPro
 };
 
 const ReviewItem = ({ review }: { review: Review }) => {
+    const { t } = useLanguage();
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateString).toLocaleDateString(t('locale'), { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     return (
@@ -175,6 +178,7 @@ interface ReviewsSectionProps {
 }
 
 export default function ReviewsSection({ targetId, targetCollection, onReviewChange }: ReviewsSectionProps) {
+  const { t } = useLanguage();
   const firestore = useFirestore();
 
   const reviewsQuery = useMemoFirebase(() => {
@@ -188,11 +192,11 @@ export default function ReviewsSection({ targetId, targetCollection, onReviewCha
     <div className="bg-muted/40 py-12 md:py-16">
       <div className="container grid md:grid-cols-2 gap-12">
         <div>
-          <h3 className="font-headline text-2xl md:text-3xl mb-6">اترك مراجعة</h3>
+          <h3 className="font-headline text-2xl md:text-3xl mb-6">{t('reviews.leaveReview')}</h3>
           <ReviewForm targetId={targetId} targetCollection={targetCollection} onReviewAdded={onReviewChange} />
         </div>
         <div>
-          <h3 className="font-headline text-2xl md:text-3xl mb-6">مراجعات العملاء</h3>
+          <h3 className="font-headline text-2xl md:text-3xl mb-6">{t('reviews.customerReviews')}</h3>
           <div className="space-y-6">
             {isLoading && Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="flex gap-4">
@@ -207,7 +211,7 @@ export default function ReviewsSection({ targetId, targetCollection, onReviewCha
             {!isLoading && reviews && reviews.length > 0 ? (
               reviews.map((review) => <ReviewItem key={review.id} review={review} />)
             ) : (
-              !isLoading && <p className="text-muted-foreground">لا توجد مراجعات حتى الآن.</p>
+              !isLoading && <p className="text-muted-foreground">{t('reviews.noReviews')}</p>
             )}
           </div>
         </div>

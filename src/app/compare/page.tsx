@@ -12,8 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '@/components/ui/table';
 import type { Product } from '@/lib/placeholder-data';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function ComparePage() {
+  const { t } = useLanguage();
   const { items, removeFromComparison, clearComparison } = useComparison();
   const { addItem } = useCart();
   const { toast } = useToast();
@@ -21,33 +23,33 @@ export default function ComparePage() {
   const handleAddToCart = (product: Product) => {
     addItem(product);
     toast({
-      title: 'أضيف إلى السلة',
-      description: `تمت إضافة ${product.name} إلى سلتك.`,
+      title: t('compare.addToCart.title'),
+      description: t('compare.addToCart.description').replace('{{name}}', product.name),
     });
   };
   
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   if (items.length === 0) {
     return (
       <div className="container py-8 md:py-12 text-center">
-        <h1 className="font-headline text-4xl md:text-5xl">مقارنة المنتجات</h1>
-        <p className="mt-4 text-lg text-muted-foreground">لا توجد منتجات للمقارنة.</p>
+        <h1 className="font-headline text-4xl md:text-5xl">{t('compare.title')}</h1>
+        <p className="mt-4 text-lg text-muted-foreground">{t('compare.noProducts')}</p>
         <Button asChild className="mt-8">
-          <Link href="/products">تصفح المنتجات</Link>
+          <Link href="/products">{t('compare.browseProducts')}</Link>
         </Button>
       </div>
     );
   }
   
   const features = [
-    { key: 'price', label: 'السعر' },
-    { key: 'averageRating', label: 'التقييم' },
-    { key: 'reviewCount', label: 'عدد المراجعات' },
-    { key: 'discount', label: 'الخصم' },
-    { key: 'stock', label: 'المخزون' },
+    { key: 'price', label: t('compare.features.price') },
+    { key: 'averageRating', label: t('compare.features.rating') },
+    { key: 'reviewCount', label: t('compare.features.reviewCount') },
+    { key: 'discount', label: t('compare.features.discount') },
+    { key: 'stock', label: t('compare.features.stock') },
   ];
 
   const renderFeature = (product: Product, featureKey: string) => {
@@ -57,11 +59,11 @@ export default function ComparePage() {
         case 'averageRating':
             return <StarRating rating={product.averageRating || 0} />;
         case 'reviewCount':
-            return `${product.reviewCount || 0} مراجعات`;
+            return t('compare.reviews').replace('{{count}}', (product.reviewCount || 0).toString());
         case 'discount':
-            return product.discount > 0 ? `${product.discount}%` : 'لا يوجد';
+            return product.discount > 0 ? `${product.discount}%` : t('compare.noDiscount');
         case 'stock':
-            return product.stock > 0 ? `${product.stock} في المخزون` : 'نفذ من المخزون';
+            return product.stock > 0 ? t('compare.inStock').replace('{{count}}', product.stock.toString()) : t('compare.outOfStock');
         default:
             return null;
     }
@@ -70,11 +72,11 @@ export default function ComparePage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="font-headline text-4xl md:text-5xl">مقارنة</h1>
+        <h1 className="font-headline text-4xl md:text-5xl">{t('compare.compareTitle')}</h1>
         {items.length > 0 && (
           <Button variant="outline" onClick={clearComparison} size="sm">
             <Trash2 className="mr-2 h-4 w-4" />
-            مسح الكل
+            {t('compare.clearAll')}
           </Button>
         )}
       </div>
@@ -117,7 +119,7 @@ export default function ComparePage() {
             <CardFooter>
                  <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    أضف إلى السلة
+                    {t('compare.addToCart.button')}
                 </Button>
             </CardFooter>
           </Card>
@@ -129,7 +131,7 @@ export default function ComparePage() {
         <Table className="border rounded-lg">
           <TableHeader>
             <TableRow>
-              <TableHead className="font-headline text-lg w-[200px]">الميزات</TableHead>
+              <TableHead className="font-headline text-lg w-[200px]">{t('compare.features.title')}</TableHead>
               {items.map(product => (
                 <TableHead key={product.id}>
                   <div className="flex flex-col items-center text-center gap-2">
@@ -169,7 +171,7 @@ export default function ComparePage() {
                   <TableCell key={product.id} className="text-center p-4">
                      <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                         <ShoppingCart className="mr-2 h-4 w-4" />
-                        إضافة
+                        {t('compare.add')}
                     </Button>
                   </TableCell>
                 ))}

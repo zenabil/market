@@ -1,4 +1,5 @@
 {
+    "locale": "ar-DZ",
     "header": {
         "home": "الرئيسية",
         "products": "المنتجات",
@@ -54,5 +55,206 @@
         "teamTitle": "تعرف على الفريق",
         "teamSubtitle": "الأشخاص الذين يجعلون كل شيء ممكنًا.",
         "teamComingSoon": "سيتم عرض أعضاء فريقنا قريبًا!"
+    },
+    "checkout": {
+        "title": "الدفع",
+        "step1": "الخطوة 1 من 2: تفاصيل الشحن",
+        "step2": "الخطوة 2 من 2: الدفع",
+        "shippingInfo": "معلومات الشحن",
+        "fullName": "الاسم الكامل",
+        "address": "العنوان",
+        "city": "المدينة",
+        "phone": "الهاتف",
+        "paymentDetails": "تفاصيل الدفع",
+        "paymentSimulation": "هذه محاكاة. لا تدخل معلومات حقيقية.",
+        "cardNumber": "رقم البطاقة",
+        "expiryDate": "تاريخ انتهاء الصلاحية",
+        "cvc": "CVC",
+        "orderSummary": "ملخص الطلب",
+        "itemsInCart": "{{count}} منتج(ات) في سلتك",
+        "quantity": "الكمية",
+        "discountCode": "كود الخصم",
+        "apply": "تطبيق",
+        "discountApplied": "تم تطبيق الخصم: {{code}} ({{percentage}}%)",
+        "subtotal": "المجموع الفرعي",
+        "discount": "الخصم",
+        "shipping": "الشحن",
+        "free": "مجاني",
+        "total": "الإجمالي",
+        "proceedToPayment": "المتابعة إلى الدفع",
+        "payNow": "ادفع {{amount}}",
+        "validation": {
+            "name": "يجب أن يتكون الاسم من حرفين على الأقل.",
+            "address": "يجب أن يتكون العنوان من 10 أحرف على الأقل.",
+            "city": "يجب أن تتكون المدينة من حرفين على الأقل.",
+            "phone": "يجب أن يتكون الهاتف من 10 أحرف على الأقل.",
+            "cardNumber": "رقم البطاقة غير صالح.",
+            "expiryDate": "تنسيق MM/YY غير صالح.",
+            "cvc": "CVC غير صالح."
+        },
+        "coupon": {
+            "invalid": {
+                "title": "كوبون غير صالح",
+                "description": "هذا الكود الترويجي غير موجود أو تم إدخاله بشكل غير صحيح."
+            },
+            "inactive": {
+                "title": "كوبون غير نشط",
+                "description": "هذا الكود الترويجي لم يعد نشطًا."
+            },
+            "expired": {
+                "title": "كوبون منتهي الصلاحية",
+                "description": "انتهت صلاحية هذا الكود الترويجي."
+            },
+            "applied": "تم تطبيق الكوبون: {{code}}",
+            "error": {
+                "title": "خطأ في الكوبون",
+                "description": "تعذر التحقق من الكوبون. ربما لا تملك الإذن."
+            }
+        },
+        "orderSuccess": {
+            "title": "تم تقديم الطلب!",
+            "description": "تم تسجيل طلبك بنجاح."
+        },
+        "orderFail": {
+            "title": "فشل الطلب",
+            "description": "لم نتمكن من معالجة طلبك."
+        }
+    },
+    "compare": {
+        "title": "مقارنة المنتجات",
+        "noProducts": "لا توجد منتجات للمقارنة.",
+        "browseProducts": "تصفح المنتجات",
+        "compareTitle": "مقارنة",
+
+        "clearAll": "مسح الكل",
+        "addToCart": {
+            "title": "أضيف إلى السلة",
+            "description": "تمت إضافة {{name}} إلى سلتك.",
+            "button": "أضف إلى السلة"
+        },
+        "add": "إضافة",
+        "reviews": "{{count}} مراجعات",
+        "noDiscount": "لا يوجد",
+        "inStock": "{{count}} في المخزون",
+        "outOfStock": "نفذ من المخزون",
+        "features": {
+            "title": "الميزات",
+            "price": "السعر",
+            "rating": "التقييم",
+            "reviewCount": "عدد المراجعات",
+            "discount": "الخصم",
+            "stock": "المخزون"
+        }
+    },
+    "contact": {
+        "title": "اتصل بنا",
+        "subtitle": "نحن هنا لمساعدتك. اتصل بنا لأي سؤال.",
+        "formTitle": "أرسل رسالة",
+        "name": "الاسم",
+        "namePlaceholder": "اسمك",
+        "email": "البريد الإلكتروني",
+        "emailPlaceholder": "عنوان بريدك الإلكتروني",
+        "subject": "الموضوع",
+        "subjectPlaceholder": "موضوع رسالتك",
+        "message": "الرسالة",
+        "messagePlaceholder": "اكتب رسالتك هنا...",
+        "submitButton": "إرسال الرسالة",
+        "contactInfo": "معلومات الاتصال",
+        "address": "العنوان",
+        "phone": "الهاتف",
+        "notAvailable": "غير متوفر",
+        "success": {
+            "title": "تم إرسال الرسالة!",
+            "description": "لقد استلمنا رسالتك وسنرد عليك قريبًا."
+        },
+        "error": {
+            "title": "فشل الإرسال",
+            "description": "تعذر إرسال رسالتك في الوقت الحالي."
+        },
+        "validation": {
+            "name": "يجب أن يتكون الاسم من حرفين على الأقل.",
+            "email": "الرجاء إدخال عنوان بريد إلكتروني صالح.",
+            "subject": "يجب أن يتكون الموضوع من 5 أحرف على الأقل.",
+            "message": "يجب أن تتكون الرسالة من 10 أحرف على الأقل."
+        }
+    },
+    "product": {
+        "reviews": "avis",
+        "relatedProducts": "Produits similaires",
+        "compare": "Comparer ce produit",
+        "removeFromComparison": "Retirer de la comparaison",
+        "addToCart": {
+            "title": "Ajouté au panier",
+            "description": "{{quantity}} x {{name}} a été ajouté à votre panier.",
+            "button": "Ajouter au panier"
+        },
+        "outOfStock": "En rupture de stock",
+        "outOfStockFull": "Ce produit est actuellement en rupture de stock.",
+        "inStock": "En stock: {{count}} unités disponibles",
+        "wishlist": {
+            "loginRequired": {
+                "title": "Connexion requise",
+                "description": "Vous devez être connecté pour ajouter des articles à votre liste de souhaits."
+            }
+        }
+    },
+    "productCard": {
+        "addToCart": {
+            "title": "أضيف إلى السلة",
+            "description": "تمت إضافة {{name}} إلى سلتك.",
+            "button": "أضف إلى السلة"
+        },
+        "outOfStock": "نفذ من المخزون",
+        "wishlist": {
+            "add": "إضافة إلى قائمة الرغبات",
+            "remove": "إزالة من قائمة الرغبات",
+            "loginRequired": {
+                "title": "تسجيل الدخول مطلوب",
+                "description": "يجب عليك تسجيل الدخول لإضافة عناصر إلى قائمة الرغبات الخاصة بك."
+            }
+        },
+        "compare": {
+            "add": "إضافة إلى المقارنة",
+            "remove": "إزالة من المقارنة"
+        }
+    },
+    "wishlist": {
+        "added": "أضيف إلى قائمة الرغبات",
+        "removed": "أزيل من قائمة الرغبات"
+    },
+    "search": {
+        "title": "بحث عن منتجات",
+        "resultsFor": "نتائج البحث عن \"{{query}}\"",
+        "productsFound": "{{count}} منتجات تم العثور عليها",
+        "noResults": "لم يتم العثور على نتائج."
+    },
+    "cart": {
+        "title": "سلة التسوق",
+        "empty": "سلة التسوق الخاصة بك فارغة.",
+        "subtotal": "المجموع الفرعي",
+        "checkout": "الدفع"
+    },
+    "reviews": {
+        "leaveReview": "اترك مراجعة",
+        "customerReviews": "مراجعات العملاء",
+        "submitButton": "إرسال المراجعة",
+        "commentPlaceholder": "شاركنا رأيك...",
+        "anonymous": "مجهول",
+        "loginPrompt": {
+            "message": "الرجاء تسجيل الدخول لترك مراجعة.",
+            "button": "تسجيل الدخول"
+        },
+        "noReviews": "لا توجد مراجعات حتى الآن.",
+        "validation": {
+            "comment": "يجب أن يحتوي التعليق على 10 أحرف على الأقل.",
+            "rating": "التقييم مطلوب."
+        },
+        "success": {
+            "title": "تم تقديم المراجعة بنجاح"
+        },
+        "error": {
+            "title": "خطأ",
+            "description": "حدث خطأ غير متوقع أثناء تقديم المراجعة."
+        }
     }
 }

@@ -27,20 +27,7 @@ import { collection, doc, getDocs, query, where, Timestamp } from 'firebase/fire
 import type { User as FirestoreUser } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
 import type { Coupon } from '@/lib/placeholder-data';
-
-const shippingFormSchema = z.object({
-  name: z.string().min(2, { message: 'يجب أن يتكون الاسم من حرفين على الأقل.' }),
-  address: z.string().min(10, { message: 'يجب أن يتكون العنوان من 10 أحرف على الأقل.' }),
-  city: z.string().min(2, { message: 'يجب أن تتكون المدينة من حرفين على الأقل.' }),
-  phone: z.string().min(10, { message: 'يجب أن يتكون الهاتف من 10 أحرف على الأقل.' }),
-});
-
-// Dummy schema for payment simulation
-const paymentFormSchema = z.object({
-    cardNumber: z.string().min(16, "رقم البطاقة غير صالح.").max(16, "رقم البطاقة غير صالح."),
-    expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "تنسيق MM/YY غير صالح."),
-    cvc: z.string().min(3, "CVC غير صالح.").max(4, "CVC غير صالح."),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 type SiteSettings = {
   deliveryFeeBase?: number;
@@ -49,6 +36,22 @@ type SiteSettings = {
 };
 
 export default function CheckoutPage() {
+  const { t } = useLanguage();
+
+  const shippingFormSchema = z.object({
+    name: z.string().min(2, { message: t('checkout.validation.name') }),
+    address: z.string().min(10, { message: t('checkout.validation.address') }),
+    city: z.string().min(2, { message: t('checkout.validation.city') }),
+    phone: z.string().min(10, { message: t('checkout.validation.phone') }),
+  });
+  
+  const paymentFormSchema = z.object({
+      cardNumber: z.string().min(16, t('checkout.validation.cardNumber')).max(16, t('checkout.validation.cardNumber')),
+      expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, t('checkout.validation.expiryDate')),
+      cvc: z.string().min(3, t('checkout.validation.cvc')).max(4, t('checkout.validation.cvc')),
+  });
+
+
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { user } = useUser();
   const firestore = useFirestore();
@@ -148,7 +151,7 @@ export default function CheckoutPage() {
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-            toast({ variant: 'destructive', title: 'كوبون غير صالح', description: "هذا الكود الترويجي غير موجود أو تم إدخاله بشكل غير صحيح." });
+            toast({ variant: 'destructive', title: t('checkout.coupon.invalid.title'), description: t('checkout.coupon.invalid.description') });
             return;
         }
 
@@ -160,17 +163,17 @@ export default function CheckoutPage() {
         const expiryDate = (couponData.expiryDate as any).toDate ? (couponData.expiryDate as any).toDate() : new Date(couponData.expiryDate);
 
         if (!couponData.isActive) {
-            toast({ variant: 'destructive', title: 'كوبون غير نشط', description: "هذا الكود الترويجي لم يعد نشطًا." });
+            toast({ variant: 'destructive', title: t('checkout.coupon.inactive.title'), description: t('checkout.coupon.inactive.description') });
             return;
         }
         
         if (now > expiryDate) {
-            toast({ variant: 'destructive', title: 'كوبون منتهي الصلاحية', description: "انتهت صلاحية هذا الكود الترويجي." });
+            toast({ variant: 'destructive', title: t('checkout.coupon.expired.title'), description: t('checkout.coupon.expired.description') });
             return;
         }
         
         setAppliedCoupon(couponData);
-        toast({ title: `تم تطبيق الكوبون: ${couponData.code}` });
+        toast({ title: t('checkout.coupon.applied').replace('{{code}}', couponData.code) });
     } catch (error) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'list',
@@ -178,8 +181,8 @@ export default function CheckoutPage() {
         }));
         toast({
             variant: 'destructive',
-            title: 'خطأ في الكوبون',
-            description: "تعذر التحقق من الكوبون. ربما لا تملك الإذن.",
+            title: t('checkout.coupon.error.title'),
+            description: t('checkout.coupon.error.description'),
         });
     } finally {
         setIsApplyingCoupon(false);
@@ -188,7 +191,7 @@ export default function CheckoutPage() {
 
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-DZ', { style: 'currency', currency: 'DZD' }).format(amount);
+    return new Intl.NumberFormat(t('locale'), { style: 'currency', currency: 'DZD' }).format(amount);
   };
 
   const handleProceedToPayment = () => {
@@ -210,8 +213,8 @@ export default function CheckoutPage() {
       });
 
       toast({
-        title: 'تم تقديم الطلب!',
-        description: 'تم تسجيل طلبك بنجاح.',
+        title: t('checkout.orderSuccess.title'),
+        description: t('checkout.orderSuccess.description'),
       });
       
       clearCart();
@@ -220,8 +223,8 @@ export default function CheckoutPage() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: 'فشل الطلب',
-        description: error.message || 'لم نتمكن من معالجة طلبك.',
+        title: t('checkout.orderFail.title'),
+        description: error.message || t('checkout.orderFail.description'),
       });
     } finally {
       setIsProcessing(false);
@@ -237,21 +240,21 @@ export default function CheckoutPage() {
           <form onSubmit={shippingForm.handleSubmit(handleProceedToPayment)} id="shipping-form">
                 <Card>
                   <CardHeader>
-                    <CardTitle>معلومات الشحن</CardTitle>
+                    <CardTitle>{t('checkout.shippingInfo')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <div className="space-y-6">
                         <FormField control={shippingForm.control} name="name" render={({ field }) => (
-                            <FormItem><FormLabel>الاسم الكامل</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('checkout.fullName')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={shippingForm.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>العنوان</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('checkout.address')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={shippingForm.control} name="city" render={({ field }) => (
-                            <FormItem><FormLabel>المدينة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('checkout.city')}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                          <FormField control={shippingForm.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>الهاتف</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>{t('checkout.phone')}</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                       </div>
                   </CardContent>
@@ -265,13 +268,13 @@ export default function CheckoutPage() {
           <form onSubmit={paymentForm.handleSubmit(onFinalSubmit)} id="payment-form">
              <Card>
                 <CardHeader>
-                    <CardTitle>تفاصيل الدفع</CardTitle>
-                    <CardDescription>هذه محاكاة. لا تدخل معلومات حقيقية.</CardDescription>
+                    <CardTitle>{t('checkout.paymentDetails')}</CardTitle>
+                    <CardDescription>{t('checkout.paymentSimulation')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <FormField control={paymentForm.control} name="cardNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>رقم البطاقة</FormLabel>
+                            <FormLabel>{t('checkout.cardNumber')}</FormLabel>
                             <div className="relative">
                                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input {...field} placeholder="0000 0000 0000 0000" className="pl-10" />
@@ -282,7 +285,7 @@ export default function CheckoutPage() {
                      <div className="grid grid-cols-2 gap-4">
                         <FormField control={paymentForm.control} name="expiryDate" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>تاريخ انتهاء الصلاحية</FormLabel>
+                                <FormLabel>{t('checkout.expiryDate')}</FormLabel>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input {...field} placeholder="MM/YY" className="pl-10"/>
@@ -292,7 +295,7 @@ export default function CheckoutPage() {
                         )} />
                         <FormField control={paymentForm.control} name="cvc" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>CVC</FormLabel>
+                                <FormLabel>{t('checkout.cvc')}</FormLabel>
                                 <div className="relative">
                                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                      <Input {...field} placeholder="123" className="pl-10"/>
@@ -310,9 +313,9 @@ export default function CheckoutPage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">الدفع</h1>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('checkout.title')}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-            الخطوة {step === 'details' ? '1 من 2: تفاصيل الشحن' : '2 من 2: الدفع'}
+            {step === 'details' ? t('checkout.step1') : t('checkout.step2')}
         </p>
       </div>
       <div className="grid lg:grid-cols-2 gap-12">
@@ -322,8 +325,8 @@ export default function CheckoutPage() {
         <div>
             <Card>
                 <CardHeader>
-                    <CardTitle>ملخص الطلب</CardTitle>
-                    <CardDescription>{`${totalItems} منتج(ات) في سلتك`}</CardDescription>
+                    <CardTitle>{t('checkout.orderSummary')}</CardTitle>
+                    <CardDescription>{t('checkout.itemsInCart').replace('{{count}}', totalItems.toString())}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
@@ -335,7 +338,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div>
                                     <p className="font-medium text-sm">{item.name}</p>
-                                    <p className="text-sm text-muted-foreground">الكمية: {item.quantity}</p>
+                                    <p className="text-sm text-muted-foreground">{t('checkout.quantity')}: {item.quantity}</p>
                                 </div>
                             </div>
                             <p className="font-medium text-sm">{formatCurrency(item.price * (1 - item.discount / 100) * item.quantity)}</p>
@@ -346,7 +349,7 @@ export default function CheckoutPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Input 
-                          placeholder="كود الخصم"
+                          placeholder={t('checkout.discountCode')}
                           value={couponCode}
                           onChange={(e) => setCouponCode(e.target.value)}
                           className='flex-grow'
@@ -358,38 +361,38 @@ export default function CheckoutPage() {
                           disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
                         >
                           {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                          تطبيق
+                          {t('checkout.apply')}
                         </Button>
                       </div>
                       {appliedCoupon && (
                         <p className="text-sm text-primary flex items-center gap-2">
                           <TicketPercent className="h-4 w-4" />
-                          <span>{`تم تطبيق الخصم: ${appliedCoupon.code} (${appliedCoupon.discountPercentage}%)`}</span>
+                          <span>{t('checkout.discountApplied').replace('{{code}}', appliedCoupon.code).replace('{{percentage}}', appliedCoupon.discountPercentage.toString())}</span>
                         </p>
                       )}
                     </div>
                    <Separator />
                    <div className="space-y-2">
                        <div className="flex justify-between">
-                           <span>المجموع الفرعي</span>
+                           <span>{t('checkout.subtotal')}</span>
                            <span>{formatCurrency(subTotalAfterDiscount)}</span>
                        </div>
                         {appliedCoupon && (
                           <div className="flex justify-between text-primary">
-                            <span>الخصم</span>
+                            <span>{t('checkout.discount')}</span>
                             <span>- {formatCurrency(totalPrice - subTotalAfterDiscount)}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                           <span>الشحن</span>
+                           <span>{t('checkout.shipping')}</span>
                            <span className={cn(deliveryFee === 0 && 'font-semibold')}>
-                                {deliveryFee > 0 ? formatCurrency(deliveryFee) : 'مجاني'}
+                                {deliveryFee > 0 ? formatCurrency(deliveryFee) : t('checkout.free')}
                            </span>
                        </div>
                    </div>
                    <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                       <span>الإجمالي</span>
+                       <span>{t('checkout.total')}</span>
                        <span>{formatCurrency(finalTotalPrice)}</span>
                    </div>
                 </CardContent>
@@ -402,7 +405,7 @@ export default function CheckoutPage() {
                 disabled={isProcessing}
             >
                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {step === 'details' ? 'المتابعة إلى الدفع' : `ادفع ${formatCurrency(finalTotalPrice)}`}
+                {step === 'details' ? t('checkout.proceedToPayment') : t('checkout.payNow').replace('{{amount}}', formatCurrency(finalTotalPrice))}
             </Button>
         </div>
       </div>

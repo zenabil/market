@@ -20,24 +20,25 @@ import { useDoc, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissio
 import { doc, addDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'يجب أن يتكون الاسم من حرفين على الأقل.' }),
-  email: z.string().email({ message: 'الرجاء إدخال عنوان بريد إلكتروني صالح.' }),
-  subject: z.string().min(5, { message: 'يجب أن يتكون الموضوع من 5 أحرف على الأقل.' }),
-  message: z.string().min(10, { message: 'يجب أن تتكون الرسالة من 10 أحرف على الأقل.' }),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 type SiteSettings = {
   address?: string;
   phone?: string;
 };
 
-
 export default function ContactPage() {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const formSchema = z.object({
+    name: z.string().min(2, { message: t('contact.validation.name') }),
+    email: z.string().email({ message: t('contact.validation.email') }),
+    subject: z.string().min(5, { message: t('contact.validation.subject') }),
+    message: z.string().min(10, { message: t('contact.validation.message') }),
+  });
 
   const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -45,7 +46,6 @@ export default function ContactPage() {
   }, [firestore]);
   
   const { data: settings, isLoading } = useDoc<SiteSettings>(settingsRef);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,8 +70,8 @@ export default function ContactPage() {
     addDoc(contactMessagesCollection, messageData)
       .then(() => {
         toast({
-          title: 'تم إرسال الرسالة!',
-          description: 'لقد استلمنا رسالتك وسنرد عليك قريبًا.',
+          title: t('contact.success.title'),
+          description: t('contact.success.description'),
         });
         form.reset();
       })
@@ -86,8 +86,8 @@ export default function ContactPage() {
         );
         toast({
           variant: 'destructive',
-          title: 'فشل الإرسال',
-          description: 'تعذر إرسال رسالتك في الوقت الحالي.',
+          title: t('contact.error.title'),
+          description: t('contact.error.description'),
         });
       })
       .finally(() => {
@@ -98,13 +98,13 @@ export default function ContactPage() {
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">اتصل بنا</h1>
-        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">نحن هنا لمساعدتك. اتصل بنا لأي سؤال.</p>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('contact.title')}</h1>
+        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('contact.subtitle')}</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12">
         <div>
-          <h2 className="font-headline text-2xl mb-6">أرسل رسالة</h2>
+          <h2 className="font-headline text-2xl mb-6">{t('contact.formTitle')}</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -112,9 +112,9 @@ export default function ContactPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم</FormLabel>
+                    <FormLabel>{t('contact.name')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="اسمك" {...field} />
+                      <Input placeholder={t('contact.namePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -125,9 +125,9 @@ export default function ContactPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>البريد الإلكتروني</FormLabel>
+                    <FormLabel>{t('contact.email')}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="عنوان بريدك الإلكتروني" {...field} />
+                      <Input type="email" placeholder={t('contact.emailPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,9 +138,9 @@ export default function ContactPage() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الموضوع</FormLabel>
+                    <FormLabel>{t('contact.subject')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="موضوع رسالتك" {...field} />
+                      <Input placeholder={t('contact.subjectPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,9 +151,9 @@ export default function ContactPage() {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الرسالة</FormLabel>
+                    <FormLabel>{t('contact.message')}</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="اكتب رسالتك هنا..." rows={5} {...field} />
+                      <Textarea placeholder={t('contact.messagePlaceholder')} rows={5} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,33 +161,33 @@ export default function ContactPage() {
               />
               <Button type="submit" size="lg" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                إرسال الرسالة
+                {t('contact.submitButton')}
               </Button>
             </form>
           </Form>
         </div>
         <div className="space-y-8">
             <div>
-                 <h2 className="font-headline text-2xl mb-6">معلومات الاتصال</h2>
+                 <h2 className="font-headline text-2xl mb-6">{t('contact.contactInfo')}</h2>
                  <div className="space-y-4 text-muted-foreground">
                     <div className="flex items-start gap-4">
                         <MapPin className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">العنوان</h3>
-                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || 'غير متوفر'}</p>}
+                            <h3 className="font-semibold text-foreground">{t('contact.address')}</h3>
+                            {isLoading ? <Skeleton className="h-5 w-48 mt-1" /> : <p>{settings?.address || t('contact.notAvailable')}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Phone className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">الهاتف</h3>
-                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || 'غير متوفر'}</p>}
+                            <h3 className="font-semibold text-foreground">{t('contact.phone')}</h3>
+                             {isLoading ? <Skeleton className="h-5 w-32 mt-1" /> : <p>{settings?.phone || t('contact.notAvailable')}</p>}
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
                         <Mail className="h-6 w-6 mt-1 text-primary"/>
                         <div>
-                            <h3 className="font-semibold text-foreground">البريد الإلكتروني</h3>
+                            <h3 className="font-semibold text-foreground">{t('contact.email')}</h3>
                             <p>contact@tlemcensmart.dz</p>
                         </div>
                     </div>
