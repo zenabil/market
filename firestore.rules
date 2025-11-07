@@ -21,7 +21,7 @@
  * - `/users/{userId}/notifications/{notificationId}`: User notifications, accessible only to the user.
  * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
  * - `/settings/site`: Global site settings, publicly readable.
- * - `/contactMessages/{messageId}`: Contact form submissions, write-only for users.
+ * - `/contactMessages/{messageId}`: Contact form submissions, write-only for users, read/delete for admins.
  * - `/pageContent/{pageId}`: Editable content for static pages, publicly readable, admin writable.
  *
  * Key Security Decisions:
@@ -257,12 +257,26 @@ service cloud.firestore {
      * @description Allows anyone to submit a contact message. Reading and deleting is restricted to admins.
      * @path /contactMessages/{messageId}
      * @allow create: if true;
-     * @allow read, update, delete: if isAdmin();
-     * @principle Write-only for public users, full access for admins.
+     * @allow read, delete: if isAdmin();
+     * @allow update: if false;
+     * @principle Write-only for public users, read/delete for admins.
      */
     match /contactMessages/{messageId} {
         allow create: if true;
-        allow read, update, delete: if isAdmin();
+        allow read, delete: if isAdmin();
+        allow update: if false;
+    }
+    
+    /**
+     * @description Publicly readable team member information, admin writable.
+     * @path /teamMembers/{memberId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write.
+     */
+    match /teamMembers/{memberId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
     }
     
   }

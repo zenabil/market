@@ -393,7 +393,7 @@
             "description": "تمت إضافة {{name}} إلى سلتك.",
             "button": "أضف إلى السلة"
         },
-        "outOfStock": "نفذ من المخزون",
+        "outOfStock": "Épuisé",
         "wishlist": {
             "add": "إضافة إلى قائمة الرغبات",
             "remove": "إزالة من قائمة الرغبات",
