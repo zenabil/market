@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { ShieldCheck, Code, Users, Leaf } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import type { TeamMember } from '@/lib/placeholder-data';
@@ -42,7 +41,6 @@ type PageContent = {
     content_ar: string;
 };
 
-const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket-interior');
 
 export default function AboutPage() {
   const { t, locale } = useLanguage();
@@ -60,6 +58,14 @@ export default function AboutPage() {
 
   const title = pageContent ? (locale === 'ar' ? pageContent.title_ar : pageContent.title_fr) : t('about.title');
   const content = pageContent ? (locale === 'ar' ? pageContent.content_ar : pageContent.content_fr) : `${t('about.storyP1')}\n\n${t('about.storyP2')}\n\n${t('about.storyP3')}`;
+  
+  const aboutImageQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'siteImages'), where('id', '==', 'about-supermarket-interior'));
+  }, [firestore]);
+  
+  const { data: aboutImage, isLoading: isAboutImageLoading } = useCollection<{id: string, imageUrl: string, description: string, imageHint: string}>(aboutImageQuery);
+  const supermarketImage = aboutImage?.[0];
 
 
   return (
@@ -71,6 +77,7 @@ export default function AboutPage() {
 
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className="relative aspect-square md:aspect-[4/3] rounded-lg overflow-hidden">
+          {isAboutImageLoading && <Skeleton className="w-full h-full" />}
           {supermarketImage && (
             <Image
                 src={supermarketImage.imageUrl}

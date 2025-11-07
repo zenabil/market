@@ -1,4 +1,4 @@
-import { PlaceHolderImages } from './placeholder-images';
+
 
 export type Product = {
   id: string;
@@ -132,5 +132,3 @@ const users: User[] = [];
 export const getProducts = () => products;
 export const getUsers = () => users;
 export const getProductById = (id: string) => products.find(p => p.id === id);
-
-    
