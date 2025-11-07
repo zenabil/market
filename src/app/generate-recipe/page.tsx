@@ -18,20 +18,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
-
-
-const formSchema = z.object({
-    ingredients: z.string().min(10, { message: 'Veuillez lister au moins quelques ingrédients.' }),
-});
+import { useLanguage } from '@/contexts/language-provider';
 
 
 export default function GenerateRecipePage() {
+    const { t } = useLanguage();
     const { toast } = useToast();
     const { addItem } = useCart();
     const [isLoading, setIsLoading] = useState(false);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [generatedRecipe, setGeneratedRecipe] = useState<GenerateRecipeFromIngredientsOutput | null>(null);
     const firestore = useFirestore();
+
+    const formSchema = z.object({
+        ingredients: z.string().min(10, { message: t('generateRecipe.validation.ingredients') }),
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -65,8 +66,8 @@ export default function GenerateRecipePage() {
     
             if (itemsAddedCount > 0) {
                 toast({
-                    title: 'Articles ajoutés au panier',
-                    description: `${itemsAddedCount} ingrédient(s) manquant(s) ont été ajoutés à votre panier.`
+                    title: t('generateRecipe.toast.added.title'),
+                    description: t('generateRecipe.toast.added.description').replace('{{count}}', itemsAddedCount.toString())
                 });
             }
             
@@ -77,8 +78,8 @@ export default function GenerateRecipePage() {
             if (notFoundProducts.length > 0) {
                  toast({
                     variant: 'destructive',
-                    title: 'Produits non trouvés',
-                    description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+                    title: t('generateRecipe.toast.notFound.title'),
+                    description: `${t('generateRecipe.toast.notFound.description')}: ${notFoundProducts.join(', ')}`
                 });
             }
     
@@ -86,8 +87,8 @@ export default function GenerateRecipePage() {
             console.error("Error adding missing products to cart:", error);
             toast({
                 variant: 'destructive',
-                title: 'Erreur',
-                description: "Impossible d'ajouter les produits au panier."
+                title: t('dashboard.common.error'),
+                description: t('generateRecipe.toast.error')
             });
         } finally {
             setIsAddingToCart(false);
@@ -107,8 +108,8 @@ export default function GenerateRecipePage() {
             console.error("Failed to generate recipe:", error);
             toast({
                 variant: 'destructive',
-                title: 'Échec de la génération',
-                description: 'Impossible de générer une recette pour le moment.',
+                title: t('generateRecipe.toast.generationFailed.title'),
+                description: t('generateRecipe.toast.generationFailed.description'),
             });
         } finally {
             setIsLoading(false);
@@ -120,15 +121,15 @@ export default function GenerateRecipePage() {
             <div className="text-center mb-12 max-w-3xl mx-auto">
                 <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl flex items-center justify-center gap-4">
                     <Wand2 className="h-10 w-10 text-primary" />
-                    Générateur de Recettes IA
+                    {t('generateRecipe.title')}
                 </h1>
-                <p className="mt-4 text-lg text-muted-foreground">Vous ne savez pas quoi cuisiner ? Entrez les ingrédients que vous avez et laissez notre IA créer une recette délicieuse pour vous !</p>
+                <p className="mt-4 text-lg text-muted-foreground">{t('generateRecipe.subtitle')}</p>
             </div>
             
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Vos Ingrédients</CardTitle>
-                    <CardDescription>Listez les ingrédients que vous avez, séparés par des virgules.</CardDescription>
+                    <CardTitle>{t('generateRecipe.yourIngredients.title')}</CardTitle>
+                    <CardDescription>{t('generateRecipe.yourIngredients.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -138,10 +139,10 @@ export default function GenerateRecipePage() {
                                 name="ingredients"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Ingrédients</FormLabel>
+                                        <FormLabel>{t('generateRecipe.yourIngredients.label')}</FormLabel>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Ex: tomates, poulet, oignon, huile d'olive..."
+                                                placeholder={t('generateRecipe.yourIngredients.placeholder')}
                                                 rows={4}
                                                 {...field}
                                             />
@@ -154,12 +155,12 @@ export default function GenerateRecipePage() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Génération en cours...
+                                        {t('generateRecipe.buttons.generating')}
                                     </>
                                 ) : (
                                     <>
                                         <Sparkles className="mr-2 h-4 w-4" />
-                                        Générer une recette
+                                        {t('generateRecipe.buttons.generate')}
                                     </>
                                 )}
                             </Button>
@@ -188,23 +189,23 @@ export default function GenerateRecipePage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-8">
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <Clock className="h-8 w-8 mx-auto text-primary" />
-                            <p className="mt-2 font-semibold">Temps de prép.</p>
+                            <p className="mt-2 font-semibold">{t('recipe.prepTime')}</p>
                             <p className="text-sm text-muted-foreground">{generatedRecipe.prepTime} min</p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <ChefHat className="h-8 w-8 mx-auto text-primary" />
-                            <p className="mt-2 font-semibold">Temps de cuisson</p>
+                            <p className="mt-2 font-semibold">{t('recipe.cookTime')}</p>
                             <p className="text-sm text-muted-foreground">{generatedRecipe.cookTime} min</p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
                             <Soup className="h-8 w-8 mx-auto text-primary" />
-                            <p className="mt-2 font-semibold">Temps Total</p>
+                            <p className="mt-2 font-semibold">{t('recipe.totalTime')}</p>
                             <p className="text-sm text-muted-foreground">{generatedRecipe.prepTime + generatedRecipe.cookTime} min</p>
                         </div>
                          <div className="p-4 bg-muted/50 rounded-lg">
                             <Users className="h-8 w-8 mx-auto text-primary" />
-                            <p className="mt-2 font-semibold">Portions</p>
-                            <p className="text-sm text-muted-foreground">{generatedRecipe.servings} pers.</p>
+                            <p className="mt-2 font-semibold">{t('recipe.servings')}</p>
+                            <p className="text-sm text-muted-foreground">{generatedRecipe.servings} {t('recipe.people')}</p>
                         </div>
                     </div>
                     
@@ -216,7 +217,7 @@ export default function GenerateRecipePage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <ShoppingCart className="h-5 w-5" />
-                                        Ingrédients
+                                        {t('recipe.ingredients')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -231,7 +232,7 @@ export default function GenerateRecipePage() {
                                  <Card className="mt-4 bg-primary/10 border-primary/50">
                                     <CardHeader>
                                         <CardTitle className="text-base flex items-center gap-2">
-                                            Ingrédients manquants suggérés
+                                            {t('generateRecipe.missingIngredients.title')}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -241,14 +242,14 @@ export default function GenerateRecipePage() {
                                         <Button className="w-full mt-4" onClick={handleAddMissingToCart} disabled={isAddingToCart}>
                                             {isAddingToCart && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             <ShoppingCart className="mr-2 h-4 w-4" />
-                                            Ajouter au panier
+                                            {t('generateRecipe.buttons.addToCart')}
                                         </Button>
                                     </CardContent>
                                 </Card>
                             )}
                         </div>
                         <div className="md:col-span-2">
-                            <h3 className="font-headline text-2xl mb-4">Instructions</h3>
+                            <h3 className="font-headline text-2xl mb-4">{t('recipe.instructions')}</h3>
                             <div className="space-y-4 prose prose-neutral dark:prose-invert max-w-none">
                                 {generatedRecipe.instructions.map((instruction, index) => (
                                     <div key={index} className="flex gap-4 items-start">

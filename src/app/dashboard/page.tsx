@@ -11,8 +11,10 @@ import type { Product } from '@/lib/placeholder-data';
 import { useRouter } from 'next/navigation';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useLanguage } from '@/contexts/language-provider';
 
 function AdminDashboard() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -60,7 +62,7 @@ function AdminDashboard() {
 
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(t('locale'), {
       style: 'currency',
       currency: 'DZD',
     }).format(amount);
@@ -68,18 +70,18 @@ function AdminDashboard() {
   
   const chartConfig = {
     sold: {
-      label: 'Unités vendues',
+      label: t('dashboard.admin.unitsSold'),
       color: 'hsl(var(--chart-1))',
     },
   };
 
   return (
     <div className="container py-8 md:py-12">
-      <h1 className="font-headline text-3xl md:text-4xl mb-8">Aperçu</h1>
+      <h1 className="font-headline text-3xl md:text-4xl mb-8">{t('dashboard.admin.overview')}</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenu total</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.admin.totalRevenue')}</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -99,7 +101,7 @@ function AdminDashboard() {
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bénéfice total</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.admin.totalProfit')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -108,7 +110,7 @@ function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produits vendus</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.admin.productsSold')}</CardTitle>
              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -132,7 +134,7 @@ function AdminDashboard() {
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produits en stock</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.admin.productsInStock')}</CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -160,7 +162,7 @@ function AdminDashboard() {
       <div className="mt-8">
         <Card>
           <CardHeader>
-            <CardTitle>Meilleures ventes de produits</CardTitle>
+            <CardTitle>{t('dashboard.admin.topSellingProducts')}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -189,7 +191,7 @@ function AdminDashboard() {
                 </ChartContainer>
             ) : (
               <div className="text-center p-8 text-muted-foreground">
-                Aucune donnée de vente disponible.
+                {t('dashboard.admin.noSalesData')}
               </div>
             )}
           </CardContent>

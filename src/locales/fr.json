@@ -78,6 +78,42 @@
         },
         "error": "Impossible d'ajouter les ingrédients au panier."
     },
+    "generateRecipe": {
+        "title": "Générateur de Recettes IA",
+        "subtitle": "Vous ne savez pas quoi cuisiner ? Entrez les ingrédients que vous avez et laissez notre IA créer une recette délicieuse pour vous !",
+        "yourIngredients": {
+            "title": "Vos Ingrédients",
+            "description": "Listez les ingrédients que vous avez, séparés par des virgules.",
+            "label": "Ingrédients",
+            "placeholder": "Ex: tomates, poulet, oignon, huile d'olive..."
+        },
+        "buttons": {
+            "generate": "Générer une recette",
+            "generating": "Génération en cours...",
+            "addToCart": "Ajouter au panier"
+        },
+        "missingIngredients": {
+            "title": "Ingrédients manquants suggérés"
+        },
+        "toast": {
+            "generationFailed": {
+                "title": "Échec de la génération",
+                "description": "Impossible de générer une recette pour le moment."
+            },
+            "added": {
+                "title": "Articles ajoutés au panier",
+                "description": "{{count}} ingrédient(s) manquant(s) ont été ajoutés à votre panier."
+            },
+            "notFound": {
+                "title": "Produits non trouvés",
+                "description": "Nous n'avons pas pu trouver"
+            },
+            "error": "Impossible d'ajouter les produits au panier."
+        },
+        "validation": {
+            "ingredients": "Veuillez lister au moins quelques ingrédients."
+        }
+    },
     "header": {
         "home": "Accueil",
         "products": "Produits",
@@ -355,6 +391,16 @@
             "update": "Mettre à jour",
             "saveChanges": "Enregistrer les modifications",
             "error": "Erreur"
+        },
+        "admin": {
+            "overview": "Aperçu",
+            "totalRevenue": "Revenu total",
+            "totalProfit": "Bénéfice total",
+            "productsSold": "Produits vendus",
+            "productsInStock": "Produits en stock",
+            "topSellingProducts": "Meilleures ventes de produits",
+            "unitsSold": "Unités vendues",
+            "noSalesData": "Aucune donnée de vente disponible."
         },
         "layout": {
             "dashboard": "Tableau de bord",
