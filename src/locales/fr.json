@@ -319,6 +319,12 @@
             "title": "Comparer les produits",
             "compareButton": "Comparer ({{count}})",
             "clear": "Effacer"
+        },
+        "toast": {
+            "limitReached": {
+                "title": "Limite de comparaison atteinte",
+                "description": "Vous ne pouvez comparer que {{count}} produits à la fois."
+            }
         }
     },
     "contact": {
@@ -765,7 +771,7 @@
             },
             "validation": {
                 "name": "Le nom doit comporter au moins 2 caractères.",
-                "passwordLength": "Le mot de passe doit comporter au moins 6 caractères.",
+                "passwordLength": "Le mot de passe doit contenir au moins 6 caractères.",
                 "passwordMismatch": "Les mots de passe ne correspondent pas."
             }
         },

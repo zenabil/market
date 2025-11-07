@@ -319,6 +319,12 @@
             "title": "مقارنة المنتجات",
             "compareButton": "قارن ({{count}})",
             "clear": "مسح"
+        },
+        "toast": {
+            "limitReached": {
+                "title": "الحد الأقصى للمقارنة",
+                "description": "يمكنك فقط مقارنة {{count}} منتجات في المرة الواحدة."
+            }
         }
     },
     "contact": {

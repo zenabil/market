@@ -3,6 +3,7 @@
 import React, { createContext, useReducer, useEffect, ReactNode, useMemo } from 'react';
 import type { Product } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from './language-provider';
 
 type ComparisonState = {
   items: Product[];
@@ -68,6 +69,7 @@ interface ComparisonProviderProps {
 export const ComparisonProvider: React.FC<ComparisonProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(comparisonReducer, { items: [] });
   const { toast } = useToast();
+  const { t } = useLanguage();
   
   useEffect(() => {
     try {
@@ -92,8 +94,8 @@ export const ComparisonProvider: React.FC<ComparisonProviderProps> = ({ children
     if (state.items.length >= MAX_COMPARISON_ITEMS && !state.items.find(i => i.id === item.id)) {
         toast({
             variant: 'destructive',
-            title: 'Limite de comparaison atteint',
-            description: `Vous ne pouvez comparer que ${MAX_COMPARISON_ITEMS} produits à la fois.`,
+            title: t('compare.toast.limitReached.title'),
+            description: t('compare.toast.limitReached.description').replace('{{count}}', MAX_COMPARISON_ITEMS.toString()),
         });
         return;
     }
