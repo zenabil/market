@@ -569,6 +569,19 @@
         }
       },
       "required": ["name", "role", "avatar"]
+    },
+    "PageContent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Page Content",
+        "type": "object",
+        "description": "Represents the editable content for a static page, in multiple languages.",
+        "properties": {
+            "title_fr": { "type": "string", "description": "The page title in French." },
+            "content_fr": { "type": "string", "description": "The main page content in French (Markdown format)." },
+            "title_ar": { "type": "string", "description": "The page title in Arabic." },
+            "content_ar": { "type": "string", "description": "The main page content in Arabic (Markdown format)." }
+        },
+        "required": ["title_fr", "content_fr", "title_ar", "content_ar"]
     }
   },
   "auth": {
@@ -644,6 +657,16 @@
     "/contactMessages/{messageId}": {
       "schema": { "$ref": "#/entities/ContactMessage" },
       "description": "Stores messages submitted through the contact form. Writable by anyone, but not readable by clients."
+    },
+    "/teamMembers/{memberId}": {
+      "schema": { "$ref": "#/entities/TeamMember" },
+      "description": "Stores information about team members. Publicly readable, admin writable."
+    },
+    "/pageContent/{pageId}": {
+        "schema": { "$ref": "#/entities/PageContent" },
+        "description": "Stores editable content for static pages. Publicly readable, admin writable. Page ID can be 'about', 'privacy', 'terms'."
     }
   }
 }
+
+    

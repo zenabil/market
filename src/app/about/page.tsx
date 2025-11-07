@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -6,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLanguage } from '@/contexts/language-provider';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import type { TeamMember } from '@/lib/placeholder-data';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, doc } from 'firebase/firestore';
+import { useLanguage } from '@/contexts/language-provider';
 
 const values = [
     {
@@ -34,10 +35,17 @@ const values = [
     }
 ]
 
+type PageContent = {
+    title_fr: string;
+    content_fr: string;
+    title_ar: string;
+    content_ar: string;
+};
+
 const supermarketImage = PlaceHolderImages.find(p => p.id === 'about-supermarket-interior');
 
 export default function AboutPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const firestore = useFirestore();
   
   const teamQuery = useMemoFirebase(() => {
@@ -46,11 +54,18 @@ export default function AboutPage() {
   }, [firestore]);
 
   const { data: team, isLoading: areMembersLoading } = useCollection<TeamMember>(teamQuery);
+  
+  const pageContentRef = useMemoFirebase(() => doc(firestore, 'pageContent', 'about'), [firestore]);
+  const { data: pageContent, isLoading: isContentLoading } = useDoc<PageContent>(pageContentRef);
+
+  const title = pageContent ? (locale === 'ar' ? pageContent.title_ar : pageContent.title_fr) : t('about.title');
+  const content = pageContent ? (locale === 'ar' ? pageContent.content_ar : pageContent.content_fr) : `${t('about.storyP1')}\n\n${t('about.storyP2')}\n\n${t('about.storyP3')}`;
+
 
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('about.title')}</h1>
+        <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{isContentLoading ? <Skeleton className="h-12 w-2/3 mx-auto" /> : title}</h1>
         <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('about.subtitle')}</p>
       </div>
 
@@ -69,9 +84,15 @@ export default function AboutPage() {
         </div>
         <div className="space-y-4 text-muted-foreground">
           <h2 className="font-headline text-2xl text-foreground">{t('about.storyTitle')}</h2>
-          <p className="text-lg leading-relaxed">{t('about.storyP1')}</p>
-          <p className="leading-relaxed">{t('about.storyP2')}</p>
-          <p className="leading-relaxed">{t('about.storyP3')}</p>
+          {isContentLoading ? (
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+            </div>
+          ) : (
+             <div className="leading-relaxed whitespace-pre-line">{content}</div>
+          )}
         </div>
       </div>
 
@@ -113,7 +134,7 @@ export default function AboutPage() {
                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <h3 className="font-bold">{member.name}</h3>
-                        <p className="text-sm text-primary">{member.role}</p>
+                        <p className="text-sm text-primary">{t(`teamRoles.${member.role}`)}</p>
                     </div>
                 ))}
             </div>
@@ -124,3 +145,5 @@ export default function AboutPage() {
     </div>
   );
 }
+
+    

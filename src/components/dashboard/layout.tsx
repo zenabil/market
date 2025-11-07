@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -32,6 +33,7 @@ import {
   List,
   Mail,
   UserSquare,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -57,6 +59,11 @@ const adminMenuItems = [
     key: 'products',
     href: '/dashboard/products',
     icon: Package,
+  },
+   {
+    key: 'content',
+    href: '/dashboard/content',
+    icon: FileText,
   },
   {
     key: 'recipes',
@@ -215,3 +222,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    
