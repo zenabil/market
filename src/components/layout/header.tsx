@@ -287,21 +287,21 @@ function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
             <Link href="/dashboard/orders">
-                <ShoppingBasket className="ml-2 h-4 w-4" />
+                <ShoppingBasket className="mr-2 h-4 w-4" />
                 <span>{t('header.myOrders')}</span>
             </Link>
         </DropdownMenuItem>
         {isAdmin && (
             <DropdownMenuItem asChild>
                 <Link href="/dashboard">
-                     <LayoutDashboard className="ml-2 h-4 w-4" />
+                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>{t('header.dashboard')}</span>
                 </Link>
             </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="ml-2 h-4 w-4" />
+          <LogOut className="mr-2 h-4 w-4" />
           <span>{t('header.logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -309,12 +309,19 @@ function UserNav() {
   );
 }
 
+type SiteSettings = {
+  logoUrl?: string;
+}
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useLanguage();
+  const firestore = useFirestore();
+  
+  const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);
+  const { data: settings } = useDoc<SiteSettings>(settingsRef);
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
@@ -334,15 +341,15 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <MobileNav />
         
-        <Link href="/" className="ml-6 hidden md:flex">
-          <Logo className="h-8 w-auto" />
+        <Link href="/" className="mr-6 hidden md:flex">
+          <Logo className="h-8 w-auto" logoUrl={settings?.logoUrl} />
         </Link>
 
         <div className="hidden md:flex flex-1">
             <NavLinks />
         </div>
 
-        <div className="flex flex-1 items-center justify-start space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form onSubmit={handleSearch}>
               <div className="relative">
