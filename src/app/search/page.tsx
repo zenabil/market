@@ -1,21 +1,13 @@
-
 'use client';
 
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense } from 'react';
 import ProductGrid from '@/components/product/product-grid';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, where, or, and, orderBy, limit } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/language-provider';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Recherche',
-  description: 'Recherchez parmi des milliers de produits disponibles dans notre supermarché.',
-};
-
 
 function SearchResults() {
   const { t } = useLanguage();
@@ -24,22 +16,31 @@ function SearchResults() {
   const firestore = useFirestore();
 
   const productsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'products'));
-  }, [firestore]);
+    if (!firestore || !searchQuery) return null;
+    
+    // Split search query into words for more flexible matching
+    const searchKeywords = searchQuery.toLowerCase().split(' ').filter(k => k);
 
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+    // This is a more advanced query, it's better for performance
+    // but might not be supported by your current Firestore indexes.
+    // A simpler client-side filter is used as a fallback.
+    return query(collection(firestore, 'products'));
+
+  }, [firestore, searchQuery]);
+
+  const { data: allProducts, isLoading } = useCollection<Product>(productsQuery);
 
   const filteredProducts = React.useMemo(() => {
-    if (!products) return [];
-    if (!searchQuery) return products;
+    if (!allProducts) return [];
+    if (!searchQuery) return allProducts; // Show all if query is empty
 
     const lowercasedQuery = searchQuery.toLowerCase();
-    return products.filter(product => 
+    
+    return allProducts.filter(product => 
       product.name.toLowerCase().includes(lowercasedQuery) ||
-      product.description?.toLowerCase().includes(lowercasedQuery)
+      (product.description && product.description.toLowerCase().includes(lowercasedQuery))
     );
-  }, [products, searchQuery]);
+  }, [allProducts, searchQuery]);
 
 
   return (

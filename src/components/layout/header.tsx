@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -15,6 +15,7 @@ import {
   Globe,
   Star,
   Camera,
+  Command,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,64 @@ import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
 import { useLanguage } from '@/contexts/language-provider';
 import ImageSearchDialog from './image-search-dialog';
+import { Dialog, DialogContent } from '../ui/dialog';
 
+function SearchCommandMenu() {
+    const { t } = useLanguage();
+    const [open, setOpen] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setOpen((open) => !open);
+            }
+        };
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
+
+    const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const searchQuery = formData.get('search') as string;
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            setOpen(false);
+        }
+    };
+    
+    return (
+        <>
+            <Button
+                variant="outline"
+                className="relative h-10 w-10 p-0 sm:w-64 sm:justify-start sm:px-4"
+                onClick={() => setOpen(true)}
+            >
+                <Search className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline-block">{t('header.searchPlaceholder')}</span>
+                <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium opacity-100 sm:flex">
+                    <span className="text-sm">⌘</span>K
+                </kbd>
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="overflow-hidden p-0 shadow-lg top-1/4 sm:top-1/3">
+                    <form onSubmit={handleSearch}>
+                        <div className="flex items-center border-b px-3">
+                            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                            <Input
+                                name="search"
+                                className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-0 focus-visible:ring-0"
+                                placeholder={t('header.searchPlaceholder')}
+                            />
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </>
+    )
+}
 
 function LanguageSwitcher() {
     const { locale, setLocale, t } = useLanguage();
@@ -317,10 +375,7 @@ type SiteSettings = {
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
-  const router = useRouter();
   const { t } = useLanguage();
   const firestore = useFirestore();
   
@@ -329,25 +384,6 @@ export default function Header() {
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/login')) {
     return null;
-  }
-  
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const searchQuery = formData.get('search') as string;
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsSearchExpanded(false);
-    }
-  };
-  
-  const toggleSearch = () => {
-    setIsSearchExpanded(prev => !prev);
-    setTimeout(() => {
-        if (!isSearchExpanded) {
-            searchInputRef.current?.focus();
-        }
-    }, 100);
   }
 
   return (
@@ -364,40 +400,9 @@ export default function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-1 md:space-x-2">
-          <form onSubmit={handleSearch} className="hidden md:flex items-center">
-            <div className={cn("flex items-center justify-end transition-all duration-300 ease-in-out", isSearchExpanded ? "w-64" : "w-10")}>
-              <Input
-                ref={searchInputRef}
-                type="search"
-                name="search"
-                placeholder={t('header.searchPlaceholder')}
-                className={cn(
-                    "h-10 pr-10 transition-all duration-300 ease-in-out",
-                    isSearchExpanded ? "w-full opacity-100 pl-4" : "w-0 opacity-0 p-0 border-transparent"
-                )}
-                onBlur={() => setIsSearchExpanded(false)}
-              />
-              <Button type={isSearchExpanded ? 'submit' : 'button'} onClick={!isSearchExpanded ? toggleSearch : undefined} variant="ghost" size="icon" className={cn("absolute transition-all duration-300 ease-in-out", isSearchExpanded ? "text-primary" : "")}>
-                <Search className="h-5 w-5" />
-                <span className="sr-only">Search</span>
-              </Button>
-            </div>
-          </form>
           
-           {/* Mobile Search */}
-          <div className="relative md:hidden">
-             <form onSubmit={handleSearch}>
-                <Input
-                  type="search"
-                  name="search"
-                  placeholder={t('header.searchPlaceholder')}
-                  className="w-full bg-secondary pr-9"
-                />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <span className="sr-only">Search</span>
-                </button>
-             </form>
+          <div className="hidden sm:flex items-center gap-2">
+            <SearchCommandMenu />
           </div>
 
           <ImageSearchDialog>
