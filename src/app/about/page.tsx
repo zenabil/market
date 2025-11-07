@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Award, Code, Users, Leaf } from 'lucide-react';
+import { ShieldCheck, Code, Users, Leaf } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -22,6 +22,11 @@ const values = [
         icon: Users,
         title: "Esprit de Communauté",
         description: "Nous sommes plus qu'un supermarché; nous sommes un voisin engagé dans le bien-être de notre communauté."
+    },
+    {
+        icon: ShieldCheck,
+        title: "Engagement Qualité",
+        description: "Votre confiance est notre priorité. Nous garantissons la qualité de chaque produit que nous vendons."
     }
 ]
 
@@ -77,7 +82,7 @@ export default function AboutPage() {
 
         <section className="mt-16 md:mt-24 text-center">
             <h2 className="font-headline text-3xl md:text-4xl">Nos Valeurs</h2>
-            <div className="mt-8 grid md:grid-cols-3 gap-8">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                 {values.map((value) => {
                     const Icon = value.icon;
                     return (
