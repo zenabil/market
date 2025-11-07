@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLanguage } from '@/contexts/language-provider';
 
 type PageContent = {
     id: string;
@@ -25,13 +26,9 @@ type PageContent = {
 };
 
 const pageIds = ['about', 'privacy', 'terms'];
-const pageTitles: { [key: string]: string } = {
-    about: 'À Propos',
-    privacy: 'Politique de Confidentialité',
-    terms: 'Conditions d\'Utilisation',
-};
 
 function ContentEditor({ pageId }: { pageId: string }) {
+    const { t } = useLanguage();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
@@ -42,10 +39,18 @@ function ContentEditor({ pageId }: { pageId: string }) {
     const [content, setContent] = useState<Omit<PageContent, 'id'>>({
         title_fr: '', content_fr: '', title_ar: '', content_ar: ''
     });
+    
+    const pageTitles: { [key: string]: string } = {
+        about: t('dashboard.content.pageTitles.about'),
+        privacy: t('dashboard.content.pageTitles.privacy'),
+        terms: t('dashboard.content.pageTitles.terms'),
+    };
 
     useEffect(() => {
         if (pageContent) {
             setContent(pageContent);
+        } else {
+             setContent({ title_fr: '', content_fr: '', title_ar: '', content_ar: '' });
         }
     }, [pageContent]);
 
@@ -53,7 +58,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
         setIsSaving(true);
         try {
             await setDoc(pageContentRef, content, { merge: true });
-            toast({ title: "Contenu sauvegardé", description: `La page '${pageTitles[pageId]}' a été mise à jour.` });
+            toast({ title: t('dashboard.content.toast.saved.title'), description: t('dashboard.content.toast.saved.description').replace('{{page}}', pageTitles[pageId]) });
         } catch (error) {
             errorEmitter.emit(
                 'permission-error',
@@ -63,7 +68,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
                     requestResourceData: content,
                 })
             );
-            toast({ variant: 'destructive', title: "Erreur de sauvegarde" });
+            toast({ variant: 'destructive', title: t('dashboard.content.toast.error') });
         } finally {
             setIsSaving(false);
         }
@@ -79,18 +84,18 @@ function ContentEditor({ pageId }: { pageId: string }) {
                 <CardTitle>{pageTitles[pageId]}</CardTitle>
                 <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    Enregistrer
+                    {t('dashboard.common.save')}
                 </Button>
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="fr">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="fr">Français</TabsTrigger>
-                        <TabsTrigger value="ar">Arabe</TabsTrigger>
+                        <TabsTrigger value="fr">{t('dashboard.content.french')}</TabsTrigger>
+                        <TabsTrigger value="ar">{t('dashboard.content.arabic')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="fr" className="space-y-4 pt-4">
                          <div className="space-y-2">
-                            <Label htmlFor={`title_fr_${pageId}`}>Titre (FR)</Label>
+                            <Label htmlFor={`title_fr_${pageId}`}>{t('dashboard.content.title_fr')}</Label>
                             <Input 
                                 id={`title_fr_${pageId}`}
                                 value={content.title_fr} 
@@ -98,7 +103,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
                              />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor={`content_fr_${pageId}`}>Contenu (FR)</Label>
+                            <Label htmlFor={`content_fr_${pageId}`}>{t('dashboard.content.content_fr')}</Label>
                             <Textarea 
                                 id={`content_fr_${pageId}`}
                                 value={content.content_fr} 
@@ -109,7 +114,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
                     </TabsContent>
                     <TabsContent value="ar" className="space-y-4 pt-4">
                         <div className="space-y-2">
-                            <Label htmlFor={`title_ar_${pageId}`}>Titre (AR)</Label>
+                            <Label htmlFor={`title_ar_${pageId}`}>{t('dashboard.content.title_ar')}</Label>
                             <Input 
                                 id={`title_ar_${pageId}`}
                                 value={content.title_ar} 
@@ -118,7 +123,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor={`content_ar_${pageId}`}>Contenu (AR)</Label>
+                            <Label htmlFor={`content_ar_${pageId}`}>{t('dashboard.content.content_ar')}</Label>
                             <Textarea 
                                 id={`content_ar_${pageId}`}
                                 value={content.content_ar} 
@@ -136,6 +141,7 @@ function ContentEditor({ pageId }: { pageId: string }) {
 
 
 export default function ContentManagementPage() {
+  const { t } = useLanguage();
   const { isAdmin, isRoleLoading } = useUserRole();
   const router = useRouter();
   
@@ -156,8 +162,8 @@ export default function ContentManagementPage() {
   return (
     <div className="container py-8 md:py-12">
         <div className="mb-8">
-            <h1 className='font-headline text-3xl'>Gestion de Contenu</h1>
-            <p className="text-muted-foreground">Modifiez le contenu des pages statiques de votre site.</p>
+            <h1 className='font-headline text-3xl'>{t('dashboard.content.pageTitle')}</h1>
+            <p className="text-muted-foreground">{t('dashboard.content.pageDescription')}</p>
         </div>
         
         <div className="space-y-8">
@@ -168,6 +174,3 @@ export default function ContentManagementPage() {
     </div>
   );
 }
-
-
-    

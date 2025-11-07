@@ -506,6 +506,28 @@
             "profile": "ملفي الشخصي",
             "logout": "تسجيل الخروج"
         },
+        "content": {
+            "pageTitle": "إدارة المحتوى",
+            "pageDescription": "قم بتعديل محتوى الصفحات الثابتة في موقعك.",
+            "pageTitles": {
+                "about": "من نحن",
+                "privacy": "سياسة الخصوصية",
+                "terms": "شروط الاستخدام"
+            },
+            "french": "الفرنسية",
+            "arabic": "العربية",
+            "title_fr": "العنوان (FR)",
+            "content_fr": "المحتوى (FR)",
+            "title_ar": "العنوان (AR)",
+            "content_ar": "المحتوى (AR)",
+            "toast": {
+                "saved": {
+                    "title": "تم حفظ المحتوى",
+                    "description": "تم تحديث الصفحة '{{page}}'."
+                },
+                "error": "خطأ في الحفظ"
+            }
+        },
         "categories": {
             "addCategory": "إضافة فئة",
             "editCategory": "تعديل الفئة",

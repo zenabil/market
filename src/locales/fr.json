@@ -506,6 +506,28 @@
             "profile": "Mon profil",
             "logout": "Déconnexion"
         },
+        "content": {
+            "pageTitle": "Gestion de Contenu",
+            "pageDescription": "Modifiez le contenu des pages statiques de votre site.",
+            "pageTitles": {
+                "about": "À Propos",
+                "privacy": "Politique de Confidentialité",
+                "terms": "Conditions d'Utilisation"
+            },
+            "french": "Français",
+            "arabic": "Arabe",
+            "title_fr": "Titre (FR)",
+            "content_fr": "Contenu (FR)",
+            "title_ar": "Titre (AR)",
+            "content_ar": "Contenu (AR)",
+            "toast": {
+                "saved": {
+                    "title": "Contenu sauvegardé",
+                    "description": "La page '{{page}}' a été mise à jour."
+                },
+                "error": "Erreur de sauvegarde"
+            }
+        },
         "categories": {
             "addCategory": "Ajouter une catégorie",
             "editCategory": "Modifier la catégorie",
