@@ -40,55 +40,61 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser } from '@/firebase';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useLanguage } from '@/contexts/language-provider';
 
 const adminMenuItems = [
   {
-    key: 'لوحة التحكم',
+    key: 'dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    key: 'الطلبات',
+    key: 'orders',
     href: '/dashboard/orders',
     icon: ShoppingBasket,
   },
   {
-    key: 'المنتجات',
+    key: 'products',
     href: '/dashboard/products',
     icon: Package,
   },
   {
-    key: 'الوصفات',
+    key: 'recipes',
     href: '/dashboard/recipes',
     icon: BookOpen,
   },
   {
-    key: 'الفئات',
+    key: 'categories',
     href: '/dashboard/categories',
     icon: LayoutGrid,
   },
   {
-    key: 'المستخدمون',
+    key: 'users',
     href: '/dashboard/users',
     icon: Users,
   },
     {
-    key: 'الرسائل',
+    key: 'messages',
     href: '/dashboard/messages',
     icon: Mail,
   },
   {
-    key: 'الكوبونات',
+    key: 'coupons',
     href: '/dashboard/coupons',
     icon: Ticket,
   },
   {
-    key: 'الخصومات',
+    key: 'discounts',
     href: '/dashboard/discounts',
     icon: Percent,
   },
+   {
+    key: 'team',
+    href: '/dashboard/team',
+    icon: UserSquare,
+  },
   {
-    key: 'الإعدادات',
+    key: 'settings',
     href: '/dashboard/settings',
     icon: Settings,
   },
@@ -96,22 +102,22 @@ const adminMenuItems = [
 
 const userMenuItems = [
     {
-        key: 'طلباتي',
+        key: 'myOrders',
         href: '/dashboard/orders',
         icon: ShoppingBasket,
     },
     {
-        key: 'قوائم التسوق',
+        key: 'shoppingLists',
         href: '/dashboard/shopping-lists',
         icon: List,
     },
     {
-        key: 'قائمة الرغبات',
+        key: 'wishlist',
         href: '/dashboard/wishlist',
         icon: Heart,
     },
     {
-        key: 'ملفي الشخصي',
+        key: 'profile',
         href: '/dashboard/profile',
         icon: User,
     }
@@ -124,6 +130,7 @@ function DashboardSidebar() {
   const { user } = useUser();
   const auth = useAuth();
   const { isAdmin } = useUserRole();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     if (auth) {
@@ -155,11 +162,11 @@ function DashboardSidebar() {
               <Link href={item.href}>
                 <SidebarMenuButton
                   isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}
-                  tooltip={{ content: item.key }}
+                  tooltip={{ content: t(`dashboard.layout.${item.key}`) }}
                   className={cn(isCollapsed && 'justify-center')}
                 >
                   <item.icon />
-                  <span className={cn(isCollapsed && 'hidden')}>{item.key}</span>
+                  <span className={cn(isCollapsed && 'hidden')}>{t(`dashboard.layout.${item.key}`)}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -181,7 +188,7 @@ function DashboardSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} className={cn(isCollapsed && 'justify-center')}>
                     <LogOut />
-                    <span className={cn(isCollapsed && 'hidden')}>تسجيل الخروج</span>
+                    <span className={cn(isCollapsed && 'hidden')}>{t('dashboard.layout.logout')}</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
