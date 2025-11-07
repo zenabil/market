@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Toolti
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import type { Product, User as FirestoreUser, Order } from '@/lib/placeholder-data';
@@ -22,28 +22,35 @@ import { Button } from '@/components/ui/button';
 function AdminDashboard() {
   const { t } = useLanguage();
   const firestore = useFirestore();
-  const productsQuery = useMemoFirebase(() => {
+  const allProductsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'products'));
   }, [firestore]);
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  
+  const { data: allProducts, isLoading: isAllProductsLoading } = useCollection<Product>(allProductsQuery);
+
+  const topSellingQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'products'), where('sold', '>', 0), orderBy('sold', 'desc'), limit(5));
+  }, [firestore]);
+
+  const { data: topSellingProducts, isLoading: isTopSellingLoading } = useCollection<Product>(topSellingQuery);
 
   const stats = React.useMemo(() => {
-    if (!products) {
+    if (!allProducts) {
       return {
         totalRevenue: 0,
         totalProfit: 0,
         totalProductsSold: 0,
-        topSellingProducts: [],
         productsInStock: 0,
       };
     }
-    const totalRevenue = products.reduce((acc, product) => {
+    const totalRevenue = allProducts.reduce((acc, product) => {
       const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
       return acc + discountedPrice * (product.sold || 0);
     }, 0);
     
-    const totalProfit = products.reduce((acc, product) => {
+    const totalProfit = allProducts.reduce((acc, product) => {
         if (typeof product.purchasePrice !== 'number') {
             return acc; // Skip products without a valid purchase price
         }
@@ -52,19 +59,15 @@ function AdminDashboard() {
         return acc + (profitPerUnit * (product.sold || 0));
     }, 0);
 
-    const totalProductsSold = products.reduce((acc, product) => acc + (product.sold || 0), 0);
-
-    const topSellingProducts = [...products]
-      .filter(p => p.sold > 0)
-      .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-      .slice(0, 5)
-      .map(p => ({
-        name: p.name || '',
-        sold: p.sold,
-      }));
+    const totalProductsSold = allProducts.reduce((acc, product) => acc + (product.sold || 0), 0);
     
-    return { totalRevenue, totalProfit, totalProductsSold, topSellingProducts, productsInStock: products.length };
-  }, [products]);
+    return { totalRevenue, totalProfit, totalProductsSold, productsInStock: allProducts.length };
+  }, [allProducts]);
+  
+  const topSellingChartData = useMemo(() => {
+      if (!topSellingProducts) return [];
+      return topSellingProducts.map(p => ({ name: p.name || '', sold: p.sold }));
+  }, [topSellingProducts]);
 
 
   const formatCurrency = (amount: number) => {
@@ -80,6 +83,8 @@ function AdminDashboard() {
       color: 'hsl(var(--chart-1))',
     },
   };
+
+  const isLoading = isAllProductsLoading || isTopSellingLoading;
 
   return (
     <div className="container py-8 md:py-12">
@@ -175,10 +180,10 @@ function AdminDashboard() {
                 <div className="min-h-[350px] w-full flex items-center justify-center">
                     <Skeleton className="h-[300px] w-[95%]" />
                 </div>
-            ) : stats.topSellingProducts.length > 0 ? (
+            ) : topSellingChartData.length > 0 ? (
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={stats.topSellingProducts} layout="vertical" margin={{ right: 20, left: 20 }}>
+                    <BarChart data={topSellingChartData} layout="vertical" margin={{ right: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" allowDecimals={false} />
                     <YAxis
@@ -353,3 +358,5 @@ export default function DashboardPage() {
     
     return isAdmin ? <AdminDashboard /> : <UserDashboard />;
 }
+
+    
