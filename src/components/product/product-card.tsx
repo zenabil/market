@@ -29,10 +29,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const isWishlisted = !!wishlist?.find(item => item.id === product.id);
   const isComparing = !!comparisonItems.find(item => item.id === product.id);
+  const isOutOfStock = product.stock === 0;
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) return;
     addItem(product);
     toast({
       title: 'Ajouté au panier',
@@ -75,9 +77,16 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover"
+              className={cn("object-cover", isOutOfStock && "grayscale")}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
+            {isOutOfStock && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Badge variant="outline" className="text-white bg-black/50 border-white/50 text-sm">
+                        Épuisé
+                    </Badge>
+                </div>
+            )}
             <div className="absolute top-2 left-2 flex flex-col gap-2">
                 <Button
                   size="icon"
@@ -103,7 +112,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   <GitCompareArrows className={cn("h-4 w-4", isComparing ? "text-primary-foreground" : "text-muted-foreground")} />
                 </Button>
             </div>
-            {product.discount > 0 && (
+            {product.discount > 0 && !isOutOfStock && (
               <Badge variant="destructive" className="absolute top-2 right-2">
                 -{product.discount}%
               </Badge>
@@ -124,9 +133,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </CardContent>
         <CardFooter className="p-2 md:p-4 mt-auto">
-          <Button className="w-full font-bold" onClick={handleAddToCart}>
+          <Button className="w-full font-bold" onClick={handleAddToCart} disabled={isOutOfStock}>
             <ShoppingCart className="mr-2 h-4 w-4" />
-            Ajouter au panier
+            {isOutOfStock ? 'Épuisé' : 'Ajouter au panier'}
           </Button>
         </CardFooter>
       </Link>
