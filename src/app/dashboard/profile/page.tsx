@@ -55,7 +55,7 @@ export default function ProfilePage() {
     return doc(firestore, 'users', authUser.uid);
   }, [firestore, authUser]);
 
-  const { data: firestoreUser, isLoading: isFirestoreUserLoading } = useDoc<FirestoreUser>(userDocRef);
+  const { data: firestoreUser, isLoading: isFirestoreUserLoading, refetch } = useDoc<FirestoreUser>(userDocRef);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -104,6 +104,7 @@ export default function ProfilePage() {
             }
         });
         toast({ title: 'Avatar mis à jour' });
+        refetch();
       } catch (error) {
         console.error("Avatar update failed:", error);
         toast({ variant: 'destructive', title: 'Erreur', description: "Impossible de mettre à jour l'avatar." });
@@ -124,7 +125,7 @@ export default function ProfilePage() {
 
         const updateData = { name: values.name, phone: values.phone };
         await updateDoc(userDocRef, updateData);
-
+        refetch();
         toast({
             title: 'Profil mis à jour',
             description: 'Vos informations ont été enregistrées.',
@@ -184,6 +185,7 @@ export default function ProfilePage() {
     updateDoc(userDocRef, updateData)
     .then(() => {
       toast({ title: 'Adresse supprimée' });
+      refetch();
     })
     .catch((error) => {
       errorEmitter.emit(
@@ -404,3 +406,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

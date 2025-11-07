@@ -121,9 +121,9 @@ service cloud.firestore {
      * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow list: if isAdmin();
      * @allow create: if isSignedIn() && isOwner(userId);
-     * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
+     * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || isAdmin() );
      * @allow delete: if false;
-     * @principle Enforces document ownership and admin read/limited-write access.
+     * @principle Enforces document ownership and admin read/full-write access.
      */
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
@@ -281,35 +281,19 @@ service cloud.firestore {
   }
   
   function isUpdatingOwnData() {
-    // Users can't change their own role, order count, total spent, or loyalty points directly.
+    // Users can't change their own role or calculated stats directly.
     let disallowedFields = ['role', 'orderCount', 'totalSpent', 'loyaltyPoints', 'id', 'registrationDate'];
     let incomingKeys = request.resource.data.keys();
     
-    // Ensure no disallowed fields are being modified, unless they are being set to their existing value (which is a no-op).
-    return incomingKeys.hasAll(disallowedFields) == false ||
-           (request.resource.data.role == resource.data.role &&
-           request.resource.data.orderCount == resource.data.orderCount &&
-           request.resource.data.totalSpent == resource.data.totalSpent &&
-           request.resource.data.loyaltyPoints == resource.data.loyaltyPoints);
+    // Check that no disallowed fields are being modified by the user.
+    return !incomingKeys.hasAny(disallowedFields);
   }
   
   function isUpdatingAllowedAdminFields() {
-    // Admins can ONLY update the 'role' and 'loyaltyPoints' fields.
-    // All other fields must remain unchanged.
-    let allowedFields = ['role', 'loyaltyPoints'];
-    let allKeys = resource.data.keys().concat(request.resource.data.keys()).toSet();
-    
-    return allKeys.size() > 0 && allKeys.hasOnly(allowedFields.concat(resource.data.keys())) &&
-      request.resource.data.id == resource.data.id &&
-      request.resource.data.name == resource.data.name &&
-      request.resource.data.email == resource.data.email &&
-      request.resource.data.phone == resource.data.phone &&
-      request.resource.data.addresses == resource.data.addresses &&
-      request.resource.data.preferredLanguage == resource.data.preferredLanguage &&
-      request.resource.data.avatar == resource.data.avatar &&
-      request.resource.data.registrationDate == resource.data.registrationDate &&
-      request.resource.data.orderCount == resource.data.orderCount &&
-      request.resource.data.totalSpent == resource.data.totalSpent;
+    // Admins can update any field except for the calculated stats.
+    let disallowedFields = ['orderCount', 'totalSpent', 'id', 'registrationDate'];
+    let incomingKeys = request.resource.data.keys();
+    return !incomingKeys.hasAny(disallowedFields);
   }
 
   function isNotUpdatingCalculatedFields() {
