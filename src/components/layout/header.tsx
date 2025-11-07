@@ -43,7 +43,9 @@ import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
 import { useLanguage } from '@/contexts/language-provider';
 import ImageSearchDialog from './image-search-dialog';
-import { Dialog, DialogContent } from '../ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+
 
 function SearchCommandMenu() {
     const { t } = useLanguage();
@@ -86,6 +88,9 @@ function SearchCommandMenu() {
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="overflow-hidden p-0 shadow-lg top-1/4 sm:top-1/3">
+                    <VisuallyHidden>
+                      <DialogTitle>{t('header.searchPlaceholder')}</DialogTitle>
+                    </VisuallyHidden>
                     <form onSubmit={handleSearch}>
                         <div className="flex items-center border-b px-3">
                             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
