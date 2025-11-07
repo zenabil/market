@@ -104,7 +104,7 @@ export default function HomePageClient({ categories, bestSellers, exclusiveOffer
       <div className="mt-12 md:mt-16">
         <ProductGrid title="Nouveautés" products={newArrivals} />
       </div>
-      <div className="mt-12 md:mt-16">
+       <div className="mt-12 md:mt-16">
         <ProductGrid title="Offres exclusives" products={exclusiveOffers} />
       </div>
       <RecommendedProducts />
