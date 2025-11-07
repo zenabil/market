@@ -10,41 +10,43 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ShopByRecipe from '@/components/product/shop-by-recipe';
 import { Award, Leaf, Truck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-
-const features = [
-    {
-        icon: Leaf,
-        title: "نضارة مضمونة",
-        description: "نعمل مباشرة مع المزارعين المحليين لنقدم لكم منتجات موسمية طازجة."
-    },
-    {
-        icon: Truck,
-        title: "توصيل سريع",
-        description: "استلم مشترياتك عند باب منزلك في وقت قياسي، في أي مكان في تلمسان."
-    },
-    {
-        icon: Award,
-        title: "جودة فائقة",
-        description: "اختيار دقيق لضمان وصول أفضل المنتجات فقط إلى منزلك."
-    }
-];
+import { useLanguage } from '@/contexts/language-provider';
 
 function WhyChooseUs() {
+    const { t } = useLanguage();
+    const features = [
+        {
+            icon: Leaf,
+            titleKey: "freshnessGuaranteed",
+            descriptionKey: "freshnessGuaranteedDesc"
+        },
+        {
+            icon: Truck,
+            titleKey: "fastDelivery",
+            descriptionKey: "fastDeliveryDesc"
+        },
+        {
+            icon: Award,
+            titleKey: "superiorQuality",
+            "descriptionKey": "superiorQualityDesc"
+        }
+    ];
+
     return (
         <div className="bg-background">
             <div className="container py-12 md:py-24">
-                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">لماذا تختارنا؟</h2>
+                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">{t('home.whyChooseUs')}</h2>
                  <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature) => {
                         const Icon = feature.icon;
                         return (
-                            <Card key={feature.title} className="text-center border-none shadow-none bg-transparent">
+                            <Card key={feature.titleKey} className="text-center border-none shadow-none bg-transparent">
                                 <CardContent className="p-6">
                                     <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                                         <Icon className="h-8 w-8"/>
                                     </div>
-                                    <h3 className="font-bold text-xl">{feature.title}</h3>
-                                    <p className="mt-2 text-muted-foreground">{feature.description}</p>
+                                    <h3 className="font-bold text-xl">{t(`home.features.${feature.titleKey}`)}</h3>
+                                    <p className="mt-2 text-muted-foreground">{t(`home.features.${feature.descriptionKey}`)}</p>
                                 </CardContent>
                             </Card>
                         )

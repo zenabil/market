@@ -7,8 +7,10 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/contexts/language-provider';
 
 function CategoryDetails({ categoryId }: { categoryId: string }) {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const { categories, areCategoriesLoading } = useCategories();
 
@@ -38,7 +40,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
         {isLoading || !category ? (
             <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
         ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{`اكتشف منتجاتنا في فئة ${category.name}`}</p>
+            <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle').replace('{{name}}', category.name)}</p>
         )}
       </div>
       {isLoading ? (
@@ -53,7 +55,7 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
             <ProductGrid title="" products={products} />
           ) : (
              <div className="text-center p-8 text-muted-foreground">
-                لم يتم العثور على منتجات في هذه الفئة.
+                {t('category.noProducts')}
             </div>
           )}
         </>

@@ -10,8 +10,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import StarRating from '@/components/product/star-rating';
+import { useLanguage } from '@/contexts/language-provider';
 
 function RecipeCard({ recipe }: { recipe: Recipe }) {
+    const { t } = useLanguage();
     const totalTime = recipe.prepTime + recipe.cookTime;
 
     return (
@@ -35,11 +37,11 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
                 <CardFooter className="flex-col items-start gap-2">
                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        <span>Temps total: {totalTime} min</span>
+                        <span>{t('recipes.totalTime')}: {totalTime} min</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <StarRating rating={recipe.averageRating || 0} size="sm" />
-                        <span className="text-xs text-muted-foreground">({recipe.reviewCount || 0} avis)</span>
+                        <span className="text-xs text-muted-foreground">({recipe.reviewCount || 0} {t('recipes.reviews')})</span>
                     </div>
                 </CardFooter>
             </Card>
@@ -49,6 +51,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
 
 
 export default function RecipesPage() {
+    const { t } = useLanguage();
     const firestore = useFirestore();
 
     const recipesQuery = useMemoFirebase(
@@ -60,8 +63,8 @@ export default function RecipesPage() {
     return (
         <div className="container py-8 md:py-12">
             <div className="text-center mb-12">
-                <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">Nos Recettes</h1>
-                <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">Inspirez-vous pour votre prochain repas avec nos délicieuses recettes.</p>
+                <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('recipes.title')}</h1>
+                <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('recipes.subtitle')}</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -74,7 +77,7 @@ export default function RecipesPage() {
             </div>
              {!isLoading && recipes?.length === 0 && (
                 <div className="text-center p-16 text-muted-foreground col-span-full">
-                    <p className="text-lg">Aucune recette trouvée pour le moment.</p>
+                    <p className="text-lg">{t('recipes.noRecipes')}</p>
                 </div>
             )}
         </div>

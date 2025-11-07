@@ -8,6 +8,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { getProductRecommendations } from "@/ai/flows/product-recommendations";
 import { Skeleton } from "../ui/skeleton";
 import { collection, query, where, documentId } from "firebase/firestore";
+import { useLanguage } from "@/contexts/language-provider";
 
 type HomePageClientProps = {
   categories: Category[];
@@ -34,6 +35,7 @@ const useRecentProducts = () => {
 };
 
 function RecommendedProducts() {
+    const { t } = useLanguage();
     const { user } = useUser();
     const viewedProducts = useRecentProducts();
     const [recommendedProductNames, setRecommendedProductNames] = useState<string[]>([]);
@@ -78,7 +80,7 @@ function RecommendedProducts() {
     if (finalIsLoading) {
          return (
             <div className="mt-12 md:mt-16">
-                <h2 className="font-headline text-3xl md:text-4xl mb-8">نوصي به لك</h2>
+                <h2 className="font-headline text-3xl md:text-4xl mb-8">{t('home.recommendedForYou')}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                 </div>
@@ -88,24 +90,25 @@ function RecommendedProducts() {
 
     return (
         <div className="mt-12 md:mt-16">
-            <ProductGrid title="نوصي به لك" products={recommendedProducts || []} />
+            <ProductGrid title={t('home.recommendedForYou')} products={recommendedProducts || []} />
         </div>
     );
 }
 
 export default function HomePageClient({ categories, bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
+  const { t } = useLanguage();
 
   return (
     <div className="container py-8 md:py-12">
-      <CategoryShowcase title="تصفح الفئات" categories={categories} />
+      <CategoryShowcase title={t('home.browseCategories')} categories={categories} />
       <div className="mt-12 md:mt-16">
-        <ProductGrid title="الأكثر مبيعاً" products={bestSellers} />
+        <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
       </div>
       <div className="mt-12 md:mt-16">
-        <ProductGrid title="وصل حديثاً" products={newArrivals} />
+        <ProductGrid title={t('home.newArrivals')} products={newArrivals} />
       </div>
        <div className="mt-12 md:mt-16">
-        <ProductGrid title="عروض حصرية" products={exclusiveOffers} />
+        <ProductGrid title={t('home.exclusiveOffers')} products={exclusiveOffers} />
       </div>
       <RecommendedProducts />
     </div>

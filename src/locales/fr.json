@@ -1,6 +1,84 @@
 
 {
     "locale": "fr-FR",
+    "home": {
+        "browseCategories": "Parcourir les catégories",
+        "bestSellers": "Meilleures ventes",
+        "newArrivals": "Nouveautés",
+        "exclusiveOffers": "Offres exclusives",
+        "recommendedForYou": "Recommandé pour vous",
+        "shopByRecipe": "Acheter par recette",
+        "viewAll": "Voir tout",
+        "whyChooseUs": "Pourquoi nous choisir ?",
+        "features": {
+            "freshnessGuaranteed": "Fraîcheur Garantie",
+            "freshnessGuaranteedDesc": "Nous travaillons directement avec les agriculteurs locaux pour vous proposer des produits de saison frais.",
+            "fastDelivery": "Livraison Rapide",
+            "fastDeliveryDesc": "Recevez vos courses à votre porte en un temps record, partout à Tlemcen.",
+            "superiorQuality": "Qualité Supérieure",
+            "superiorQualityDesc": "Une sélection rigoureuse pour garantir que seuls les meilleurs produits arrivent chez vous."
+        },
+        "hero1": {
+            "heading": "Produits frais, directement à votre porte",
+            "subheading": "Découvrez notre sélection de fruits, légumes et produits locaux de haute qualité."
+        },
+        "hero2": {
+            "heading": "Des offres à ne pas manquer chaque semaine",
+            "subheading": "Économisez sur vos marques préférées avec nos offres exclusives."
+        },
+        "hero3": {
+            "heading": "La boulangerie, comme à la maison",
+            "subheading": "Dégustez notre pain artisanal et nos viennoiseries préparés chaque jour."
+        },
+        "shopNow": "Acheter maintenant"
+    },
+    "products": {
+        "allProducts": "Tous les produits",
+        "products": "Produits",
+        "subtitle": {
+            "all": "Parcourez notre gamme complète de produits frais et de haute qualité.",
+            "category": "Découvrez nos produits dans la catégorie {{name}}"
+        },
+        "sortBy": "Trier par",
+        "sort": {
+            "popularity": "Popularité",
+            "priceAsc": "Prix : Croissant",
+            "priceDesc": "Prix : Décroissant",
+            "nameAsc": "Nom (A-Z)"
+        }
+    },
+    "category": {
+        "subtitle": "Découvrez nos produits dans la catégorie {{name}}",
+        "noProducts": "Aucun produit trouvé dans cette catégorie."
+    },
+     "recipes": {
+        "title": "Nos Recettes",
+        "subtitle": "Inspirez-vous pour votre prochain repas avec nos délicieuses recettes.",
+        "totalTime": "Temps total",
+        "reviews": "avis",
+        "noRecipes": "Aucune recette trouvée pour le moment."
+    },
+    "recipe": {
+        "reviews": "avis",
+        "prepTime": "Temps de prép.",
+        "cookTime": "Temps de cuisson",
+        "totalTime": "Temps Total",
+        "servings": "Portions",
+        "people": "pers.",
+        "ingredients": "Ingrédients",
+        "instructions": "Instructions",
+        "addToCart": "Ajouter les ingrédients au panier",
+        "noIngredients": "Aucun ingrédient à rechercher",
+        "addedToCart": {
+            "title": "Ingrédients ajoutés au panier",
+            "description": "{{count}} ingrédient(s) ont été ajoutés à votre panier."
+        },
+        "notFound": {
+            "title": "Certains ingrédients non trouvés",
+            "description": "Nous n'avons pas pu trouver"
+        },
+        "error": "Impossible d'ajouter les ingrédients au panier."
+    },
     "header": {
         "home": "Accueil",
         "products": "Produits",
@@ -443,7 +521,7 @@
                 "minImage": "Au moins une image est requise."
             }
         },
-         "addressDialog": {
+        "addressDialog": {
             "addTitle": "Ajouter une nouvelle adresse",
             "addDescription": "Ajoutez une nouvelle adresse de livraison à votre profil.",
             "editTitle": "Modifier l'adresse",
@@ -465,5 +543,3 @@
         }
     }
 }
-
-    

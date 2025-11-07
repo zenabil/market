@@ -7,19 +7,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Recipe } from '@/lib/placeholder-data';
 import { Button } from '../ui/button';
 import { ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-provider';
 
 interface ShopByRecipeProps {
   recipes: Recipe[];
 }
 
 export default function ShopByRecipe({ recipes }: ShopByRecipeProps) {
+  const { t } = useLanguage();
   return (
     <section>
       <div className="flex items-center justify-between mb-8">
-        <h2 className="font-headline text-3xl md:text-4xl">تسوق حسب الوصفة</h2>
+        <h2 className="font-headline text-3xl md:text-4xl">{t('home.shopByRecipe')}</h2>
         <Button variant="ghost" asChild>
             <Link href="/recipes">
-                عرض الكل <ArrowRight className="mr-2 h-4 w-4" />
+                {t('home.viewAll')} <ArrowRight className="mr-2 h-4 w-4" />
             </Link>
         </Button>
       </div>

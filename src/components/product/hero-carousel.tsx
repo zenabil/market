@@ -13,26 +13,28 @@ import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Autoplay from "embla-carousel-autoplay";
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/language-provider';
 
 const slides = [
   {
     id: 'hero-1',
-    heading: 'منتجات طازجة، مباشرة إلى باب منزلك',
-    subheading: 'اكتشف مجموعتنا المختارة من الفواكه والخضروات والمنتجات المحلية عالية الجودة.',
+    headingKey: 'hero1.heading',
+    subheadingKey: 'hero1.subheading',
   },
   {
     id: 'hero-2',
-    heading: 'عروض لا تفوت كل أسبوع',
-    subheading: 'وفّر على علاماتك التجارية المفضلة مع عروضنا الحصرية.',
+    headingKey: 'hero2.heading',
+    subheadingKey: 'hero2.subheading',
   },
   {
     id: 'hero-3',
-    heading: 'المخبز، وكأنه في المنزل',
-    subheading: 'تذوق الخبز والمعجنات الحرفية التي نعدها يوميًا.',
+    headingKey: 'hero3.heading',
+    subheadingKey: 'hero3.subheading',
   },
 ];
 
 export default function HeroCarousel() {
+  const { t } = useLanguage();
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
@@ -65,13 +67,13 @@ export default function HeroCarousel() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
                   <div className="container">
                     <h1 className="font-headline text-3xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg">
-                      {slide.heading}
+                      {t(`home.${slide.headingKey}`)}
                     </h1>
                     <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-neutral-200 drop-shadow">
-                      {slide.subheading}
+                      {t(`home.${slide.subheadingKey}`)}
                     </p>
                     <Button size="lg" className="mt-8 font-bold text-base" asChild>
-                      <Link href="/products">تسوق الآن</Link>
+                      <Link href="/products">{t('home.shopNow')}</Link>
                     </Button>
                   </div>
                 </div>

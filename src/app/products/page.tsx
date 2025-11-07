@@ -15,8 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function ProductsPage() {
+  const { t } = useLanguage();
   const firestore = useFirestore();
   const productsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
   const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
@@ -53,9 +55,9 @@ export default function ProductsPage() {
   }, [products, selectedCategoryId, sortOption]);
 
   const selectedCategoryName = useMemo(() => {
-    if (!selectedCategoryId) return 'جميع المنتجات';
-    return categories?.find(c => c.id === selectedCategoryId)?.name || 'المنتجات';
-  }, [selectedCategoryId, categories]);
+    if (!selectedCategoryId) return t('products.allProducts');
+    return categories?.find(c => c.id === selectedCategoryId)?.name || t('products.products');
+  }, [selectedCategoryId, categories, t]);
 
 
   return (
@@ -64,8 +66,8 @@ export default function ProductsPage() {
         <h1 className="font-headline text-4xl md:text-5xl">{selectedCategoryName}</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           {selectedCategoryId 
-            ? `اكتشف منتجاتنا في فئة ${selectedCategoryName}`
-            : 'تصفح تشكيلتنا الكاملة من المنتجات الطازجة وعالية الجودة.'
+            ? t('products.subtitle.category').replace('{{name}}', selectedCategoryName)
+            : t('products.subtitle.all')
           }
         </p>
       </div>
@@ -76,7 +78,7 @@ export default function ProductsPage() {
           onClick={() => setSelectedCategoryId(null)}
           size="sm"
         >
-          جميع المنتجات
+          {t('products.allProducts')}
         </Button>
         {categories?.map(category => (
           <Button 
@@ -93,13 +95,13 @@ export default function ProductsPage() {
        <div className="flex justify-end mb-8">
         <Select onValueChange={setSortOption} defaultValue={sortOption}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="الترتيب حسب" />
+            <SelectValue placeholder={t('products.sortBy')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="popularity">الشعبية</SelectItem>
-            <SelectItem value="price-asc">السعر: من الأقل إلى الأعلى</SelectItem>
-            <SelectItem value="price-desc">السعر: من الأعلى إلى الأقل</SelectItem>
-            <SelectItem value="name-asc">الاسم (أ-ي)</SelectItem>
+            <SelectItem value="popularity">{t('products.sort.popularity')}</SelectItem>
+            <SelectItem value="price-asc">{t('products.sort.priceAsc')}</SelectItem>
+            <SelectItem value="price-desc">{t('products.sort.priceDesc')}</SelectItem>
+            <SelectItem value="name-asc">{t('products.sort.nameAsc')}</SelectItem>
           </SelectContent>
         </Select>
       </div>

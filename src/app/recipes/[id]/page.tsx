@@ -14,8 +14,10 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
 import ReviewsSection from '@/components/shared/reviews-section';
+import { useLanguage } from '@/contexts/language-provider';
 
 function RecipeDetailsPage() {
+    const { t } = useLanguage();
     const { id: recipeId } = useParams();
     const firestore = useFirestore();
     const { addItem } = useCart();
@@ -38,7 +40,7 @@ function RecipeDetailsPage() {
             if (productsToQuery.length === 0) {
                  toast({
                     variant: 'destructive',
-                    title: 'Aucun ingrédient à rechercher',
+                    title: t('recipe.noIngredients'),
                 });
                 setIsAddingToCart(false);
                 return;
@@ -58,8 +60,8 @@ function RecipeDetailsPage() {
     
             if (itemsAddedCount > 0) {
                 toast({
-                    title: 'Ingrédients ajoutés au panier',
-                    description: `${itemsAddedCount} ingrédient(s) ont été ajoutés à votre panier.`
+                    title: t('recipe.addedToCart.title'),
+                    description: t('recipe.addedToCart.description').replace('{{count}}', itemsAddedCount.toString())
                 });
             }
     
@@ -70,8 +72,8 @@ function RecipeDetailsPage() {
             if (notFoundProducts.length > 0) {
                  toast({
                     variant: 'destructive',
-                    title: 'Certains ingrédients non trouvés',
-                    description: `Nous n'avons pas pu trouver: ${notFoundProducts.join(', ')}`
+                    title: t('recipe.notFound.title'),
+                    description: `${t('recipe.notFound.description')}: ${notFoundProducts.join(', ')}`
                 });
             }
 
@@ -79,8 +81,8 @@ function RecipeDetailsPage() {
             console.error("Error adding recipe ingredients to cart:", error);
             toast({
                 variant: 'destructive',
-                title: 'Erreur',
-                description: "Impossible d'ajouter les ingrédients au panier."
+                title: t('dashboard.common.error'),
+                description: t('recipe.error')
             });
         } finally {
             setIsAddingToCart(false);
@@ -121,7 +123,7 @@ function RecipeDetailsPage() {
                 <div className="mt-4 flex items-center justify-center gap-2">
                     <StarRating rating={recipe.averageRating || 0} />
                     <span className="text-sm text-muted-foreground">
-                        ({recipe.reviewCount || 0} avis)
+                        ({recipe.reviewCount || 0} {t('recipe.reviews')})
                     </span>
                 </div>
                 <p className="mt-4 text-center text-lg text-muted-foreground">{recipe.description}</p>
@@ -133,23 +135,23 @@ function RecipeDetailsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-8">
                     <div className="p-4 bg-muted/50 rounded-lg">
                         <Clock className="h-8 w-8 mx-auto text-primary" />
-                        <p className="mt-2 font-semibold">Temps de prép.</p>
+                        <p className="mt-2 font-semibold">{t('recipe.prepTime')}</p>
                         <p className="text-sm text-muted-foreground">{recipe.prepTime} min</p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
                         <Soup className="h-8 w-8 mx-auto text-primary" />
-                        <p className="mt-2 font-semibold">Temps de cuisson</p>
+                        <p className="mt-2 font-semibold">{t('recipe.cookTime')}</p>
                         <p className="text-sm text-muted-foreground">{recipe.cookTime} min</p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
                         <Clock className="h-8 w-8 mx-auto text-primary" />
-                        <p className="mt-2 font-semibold">Temps Total</p>
+                        <p className="mt-2 font-semibold">{t('recipe.totalTime')}</p>
                         <p className="text-sm text-muted-foreground">{totalTime} min</p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
                         <Users className="h-8 w-8 mx-auto text-primary" />
-                        <p className="mt-2 font-semibold">Portions</p>
-                        <p className="text-sm text-muted-foreground">{recipe.servings} pers.</p>
+                        <p className="mt-2 font-semibold">{t('recipe.servings')}</p>
+                        <p className="text-sm text-muted-foreground">{recipe.servings} {t('recipe.people')}</p>
                     </div>
                 </div>
 
@@ -158,7 +160,7 @@ function RecipeDetailsPage() {
                 <div className="grid md:grid-cols-3 gap-12">
                     <div className="md:col-span-1">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="font-headline text-2xl">Ingrédients</h2>
+                            <h2 className="font-headline text-2xl">{t('recipe.ingredients')}</h2>
                         </div>
                         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
                             {recipe.ingredients.map((ingredient, index) => (
@@ -171,11 +173,11 @@ function RecipeDetailsPage() {
                             ) : (
                                 <ShoppingCart className="mr-2 h-4 w-4" />
                             )}
-                            Ajouter les ingrédients au panier
+                            {t('recipe.addToCart')}
                         </Button>
                     </div>
                     <div className="md:col-span-2">
-                        <h2 className="font-headline text-2xl mb-4">Instructions</h2>
+                        <h2 className="font-headline text-2xl mb-4">{t('recipe.instructions')}</h2>
                         <div className="space-y-4 prose prose-neutral dark:prose-invert max-w-none">
                             {recipe.instructions.map((instruction, index) => (
                                 <div key={index} className="flex gap-4 items-start">
