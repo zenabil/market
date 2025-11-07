@@ -46,7 +46,7 @@ function OrderDetails() {
         return query(collectionGroup(firestore, 'orders'), where(documentId(), '==', orderId as string));
     }, [firestore, orderId]);
     
-    const { data: orders, isLoading: isOrderLoading, refetch } = useCollection<Order>(orderQuery);
+    const { data: orders, isLoading: isOrderLoading, refetch: refetchOrder } = useCollection<Order>(orderQuery);
     
     const order = useMemo(() => {
         return orders && orders.length === 1 ? orders[0] : null;
@@ -57,7 +57,7 @@ function OrderDetails() {
         return doc(firestore, 'users', order.userId);
     }, [firestore, order]);
 
-    const { data: customer, isLoading: isCustomerLoading } = useDoc<FirestoreUser>(userDocRef);
+    const { data: customer, isLoading: isCustomerLoading, refetch: refetchCustomer } = useDoc<FirestoreUser>(userDocRef);
 
     const productIds = useMemo(() => {
         if (!order) return null;
@@ -91,7 +91,7 @@ function OrderDetails() {
                     message: `Le statut de votre commande ...${order.id.slice(-6)} est maintenant : ${statusTranslations[newStatus]}`,
                     link: `/dashboard/orders/${order.id}`,
                  }).catch(console.error);
-                 refetch();
+                 refetchOrder();
             })
             .catch(error => {
                 errorEmitter.emit(
@@ -252,6 +252,7 @@ function OrderDetails() {
                                 <AddressDialog 
                                     userDocRef={userDocRef} 
                                     firestoreUser={customer}
+                                    onAddressChange={refetchCustomer}
                                 >
                                     <Button variant="ghost" size="icon" title="Modifier les adresses du client">
                                         <Home className="h-4 w-4 text-muted-foreground" />

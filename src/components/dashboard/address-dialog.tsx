@@ -34,10 +34,11 @@ interface AddressDialogProps {
     userDocRef: DocumentReference | null;
     firestoreUser: FirestoreUser | null;
     addressToEdit?: Address | null;
+    onAddressChange?: () => void;
     children: React.ReactNode;
 }
 
-export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, children }: AddressDialogProps) {
+export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, onAddressChange, children }: AddressDialogProps) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -70,6 +71,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
             updateDoc(userDocRef, { addresses: updatedAddresses })
                 .then(() => {
                     toast({ title: 'Adresse mise à jour' });
+                    onAddressChange?.();
                     setIsOpen(false);
                 })
                 .catch(() => {
@@ -90,6 +92,7 @@ export function AddressDialog({ userDocRef, firestoreUser, addressToEdit, childr
             updateDoc(userDocRef, { addresses: arrayUnion(newAddress) })
                 .then(() => {
                     toast({ title: 'Adresse ajoutée' });
+                    onAddressChange?.();
                     setIsOpen(false);
                 })
                 .catch(() => {

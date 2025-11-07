@@ -279,6 +279,7 @@ export default function UsersPage() {
                         <AddressDialog 
                           userDocRef={doc(firestore, 'users', user.id)} 
                           firestoreUser={user}
+                          onAddressChange={handleUpdate}
                         >
                             <Button variant="ghost" size="icon" title="Modifier les adresses">
                                 <Home className="h-4 w-4 text-muted-foreground" />

@@ -362,7 +362,7 @@ export default function ProfilePage() {
             <CardTitle>Gérer les adresses</CardTitle>
             <CardDescription>Ajoutez ou supprimez vos adresses de livraison.</CardDescription>
           </div>
-          <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser}>
+          <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser} onAddressChange={refetch}>
             <Button size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Ajouter une adresse
@@ -376,7 +376,7 @@ export default function ProfilePage() {
                     <div key={addr.id} className="flex justify-between items-center p-3 border rounded-md">
                         <p className="text-sm text-muted-foreground">{addr.street}, {addr.city}, {addr.zipCode}, {addr.country}</p>
                         <div className="flex items-center">
-                            <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser} addressToEdit={addr}>
+                            <AddressDialog userDocRef={userDocRef} firestoreUser={firestoreUser} addressToEdit={addr} onAddressChange={refetch}>
                                 <Button variant="ghost" size="icon"><Pencil className="h-4 w-4 text-muted-foreground" /></Button>
                             </AddressDialog>
                             <AlertDialog>
