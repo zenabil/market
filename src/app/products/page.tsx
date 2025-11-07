@@ -16,6 +16,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Tous les produits',
+  description: 'Parcourez notre gamme complète de produits frais et de haute qualité chez Tlemcen Smart Supermarket.',
+  openGraph: {
+    title: 'Tous les produits | Tlemcen Smart Supermarket',
+    description: 'Découvrez des milliers de produits, des fruits et légumes frais aux produits d\'épicerie essentiels.',
+  },
+};
 
 export default function ProductsPage() {
   const { t } = useLanguage();

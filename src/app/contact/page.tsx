@@ -22,6 +22,17 @@ import { doc, addDoc, collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Contactez-nous',
+  description: 'Contactez Tlemcen Smart Supermarket pour toute question, suggestion ou demande d\'assistance.',
+  openGraph: {
+      title: 'Contactez Tlemcen Smart Supermarket',
+      description: 'Nous sommes là pour vous aider.',
+  },
+};
+
 
 type SiteSettings = {
   address?: string;

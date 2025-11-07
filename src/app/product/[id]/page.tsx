@@ -12,7 +12,7 @@ import ProductGrid from '@/components/product/product-grid';
 import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, limit, documentId } from 'firebase/firestore';
+import { doc, collection, query, where, limit, documentId, getDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
@@ -21,6 +21,60 @@ import { useWishlist } from '@/hooks/use-wishlist';
 import { cn } from '@/lib/utils';
 import { useComparison } from '@/hooks/use-comparison';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { initializeApp, getApps } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+
+// Server-side metadata generation
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const db = getFirestore();
+  const productRef = doc(db, 'products', params.id);
+  const productSnap = await getDoc(productRef);
+
+  if (!productSnap.exists()) {
+    return {
+      title: 'Product Not Found',
+    }
+  }
+
+  const product = productSnap.data() as Product;
+  const previousImages = (await parent).openGraph?.images || []
+
+  return {
+    title: product.name,
+    description: product.description.substring(0, 160),
+    openGraph: {
+      title: product.name,
+      description: product.description.substring(0, 160),
+      images: [
+        {
+          url: product.images[0],
+          width: 800,
+          height: 800,
+          alt: product.name,
+        },
+        ...previousImages,
+      ],
+    },
+     twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: product.description.substring(0, 160),
+      images: [product.images[0]],
+    },
+  }
+}
 
 
 function ProductDetails({ productId }: { productId: string }) {

@@ -5,10 +5,59 @@ import { notFound } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
 import { useCategories } from '@/hooks/use-categories';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import type { Product } from '@/lib/placeholder-data';
+import { collection, query, where, doc, getDoc } from 'firebase/firestore';
+import type { Product, Category } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { initializeApp, getApps } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+
+// Server-side metadata generation
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const db = getFirestore();
+  const categoryRef = doc(db, 'categories', params.id);
+  const categorySnap = await getDoc(categoryRef);
+
+  if (!categorySnap.exists()) {
+    return {
+      title: 'Category Not Found',
+    }
+  }
+
+  const category = categorySnap.data() as Category;
+  const previousImages = (await parent).openGraph?.images || []
+
+  return {
+    title: category.name,
+    description: `Découvrez nos produits dans la catégorie ${category.name}`,
+    openGraph: {
+      title: category.name,
+      description: `Découvrez tous les produits de la catégorie ${category.name} sur Tlemcen Smart Supermarket.`,
+      images: [
+        {
+          url: category.image,
+          width: 800,
+          height: 800,
+          alt: category.name,
+        },
+        ...previousImages,
+      ],
+    },
+  }
+}
+
 
 function CategoryDetails({ categoryId }: { categoryId: string }) {
   const { t } = useLanguage();

@@ -25,7 +25,8 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   let siteName = 'Tlemcen Smart Supermarket'; // Default in English for crawlers
-  let siteDescription = 'Your local Tlemcen grocery store, now online with smart features.';
+  let siteDescription = 'Your local Tlemcen grocery store, now online with smart features. Fresh products, fast delivery, and smart shopping.';
+  let logoUrl = '';
 
   try {
     const db = getFirestore();
@@ -35,6 +36,7 @@ export async function generateMetadata(
     if (settingsSnap.exists()) {
       const settingsData = settingsSnap.data();
       siteName = settingsData.siteName || siteName;
+      logoUrl = settingsData.logoUrl || '';
     }
   } catch (error) {
     console.error("Could not fetch site settings for metadata:", error);
@@ -46,6 +48,40 @@ export async function generateMetadata(
       template: `%s | ${siteName}`,
     },
     description: siteDescription,
+    keywords: ['supermarket', 'Tlemcen', 'grocery', 'online shopping', 'food', 'supermarché', 'épicerie', 'سوبر ماركت', 'تلمسان', 'بقالة'],
+    openGraph: {
+      title: siteName,
+      description: siteDescription,
+      url: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+      siteName: siteName,
+      images: [
+        {
+          url: logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080',
+          width: 1200,
+          height: 630,
+          alt: 'Tlemcen Smart Supermarket',
+        },
+      ],
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteName,
+      description: siteDescription,
+      images: [logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080'],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 

@@ -9,6 +9,16 @@ import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase
 import type { TeamMember } from '@/lib/placeholder-data';
 import { collection, query, doc, where } from 'firebase/firestore';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'À Propos',
+  description: 'Apprenez-en plus sur l\'histoire, les valeurs et l\'équipe de Tlemcen Smart Supermarket.',
+  openGraph: {
+      title: 'À Propos de Tlemcen Smart Supermarket',
+      description: 'Découvrez notre engagement envers la qualité, la communauté et l\'innovation.',
+  },
+};
 
 const values = [
     {

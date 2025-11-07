@@ -11,6 +11,17 @@ import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import StarRating from '@/components/product/star-rating';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Recettes',
+  description: 'Inspirez-vous pour votre prochain repas avec nos délicieuses recettes, faciles à suivre et parfaites pour toutes les occasions.',
+  openGraph: {
+    title: 'Recettes | Tlemcen Smart Supermarket',
+    description: 'Découvrez des dizaines de recettes, du plat principal au dessert, et ajoutez les ingrédients à votre panier en un clic.',
+  },
+};
+
 
 function RecipeCard({ recipe }: { recipe: Recipe }) {
     const { t } = useLanguage();

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDocs, query, where, getDoc } from 'firebase/firestore';
 import type { Recipe, Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,60 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
 import ReviewsSection from '@/components/shared/reviews-section';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { initializeApp, getApps } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+
+// Server-side metadata generation
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const db = getFirestore();
+  const recipeRef = doc(db, 'recipes', params.id);
+  const recipeSnap = await getDoc(recipeRef);
+
+  if (!recipeSnap.exists()) {
+    return {
+      title: 'Recipe Not Found',
+    }
+  }
+
+  const recipe = recipeSnap.data() as Recipe;
+  const previousImages = (await parent).openGraph?.images || []
+
+  return {
+    title: recipe.title,
+    description: recipe.description.substring(0, 160),
+    openGraph: {
+      title: recipe.title,
+      description: recipe.description.substring(0, 160),
+      images: [
+        {
+          url: recipe.image,
+          width: 1200,
+          height: 630,
+          alt: recipe.title,
+        },
+        ...previousImages,
+      ],
+    },
+     twitter: {
+      card: 'summary_large_image',
+      title: recipe.title,
+      description: recipe.description.substring(0, 160),
+      images: [recipe.image],
+    },
+  }
+}
 
 function RecipeDetailsPage() {
     const { t } = useLanguage();
