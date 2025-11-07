@@ -122,16 +122,8 @@ service cloud.firestore {
      * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
      * @allow list: if isAdmin();
      * @allow create: if isSignedIn() && isOwner(userId);
-     * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
-     * @allow delete: if false;
-     * @principle Enforces document ownership and admin read/limited-write access.
-     */
-    match /users/{userId} {
-      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow list: if isAdmin();
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && (isOwner(userId) && isUpdatingOwnData() || isAdmin() && isUpdatingAllowedAdminFields());
-      allow delete: if false; // Generally don't want users to delete their own account record
+     * @allow update: if isSignedIn() && (isOwner(userId) && isUpdatingOwnData() || isAdmin() && isUpdatingAllowedAdminFields());
+     * @allow delete: if false; // Generally don't want users to delete their own account record
 
       /**
        * @description Allows a user to manage their own wishlist.
@@ -325,7 +317,3 @@ service cloud.firestore {
     return request.resource.data.type == resource.data.type;
   }
 }
-
-    
-
-    
