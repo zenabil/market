@@ -15,7 +15,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
 import dynamic from 'next/dynamic';
-
+import { WithContext, BreadcrumbList } from 'schema-dts';
 
 // This needs to be outside the component to work on the server
 if (!getApps().length) {
@@ -31,11 +31,10 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  // We need a server-side instance of Firestore
   const db = getFirestore();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const q = query(collection(db, 'categories'), where('slug', '==', params.slug), limit(1));
   const categorySnap = await getDocs(q);
-
 
   if (categorySnap.empty) {
     return {
@@ -44,8 +43,17 @@ export async function generateMetadata(
   }
 
   const category = categorySnap.docs[0].data() as Category;
-  // We can optionally resolve parent metadata to extend it
   const previousImages = (await parent).openGraph?.images || []
+  
+  const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${baseUrl}` },
+        { '@type': 'ListItem', position: 2, name: 'Produits', item: `${baseUrl}/products` },
+        { '@type': 'ListItem', position: 3, name: category.name, item: `${baseUrl}/category/${category.slug}` }
+    ]
+  };
 
   return {
     title: category.name,
@@ -63,6 +71,9 @@ export async function generateMetadata(
         ...previousImages,
       ],
     },
+    other: {
+        jsonLd: JSON.stringify(breadcrumbJsonLd),
+    }
   }
 }
 

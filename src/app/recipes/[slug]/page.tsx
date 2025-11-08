@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import type { Recipe } from '@/lib/placeholder-data';
-import { WithContext, Recipe as RecipeSchema } from 'schema-dts';
+import { WithContext, Recipe as RecipeSchema, BreadcrumbList } from 'schema-dts';
 
 const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false });
 
@@ -29,6 +29,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const db = getFirestore();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const q = query(collection(db, 'recipes'), where('slug', '==', params.slug), limit(1));
   const recipeSnap = await getDocs(q);
 
@@ -41,7 +42,7 @@ export async function generateMetadata(
   const recipe = recipeSnap.docs[0].data() as Recipe;
   const previousImages = (await parent).openGraph?.images || []
   
-  const jsonLd: WithContext<RecipeSchema> = {
+  const recipeJsonLd: WithContext<RecipeSchema> = {
     '@context': 'https://schema.org',
     '@type': 'Recipe',
     name: recipe.title,
@@ -64,6 +65,16 @@ export async function generateMetadata(
             reviewCount: recipe.reviewCount
         }
     } : {})
+  };
+
+  const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${baseUrl}` },
+        { '@type': 'ListItem', position: 2, name: 'Recettes', item: `${baseUrl}/recipes` },
+        { '@type': 'ListItem', position: 3, name: recipe.title, item: `${baseUrl}/recipes/${recipe.slug}` }
+    ]
   };
 
 
@@ -93,7 +104,7 @@ export async function generateMetadata(
         canonical: `/recipes/${recipe.slug}`,
     },
     other: {
-      jsonLd: JSON.stringify(jsonLd)
+      jsonLd: JSON.stringify([recipeJsonLd, breadcrumbJsonLd])
     }
   }
 }

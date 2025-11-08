@@ -9,8 +9,8 @@ import { getFirestore, doc, collection, query, where, getDocs, limit } from 'fir
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Product } from '@/lib/placeholder-data';
-import { WithContext, Product as ProductSchema } from 'schema-dts';
+import type { Product, Category } from '@/lib/placeholder-data';
+import { WithContext, Product as ProductSchema, BreadcrumbList } from 'schema-dts';
 
 const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false });
 
@@ -28,6 +28,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const db = getFirestore();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const productsRef = collection(db, 'products');
   const q = query(productsRef, where('slug', '==', params.slug), limit(1));
   const querySnapshot = await getDocs(q);
@@ -42,8 +43,18 @@ export async function generateMetadata(
   const previousImages = (await parent).openGraph?.images || []
   
   const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+  
+  // Fetch category for breadcrumbs
+  let category: Category | null = null;
+  if (product.categoryId) {
+      const categoryRef = doc(db, 'categories', product.categoryId);
+      const categorySnap = await getDoc(categoryRef);
+      if (categorySnap.exists()) {
+          category = categorySnap.data() as Category;
+      }
+  }
 
-  const jsonLd: WithContext<ProductSchema> = {
+  const productJsonLd: WithContext<ProductSchema> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
@@ -55,7 +66,7 @@ export async function generateMetadata(
       price: discountedPrice.toFixed(2),
       priceCurrency: 'DZD',
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/product/${product.slug}`
+      url: `${baseUrl}/product/${product.slug}`
     },
     ...(product.reviewCount && product.reviewCount > 0 && product.averageRating ? {
         aggregateRating: {
@@ -64,6 +75,17 @@ export async function generateMetadata(
             reviewCount: product.reviewCount
         }
     } : {})
+  };
+  
+  const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${baseUrl}` },
+        { '@type': 'ListItem', position: 2, name: 'Produits', item: `${baseUrl}/products` },
+        ...(category ? [{ '@type': 'ListItem', position: 3, name: category.name, item: `${baseUrl}/category/${category.slug}` }] : []),
+        { '@type': 'ListItem', position: 4, name: product.name, item: `${baseUrl}/product/${product.slug}` }
+    ]
   };
 
 
@@ -93,7 +115,7 @@ export async function generateMetadata(
         canonical: `/product/${product.slug}`,
     },
     other: {
-      jsonLd: JSON.stringify(jsonLd)
+      jsonLd: JSON.stringify([productJsonLd, breadcrumbJsonLd])
     }
   }
 }
