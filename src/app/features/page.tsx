@@ -39,7 +39,7 @@ export default function FeaturesPage() {
     const { data: features, isLoading } = useCollection<StoreFeature>(featuresQuery);
     
     return (
-        <div className="container py-8 md:py-12" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="container py-6 md:py-8" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <div className="text-center mb-12">
                 <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('features.title')}</h1>
                 <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('features.subtitle')}</p>

@@ -102,7 +102,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
               </div>
             </ScrollArea>
             <Separator />
-            <SheetFooter className="mt-4 sm:flex-col sm:space-x-0 space-y-2">
+            <SheetFooter className="mt-4 flex-col space-y-2 sm:space-y-0">
               <div className="flex justify-between font-bold text-lg">
                 <span>{t('cart.subtotal')}</span>
                 <span>{formatCurrency(totalPrice)}</span>

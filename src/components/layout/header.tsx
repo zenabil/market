@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -83,7 +82,7 @@ function SearchCommandMenu() {
         <>
             <Button
                 variant="outline"
-                className="relative h-10 w-10 p-0 sm:w-64 sm:justify-start sm:px-4"
+                className="relative h-10 w-10 p-0 sm:w-auto sm:justify-start sm:px-4"
                 onClick={() => setOpen(true)}
             >
                 <Search className="h-4 w-4 sm:mr-2" />
@@ -439,7 +438,7 @@ export default function Header() {
 
         <div className="flex flex-1 items-center justify-end space-x-1 md:space-x-2">
           
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <SearchCommandMenu />
           </div>
 

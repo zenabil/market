@@ -204,7 +204,7 @@ export default function ProfilePage() {
   const isLoading = isUserLoading || isFirestoreUserLoading;
 
   return (
-    <div className="container py-8 md:py-12 space-y-8">
+    <div className="container py-6 md:py-8 space-y-8">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>{t('dashboard.profile.title')}</CardTitle>

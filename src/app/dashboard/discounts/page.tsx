@@ -203,14 +203,14 @@ export default function DiscountsPage() {
 
     if (isLoading || !isAdmin) {
         return (
-            <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <div className="container py-6 md:py-8 flex-grow flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
     }
 
     return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <div className="mb-8">
                 <h1 className='font-headline text-3xl'>{t('dashboard.layout.discounts')}</h1>
                 <p className="text-muted-foreground">{t('dashboard.discounts.pageDescription')}</p>
@@ -259,4 +259,3 @@ export default function DiscountsPage() {
         </div>
     );
 }
-

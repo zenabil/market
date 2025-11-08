@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -32,7 +33,7 @@ export default function WishlistPage() {
     const isLoading = isWishlistLoading || (wishlist && wishlist.length > 0 && areProductsLoading);
 
     return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <Card>
                 <CardHeader>
                     <CardTitle className='font-headline text-3xl'>{t('dashboard.layout.wishlist')}</CardTitle>

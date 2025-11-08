@@ -39,7 +39,7 @@ export default function SearchResultsClient() {
 
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">
           {searchQuery ? t('search.resultsFor').replace('{{query}}', searchQuery) : t('search.title')}
@@ -51,7 +51,7 @@ export default function SearchResultsClient() {
         )}
       </div>
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-80 w-full" />
           ))}

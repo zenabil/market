@@ -92,7 +92,7 @@ function CategoryDetailsClient({ categoryId }: { categoryId: string }) {
   }
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <div className="text-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">{category?.name}</h1>
         <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle', { name: category?.name || '' })}</p>
@@ -112,7 +112,7 @@ function CategoryDetailsClient({ categoryId }: { categoryId: string }) {
 
 function CategoryPageSkeleton() {
     return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <div className="text-center mb-8">
                 <Skeleton className="h-14 w-1/2 mx-auto" />
                 <Skeleton className="h-7 w-2/3 mx-auto mt-2" />

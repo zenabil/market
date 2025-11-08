@@ -350,7 +350,7 @@ export default function CheckoutPageClient() {
                    </div>
                    <Separator />
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row items-center gap-2">
                         <Input 
                           placeholder={t('checkout.discountCode')}
                           value={couponCode}
@@ -362,6 +362,7 @@ export default function CheckoutPageClient() {
                           type="button"
                           onClick={handleApplyCoupon}
                           disabled={isApplyingCoupon || !couponCode || !!appliedCoupon}
+                          className="w-full sm:w-auto"
                         >
                           {isApplyingCoupon && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                           {t('checkout.apply')}

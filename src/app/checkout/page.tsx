@@ -29,7 +29,7 @@ export default function CheckoutPage() {
 
 function CheckoutPageSkeleton() {
     return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <div className="text-center mb-12">
                 <Skeleton className="h-12 w-1/2 mx-auto" />
                 <Skeleton className="h-6 w-1/4 mx-auto mt-4" />

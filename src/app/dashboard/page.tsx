@@ -32,7 +32,7 @@ const UserDashboard = dynamic(() => import('@/components/dashboard/user-dashboar
 
 function AdminDashboardSkeleton() {
     return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <Skeleton className="h-10 w-64 mb-8" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Skeleton className="h-28" />
@@ -49,7 +49,7 @@ function AdminDashboardSkeleton() {
 
 function UserDashboardSkeleton() {
      return (
-        <div className="container py-8 md:py-12">
+        <div className="container py-6 md:py-8">
             <Skeleton className="h-10 w-80 mb-8" />
             <div className="grid gap-4 md:grid-cols-3">
                 <Skeleton className="h-28" />
@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+            <div className="container py-6 md:py-8 flex-grow flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );

@@ -69,7 +69,7 @@ export default function AboutPageClient() {
 
 
   return (
-    <div className="container py-8 md:py-12" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="container py-6 md:py-8" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{isContentLoading ? <Skeleton className="h-12 w-2/3 mx-auto" /> : title}</h1>
         <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('about.subtitle')}</p>
@@ -105,7 +105,7 @@ export default function AboutPageClient() {
 
         <section className="mt-16 md:mt-24 text-center">
             <h2 className="font-headline text-3xl md:text-4xl">{t('about.valuesTitle')}</h2>
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {values.map((value) => {
                     const Icon = value.icon;
                     return (

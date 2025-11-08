@@ -97,7 +97,7 @@ export default function ContactPageClient() {
   }
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl">{t('contact.title')}</h1>
         <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">{t('contact.subtitle')}</p>

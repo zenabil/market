@@ -153,7 +153,7 @@ export default function MealPlannerPage() {
   };
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <div className="text-center mb-12 max-w-3xl mx-auto">
         <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl flex items-center justify-center gap-4">
           <CalendarDays className="h-10 w-10 text-primary" />

@@ -36,7 +36,7 @@ export default function ComparePageClient() {
 
   if (items.length === 0) {
     return (
-      <div className="container py-8 md:py-12 text-center">
+      <div className="container py-6 md:py-8 text-center">
         <h1 className="font-headline text-4xl md:text-5xl">{t('compare.title')}</h1>
         <p className="mt-4 text-lg text-muted-foreground">{t('compare.noProducts')}</p>
         <Button asChild className="mt-8">
@@ -72,7 +72,7 @@ export default function ComparePageClient() {
   }
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-headline text-4xl md:text-5xl">{t('compare.compareTitle')}</h1>
         {items.length > 0 && (
