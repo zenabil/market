@@ -14,12 +14,16 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
-import ReviewsSection from '@/components/shared/reviews-section';
 import { useLanguage } from '@/contexts/language-provider';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
+import dynamic from 'next/dynamic';
+
+const ReviewsSection = dynamic(() => import('@/components/shared/reviews-section'), {
+    loading: () => <div className="container py-12"><Skeleton className="h-64 w-full" /></div>
+});
 
 // Server-side metadata generation
 if (!getApps().length) {
@@ -254,5 +258,3 @@ function RecipeDetailsPage() {
 export default function RecipePage() {
     return <RecipeDetailsPage />
 }
-
-    

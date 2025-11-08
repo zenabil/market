@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
@@ -17,7 +17,6 @@ import { doc, collection, query, where, limit, documentId, getDoc } from 'fireba
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
-import ReviewsSection from '@/components/shared/reviews-section';
 import { useWishlist } from '@/hooks/use-wishlist';
 import { cn } from '@/lib/utils';
 import { useComparison } from '@/hooks/use-comparison';
@@ -28,6 +27,12 @@ import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import dynamic from 'next/dynamic';
+
+const ReviewsSection = dynamic(() => import('@/components/shared/reviews-section'), {
+    loading: () => <div className="container py-12"><Skeleton className="h-64 w-full" /></div>
+});
+
 
 // Server-side metadata generation
 if (!getApps().length) {
@@ -369,5 +374,3 @@ function ProductDetails({ productId }: { productId: string }) {
 export default function ProductPage({ params }: { params: { id: string } }) {
     return <ProductDetails productId={params.id} />
 }
-
-    

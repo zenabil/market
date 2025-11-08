@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -53,7 +52,6 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import dynamic from 'next/dynamic';
 
 const AiChatbot = dynamic(() => import('@/components/chatbot/ai-chatbot'), { ssr: false });
-
 
 function SearchCommandMenu() {
     const { t } = useLanguage();
