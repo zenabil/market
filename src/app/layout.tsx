@@ -16,7 +16,7 @@ import { ComparisonProvider } from '@/contexts/comparison-provider';
 import ComparisonBar from '@/components/product/comparison-bar';
 import { LanguageProvider } from '@/contexts/language-provider';
 import { Cairo, Readex_Pro } from 'next/font/google';
-import { WithContext, WebSite } from 'schema-dts';
+import { WithContext, WebSite, Organization } from 'schema-dts';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -39,10 +39,12 @@ export async function generateMetadata(
   {},
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  let siteName = 'Tlemcen Smart Supermarket'; // Default in English for crawlers
-  let siteDescription = 'Your local Tlemcen grocery store, now online with smart features. Fresh products, fast delivery, and smart shopping.';
-  let logoUrl = '';
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
+  // Default values
+  let siteName = 'Tlemcen Smart Supermarket';
+  let siteDescription = 'Your local Tlemcen grocery store, now online with smart features. Fresh products, fast delivery, and smart shopping.';
+  let siteSettings: { [key: string]: any } = {};
 
   try {
     const db = getFirestore();
@@ -50,19 +52,49 @@ export async function generateMetadata(
     const settingsSnap = await getDoc(settingsRef);
 
     if (settingsSnap.exists()) {
-      const settingsData = settingsSnap.data();
-      siteName = settingsData.siteName || siteName;
-      logoUrl = settingsData.logoUrl || '';
+      siteSettings = settingsSnap.data();
+      siteName = siteSettings.siteName || siteName;
     }
   } catch (error) {
     console.error("Could not fetch site settings for metadata:", error);
   }
   
+  const socialUrls = [
+    siteSettings.facebookUrl,
+    siteSettings.instagramUrl,
+    siteSettings.twitterUrl,
+  ].filter(Boolean);
+
+  const organizationSchema: WithContext<Organization> = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${baseUrl}/#organization`,
+    name: siteName,
+    url: baseUrl,
+    logo: siteSettings.logoUrl || `${baseUrl}/logo.png`, // Fallback logo
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: siteSettings.phone,
+      contactType: 'Customer Service',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: siteSettings.address,
+      addressLocality: 'Tlemcen',
+      addressCountry: 'DZ',
+    },
+    sameAs: socialUrls,
+  };
+
   const websiteSchema: WithContext<WebSite> = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${baseUrl}/#website`,
     name: siteName,
     url: baseUrl,
+    publisher: {
+      '@id': `${baseUrl}/#organization`,
+    },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -88,7 +120,7 @@ export async function generateMetadata(
       siteName: siteName,
       images: [
         {
-          url: logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080',
+          url: siteSettings.logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080',
           width: 1200,
           height: 630,
           alt: 'Tlemcen Smart Supermarket',
@@ -101,7 +133,7 @@ export async function generateMetadata(
       card: 'summary_large_image',
       title: siteName,
       description: siteDescription,
-      images: [logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080'],
+      images: [siteSettings.logoUrl || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1080'],
     },
     robots: {
       index: true,
@@ -115,7 +147,7 @@ export async function generateMetadata(
       },
     },
     other: {
-      jsonLd: JSON.stringify(websiteSchema),
+      jsonLd: JSON.stringify([organizationSchema, websiteSchema]),
     }
   };
 }
