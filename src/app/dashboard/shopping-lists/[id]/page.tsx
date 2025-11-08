@@ -245,3 +245,5 @@ function ShoppingListDetail() {
 export default function ShoppingListDetailPage() {
     return <ShoppingListDetail />;
 }
+
+    
