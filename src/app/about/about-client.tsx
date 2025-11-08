@@ -135,7 +135,7 @@ export default function AboutPageClient() {
                     </div>
                 ))}
                 {team && team.map((member) => (
-                    <div key={member.name} className="flex flex-col items-center">
+                    <div key={member.id} className="flex flex-col items-center">
                         <Avatar className="h-24 w-24 mb-4">
                             <AvatarImage src={member.avatar} alt={member.name} />
                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
