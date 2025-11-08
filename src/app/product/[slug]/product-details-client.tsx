@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
@@ -213,7 +214,7 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
                 {isComparing ? t('product.removeFromComparison') : t('product.compare')}
              </Button>
 
-            {product.type === 'standard' && (
+            {product.type === 'standard' ? (
                 <>
                  <div className="flex flex-col sm:flex-row items-stretch gap-4">
                     <div className="flex items-center gap-2 justify-center">
@@ -257,6 +258,11 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
                 }
                 </p>
                 </>
+            ) : (
+                <Button size="lg" className="w-full font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    {product.stock === 0 ? t('product.outOfStock') : "Ajouter l'offre au panier"}
+                </Button>
             )}
 
           </div>
@@ -287,12 +293,7 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
                         ))}
                     </div>
                 )}
-                 <div className="mt-6 flex justify-end">
-                    <Button size="lg" className="font-bold text-base py-6" onClick={handleAddToCart} disabled={product.stock === 0}>
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        {product.stock === 0 ? t('product.outOfStock') : "Ajouter l'offre au panier"}
-                    </Button>
-                </div>
+                 
             </CardContent>
         </Card>
       )}

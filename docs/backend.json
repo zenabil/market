@@ -21,7 +21,7 @@
         },
         "purchasePrice": {
           "type": "number",
-          "description": "The cost price of the product for the supermarket. Admin only."
+          "description": "The cost price of the product for the supermarket. Admin only. Not applicable for bundles."
         },
         "stock": {
           "type": "number",
@@ -688,6 +688,14 @@
       "schema": { "$ref": "#/entities/Category" },
       "description": "Stores category information. Readable by all users, writable only by admins."
     },
+    "/recipes/{recipeId}": {
+        "schema": { "$ref": "#/entities/Recipe" },
+        "description": "Stores cooking recipes. Publicly readable, writable only by admins."
+    },
+    "/recipes/{recipeId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews for a specific recipe. Writable by the user who owns the review."
+    },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Stores user profile information. Accessible only by the user and admins."
@@ -729,14 +737,6 @@
     "/coupons/{couponId}": {
         "schema": { "$ref": "#/entities/Coupon" },
         "description": "Stores discount coupons. Readable by all users, writable only by admins."
-    },
-    "/recipes/{recipeId}": {
-        "schema": { "$ref": "#/entities/Recipe" },
-        "description": "Stores cooking recipes. Publicly readable, writable only by admins."
-    },
-    "/recipes/{recipeId}/reviews/{reviewId}": {
-      "schema": { "$ref": "#/entities/Review" },
-      "description": "Stores reviews for a specific recipe. Writable by the user who owns the review."
     },
     "/contactMessages/{messageId}": {
       "schema": { "$ref": "#/entities/ContactMessage" },
