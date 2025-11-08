@@ -1,4 +1,5 @@
 
+
 import type { Metadata, ResolvingMetadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -56,6 +57,7 @@ export async function generateMetadata(
   }
 
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
     title: {
       default: siteName,
       template: `%s | ${siteName}`,

@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import type { Recipe } from '@/lib/placeholder-data';
+import { WithContext, Recipe as RecipeSchema } from 'schema-dts';
 
 const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false });
 
@@ -39,6 +40,32 @@ export async function generateMetadata(
 
   const recipe = recipeSnap.docs[0].data() as Recipe;
   const previousImages = (await parent).openGraph?.images || []
+  
+  const jsonLd: WithContext<RecipeSchema> = {
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: recipe.title,
+    description: recipe.description,
+    image: recipe.image,
+    prepTime: `PT${recipe.prepTime}M`,
+    cookTime: `PT${recipe.cookTime}M`,
+    totalTime: `PT${recipe.prepTime + recipe.cookTime}M`,
+    recipeYield: `${recipe.servings} servings`,
+    recipeIngredient: recipe.ingredients,
+    recipeInstructions: recipe.instructions.map((instruction, index) => ({
+      '@type': 'HowToStep',
+      text: instruction,
+      position: index + 1,
+    })),
+     ...(recipe.reviewCount && recipe.reviewCount > 0 && recipe.averageRating ? {
+        aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: recipe.averageRating.toFixed(1),
+            reviewCount: recipe.reviewCount
+        }
+    } : {})
+  };
+
 
   return {
     title: recipe.title,
@@ -62,6 +89,12 @@ export async function generateMetadata(
       description: recipe.description.substring(0, 160),
       images: [recipe.image],
     },
+     alternates: {
+        canonical: `/recipes/${recipe.slug}`,
+    },
+    other: {
+      jsonLd: JSON.stringify(jsonLd)
+    }
   }
 }
 
@@ -88,9 +121,57 @@ function RecipePageSkeleton() {
 
 
 export default function RecipePage({ params }: { params: { slug: string }}) {
+    const { slug } = params;
+
+    const jsonLdScript = async () => {
+        const db = getFirestore();
+        const q = query(collection(db, 'recipes'), where('slug', '==', slug), limit(1));
+        const recipeSnap = await getDocs(q);
+
+        if (recipeSnap.empty) {
+            return null;
+        }
+
+        const recipe = recipeSnap.docs[0].data() as Recipe;
+        const jsonLd: WithContext<RecipeSchema> = {
+            '@context': 'https://schema.org',
+            '@type': 'Recipe',
+            name: recipe.title,
+            description: recipe.description,
+            image: recipe.image,
+            prepTime: `PT${recipe.prepTime}M`,
+            cookTime: `PT${recipe.cookTime}M`,
+            totalTime: `PT${recipe.prepTime + recipe.cookTime}M`,
+            recipeYield: `${recipe.servings} servings`,
+            recipeIngredient: recipe.ingredients,
+            recipeInstructions: recipe.instructions.map((instruction, index) => ({
+                '@type': 'HowToStep',
+                text: instruction,
+                position: index + 1,
+            })),
+            ...(recipe.reviewCount && recipe.reviewCount > 0 && recipe.averageRating ? {
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: recipe.averageRating.toFixed(1),
+                    reviewCount: recipe.reviewCount
+                }
+            } : {})
+        };
+
+        return (
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+        );
+    };
+    
     return (
-        <Suspense fallback={<RecipePageSkeleton />}>
-            <RecipeDetailsClient recipeSlug={params.slug} />
-        </Suspense>
+        <>
+            <Suspense fallback={<RecipePageSkeleton />}>
+                <RecipeDetailsClient recipeSlug={params.slug} />
+            </Suspense>
+             <Suspense>{jsonLdScript()}</Suspense>
+        </>
     );
 }

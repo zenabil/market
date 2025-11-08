@@ -10,6 +10,7 @@ import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/lib/placeholder-data';
+import { WithContext, Product as ProductSchema } from 'schema-dts';
 
 const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false });
 
@@ -39,6 +40,32 @@ export async function generateMetadata(
 
   const product = querySnapshot.docs[0].data() as Product;
   const previousImages = (await parent).openGraph?.images || []
+  
+  const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+
+  const jsonLd: WithContext<ProductSchema> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    sku: product.sku,
+    offers: {
+      '@type': 'Offer',
+      price: discountedPrice.toFixed(2),
+      priceCurrency: 'DZD',
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/product/${product.slug}`
+    },
+    ...(product.reviewCount && product.reviewCount > 0 && product.averageRating ? {
+        aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: product.averageRating.toFixed(1),
+            reviewCount: product.reviewCount
+        }
+    } : {})
+  };
+
 
   return {
     title: product.name,
@@ -62,6 +89,12 @@ export async function generateMetadata(
       description: product.description.substring(0, 160),
       images: [product.images[0]],
     },
+    alternates: {
+        canonical: `/product/${product.slug}`,
+    },
+    other: {
+      jsonLd: JSON.stringify(jsonLd)
+    }
   }
 }
 
@@ -95,9 +128,58 @@ function ProductPageSkeleton() {
 }
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
+    const { slug } = params;
+
+    const jsonLdScript = async () => {
+        const db = getFirestore();
+        const productsRef = collection(db, 'products');
+        const q = query(productsRef, where('slug', '==', slug), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return null;
+        }
+
+        const product = querySnapshot.docs[0].data() as Product;
+        const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+
+        const jsonLd: WithContext<ProductSchema> = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: product.description,
+            image: product.images,
+            sku: product.sku,
+            offers: {
+                '@type': 'Offer',
+                price: discountedPrice.toFixed(2),
+                priceCurrency: 'DZD',
+                availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                url: `${process.env.NEXT_PUBLIC_BASE_URL}/product/${product.slug}`
+            },
+            ...(product.reviewCount && product.reviewCount > 0 && product.averageRating ? {
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: product.averageRating.toFixed(1),
+                    reviewCount: product.reviewCount
+                }
+            } : {})
+        };
+
+        return (
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+        );
+    };
+
     return (
-        <Suspense fallback={<ProductPageSkeleton />}>
-            <ProductDetailsClient productSlug={params.slug} />
-        </Suspense>
+        <>
+            <Suspense fallback={<ProductPageSkeleton />}>
+                <ProductDetailsClient productSlug={params.slug} />
+            </Suspense>
+            <Suspense>{jsonLdScript()}</Suspense>
+        </>
     );
 }
