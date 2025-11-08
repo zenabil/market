@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,12 +39,12 @@ export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
 
     const form = useForm<z.infer<typeof imageFormSchema>>({
         resolver: zodResolver(imageFormSchema),
-        defaultValues: { url: '' },
+        defaultValues: { url: 'https://picsum.photos/seed/' + Date.now() + '/600/600' },
     });
     
     useEffect(() => {
         if(isOpen) {
-            form.reset();
+            form.reset({ url: 'https://picsum.photos/seed/' + Date.now() + '/600/600' });
         }
     }, [isOpen, form]);
 
@@ -84,7 +85,3 @@ export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
         </Dialog>
     );
 }
-
-    
-
-    

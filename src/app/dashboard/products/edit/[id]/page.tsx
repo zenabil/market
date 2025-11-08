@@ -31,7 +31,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { notFound, useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/use-user-role';
 import Image from 'next/image';
-import { ImageDialog } from '@/components/dashboard/image-dialog';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/language-provider';
@@ -120,7 +119,7 @@ function EditProductForm({ productId }: { productId: string }) {
         dataToUpdate.slug = slugify(values.name);
     }
 
-    updateDoc(productRef, dataToUpdate)
+    updateDoc(productRef, dataToUpdate as any)
         .then(() => {
             toast({
                 title: t('dashboard.products.toastUpdate.title'),
@@ -310,15 +309,14 @@ function EditProductForm({ productId }: { productId: string }) {
                         </div>
                       </div>
                     ))}
-                    <ImageDialog onImageAdd={(url) => append(url)}>
-                      <button
+                    <button
                         type="button"
+                        onClick={() => append('https://picsum.photos/seed/' + Date.now() + '/600/600')}
                         className="aspect-square flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-md hover:bg-muted hover:border-solid"
-                      >
+                    >
                         <PlusCircle className="h-8 w-8" />
                         <span className="text-xs mt-2">{t('dashboard.products.addImage')}</span>
-                      </button>
-                    </ImageDialog>
+                    </button>
                   </div>
                    {form.formState.errors.images && <p className="text-sm text-destructive">{form.formState.errors.images.message}</p>}
                 </CardContent>
