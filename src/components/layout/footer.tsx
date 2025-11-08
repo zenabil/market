@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/language-provider';
 
 type SiteSettings = {
   siteName?: string;
+  logoUrl?: string;
   phone?: string;
   address?: string;
   facebookUrl?: string;
@@ -55,7 +56,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1 space-y-4">
             <Link href="/">
-              <Logo className="h-8" />
+              <Logo className="h-8" logoUrl={settings?.logoUrl} />
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
               {t('footer.tagline')}
