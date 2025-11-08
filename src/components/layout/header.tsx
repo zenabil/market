@@ -355,7 +355,7 @@ function UserNav() {
 
   if (!authUser) {
      return (
-        <Button variant="ghost" asChild>
+        <Button variant="default" asChild>
             <Link href="/login">{t('login.tabs.login')}</Link>
         </Button>
     );
