@@ -213,6 +213,29 @@
         "contactUs": "Contactez-nous",
         "copyright": "© {{year}} {{siteName}}. Tous droits réservés."
     },
+    "imageSearch": {
+        "title": "Recherche par image",
+        "description": "Téléchargez une image d'un produit pour le trouver dans notre magasin.",
+        "uploadPrompt": "Cliquez pour télécharger une image",
+        "searchButton": "Rechercher",
+        "previewAlt": "Aperçu de l'image",
+        "noImage": {
+            "title": "Aucune image sélectionnée",
+            "description": "Veuillez sélectionner une image à rechercher."
+        },
+        "productFound": {
+            "title": "Produit trouvé !",
+            "description": "Redirection vers les résultats de recherche pour \"{{productName}}\"."
+        },
+        "productNotFound": {
+            "title": "Produit non reconnu",
+            "description": "Nous n'avons pas pu identifier le produit dans l'image. Veuillez essayer une autre image."
+        },
+        "error": {
+            "title": "Erreur de recherche",
+            "description": "Une erreur s'est produite lors de la recherche par image."
+        }
+    },
     "about": {
         "title": "À Propos de Tlemcen Smart Supermarket",
         "subtitle": "Apporter fraîcheur et innovation au cœur de Tlemcen.",

@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase, useCollectionGroup, errorEmitter, FirestorePermissionError, useDoc } from '@/firebase';
 import { doc, collection, query, where, documentId, collectionGroup, updateDoc, addDoc } from 'firebase/firestore';
 import type { Order, Product, User as FirestoreUser } from '@/lib/placeholder-data';
@@ -22,9 +21,8 @@ import { useLanguage } from '@/contexts/language-provider';
 
 const orderStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
 
-export default function OrderDetailsClient() {
+export default function OrderDetailsClient({ orderId }: { orderId: string }) {
     const { t } = useLanguage();
-    const { id: orderId } = useParams();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isUpdatingStatus, setIsUpdatingStatus] = React.useState(false);

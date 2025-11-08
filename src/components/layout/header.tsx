@@ -412,7 +412,6 @@ type SiteSettings = {
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const pathname = usePathname();
-  const { t } = useLanguage();
   const firestore = useFirestore();
   
   const settingsRef = useMemoFirebase(() => doc(firestore, 'settings', 'site'), [firestore]);

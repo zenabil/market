@@ -33,10 +33,10 @@ function OrderDetailsSkeleton() {
   );
 }
 
-export default function OrderDetailsPage() {
+export default function OrderDetailsPage({ params }: { params: { id: string } }) {
     return (
       <Suspense fallback={<OrderDetailsSkeleton />}>
-        <OrderDetailsClient />
+        <OrderDetailsClient orderId={params.id} />
       </Suspense>
     );
 }

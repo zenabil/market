@@ -14,11 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Camera, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { diagnosePlant } from '@/ai/flows/diagnose-plant-flow';
+import { identifyProduct } from '@/ai/flows/identify-product-flow';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/language-provider';
 
 export default function ImageSearchDialog({ children }: { children: React.ReactNode }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -42,15 +44,15 @@ export default function ImageSearchDialog({ children }: { children: React.ReactN
     if (!selectedFile || !previewUrl) {
       toast({
         variant: 'destructive',
-        title: 'Aucune image sélectionnée',
-        description: "Veuillez sélectionner une image à rechercher.",
+        title: t('imageSearch.noImage.title'),
+        description: t('imageSearch.noImage.description'),
       });
       return;
     }
     setIsLoading(true);
 
     try {
-      const result = await diagnosePlant({
+      const result = await identifyProduct({
         photoDataUri: previewUrl,
         description: 'Identify this product',
       });
@@ -59,31 +61,30 @@ export default function ImageSearchDialog({ children }: { children: React.ReactN
 
       if (productName && productName.toLowerCase() !== 'unknown') {
         toast({
-          title: 'Produit trouvé !',
-          description: `Redirection vers les résultats de recherche pour "${productName}".`,
+          title: t('imageSearch.productFound.title'),
+          description: t('imageSearch.productFound.description', { productName }),
         });
         setIsOpen(false);
         router.push(`/search?q=${encodeURIComponent(productName)}`);
       } else {
         toast({
           variant: 'destructive',
-          title: 'Produit non reconnu',
-          description: "Nous n'avons pas pu identifier le produit dans l'image. Veuillez essayer une autre image.",
+          title: t('imageSearch.productNotFound.title'),
+          description: t('imageSearch.productNotFound.description'),
         });
       }
     } catch (error) {
       console.error('Image search error:', error);
       toast({
         variant: 'destructive',
-        title: 'Erreur de recherche',
-        description: "Une erreur s'est produite lors de la recherche par image.",
+        title: t('imageSearch.error.title'),
+        description: t('imageSearch.error.description'),
       });
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Reset state when dialog is closed
   const onOpenChange = (open: boolean) => {
     if (!open) {
         setSelectedFile(null);
@@ -101,17 +102,17 @@ export default function ImageSearchDialog({ children }: { children: React.ReactN
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Camera /> Recherche par image
+            <Camera /> {t('imageSearch.title')}
           </DialogTitle>
           <DialogDescription>
-            Téléchargez une image d'un produit pour le trouver dans notre magasin.
+            {t('imageSearch.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
           {previewUrl ? (
             <div className="relative aspect-video w-full rounded-md overflow-hidden border">
-              <Image src={previewUrl} alt="Aperçu de l'image" fill className="object-contain" />
+              <Image src={previewUrl} alt={t('imageSearch.previewAlt')} fill className="object-contain" />
             </div>
           ) : (
             <div
@@ -119,7 +120,7 @@ export default function ImageSearchDialog({ children }: { children: React.ReactN
               onClick={() => document.getElementById('image-upload-input')?.click()}
             >
               <Upload className="h-8 w-8 text-muted-foreground" />
-              <p className="mt-2 text-sm text-muted-foreground">Cliquez pour télécharger une image</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('imageSearch.uploadPrompt')}</p>
             </div>
           )}
           <Input id="image-upload-input" type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
@@ -127,11 +128,11 @@ export default function ImageSearchDialog({ children }: { children: React.ReactN
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Annuler
+            {t('dashboard.common.cancel')}
           </Button>
           <Button onClick={handleSearch} disabled={!selectedFile || isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Rechercher
+            {t('imageSearch.searchButton')}
           </Button>
         </DialogFooter>
       </DialogContent>
