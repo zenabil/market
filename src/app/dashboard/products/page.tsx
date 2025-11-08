@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, PlusCircle, Trash2, Loader2, Search } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, PlusCircle, Trash2, Loader2, Search, Box } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -29,6 +28,7 @@ import { useLanguage } from '@/contexts/language-provider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategories } from '@/hooks/use-categories';
+import { Badge } from '@/components/ui/badge';
 
 export default function ProductsPage() {
   const { t } = useLanguage();
@@ -131,12 +131,20 @@ export default function ProductsPage() {
                       {t('dashboard.products.pageDescription', { count: filteredProducts.length, total: products?.length || 0 })}
                     </CardDescription>
                   </div>
-                  <Button asChild size="sm" className="gap-1">
-                    <Link href="/dashboard/products/new">
-                      <PlusCircle className="h-4 w-4" />
-                      {t('dashboard.products.addProduct')}
-                    </Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button size="sm" className="gap-1">
+                            <PlusCircle className="h-4 w-4" />
+                            {t('dashboard.products.addProduct')}
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem asChild><Link href="/dashboard/products/new?type=standard">Produit standard</Link></DropdownMenuItem>
+                        <DropdownMenuItem asChild><Link href="/dashboard/products/new?type=bundle">Offre groupée (Bundle)</Link></DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
                  <div className="mt-4 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-grow">
@@ -174,10 +182,10 @@ export default function ProductsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t('dashboard.discounts.product')}</TableHead>
-                        <TableHead>{t('dashboard.products.purchasePrice')}</TableHead>
                         <TableHead>{t('dashboard.products.sellingPrice')}</TableHead>
                         <TableHead>{t('dashboard.products.stock')}</TableHead>
                         <TableHead>{t('dashboard.products.sold')}</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>
                           <span className="sr-only">{t('dashboard.common.actions')}</span>
                         </TableHead>
@@ -188,7 +196,7 @@ export default function ProductsPage() {
                         <TableRow key={i}>
                           <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                           <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                          <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                           <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                           <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                           <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
@@ -197,10 +205,10 @@ export default function ProductsPage() {
                       {filteredProducts.map((product) => (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell>{formatCurrency(product.purchasePrice)}</TableCell>
                           <TableCell>{formatCurrency(product.price)}</TableCell>
                           <TableCell>{product.stock}</TableCell>
                           <TableCell>{product.sold}</TableCell>
+                          <TableCell>{product.type === 'bundle' ? <Badge variant="secondary">Bundle</Badge> : <Badge variant="outline">Standard</Badge>}</TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -297,9 +305,3 @@ export default function ProductsPage() {
       </div>
   )
 }
-    
-    
-    
-
-
-    

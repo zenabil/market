@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -25,7 +23,7 @@ import React, { useEffect } from 'react';
 import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
 import { useUserRole } from '@/hooks/use-user-role';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { useLanguage } from '@/contexts/language-provider';
 
@@ -43,10 +41,14 @@ function slugify(text: string): string {
 
 export default function NewProductPage() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+  const productType = searchParams.get('type') === 'bundle' ? 'bundle' : 'standard';
+
+  const isBundle = productType === 'bundle';
   
   const formSchema = z.object({
     name: z.string().min(2, { message: t('dashboard.products.validation.name') }),
-    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }),
+    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }).optional(),
     price: z.coerce.number().positive({ message: t('dashboard.products.validation.pricePositive') }),
     stock: z.coerce.number().int().min(0, { message: t('dashboard.products.validation.stock') }),
     categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
@@ -69,28 +71,32 @@ export default function NewProductPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      purchasePrice: 0,
       price: 0,
       stock: 0,
+      ...(isBundle ? {} : { purchasePrice: 0 }),
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) return;
     setIsSaving(true);
-    const productData = {
-        ...values,
+    const productData: Omit<Product, 'id'> = {
+        name: values.name,
         slug: slugify(values.name),
         description: '',
-        discount: 0,
+        price: values.price,
+        purchasePrice: isBundle ? 0 : values.purchasePrice || 0,
+        stock: values.stock,
+        categoryId: values.categoryId,
         images: ['https://picsum.photos/seed/' + Date.now() + '/600/600'],
         sku: `SKU-${Date.now()}`,
         barcode: `${Date.now()}`,
         sold: 0,
+        discount: 0,
         averageRating: 0,
         reviewCount: 0,
         createdAt: new Date().toISOString(),
-        type: 'standard' as 'standard' | 'bundle',
+        type: productType,
         bundleItems: [],
     };
 
@@ -159,7 +165,7 @@ export default function NewProductPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.products.newPageTitle')}</h1>
+        <h1 className="font-headline text-3xl md:text-4xl">{isBundle ? "Ajouter une nouvelle offre" : t('dashboard.products.newPageTitle')}</h1>
       </div>
 
       <Form {...form}>
@@ -174,9 +180,9 @@ export default function NewProductPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('dashboard.products.productName')}</FormLabel>
+                      <FormLabel>{isBundle ? "Nom de l'offre" : t('dashboard.products.productName')}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('dashboard.products.productNamePlaceholder')} {...field} />
+                        <Input placeholder={isBundle ? "Ex: Panier petit-déjeuner" : t('dashboard.products.productNamePlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -210,25 +216,27 @@ export default function NewProductPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="purchasePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="80.00" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!isBundle && (
+                  <FormField
+                    control={form.control}
+                    name="purchasePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="80.00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <FormField
                   control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('dashboard.products.sellingPrice')}</FormLabel>
+                      <FormLabel>{isBundle ? "Prix total de l'offre" : t('dashboard.products.sellingPrice')}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="100.00" {...field} />
                       </FormControl>

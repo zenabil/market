@@ -1,8 +1,6 @@
-
-
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,15 +16,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCategories } from '@/hooks/use-categories';
 import type { Product } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, PlusCircle, Trash2, ImageIcon, Star } from 'lucide-react';
+import { ArrowLeft, Loader2, PlusCircle, Trash2, ImageIcon, Star, Search, X } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
-import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { useFirestore, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError, useCollection } from '@/firebase';
+import { doc, updateDoc, collection, query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { notFound, useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/use-user-role';
@@ -34,6 +32,9 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/language-provider';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
 
 function slugify(text: string): string {
     return text
@@ -59,6 +60,7 @@ function EditProductForm({ productId }: { productId: string }) {
     categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
     discount: z.coerce.number().int().min(0).max(100).optional().default(0),
     images: z.array(z.string().url({ message: t('dashboard.products.validation.imageURL') })).min(1, { message: t('dashboard.products.validation.minImage') }),
+    bundleItems: z.array(z.string()).optional(),
   });
 
   const { categories, areCategoriesLoading } = useCategories();
@@ -71,6 +73,9 @@ function EditProductForm({ productId }: { productId: string }) {
 
   const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
   const { data: product, isLoading: isLoadingProduct, refetch } = useDoc<Product>(productRef);
+  
+  const allProductsQuery = useMemoFirebase(() => query(collection(firestore, 'products')), [firestore]);
+  const { data: allProducts, isLoading: areAllProductsLoading } = useCollection<Product>(allProductsQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,6 +84,11 @@ function EditProductForm({ productId }: { productId: string }) {
   const { fields, append, remove, move } = useFieldArray({
       control: form.control,
       name: "images"
+  });
+  
+  const { fields: bundleFields, append: appendBundleItem, remove: removeBundleItem } = useFieldArray({
+      control: form.control,
+      name: "bundleItems"
   });
 
   useEffect(() => {
@@ -98,6 +108,7 @@ function EditProductForm({ productId }: { productId: string }) {
         categoryId: product.categoryId,
         discount: product.discount,
         images: product.images,
+        bundleItems: product.bundleItems || [],
       });
     }
   }, [product, form]);
@@ -190,7 +201,7 @@ function EditProductForm({ productId }: { productId: string }) {
     }
   };
 
-  const isLoading = isLoadingProduct || areCategoriesLoading || isRoleLoading;
+  const isLoading = isLoadingProduct || areCategoriesLoading || isRoleLoading || areAllProductsLoading;
   
   if (isLoading || !isAdmin) {
     return (
@@ -211,6 +222,9 @@ function EditProductForm({ productId }: { productId: string }) {
       day: 'numeric',
     });
   };
+  
+  const productIsBundle = product.type === 'bundle';
+  const bundledProducts = allProducts?.filter(p => form.watch('bundleItems')?.includes(p.id));
 
   return (
     <div className="container py-8 md:py-12">
@@ -221,6 +235,7 @@ function EditProductForm({ productId }: { productId: string }) {
           </Link>
         </Button>
         <h1 className="font-headline text-3xl md:text-4xl">{t('dashboard.products.editPageTitle')}</h1>
+        {productIsBundle && <Badge variant="secondary" className="text-sm">Bundle</Badge>}
       </div>
 
       <Form {...form}>
@@ -269,6 +284,61 @@ function EditProductForm({ productId }: { productId: string }) {
                   </div>
                 </CardContent>
               </Card>
+
+              {productIsBundle && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Contenu de l'offre groupée</CardTitle>
+                        <CardDescription>Ajoutez ou supprimez des produits de cette offre.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-start">
+                                        <Search className="mr-2 h-4 w-4" />
+                                        Rechercher un produit à ajouter...
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Rechercher un produit..." />
+                                        <CommandList>
+                                            <CommandEmpty>Aucun produit trouvé.</CommandEmpty>
+                                            <CommandGroup>
+                                                {allProducts?.filter(p => p.id !== product.id && p.type === 'standard' && !form.watch('bundleItems')?.includes(p.id)).map(p => (
+                                                    <CommandItem
+                                                        key={p.id}
+                                                        value={p.name}
+                                                        onSelect={() => appendBundleItem(p.id)}
+                                                    >
+                                                        {p.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            
+                            <div className="space-y-2">
+                                {bundledProducts?.map((item, index) => (
+                                    <div key={item.id} className="flex items-center justify-between p-2 border rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <Image src={item.images[0]} alt={item.name} width={32} height={32} className="rounded-sm" />
+                                            <span className="text-sm">{item.name}</span>
+                                        </div>
+                                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeBundleItem(index)}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+              )}
+
 
               <Card>
                 <CardHeader><CardTitle>{t('dashboard.products.imagesTitle')}</CardTitle></CardHeader>
@@ -360,7 +430,7 @@ function EditProductForm({ productId }: { productId: string }) {
                   <CardTitle>{t('dashboard.products.pricingStockTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {product.type === 'standard' && (
+                  {!productIsBundle && (
                     <FormField
                       control={form.control}
                       name="purchasePrice"

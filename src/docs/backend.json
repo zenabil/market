@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "Product": {
@@ -21,7 +20,7 @@
         },
         "purchasePrice": {
           "type": "number",
-          "description": "The cost price of the product for the supermarket. Admin only."
+          "description": "The cost price of the product for the supermarket. Admin only. Not applicable for bundles."
         },
         "stock": {
           "type": "number",

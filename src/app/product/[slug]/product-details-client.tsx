@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
@@ -171,6 +170,9 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
               <Badge variant="destructive" className="absolute top-4 right-4 text-base">
                 -{product.discount}%
               </Badge>
+            )}
+             {product.type === 'bundle' && (
+              <Badge variant="secondary" className="absolute top-4 left-4 text-sm">Bundle</Badge>
             )}
           </div>
           {product.images.length > 1 && (
