@@ -16,6 +16,7 @@ import { ComparisonProvider } from '@/contexts/comparison-provider';
 import ComparisonBar from '@/components/product/comparison-bar';
 import { LanguageProvider } from '@/contexts/language-provider';
 import { Cairo, Readex_Pro } from 'next/font/google';
+import { WithContext, WebSite } from 'schema-dts';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -41,6 +42,7 @@ export async function generateMetadata(
   let siteName = 'Tlemcen Smart Supermarket'; // Default in English for crawlers
   let siteDescription = 'Your local Tlemcen grocery store, now online with smart features. Fresh products, fast delivery, and smart shopping.';
   let logoUrl = '';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   try {
     const db = getFirestore();
@@ -55,9 +57,24 @@ export async function generateMetadata(
   } catch (error) {
     console.error("Could not fetch site settings for metadata:", error);
   }
+  
+  const websiteSchema: WithContext<WebSite> = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteName,
+    url: baseUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${baseUrl}/search?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+    metadataBase: new URL(baseUrl),
     title: {
       default: siteName,
       template: `%s | ${siteName}`,
@@ -67,7 +84,7 @@ export async function generateMetadata(
     openGraph: {
       title: siteName,
       description: siteDescription,
-      url: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+      url: new URL(baseUrl),
       siteName: siteName,
       images: [
         {
@@ -97,6 +114,9 @@ export async function generateMetadata(
         'max-snippet': -1,
       },
     },
+    other: {
+      jsonLd: JSON.stringify(websiteSchema),
+    }
   };
 }
 

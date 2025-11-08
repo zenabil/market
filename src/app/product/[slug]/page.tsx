@@ -128,58 +128,9 @@ function ProductPageSkeleton() {
 }
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
-    const { slug } = params;
-
-    const jsonLdScript = async () => {
-        const db = getFirestore();
-        const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('slug', '==', slug), limit(1));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            return null;
-        }
-
-        const product = querySnapshot.docs[0].data() as Product;
-        const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
-
-        const jsonLd: WithContext<ProductSchema> = {
-            '@context': 'https://schema.org',
-            '@type': 'Product',
-            name: product.name,
-            description: product.description,
-            image: product.images,
-            sku: product.sku,
-            offers: {
-                '@type': 'Offer',
-                price: discountedPrice.toFixed(2),
-                priceCurrency: 'DZD',
-                availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                url: `${process.env.NEXT_PUBLIC_BASE_URL}/product/${product.slug}`
-            },
-            ...(product.reviewCount && product.reviewCount > 0 && product.averageRating ? {
-                aggregateRating: {
-                    '@type': 'AggregateRating',
-                    ratingValue: product.averageRating.toFixed(1),
-                    reviewCount: product.reviewCount
-                }
-            } : {})
-        };
-
-        return (
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-        );
-    };
-
     return (
-        <>
-            <Suspense fallback={<ProductPageSkeleton />}>
-                <ProductDetailsClient productSlug={params.slug} />
-            </Suspense>
-            <Suspense>{jsonLdScript()}</Suspense>
-        </>
+        <Suspense fallback={<ProductPageSkeleton />}>
+            <ProductDetailsClient productSlug={params.slug} />
+        </Suspense>
     );
 }

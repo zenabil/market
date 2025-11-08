@@ -121,57 +121,9 @@ function RecipePageSkeleton() {
 
 
 export default function RecipePage({ params }: { params: { slug: string }}) {
-    const { slug } = params;
-
-    const jsonLdScript = async () => {
-        const db = getFirestore();
-        const q = query(collection(db, 'recipes'), where('slug', '==', slug), limit(1));
-        const recipeSnap = await getDocs(q);
-
-        if (recipeSnap.empty) {
-            return null;
-        }
-
-        const recipe = recipeSnap.docs[0].data() as Recipe;
-        const jsonLd: WithContext<RecipeSchema> = {
-            '@context': 'https://schema.org',
-            '@type': 'Recipe',
-            name: recipe.title,
-            description: recipe.description,
-            image: recipe.image,
-            prepTime: `PT${recipe.prepTime}M`,
-            cookTime: `PT${recipe.cookTime}M`,
-            totalTime: `PT${recipe.prepTime + recipe.cookTime}M`,
-            recipeYield: `${recipe.servings} servings`,
-            recipeIngredient: recipe.ingredients,
-            recipeInstructions: recipe.instructions.map((instruction, index) => ({
-                '@type': 'HowToStep',
-                text: instruction,
-                position: index + 1,
-            })),
-            ...(recipe.reviewCount && recipe.reviewCount > 0 && recipe.averageRating ? {
-                aggregateRating: {
-                    '@type': 'AggregateRating',
-                    ratingValue: recipe.averageRating.toFixed(1),
-                    reviewCount: recipe.reviewCount
-                }
-            } : {})
-        };
-
-        return (
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-        );
-    };
-    
     return (
-        <>
-            <Suspense fallback={<RecipePageSkeleton />}>
-                <RecipeDetailsClient recipeSlug={params.slug} />
-            </Suspense>
-             <Suspense>{jsonLdScript()}</Suspense>
-        </>
+        <Suspense fallback={<RecipePageSkeleton />}>
+            <RecipeDetailsClient recipeSlug={params.slug} />
+        </Suspense>
     );
 }
