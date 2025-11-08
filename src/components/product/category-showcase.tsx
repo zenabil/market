@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -39,3 +40,4 @@ export default function CategoryShowcase({ title, categories }: CategoryShowcase
     </section>
   );
 }
+
