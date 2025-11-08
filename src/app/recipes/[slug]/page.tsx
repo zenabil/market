@@ -56,7 +56,6 @@ export async function generateMetadata(
     recipeInstructions: recipe.instructions.map((instruction, index) => ({
       '@type': 'HowToStep',
       text: instruction,
-      position: index + 1,
     })),
      ...(recipe.reviewCount && recipe.reviewCount > 0 && recipe.averageRating ? {
         aggregateRating: {

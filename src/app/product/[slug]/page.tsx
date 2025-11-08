@@ -50,7 +50,7 @@ export async function generateMetadata(
       const categoryRef = doc(db, 'categories', product.categoryId);
       const categorySnap = await getDoc(categoryRef);
       if (categorySnap.exists()) {
-          category = categorySnap.data() as Category;
+          category = { id: categorySnap.id, ...categorySnap.data() } as Category;
       }
   }
 
@@ -83,9 +83,9 @@ export async function generateMetadata(
     itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${baseUrl}` },
         { '@type': 'ListItem', position: 2, name: 'Produits', item: `${baseUrl}/products` },
-        ...(category ? [{ '@type': 'ListItem', position: 3, name: category.name, item: `${baseUrl}/category/${category.slug}` }] : []),
-        { '@type': 'ListItem', position: 4, name: product.name, item: `${baseUrl}/product/${product.slug}` }
-    ]
+        ...(category ? [{ '@type': 'ListItem', position: 3, name: category.name, item: `${baseUrl}/category/${category.slug}` } as const] : []),
+        { '@type': 'ListItem', position: category ? 4 : 3, name: product.name, item: `${baseUrl}/product/${product.slug}` }
+    ].filter(Boolean)
   };
 
 
