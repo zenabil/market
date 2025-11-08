@@ -1,145 +1,35 @@
 
+
 'use client';
 
 import HeroCarousel from '@/components/product/hero-carousel';
-import HomePageClient from '@/components/layout/home-page-client';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, limit, orderBy, where } from 'firebase/firestore';
-import type { Product, Recipe, StoreFeature } from '@/lib/placeholder-data';
-import { useCategories } from '@/hooks/use-categories';
 import { Skeleton } from '@/components/ui/skeleton';
-import ShopByRecipe from '@/components/product/shop-by-recipe';
-import { Award, Leaf, Truck, Sparkles, type LucideProps } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useLanguage } from '@/contexts/language-provider';
+import dynamic from 'next/dynamic';
 
-// Map icon names to actual components
-const iconMap: { [key: string]: React.FC<LucideProps> } = {
-    Leaf: Leaf,
-    Truck: Truck,
-    Award: Award,
-    Sparkles: Sparkles,
-};
+const HomePageClient = dynamic(() => import('@/components/layout/home-page-client'), {
+    loading: () => <HomeProductsSkeleton />,
+    ssr: false // This component fetches client-side data like recommendations
+});
 
-
-function WhyChooseUs() {
-    const { t, locale } = useLanguage();
-    const firestore = useFirestore();
-
-    const featuresQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, 'storeFeatures'));
-    }, [firestore]);
-
-    const { data: features, isLoading } = useCollection<StoreFeature>(featuresQuery);
-
+function HomeProductsSkeleton() {
     return (
-        <div className="bg-background">
-            <div className="container py-12 md:py-24">
-                 <h2 className="font-headline text-3xl md:text-4xl text-center mb-12">{t('home.whyChooseUs')}</h2>
-                 <div className="grid md:grid-cols-3 gap-8">
-                    {isLoading && Array.from({length: 3}).map((_, i) => (
-                         <Card key={i} className="text-center border-none shadow-none bg-transparent">
-                            <CardContent className="p-6">
-                                <Skeleton className="h-16 w-16 rounded-full mx-auto mb-4" />
-                                <Skeleton className="h-6 w-3/4 mx-auto mb-2" />
-                                <Skeleton className="h-4 w-full mx-auto" />
-                            </CardContent>
-                        </Card>
-                    ))}
-                    {!isLoading && features?.map((feature) => {
-                        const Icon = iconMap[feature.icon] || Leaf;
-                        return (
-                            <Card key={feature.id} className="text-center border-none shadow-none bg-transparent">
-                                <CardContent className="p-6">
-                                    <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-                                        <Icon className="h-8 w-8"/>
-                                    </div>
-                                    <h3 className="font-bold text-xl">{locale === 'ar' ? feature.title_ar : feature.title_fr}</h3>
-                                    <p className="mt-2 text-muted-foreground">{locale === 'ar' ? feature.description_ar : feature.description_fr}</p>
-                                </CardContent>
-                            </Card>
-                        )
-                    })}
+        <div className="container py-8 md:py-12">
+            <div className="mb-12 md:mb-16">
+                <Skeleton className="h-10 w-80 mx-auto mb-8" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
                 </div>
             </div>
+            {[...Array(3)].map((_, index) => (
+                <div key={index} className="mt-12 md:mt-16">
+                    <Skeleton className="h-10 w-64 mb-8" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
+                    </div>
+                </div>
+            ))}
         </div>
     )
-}
-
-
-function HomeProducts() {
-  const firestore = useFirestore();
-
-  const bestSellersQuery = useMemoFirebase(
-    () => query(collection(firestore, 'products'), where('sold', '>', 0), orderBy('sold', 'desc'), limit(8)),
-    [firestore]
-  );
-  const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
-
-  const exclusiveOffersQuery = useMemoFirebase(
-    () => query(collection(firestore, 'products'), where('discount', '>', 0), orderBy('discount', 'desc'), limit(8)),
-    [firestore]
-  );
-  const { data: exclusiveOffers, isLoading: isLoadingOffers } = useCollection<Product>(exclusiveOffersQuery);
-  
-  const newArrivalsQuery = useMemoFirebase(
-    () => query(collection(firestore, 'products'), orderBy('createdAt', 'desc'), limit(8)),
-    [firestore]
-  );
-  const { data: newArrivals, isLoading: isLoadingNewArrivals } = useCollection<Product>(newArrivalsQuery);
-  
-  const latestRecipesQuery = useMemoFirebase(
-    () => query(collection(firestore, 'recipes'), orderBy('title'), limit(4)),
-    [firestore]
-  );
-  const { data: latestRecipes, isLoading: isLoadingRecipes } = useCollection<Recipe>(latestRecipesQuery);
-
-  const { categories, areCategoriesLoading } = useCategories();
-  const { t } = useLanguage();
-
-  const isLoading = isLoadingBestSellers || isLoadingOffers || areCategoriesLoading || isLoadingNewArrivals || isLoadingRecipes;
-
-  if (isLoading) {
-    return (
-       <div className="container py-8 md:py-12">
-          {/* Skeletons for categories and product grids */}
-           <div className="mb-12 md:mb-16">
-              <h2 className="font-headline text-3xl md:text-4xl text-center mb-8"><Skeleton className="h-10 w-80 mx-auto" /></h2>
-               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-              </div>
-           </div>
-          {[...Array(4)].map((_, index) => (
-             <div key={index} className="mt-12 md:mt-16">
-              <h2 className="font-headline text-3xl md:text-4xl mb-8"><Skeleton className="h-10 w-64" /></h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
-              </div>
-            </div>
-          ))}
-       </div>
-    )
-  }
-
-  return (
-    <>
-        <HomePageClient
-            categories={categories || []}
-            bestSellers={bestSellers || []}
-            exclusiveOffers={exclusiveOffers || []}
-            newArrivals={newArrivals || []}
-        />
-        {latestRecipes && latestRecipes.length > 0 && (
-            <div className="bg-muted/40">
-                <div className="container py-12 md:py-16">
-                    <ShopByRecipe recipes={latestRecipes} />
-                </div>
-            </div>
-        )}
-        <WhyChooseUs />
-    </>
-  );
 }
 
 
@@ -147,7 +37,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       <HeroCarousel />
-      <HomeProducts />
+      <HomePageClient />
     </div>
   );
 }
