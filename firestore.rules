@@ -243,7 +243,7 @@ service cloud.firestore {
      /**
      * @description Allows public read access to editable page content, but write access only to admins.
      * @path /pageContent/{pageId}
-     * @allow get: if true;
+     * @allow get, list: if true;
      * @allow create, update, delete: if isAdmin();
      * @principle Public read, admin write for CMS content.
      */
