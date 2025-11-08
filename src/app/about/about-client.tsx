@@ -61,7 +61,7 @@ export default function AboutPageClient() {
   
   const aboutImageQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'siteImages'), where('id', '==', 'about-supermarket-interior'));
+    return query(collection(firestore, 'siteImages'), where('id', '==', 'about-page-hero'));
   }, [firestore]);
   
   const { data: aboutImage, isLoading: isAboutImageLoading } = useCollection<{id: string, imageUrl: string, description: string, imageHint: string}>(aboutImageQuery);
