@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -114,7 +115,7 @@ function LanguageSwitcher() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                     <Globe className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
@@ -150,7 +151,7 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
       { key: 'contact', href: '/contact' },
     ];
 
-    const allLinks = [...navLinks, ...aiLinks, ...secondaryLinks];
+    const allLinks = [...navLinks, ...secondaryLinks];
 
     if (inSheet) {
         return (
@@ -169,21 +170,49 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
                     </Link>
                   </SheetClose>
                 ))}
+                 <Separator className="my-2" />
+                 <p className="text-sm font-semibold text-muted-foreground px-2">AI Tools</p>
+                 {aiLinks.map((link) => (
+                     <SheetClose asChild key={link.key}>
+                        <Link href={link.href} className="text-lg font-medium text-foreground flex items-center gap-2 text-primary">
+                            <link.icon className="h-5 w-5" />
+                            {t(`header.${link.key}`)}
+                        </Link>
+                     </SheetClose>
+                 ))}
             </div>
         )
     }
 
     return (
         <nav className={cn('items-center gap-4 lg:gap-6', className)}>
-        {navLinks.map((link) => (
-            <Link
-            key={link.key}
-            href={link.href}
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-            {t(`header.${link.key}`)}
-            </Link>
-        ))}
+            {navLinks.map((link) => (
+                <Link
+                key={link.key}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                {t(`header.${link.key}`)}
+                </Link>
+            ))}
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="text-sm font-medium text-muted-foreground p-0 h-auto hover:text-foreground">
+                        <Star className="mr-2 h-4 w-4 text-primary/80" />
+                        AI Tools
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    {aiLinks.map((link) => (
+                        <DropdownMenuItem key={link.key} asChild>
+                            <Link href={link.href}>
+                                <link.icon className="mr-2 h-4 w-4"/>
+                                {t(`header.${link.key}`)}
+                            </Link>
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
         </nav>
     )
 }
@@ -392,21 +421,6 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Top bar for secondary nav and controls */}
-      <div className="bg-muted/40">
-        <div className="container flex h-10 items-center justify-between">
-           <nav className="flex items-center gap-4 text-xs text-muted-foreground">
-                <Link href="/about" className="hover:text-foreground">{t('header.about')}</Link>
-                <Link href="/contact" className="hover:text-foreground">{t('header.contact')}</Link>
-           </nav>
-           <div className="flex items-center gap-2">
-                <LanguageSwitcher />
-                <ThemeSwitcher />
-           </div>
-        </div>
-      </div>
-      
-      {/* Main header */}
       <div className="container flex h-16 items-center">
         <MobileNav />
         
@@ -433,6 +447,8 @@ export default function Header() {
           
           <NotificationBell />
           <UserNav />
+          <ThemeSwitcher />
+          <LanguageSwitcher />
           <CartIcon onClick={() => setIsCartOpen(true)} />
         </div>
       </div>
@@ -440,5 +456,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
