@@ -1,6 +1,8 @@
 
+
 'use client';
 
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
 import { useCategories } from '@/hooks/use-categories';
@@ -13,6 +15,7 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
+import dynamic from 'next/dynamic';
 
 
 // This needs to be outside the component to work on the server
@@ -64,7 +67,7 @@ export async function generateMetadata(
 }
 
 
-function CategoryDetails({ categoryId }: { categoryId: string }) {
+function CategoryDetailsClient({ categoryId }: { categoryId: string }) {
   const { t } = useLanguage();
   const firestore = useFirestore();
   const { categories, areCategoriesLoading } = useCategories();
@@ -84,43 +87,49 @@ function CategoryDetails({ categoryId }: { categoryId: string }) {
     notFound();
   }
 
+  if (isLoading) {
+      return <CategoryPageSkeleton />;
+  }
+
   return (
     <div className="container py-8 md:py-12">
       <div className="text-center mb-8">
-        {isLoading || !category ? (
-            <Skeleton className="h-14 w-1/2 mx-auto" />
-        ) : (
-            <h1 className="font-headline text-4xl md:text-5xl">{category.name}</h1>
-        )}
-        {isLoading || !category ? (
-            <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
-        ) : (
-            <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle', { name: category.name })}</p>
-        )}
+        <h1 className="font-headline text-4xl md:text-5xl">{category?.name}</h1>
+        <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle', { name: category?.name || '' })}</p>
       </div>
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-80 w-full" />
-          ))}
+      <>
+        {products && products.length > 0 ? (
+          <ProductGrid title="" products={products} />
+        ) : (
+            <div className="text-center p-8 text-muted-foreground">
+            {t('category.noProducts')}
         </div>
-      ) : (
-        <>
-          {products && products.length > 0 ? (
-            <ProductGrid title="" products={products} />
-          ) : (
-             <div className="text-center p-8 text-muted-foreground">
-                {t('category.noProducts')}
-            </div>
-          )}
-        </>
-      )}
+        )}
+      </>
     </div>
   );
 }
 
+function CategoryPageSkeleton() {
+    return (
+        <div className="container py-8 md:py-12">
+            <div className="text-center mb-8">
+                <Skeleton className="h-14 w-1/2 mx-auto" />
+                <Skeleton className="h-7 w-2/3 mx-auto mt-2" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-80 w-full" />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function CategoryPage({ params }: { params: { id: string } }) {
-    // We validate the category exists inside the CategoryDetails component now
-    return <CategoryDetails categoryId={params.id} />
+    return (
+        <Suspense fallback={<CategoryPageSkeleton />}>
+            <CategoryDetailsClient categoryId={params.id} />
+        </Suspense>
+    );
 }

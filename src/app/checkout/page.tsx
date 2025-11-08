@@ -1,8 +1,14 @@
 
+
 import type { Metadata } from 'next';
-import CheckoutPageClient from './checkout-client';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import dynamic from 'next/dynamic';
+
+const CheckoutPageClient = dynamic(() => import('./checkout-client'), {
+    ssr: false,
+});
+
 
 export const metadata: Metadata = {
   title: 'Paiement',

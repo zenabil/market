@@ -1,4 +1,7 @@
 
+
+'use client';
+
 import { Suspense } from 'react';
 import RecipesPageClient from './recipes-client';
 import { Skeleton } from '@/components/ui/skeleton';
