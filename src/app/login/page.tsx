@@ -253,214 +253,210 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-       <div className="flex items-center justify-center py-12">
-         <div className='absolute top-8 left-8'>
-            <Link href="/" >
-              <Logo className="h-8" logoUrl={settings?.logoUrl} />
-            </Link>
+    <div className="relative w-full min-h-screen flex items-center justify-center p-4">
+        <div className="absolute inset-0">
+             <Image
+                src="https://images.unsplash.com/photo-1588964895597-cf29a1a27a8d?q=80&w=1974&auto=format&fit=crop"
+                alt={t('login.imageAlt')}
+                fill
+                className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/60" />
         </div>
-        <div className="mx-auto grid w-[350px] gap-6">
+        
+        <Link href="/" className='absolute top-8 left-8 z-10'>
+          <Logo className="h-8" logoUrl={settings?.logoUrl} />
+        </Link>
+
+        <Card className="w-full max-w-md z-10">
            <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t('login.tabs.login')}</TabsTrigger>
             <TabsTrigger value="signup">{t('login.tabs.signup')}</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-                <Card className="border-none shadow-none">
-                    <CardHeader className="px-0">
+                <CardHeader>
                     <CardTitle>{t('login.login.title')}</CardTitle>
                     <CardDescription>{t('login.login.description')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                    <div className='space-y-4'>
-                        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
-                            <GoogleIcon className="mr-2 h-5 w-5" />
-                            {t('login.continueWithGoogle')}
-                        </Button>
+                </CardHeader>
+                <CardContent>
+                <div className='space-y-4'>
+                    <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+                        <GoogleIcon className="mr-2 h-5 w-5" />
+                        {t('login.continueWithGoogle')}
+                    </Button>
 
-                        <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">
-                            {t('login.orContinueWith')}
-                            </span>
-                        </div>
-                        </div>
-
-                        <Form {...loginForm}>
-                        <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                            <FormField
-                            control={loginForm.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.email')}</FormLabel>
-                                <FormControl>
-                                    <Input type="email" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField
-                            control={loginForm.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.password')}</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <div className="text-right text-sm">
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="link" className="p-0 h-auto">{t('login.forgotPassword')}</Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>{t('login.resetPassword.title')}</DialogTitle>
-                                            <DialogDescription>{t('login.resetPassword.description')}</DialogDescription>
-                                        </DialogHeader>
-                                        <Form {...resetPasswordForm}>
-                                        <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
-                                            <FormField
-                                                control={resetPasswordForm.control}
-                                                name="email"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                    <FormLabel>{t('login.email')}</FormLabel>
-                                                    <FormControl><Input type="email" {...field} /></FormControl>
-                                                    <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </form>
-                                        </Form>
-                                        <DialogFooter>
-                                            <DialogClose asChild><Button type="button" variant="outline">{t('login.resetPassword.cancel')}</Button></DialogClose>
-                                            <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
-                                                {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                {t('login.resetPassword.send')}
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {t('login.login.button')}
-                            </Button>
-                        </form>
-                        </Form>
+                    <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
                     </div>
-                    </CardContent>
-                </Card>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                        {t('login.orContinueWith')}
+                        </span>
+                    </div>
+                    </div>
+
+                    <Form {...loginForm}>
+                    <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                        <FormField
+                        control={loginForm.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.email')}</FormLabel>
+                            <FormControl>
+                                <Input type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.password')}</FormLabel>
+                            <FormControl>
+                                <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <div className="text-right text-sm">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="link" className="p-0 h-auto">{t('login.forgotPassword')}</Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>{t('login.resetPassword.title')}</DialogTitle>
+                                        <DialogDescription>{t('login.resetPassword.description')}</DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...resetPasswordForm}>
+                                    <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordReset)} className="space-y-4" id="reset-password-form">
+                                        <FormField
+                                            control={resetPasswordForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                <FormLabel>{t('login.email')}</FormLabel>
+                                                <FormControl><Input type="email" {...field} /></FormControl>
+                                                <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                    </Form>
+                                    <DialogFooter>
+                                        <DialogClose asChild><Button type="button" variant="outline">{t('login.resetPassword.cancel')}</Button></DialogClose>
+                                        <Button type="submit" form="reset-password-form" disabled={isResettingPassword}>
+                                            {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {t('login.resetPassword.send')}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t('login.login.button')}
+                        </Button>
+                    </form>
+                    </Form>
+                </div>
+                </CardContent>
             </TabsContent>
             <TabsContent value="signup">
-                <Card className="border-none shadow-none">
-                    <CardHeader className="px-0">
-                        <CardTitle>{t('login.signup.title')}</CardTitle>
-                        <CardDescription>{t('login.signup.description')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                    <div className='space-y-4'>
-                        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
-                            <GoogleIcon className="mr-2 h-5 w-5" />
-                            {t('login.continueWithGoogle')}
-                        </Button>
+                <CardHeader>
+                    <CardTitle>{t('login.signup.title')}</CardTitle>
+                    <CardDescription>{t('login.signup.description')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <div className='space-y-4'>
+                    <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+                        <GoogleIcon className="mr-2 h-5 w-5" />
+                        {t('login.continueWithGoogle')}
+                    </Button>
 
-                        <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">
-                            {t('login.orSignupWith')}
-                            </span>
-                        </div>
-                        </div>
-
-                        <Form {...signupForm}>
-                        <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                            <FormField
-                            control={signupForm.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.name')}</FormLabel>
-                                <FormControl>
-                                    <Input type="text" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField
-                            control={signupForm.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.email')}</FormLabel>
-                                <FormControl>
-                                    <Input type="email" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField
-                            control={signupForm.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.password')}</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <FormField control={signupForm.control} name="confirmPassword"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>{t('login.confirmPassword')}</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {t('login.signup.button')}
-                            </Button>
-                        </form>
-                        </Form>
+                    <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
                     </div>
-                    </CardContent>
-                </Card>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                        {t('login.orSignupWith')}
+                        </span>
+                    </div>
+                    </div>
+
+                    <Form {...signupForm}>
+                    <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                        <FormField
+                        control={signupForm.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.name')}</FormLabel>
+                            <FormControl>
+                                <Input type="text" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={signupForm.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.email')}</FormLabel>
+                            <FormControl>
+                                <Input type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={signupForm.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.password')}</FormLabel>
+                            <FormControl>
+                                <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField control={signupForm.control} name="confirmPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>{t('login.confirmPassword')}</FormLabel>
+                            <FormControl>
+                                <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t('login.signup.button')}
+                        </Button>
+                    </form>
+                    </Form>
+                </div>
+                </CardContent>
             </TabsContent>
             </Tabs>
-        </div>
-      </div>
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="https://images.unsplash.com/photo-1588964895597-cf29a1a27a8d?q=80&w=1974&auto=format&fit=crop"
-          alt={t('login.imageAlt')}
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
+        </Card>
     </div>
   );
 }
+
+    
