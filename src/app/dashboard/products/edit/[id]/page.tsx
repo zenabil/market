@@ -54,7 +54,7 @@ function EditProductForm({ productId }: { productId: string }) {
   const formSchema = z.object({
     name: z.string().min(2, { message: t('dashboard.products.validation.name') }),
     description: z.string().optional(),
-    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }),
+    purchasePrice: z.coerce.number().min(0, { message: t('dashboard.products.validation.priceNegative') }).optional(),
     price: z.coerce.number().positive({ message: t('dashboard.products.validation.pricePositive') }),
     stock: z.coerce.number().int().min(0, { message: t('dashboard.products.validation.stock') }),
     categoryId: z.string({ required_error: t('dashboard.products.validation.category') }),
@@ -110,6 +110,10 @@ function EditProductForm({ productId }: { productId: string }) {
     const dataToUpdate: Partial<Product> = {
         ...values,
     };
+    
+    if (product.type === 'bundle') {
+        delete dataToUpdate.purchasePrice;
+    }
     
     // If the name changed, update the slug
     if (values.name !== product.name) {
@@ -358,19 +362,21 @@ function EditProductForm({ productId }: { productId: string }) {
                   <CardTitle>{t('dashboard.products.pricingStockTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                   <FormField
-                    control={form.control}
-                    name="purchasePrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="80.00" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {product.type === 'standard' && (
+                    <FormField
+                      control={form.control}
+                      name="purchasePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('dashboard.products.purchasePrice')}</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="80.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                    <FormField
                     control={form.control}
                     name="price"
