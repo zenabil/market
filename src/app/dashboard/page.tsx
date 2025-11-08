@@ -1,25 +1,11 @@
 
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
-import { collection, query, limit, orderBy, where } from 'firebase/firestore';
-import { Skeleton } from '@/components/ui/skeleton';
-import React, { Suspense } from 'react';
-import type { Product, User as FirestoreUser, Order } from '@/lib/placeholder-data';
-import { useRouter } from 'next/navigation';
-import { Loader2, TrendingUp, ShoppingBasket, Gem } from 'lucide-react';
+import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { useUserRole } from '@/hooks/use-user-role';
-import { useLanguage } from '@/contexts/language-provider';
-import { useOrders } from '@/hooks/use-orders';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { useUser } from '@/firebase';
 import dynamic from 'next/dynamic';
-
 
 const AdminDashboard = dynamic(() => import('@/components/dashboard/admin-dashboard'), {
     loading: () => <AdminDashboardSkeleton />,
@@ -33,15 +19,15 @@ const UserDashboard = dynamic(() => import('@/components/dashboard/user-dashboar
 function AdminDashboardSkeleton() {
     return (
         <div className="container py-6 md:py-8">
-            <Skeleton className="h-10 w-64 mb-8" />
+            <div className="h-10 w-64 mb-8 bg-muted rounded-md" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
+                <div className="h-28 bg-muted rounded-md" />
+                <div className="h-28 bg-muted rounded-md" />
+                <div className="h-28 bg-muted rounded-md" />
+                <div className="h-28 bg-muted rounded-md" />
             </div>
             <div className="mt-8">
-                <Skeleton className="h-96" />
+                <div className="h-96 bg-muted rounded-md" />
             </div>
         </div>
     );
@@ -50,14 +36,14 @@ function AdminDashboardSkeleton() {
 function UserDashboardSkeleton() {
      return (
         <div className="container py-6 md:py-8">
-            <Skeleton className="h-10 w-80 mb-8" />
+            <div className="h-10 w-80 mb-8 bg-muted rounded-md" />
             <div className="grid gap-4 md:grid-cols-3">
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
+                <div className="h-28 bg-muted rounded-md" />
+                <div className="h-28 bg-muted rounded-md" />
+                <div className="h-28 bg-muted rounded-md" />
             </div>
             <div className="mt-8">
-                 <Skeleton className="h-80" />
+                 <div className="h-80 bg-muted rounded-md" />
             </div>
         </div>
     );

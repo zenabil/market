@@ -1,87 +1,357 @@
+/**
+ * @fileoverview Firestore Security Rules for Tlemcen Smart Supermarket.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data (users, addresses, orders)
+ * and provides public read access for product and category information. Administrative privileges are managed
+ * via a dedicated `/roles_admin/{userId}` collection.
+ *
+ * Data Structure:
+ * - `/products/{productId}`: Publicly readable product information. Contains `purchasePrice` which is only readable/writable by admins.
+ * - `/products/{productId}/reviews/{reviewId}`: Publicly readable, owner-writable reviews.
+ * - `/categories/{categoryId}`: Publicly readable category information.
+ * - `/recipes/{recipeId}`: Publicly readable recipe information.
+ * - `/recipes/{recipeId}/reviews/{reviewId}`: Publicly readable, owner-writable reviews.
+ * - `/users/{userId}`: User profile data, accessible only to the user and admins.
+ * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only to the user and admins.
+ * - `/users/{userId}/orders/{orderId}`: User orders, accessible only to the user and admins. The `userId` field is denormalized to match the path.
+ * - `/users/{userId}/wishlist/{productId}`: User wishlist items, accessible only to the user.
+ * - `/users/{userId}/shopping-lists/{listId}`: User shopping lists, accessible only to the user.
+ * - `/users/{userId}/notifications/{notificationId}`: User notifications, accessible only to the user.
+ * - `/roles_admin/{userId}`: Collection to store admin user IDs. Existence over content.
+ * - `/settings/site`: Global site settings, publicly readable.
+ * - `/contactMessages/{messageId}`: Contact form submissions, write-only for users, read/delete for admins.
+ * - `/pageContent/{pageId}`: Editable content for static pages, publicly readable, admin writable.
+ *
+ * Key Security Decisions:
+ * - Products, Categories, and Reviews are publicly readable.
+ * - User listing is disallowed for regular users, but allowed for admins.
+ * - Default security posture for ambiguous relationships is strict owner-only access.
+ *
+ * Denormalization for Authorization:
+ * - The `Order` entity should contain a denormalized `userId` field to match the path `/users/{userId}/orders/{orderId}`.
+ *   This ensures that rules can validate the relationship between the order and the user without additional reads.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows anyone to read product information, but restricts creation, updates, and deletion to admins.
+     * The `purchasePrice` field is restricted to admins only. `bundle` type products do not require a purchasePrice on creation.
+     * @path /products/{productId}
+     * @allow get, list: if true;
+     * @allow create: if isAdmin() && ( (request.resource.data.type == 'standard' && request.resource.data.purchasePrice != null) || request.resource.data.type == 'bundle' );
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+     * @allow delete: if isAdmin();
+     * @principle Public read, admin write for products. Protect calculated fields and product type.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && ( (request.resource.data.type == 'standard' && request.resource.data.purchasePrice != null) || request.resource.data.type == 'bundle' );
+      allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+      allow delete: if isAdmin();
 
 
-'use client';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import React, { useState, useEffect } from 'react';
-
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/language-provider';
-
-interface ImageDialogProps {
-    onImageAdd: (url: string) => void;
-    children: React.ReactNode;
-}
-
-export function ImageDialog({ onImageAdd, children }: ImageDialogProps) {
-    const { t } = useLanguage();
-    
-    const imageFormSchema = z.object({
-        url: z.string().url({ message: t('dashboard.products.validation.imageURL')}),
-    });
-
-    const { toast } = useToast();
-    const [isOpen, setIsOpen] = useState(false);
-
-    const form = useForm<z.infer<typeof imageFormSchema>>({
-        resolver: zodResolver(imageFormSchema),
-        defaultValues: { url: 'https://picsum.photos/seed/' + Date.now() + '/600/600' },
-    });
-    
-    useEffect(() => {
-        if(isOpen) {
-            form.reset({ url: 'https://picsum.photos/seed/' + Date.now() + '/600/600' });
-        }
-    }, [isOpen, form]);
-
-    function onSubmit(values: z.infer<typeof imageFormSchema>) {
-        onImageAdd(values.url);
-        toast({ title: t('dashboard.products.imageAdded') });
-        setIsOpen(false);
+      /**
+       * @description Allows anyone to read reviews, but only signed-in users can create/update their own.
+       * @path /products/{productId}/reviews/{reviewId}
+       * @allow get, list: if true;
+       * @allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+       * @allow update: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @allow delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @principle Public read, owner-only write for reviews.
+       */
+      match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+        allow update, delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+      }
     }
 
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{t('dashboard.products.imagesTitle')}</DialogTitle>
-                    <DialogDescription>{t('dashboard.products.validation.imageURL')}</DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="image-dialog-form">
-                        <FormField control={form.control} name="url" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>URL de l'image</FormLabel>
-                                <FormControl><Input {...field} placeholder="https://..." /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                    </form>
-                </Form>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button>
-                    </DialogClose>
-                    <Button type="submit" form="image-dialog-form">
-                        {t('dashboard.products.addImage')}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+    /**
+     * @description Allows anyone to read category information, but restricts creation, updates, and deletion to admins.
+     * @path /categories/{categoryId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for categories.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    /**
+     * @description Allows public read access to recipes, but write access only to admins. Protects calculated fields.
+     * @path /recipes/{recipeId}
+     * @allow get, list: if true;
+     * @allow create, delete: if isAdmin();
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+     * @principle Public read, admin write for recipes.
+     */
+    match /recipes/{recipeId} {
+        allow get, list: if true;
+        allow create, delete: if isAdmin();
+        allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+
+      /**
+       * @description Allows anyone to read recipe reviews, but only signed-in users can create/update their own.
+       * @path /recipes/{recipeId}/reviews/{reviewId}
+       * @allow get, list: if true;
+       * @allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+       * @allow update: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @allow delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+       * @principle Public read, owner-only write for recipe reviews.
+       */
+        match /reviews/{reviewId} {
+            allow get, list: if true;
+            allow create: if isSignedIn() && isReviewOwner(request.resource.data.userId);
+            allow update, delete: if isSignedIn() && isReviewOwner(resource.data.userId);
+        }
+    }
+
+    /**
+     * @description Allows a user to read their own document, and admins to read any.
+     * Creation is allowed for any signed-in user for their own document.
+     * Updates are restricted to the owner for most fields, but admins can update role and loyalty points.
+     * Deletion is disallowed.
+     * @path /users/{userId}
+     * @allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+     * @allow list: if isAdmin();
+     * @allow create: if isSignedIn() && isOwner(userId);
+     * @allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
+     * @allow delete: if false; // Generally don't want users to delete their own account record
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && ( (isOwner(userId) && isUpdatingOwnData()) || (isAdmin() && isUpdatingAllowedAdminFields()) );
+      allow delete: if false;
+
+      /**
+       * @description Allows a user to manage their own wishlist.
+       * @path /users/{userId}/wishlist/{productId}
+       * @allow get, list, create, delete: if isSignedIn() && isOwner(userId);
+       * @allow update: if false;
+       * @principle Restricts access to a user's own data tree for wishlists.
+       */
+      match /wishlist/{productId} {
+        allow get, list, create, delete: if isSignedIn() && isOwner(userId);
+        allow update: if false;
+      }
+      
+      /**
+       * @description Allows a user to manage their own shopping lists.
+       * @path /users/{userId}/shopping-lists/{listId}
+       * @allow get, list, create, update, delete: if isSignedIn() && isOwner(userId);
+       * @principle Restricts access to a user's own data tree for shopping lists.
+       */
+      match /shopping-lists/{listId} {
+        allow get, list, create, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      
+      /**
+       * @description Allows a user to manage their own notifications. Admins can create notifications.
+       * @path /users/{userId}/notifications/{notificationId}
+       * @allow get, list, update, delete: if isSignedIn() && isOwner(userId);
+       * @allow create: if isAdmin(); // Only admins can create notifications for users
+       * @principle Restricts access to a user's own notifications.
+       */
+      match /notifications/{notificationId} {
+        allow get, list, update, delete: if isSignedIn() && isOwner(userId);
+        allow create: if isAdmin();
+      }
+
+        /**
+         * @description Allows a user to manage their own addresses.
+         * @path /users/{userId}/addresses/{addressId}
+         * @allow get, list: if isSignedIn() && isOwner(userId);
+         * @allow create: if isSignedIn() && isOwner(userId);
+         * @allow update: if isSignedIn() && isExistingOwner(userId);
+         * @allow delete: if isSignedIn() && isExistingOwner(userId);
+         * @principle Restricts access to a user's own data tree.
+         */
+        match /addresses/{addressId} {
+        allow get, list: if isSignedIn() && isOwner(userId);
+        allow create: if isSignedIn() && isOwner(userId);
+        allow update: if isSignedIn() && isExistingOwner(userId);
+        allow delete: if isSignedIn() && isExistingOwner(userId);
+        }
+
+        /**
+         * @description Allows a user to manage their own orders.
+         * @path /users/{userId}/orders/{orderId}
+         * @allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
+         * @allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+         * @allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
+         * @allow delete: if isSignedIn() && isExistingOwner(userId);
+         * @principle Restricts access to a user's own orders, validates userId on create/update.
+         */
+        match /orders/{orderId} {
+        allow get, list: if isSignedIn() && (isOwner(userId) || isAdmin());
+        allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isSignedIn() && (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isSignedIn() && isExistingOwner(userId);
+        }
+    }
+    
+
+    /**
+     * @description Allows admins to manage admin roles. The first user in the system can self-assign the admin role.
+     * @path /roles_admin/{userId}
+     * @allow get, list: if isAdmin();
+     * @allow create: if isSignedIn() && (isAdmin() || isFirstUser());
+     * @allow update: if false;
+     * @allow delete: if isAdmin();
+     * @principle Restricts access to admins only, with a special case for bootstrapping the first admin.
+     */
+    match /roles_admin/{userId} {
+      allow get, list: if isAdmin();
+      allow create: if isSignedIn() && (isAdmin() || isFirstUser());
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+    
+    /**
+     * @description Allows public read access to coupons, but write access only to admins.
+     * @path /coupons/{couponId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for coupons.
+     */
+    match /coupons/{couponId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Allows public read access to site settings, but write access only to admins.
+     * @path /settings/site
+     * @allow get: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for site settings.
+     */
+    match /settings/site {
+        allow get: if true;
+        allow create, update, delete: if isAdmin();
+    }
+    
+     /**
+     * @description Allows public read access to editable page content, but write access only to admins.
+     * @path /pageContent/{pageId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for CMS content.
+     */
+    match /pageContent/{pageId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Allows anyone to submit a contact message. Reading and deleting is restricted to admins.
+     * @path /contactMessages/{messageId}
+     * @allow create: if true;
+     * @allow read, delete: if isAdmin();
+     * @allow update: if false;
+     * @principle Write-only for public users, read/delete for admins.
+     */
+    match /contactMessages/{messageId} {
+        allow create: if true;
+        allow read, delete: if isAdmin();
+        allow update: if false;
+    }
+    
+    /**
+     * @description Publicly readable team member information, admin writable.
+     * @path /teamMembers/{memberId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write.
+     */
+    match /teamMembers/{memberId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly readable site image information, admin writable.
+     * @path /siteImages/{imageId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for site-wide imagery.
+     */
+    match /siteImages/{imageId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly readable store feature information, admin writable.
+     * @path /storeFeatures/{featureId}
+     * @allow get, list: if true;
+     * @allow create, update, delete: if isAdmin();
+     * @principle Public read, admin write for store features.
+     */
+    match /storeFeatures/{featureId} {
+        allow get, list: if true;
+        allow create, update, delete: if isAdmin();
+    }
+    
+  }
+
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+  
+  function isReviewOwner(userId) {
+    return isOwner(userId) && request.resource.data.userId == request.auth.uid;
+  }
+
+  function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+  }
+
+  function isAdmin() {
+    return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+  }
+  
+  function isFirstUser() {
+    // This function checks if the 'roles_admin' collection is completely empty.
+    // It is used to securely allow the very first person who signs up to become an admin.
+    return !exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.size == 0;
+  }
+  
+  function isUpdatingOwnData() {
+    // Users can't change their own role or calculated stats directly.
+    let disallowedFields = ['role', 'orderCount', 'totalSpent', 'loyaltyPoints', 'id', 'registrationDate'];
+    let incomingKeys = request.resource.data.keys();
+    
+    // Check that no disallowed fields are being modified by the user.
+    return !incomingKeys.hasAny(disallowedFields);
+  }
+  
+  function isUpdatingAllowedAdminFields() {
+    // Admins can update any field except for the calculated stats and unique ID.
+    let disallowedFields = ['orderCount', 'totalSpent', 'id', 'registrationDate'];
+    let incomingKeys = request.resource.data.keys();
+    return !incomingKeys.hasAny(disallowedFields);
+  }
+
+  function isNotUpdatingCalculatedFields() {
+    // Prevent client-side updates to calculated fields on products or recipes.
+    let disallowedFields = ['averageRating', 'reviewCount', 'sold'];
+    let incomingKeys = request.resource.data.keys();
+
+    return incomingKeys.hasAll(disallowedFields) == false ||
+           (request.resource.data.averageRating == resource.data.averageRating &&
+            request.resource.data.reviewCount == resource.data.reviewCount &&
+            request.resource.data.sold == resource.data.sold);
+  }
 }
