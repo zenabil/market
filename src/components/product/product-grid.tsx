@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Product } from '@/lib/placeholder-data';
-import ProductCard from './product-card';
+import ProductCard from '../product/product-card';
 import { useLanguage } from '@/contexts/language-provider';
 
 interface ProductGridProps {

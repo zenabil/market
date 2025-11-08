@@ -44,8 +44,8 @@ export default function AdminDashboard() {
     }, 0);
     
     const totalProfit = allProducts.reduce((acc, product) => {
-        if (typeof product.purchasePrice !== 'number') {
-            return acc; // Skip products without a valid purchase price
+        if (typeof product.purchasePrice !== 'number' || product.type === 'bundle') {
+            return acc;
         }
         const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
         const profitPerUnit = discountedPrice - product.purchasePrice;
