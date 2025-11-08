@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -191,10 +192,10 @@ export default function OrderDetailsClient() {
                                         <div key={item.productId} className="flex justify-between items-center">
                                             <div className='flex items-center gap-4'>
                                                  <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 relative overflow-hidden">
-                                                    {product ? <Image src={product.images[0]} alt={product.name} fill className="object-cover" /> : <div className="w-full h-full bg-muted" />}
+                                                    {product ? <Link href={`/product/${product.id}`}><Image src={product.images[0]} alt={product.name} fill className="object-cover" /></Link> : <div className="w-full h-full bg-muted" />}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">{item.productName}</p>
+                                                    <Link href={`/product/${item.productId}`} className="font-medium hover:underline">{item.productName}</Link>
                                                     <p className="text-sm text-muted-foreground">
                                                         {item.quantity} x {formatCurrency(item.price)}
                                                     </p>
