@@ -148,7 +148,7 @@ function CategoryPageSkeleton() {
     );
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
+export default function CategoryPage() {
     return (
         <Suspense fallback={<CategoryPageSkeleton />}>
             <CategoryDetailsClient />

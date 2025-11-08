@@ -99,7 +99,7 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
     return query(
       collection(firestore, 'products'),
       where('categoryId', '==', product.categoryId),
-      where('slug', '!=', product.slug),
+      where(documentId(), '!=', product.id),
       limit(4)
     );
   }, [firestore, product]);
