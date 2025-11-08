@@ -12,8 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
 import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows, Box } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, limit, documentId, getDoc, getDocs } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, where, limit, documentId, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
@@ -309,3 +309,5 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
     </>
   );
 }
+
+    
