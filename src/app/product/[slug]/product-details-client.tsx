@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProductGrid from '@/components/product/product-grid';
-import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows, Box } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows, Box, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, where, limit, documentId, getDocs } from 'firebase/firestore';
@@ -23,6 +24,7 @@ import { useLanguage } from '@/contexts/language-provider';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import dynamic from 'next/dynamic';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const ReviewsSection = dynamic(() => import('@/components/shared/reviews-section'), {
     loading: () => <div className="container py-12"><Skeleton className="h-64 w-full" /></div>
@@ -39,6 +41,8 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
   
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   const fetchProduct = useCallback(async () => {
       if (!firestore || !productSlug) return;
@@ -152,13 +156,46 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
       setQuantity(newQuantity);
     }
   };
+  
+  const openGallery = (index: number) => {
+    setGalleryIndex(index);
+    setIsGalleryOpen(true);
+  }
 
   return (
     <>
+    <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+        <DialogContent className="max-w-4xl p-0">
+             <div className="relative aspect-square w-full">
+                <Image
+                  src={product.images[galleryIndex]}
+                  alt={product.name}
+                  fill
+                  className="object-contain"
+                />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 bg-black/30 text-white hover:bg-black/50"
+                    onClick={() => setGalleryIndex((prev) => (prev - 1 + product.images.length) % product.images.length)}
+                >
+                    <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 bg-black/30 text-white hover:bg-black/50"
+                    onClick={() => setGalleryIndex((prev) => (prev + 1) % product.images.length)}
+                >
+                    <ChevronRight className="h-6 w-6" />
+                </Button>
+             </div>
+        </DialogContent>
+    </Dialog>
     <div className="container py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div>
-          <div className="aspect-square relative rounded-lg border overflow-hidden mb-4">
+          <div className="group aspect-square relative rounded-lg border overflow-hidden mb-4 cursor-pointer" onClick={() => openGallery(selectedImage)}>
             <Image
               src={product.images[selectedImage]}
               alt={product.name}
@@ -166,6 +203,9 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <ZoomIn className="h-12 w-12 text-white" />
+            </div>
             {product.discount > 0 && (
               <Badge variant="destructive" className="absolute top-4 right-4 text-base">
                 -{product.discount}%
@@ -181,7 +221,7 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 relative rounded-md border overflow-hidden ${selectedImage === index ? 'ring-2 ring-primary' : ''}`}
+                  className={cn("w-20 h-20 relative rounded-md border overflow-hidden", selectedImage === index && 'ring-2 ring-primary')}
                 >
                   <Image src={img} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
                 </button>
