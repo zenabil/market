@@ -19,7 +19,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
     const totalTime = recipe.prepTime + recipe.cookTime;
 
     return (
-        <Link href={`/recipes/${recipe.id}`} className="group">
+        <Link href={`/recipes/${recipe.slug}`} className="group">
             <Card className="overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
                 <div className="aspect-video relative">
                     <Image

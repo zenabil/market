@@ -2,12 +2,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, getDocs, query, where, getDoc } from 'firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { notFound } from 'next/navigation';
+import { useFirestore } from '@/firebase';
+import { collection, doc, getDocs, query, where, limit } from 'firebase/firestore';
 import type { Recipe, Product } from '@/lib/placeholder-data';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Clock, Users, Soup, ShoppingCart, Loader2 } from 'lucide-react';
@@ -17,24 +16,41 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from '@/components/product/star-rating';
 import { useLanguage } from '@/contexts/language-provider';
 import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ReviewsSection = dynamic(() => import('@/components/shared/reviews-section'), {
     loading: () => <div className="container py-12"><Skeleton className="h-64 w-full" /></div>
 });
 
-export default function RecipeDetailsClient({ recipeId }: { recipeId: string }) {
+export default function RecipeDetailsClient({ recipeSlug }: { recipeSlug: string }) {
     const { t } = useLanguage();
     const firestore = useFirestore();
     const { addItem } = useCart();
     const { toast } = useToast();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [recipe, setRecipe] = useState<Recipe | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const recipeRef = useMemoFirebase(() => {
-        if (!firestore || !recipeId) return null;
-        return doc(firestore, 'recipes', recipeId as string);
-    }, [firestore, recipeId]);
+    const fetchRecipe = useCallback(async () => {
+        if (!firestore || !recipeSlug) return;
 
-    const { data: recipe, isLoading, refetch } = useDoc<Recipe>(recipeRef);
+        setIsLoading(true);
+        const recipesRef = collection(firestore, 'recipes');
+        const q = query(recipesRef, where('slug', '==', recipeSlug), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const recipeDoc = querySnapshot.docs[0];
+            setRecipe({ id: recipeDoc.id, ...recipeDoc.data() } as Recipe);
+        } else {
+            setRecipe(null);
+        }
+        setIsLoading(false);
+    }, [firestore, recipeSlug]);
+    
+    useEffect(() => {
+        fetchRecipe();
+    }, [fetchRecipe]);
 
     const handleAddAllToCart = async () => {
         if (!firestore || !recipe?.ingredients || recipe.ingredients.length === 0) return;
@@ -178,7 +194,7 @@ export default function RecipeDetailsClient({ recipeId }: { recipeId: string }) 
                     </div>
                 </div>
             </div>
-            <ReviewsSection targetId={recipeId as string} targetCollection="recipes" onReviewChange={refetch} />
+            <ReviewsSection targetId={recipe.id} targetCollection="recipes" onReviewChange={fetchRecipe} />
         </>
     )
 }

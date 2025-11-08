@@ -5,11 +5,12 @@
 import React, { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, query, where, limit } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import type { Recipe } from '@/lib/placeholder-data';
 
 const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false });
 
@@ -27,16 +28,16 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const db = getFirestore();
-  const recipeRef = doc(db, 'recipes', params.slug);
-  const recipeSnap = await getDoc(recipeRef);
+  const q = query(collection(db, 'recipes'), where('slug', '==', params.slug), limit(1));
+  const recipeSnap = await getDocs(q);
 
-  if (!recipeSnap.exists()) {
+  if (recipeSnap.empty) {
     return {
       title: 'Recipe Not Found',
     }
   }
 
-  const recipe = recipeSnap.data();
+  const recipe = recipeSnap.docs[0].data() as Recipe;
   const previousImages = (await parent).openGraph?.images || []
 
   return {
@@ -89,7 +90,7 @@ function RecipePageSkeleton() {
 export default function RecipePage({ params }: { params: { slug: string }}) {
     return (
         <Suspense fallback={<RecipePageSkeleton />}>
-            <RecipeDetailsClient recipeId={params.slug} />
+            <RecipeDetailsClient recipeSlug={params.slug} />
         </Suspense>
     );
 }

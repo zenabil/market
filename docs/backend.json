@@ -448,6 +448,10 @@
             "title": {
                 "type": "string"
             },
+            "slug": {
+                "type": "string",
+                "description": "A URL-friendly version of the recipe title."
+            },
             "description": {
                 "type": "string"
             },
@@ -484,7 +488,7 @@
                 "description": "The total number of reviews for the recipe."
             }
         },
-        "required": ["title", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
+        "required": ["title", "slug", "image", "prepTime", "cookTime", "servings", "ingredients", "instructions"]
     },
     "ShoppingList": {
         "$schema": "http://json-schema.org/draft-07/schema#",

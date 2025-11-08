@@ -59,12 +59,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch dynamic recipe routes
     const recipesSnapshot = await getDocs(query(collection(db, 'recipes')));
-    const recipeRoutes = recipesSnapshot.docs.map(doc => ({
-        url: `${baseUrl}/recipes/${doc.id}`, // Recipes do not have slugs yet
-        lastModified: new Date().toISOString(), 
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    }));
+    const recipeRoutes = recipesSnapshot.docs.map(doc => {
+        const recipe = doc.data() as Recipe;
+        return {
+            url: `${baseUrl}/recipes/${recipe.slug}`, 
+            lastModified: new Date().toISOString(), 
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+        };
+    });
 
     return [
         ...staticRoutes,

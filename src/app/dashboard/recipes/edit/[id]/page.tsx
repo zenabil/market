@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -26,6 +27,18 @@ import { notFound, useParams, useRouter } from 'next/navigation';
 import type { Recipe } from '@/lib/placeholder-data';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useLanguage } from '@/contexts/language-provider';
+
+function slugify(text: string): string {
+    return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
+}
 
 function DynamicFieldArray({ control, name, label, buttonText }: { control: any, name: 'ingredients' | 'instructions', label: string, buttonText: string }) {
     const { fields, append, remove } = useFieldArray({ control, name });
@@ -140,6 +153,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
     setIsSaving(true);
     const recipeData = {
         title: values.title,
+        slug: slugify(values.title),
         description: values.description,
         image: values.image,
         prepTime: values.prepTime,
@@ -152,7 +166,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
     updateDoc(recipeRef, recipeData)
         .then(() => {
             toast({ title: t('dashboard.recipes.toast.updated') });
-            form.reset(values); // Reset the form to the new saved state, clearing isDirty
+            form.reset(form.getValues());
         })
         .catch(error => {
             errorEmitter.emit(

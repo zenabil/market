@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -25,6 +26,17 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-provider';
 
+function slugify(text: string): string {
+    return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
+}
 
 function DynamicFieldArray({ control, name, label, buttonText }: { control: any, name: 'ingredients' | 'instructions', label: string, buttonText: string }) {
     const { fields, append, remove } = useFieldArray({ control, name });
@@ -107,6 +119,7 @@ export default function NewRecipePage() {
     setIsSaving(true);
     const recipeData = {
         title: values.title,
+        slug: slugify(values.title),
         description: values.description || '',
         image: values.image,
         prepTime: values.prepTime,
@@ -122,7 +135,7 @@ export default function NewRecipePage() {
     addDoc(recipesCollection, recipeData)
       .then((docRef) => {
         toast({ title: t('dashboard.recipes.toast.created') });
-        router.push(`/dashboard/recipes/edit/${docRef.id}`);
+        router.push(`/dashboard/recipes`);
       })
       .catch(error => {
         errorEmitter.emit(
