@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -180,7 +181,7 @@ function DashboardSidebar() {
             <SidebarMenuItem key={item.key}>
               <Link href={item.href}>
                 <SidebarMenuButton
-                  isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
+                  isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
                   tooltip={{ content: t(`dashboard.layout.${item.key}`) }}
                   className={cn(isCollapsed && 'justify-center')}
                 >
