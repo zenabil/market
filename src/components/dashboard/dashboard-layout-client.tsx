@@ -48,76 +48,24 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useLanguage } from '@/contexts/language-provider';
 
 const adminMenuItems = [
-  {
-    key: 'dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    key: 'orders',
-    href: '/dashboard/orders',
-    icon: ShoppingBasket,
-  },
-  {
-    key: 'products',
-    href: '/dashboard/products',
-    icon: Package,
-  },
-  {
-    key: 'categories',
-    href: '/dashboard/categories',
-    icon: LayoutGrid,
-  },
-  {
-    key: 'users',
-    href: '/dashboard/users',
-    icon: Users,
-  },
-  {
-    key: 'messages',
-    href: '/dashboard/messages',
-    icon: Mail,
-  },
-  {
-    key: 'recipes',
-    href: '/dashboard/recipes',
-    icon: BookOpen,
-  },
-   {
-    key: 'content',
-    href: '/dashboard/content',
-    icon: FileText,
-  },
-  {
-    key: 'coupons',
-    href: '/dashboard/coupons',
-    icon: Ticket,
-  },
-  {
-    key: 'discounts',
-    href: '/dashboard/discounts',
-    icon: Percent,
-  },
-  {
-    key: 'features',
-    href: '/dashboard/features',
-    icon: Sparkles,
-  },
-   {
-    key: 'team',
-    href: '/dashboard/team',
-    icon: UserSquare,
-  },
-  {
-    key: 'images',
-    href: '/dashboard/images',
-    icon: Image,
-  },
-  {
-    key: 'settings',
-    href: '/dashboard/settings',
-    icon: Settings,
-  },
+  // Core
+  { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'orders', href: '/dashboard/orders', icon: ShoppingBasket },
+  { key: 'products', href: '/dashboard/products', icon: Package },
+  { key: 'categories', href: '/dashboard/categories', icon: LayoutGrid },
+  { key: 'recipes', href: '/dashboard/recipes', icon: BookOpen },
+  { key: 'users', href: '/dashboard/users', icon: Users },
+  { key: 'messages', href: '/dashboard/messages', icon: Mail },
+  // Marketing
+  { key: 'coupons', href: '/dashboard/coupons', icon: Ticket },
+  { key: 'discounts', href: '/dashboard/discounts', icon: Percent },
+  // Content
+  { key: 'content', href: '/dashboard/content', icon: FileText },
+  { key: 'features', href: '/dashboard/features', icon: Sparkles },
+  { key: 'team', href: '/dashboard/team', icon: UserSquare },
+  { key: 'images', href: '/dashboard/images', icon: Image },
+  // System
+  { key: 'settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 const userMenuItems = [
