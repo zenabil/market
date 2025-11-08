@@ -9,6 +9,26 @@ import { Skeleton } from "../ui/skeleton";
 import { collection, query, where, documentId } from "firebase/firestore";
 import { useLanguage } from "@/contexts/language-provider";
 import { useCategories } from "@/hooks/use-categories";
+import { Award, Leaf, Truck, type LucideProps, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+type StoreFeature = {
+    id: string;
+    title_fr: string;
+    description_fr: string;
+    title_ar: string;
+    description_ar: string;
+    icon: string;
+};
+
+// Map icon names to actual components
+const iconMap: { [key: string]: React.FC<LucideProps> } = {
+    Leaf: Leaf,
+    Truck: Truck,
+    Award: Award,
+    Sparkles: Sparkles,
+};
+
 
 const CategoryShowcase = dynamic(() => import('../product/category-showcase'), {
   loading: () => <CategoryShowcaseSkeleton />,
@@ -119,6 +139,45 @@ function RecommendedProducts() {
     );
 }
 
+function WhyChooseUs() {
+    const { t, locale } = useLanguage();
+    const firestore = useFirestore();
+
+    const featuresQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'storeFeatures'));
+    }, [firestore]);
+
+    const { data: features, isLoading } = useCollection<StoreFeature>(featuresQuery);
+
+    if (isLoading || !features || features.length === 0) {
+        return null; // Or a skeleton loader
+    }
+    
+    return (
+        <section className="mt-16 md:mt-24 text-center">
+            <h2 className="font-headline text-3xl md:text-4xl">{t('home.whyChooseUs')}</h2>
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {features.map((feature) => {
+                    const Icon = iconMap[feature.icon] || Leaf;
+                    return (
+                        <Card key={feature.id} className="text-center">
+                            <CardContent className="p-6">
+                                <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                                    <Icon className="h-6 w-6"/>
+                                </div>
+                                <h3 className="font-bold text-lg">{locale === 'ar' ? feature.title_ar : feature.title_fr}</h3>
+                                <p className="mt-2 text-sm text-muted-foreground">{locale === 'ar' ? feature.description_ar : feature.description_fr}</p>
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+        </section>
+    );
+}
+
+
 export default function HomePageClient({ bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
   const { t } = useLanguage();
   const { categories, areCategoriesLoading } = useCategories();
@@ -130,6 +189,7 @@ export default function HomePageClient({ bestSellers, exclusiveOffers, newArriva
       ) : (
         <CategoryShowcase title={t('home.browseCategories')} categories={categories || []} />
       )}
+      <WhyChooseUs />
       <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
       <ProductGrid title={t('home.newArrivals')} products={newArrivals} />
       <ProductGrid title={t('home.exclusiveOffers')} products={exclusiveOffers} />

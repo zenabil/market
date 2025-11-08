@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +45,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-provider';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormItem, FormMessage } from '@/components/ui/form';
 
 type StoreFeature = {
     id: string;
@@ -128,35 +129,24 @@ function FeatureDialog({ feature, onActionComplete, children }: { feature?: Stor
         <DialogHeader>
           <DialogTitle>{feature ? "Modifier la fonctionnalité" : "Ajouter une fonctionnalité"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id={`feature-dialog-form-${feature?.id || 'new'}`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label>Titre (FR)</Label>
-                <Input {...form.register('title_fr')} />
-                {form.formState.errors.title_fr && <p className="text-sm text-destructive">{form.formState.errors.title_fr.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label>Titre (AR)</Label>
-                <Input dir="rtl" {...form.register('title_ar')} />
-                {form.formState.errors.title_ar && <p className="text-sm text-destructive">{form.formState.errors.title_ar.message}</p>}
-            </div>
-            <div className="space-y-2 md:col-span-2">
-                <Label>Description (FR)</Label>
-                <Textarea {...form.register('description_fr')} />
-                {form.formState.errors.description_fr && <p className="text-sm text-destructive">{form.formState.errors.description_fr.message}</p>}
-            </div>
-             <div className="space-y-2 md:col-span-2">
-                <Label>Description (AR)</Label>
-                <Textarea dir="rtl" {...form.register('description_ar')} />
-                {form.formState.errors.description_ar && <p className="text-sm text-destructive">{form.formState.errors.description_ar.message}</p>}
-            </div>
-             <div className="space-y-2">
-                <Label>Icône</Label>
-                 <FormField
-                  control={form.control}
-                  name="icon"
-                  render={({ field }) => (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id={`feature-dialog-form-${feature?.id || 'new'}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="title_fr" render={({ field }) => (
+                    <FormItem><Label>Titre (FR)</Label><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="title_ar" render={({ field }) => (
+                    <FormItem><Label>Titre (AR)</Label><FormControl><Input dir="rtl" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="description_fr" render={({ field }) => (
+                    <FormItem className="md:col-span-2"><Label>Description (FR)</Label><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                 <FormField control={form.control} name="description_ar" render={({ field }) => (
+                    <FormItem className="md:col-span-2"><Label>Description (AR)</Label><FormControl><Textarea dir="rtl" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                 <FormField control={form.control} name="icon" render={({ field }) => (
                     <FormItem>
+                      <Label>Icône</Label>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -174,9 +164,9 @@ function FeatureDialog({ feature, onActionComplete, children }: { feature?: Stor
                     </FormItem>
                   )}
                 />
-            </div>
-          </div>
-        </form>
+              </div>
+            </form>
+        </Form>
         <DialogFooter>
             <DialogClose asChild><Button type="button" variant="outline">{t('dashboard.common.cancel')}</Button></DialogClose>
             <Button type="submit" disabled={isSaving} form={`feature-dialog-form-${feature?.id || 'new'}`}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t('dashboard.common.save')}</Button>
@@ -316,4 +306,3 @@ export default function StoreFeaturesPage() {
     </div>
   );
 }
-    

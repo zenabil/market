@@ -637,6 +637,35 @@
         }
       },
       "required": ["id", "imageUrl", "description", "imageHint"]
+    },
+    "StoreFeature": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Store Feature",
+      "type": "object",
+      "description": "Represents a key feature of the store, like 'Fast Delivery'.",
+      "properties": {
+        "title_fr": {
+          "type": "string",
+          "description": "Title in French (e.g., 'Livraison Rapide')."
+        },
+        "description_fr": {
+          "type": "string",
+          "description": "Description in French."
+        },
+        "title_ar": {
+          "type": "string",
+          "description": "Title in Arabic."
+        },
+        "description_ar": {
+          "type": "string",
+          "description": "Description in Arabic."
+        },
+        "icon": {
+          "type": "string",
+          "description": "The name of a lucide-react icon (e.g., 'Truck', 'Leaf', 'Award')."
+        }
+      },
+      "required": ["title_fr", "description_fr", "title_ar", "description_ar", "icon"]
     }
   },
   "auth": {
@@ -724,8 +753,10 @@
     "/siteImages/{imageId}": {
       "schema": { "$ref": "#/entities/SiteImage" },
       "description": "Stores manageable images for use across the site. Publicly readable, admin writable."
+    },
+    "/storeFeatures/{featureId}": {
+      "schema": { "$ref": "#/entities/StoreFeature" },
+      "description": "Stores key features of the store. Publicly readable, admin writable."
     }
   }
 }
-
-    
