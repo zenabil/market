@@ -5,12 +5,12 @@
 import { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { getFirestore, doc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Product, Category } from '@/lib/placeholder-data';
-import { WithContext, Product as ProductSchema, BreadcrumbList } from 'schema-dts';
+import type { Product, Category, Review } from '@/lib/placeholder-data';
+import { WithContext, Product as ProductSchema, BreadcrumbList, Review as ReviewSchema } from 'schema-dts';
 
 const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false });
 
@@ -39,7 +39,9 @@ export async function generateMetadata(
     }
   }
 
-  const product = querySnapshot.docs[0].data() as Product;
+  const productDoc = querySnapshot.docs[0];
+  const product = { id: productDoc.id, ...productDoc.data() } as Product;
+
   const previousImages = (await parent).openGraph?.images || []
   
   const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
@@ -53,6 +55,11 @@ export async function generateMetadata(
           category = { id: categorySnap.id, ...categorySnap.data() } as Category;
       }
   }
+  
+  // Fetch latest 5 reviews for schema
+  const reviewsQuery = query(collection(db, `products/${product.id}/reviews`), orderBy('createdAt', 'desc'), limit(5));
+  const reviewsSnapshot = await getDocs(reviewsQuery);
+  const reviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
 
   const productJsonLd: WithContext<ProductSchema> = {
     '@context': 'https://schema.org',
@@ -73,7 +80,17 @@ export async function generateMetadata(
             '@type': 'AggregateRating',
             ratingValue: product.averageRating.toFixed(1),
             reviewCount: product.reviewCount
-        }
+        },
+        review: reviews.map(review => ({
+            '@type': 'Review',
+            author: { '@type': 'Person', name: review.userName },
+            datePublished: review.createdAt,
+            reviewBody: review.comment,
+            reviewRating: {
+                '@type': 'Rating',
+                ratingValue: review.rating.toString()
+            }
+        } as ReviewSchema))
     } : {})
   };
   

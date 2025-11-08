@@ -5,13 +5,13 @@
 import React, { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import type { Recipe } from '@/lib/placeholder-data';
-import { WithContext, Recipe as RecipeSchema, BreadcrumbList } from 'schema-dts';
+import type { Recipe, Review } from '@/lib/placeholder-data';
+import { WithContext, Recipe as RecipeSchema, BreadcrumbList, Review as ReviewSchema } from 'schema-dts';
 
 const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false });
 
@@ -39,9 +39,16 @@ export async function generateMetadata(
     }
   }
 
-  const recipe = recipeSnap.docs[0].data() as Recipe;
+  const recipeDoc = recipeSnap.docs[0];
+  const recipe = { id: recipeDoc.id, ...recipeDoc.data() } as Recipe;
+
   const previousImages = (await parent).openGraph?.images || []
   
+    // Fetch latest 5 reviews for schema
+  const reviewsQuery = query(collection(db, `recipes/${recipe.id}/reviews`), orderBy('createdAt', 'desc'), limit(5));
+  const reviewsSnapshot = await getDocs(reviewsQuery);
+  const reviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
+
   const recipeJsonLd: WithContext<RecipeSchema> = {
     '@context': 'https://schema.org',
     '@type': 'Recipe',
@@ -62,7 +69,17 @@ export async function generateMetadata(
             '@type': 'AggregateRating',
             ratingValue: recipe.averageRating.toFixed(1),
             reviewCount: recipe.reviewCount
-        }
+        },
+        review: reviews.map(review => ({
+            '@type': 'Review',
+            author: { '@type': 'Person', name: review.userName },
+            datePublished: review.createdAt,
+            reviewBody: review.comment,
+            reviewRating: {
+                '@type': 'Rating',
+                ratingValue: review.rating.toString()
+            }
+        } as ReviewSchema))
     } : {})
   };
 
