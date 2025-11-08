@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useEffect } from 'react';
@@ -35,6 +36,18 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/language-provider';
 
+function slugify(text: string): string {
+    return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
+}
+
 function EditProductForm({ productId }: { productId: string }) {
   const { t } = useLanguage();
 
@@ -58,7 +71,7 @@ function EditProductForm({ productId }: { productId: string }) {
   const router = useRouter();
 
   const productRef = useMemoFirebase(() => doc(firestore, 'products', productId), [firestore, productId]);
-  const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
+  const { data: product, isLoading: isLoadingProduct, refetch } = useDoc<Product>(productRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,12 +106,15 @@ function EditProductForm({ productId }: { productId: string }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!product) return;
     setIsSaving(true);
-    const productData = {
-        ...product,
-        ...values
+
+    const dataToUpdate: Partial<Product> = {
+        ...values,
     };
     
-    const { id, ...dataToUpdate } = productData;
+    // If the name changed, update the slug
+    if (values.name !== product.name) {
+        dataToUpdate.slug = slugify(values.name);
+    }
 
     updateDoc(productRef, dataToUpdate)
         .then(() => {
@@ -106,6 +122,10 @@ function EditProductForm({ productId }: { productId: string }) {
                 title: t('dashboard.products.toastUpdate.title'),
                 description: t('dashboard.products.toastUpdate.description').replace('{{name}}', values.name),
             });
+            refetch(); // Refetch to get the latest data, including potentially new slug
+             if (dataToUpdate.slug) {
+                router.replace(`/dashboard/products/edit/${product.id}`, { scroll: false });
+            }
         })
         .catch(error => {
             errorEmitter.emit(

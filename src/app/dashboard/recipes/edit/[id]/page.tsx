@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -99,7 +100,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
   const router = useRouter();
 
   const recipeRef = useMemoFirebase(() => doc(firestore, 'recipes', recipeId), [firestore, recipeId]);
-  const { data: recipe, isLoading: isLoadingRecipe } = useDoc<Recipe>(recipeRef);
+  const { data: recipe, isLoading: isLoadingRecipe, refetch } = useDoc<Recipe>(recipeRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -150,10 +151,10 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
   }, [isDirty]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!recipe) return;
     setIsSaving(true);
-    const recipeData = {
+    const recipeData: Partial<Recipe> = {
         title: values.title,
-        slug: slugify(values.title),
         description: values.description,
         image: values.image,
         prepTime: values.prepTime,
@@ -162,11 +163,19 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
         ingredients: values.ingredients.map(i => i.value),
         instructions: values.instructions.map(i => i.value),
     };
+    
+    if (values.title !== recipe.title) {
+        recipeData.slug = slugify(values.title);
+    }
 
     updateDoc(recipeRef, recipeData)
         .then(() => {
             toast({ title: t('dashboard.recipes.toast.updated') });
-            form.reset(form.getValues());
+            refetch(); // Refetch data to ensure UI is in sync
+            form.reset(form.getValues()); // Resets the 'dirty' state
+            if (recipeData.slug) {
+                router.replace(`/dashboard/recipes/edit/${recipe.id}`, { scroll: false });
+            }
         })
         .catch(error => {
             errorEmitter.emit(
