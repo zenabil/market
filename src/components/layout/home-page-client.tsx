@@ -9,9 +9,9 @@ import { getProductRecommendations } from "@/ai/flows/product-recommendations";
 import { Skeleton } from "../ui/skeleton";
 import { collection, query, where, documentId } from "firebase/firestore";
 import { useLanguage } from "@/contexts/language-provider";
+import { useCategories } from "@/hooks/use-categories";
 
 type HomePageClientProps = {
-  categories: Category[];
   bestSellers: Product[];
   exclusiveOffers: Product[];
   newArrivals: Product[];
@@ -95,12 +95,22 @@ function RecommendedProducts() {
     );
 }
 
-export default function HomePageClient({ categories, bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
+export default function HomePageClient({ bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
   const { t } = useLanguage();
+  const { categories, areCategoriesLoading } = useCategories();
 
   return (
     <div className="container py-8 md:py-12">
-      <CategoryShowcase title={t('home.browseCategories')} categories={categories} />
+      {areCategoriesLoading ? (
+        <div className="mb-12 md:mb-16">
+            <Skeleton className="h-10 w-80 mx-auto mb-8" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+            </div>
+        </div>
+      ) : (
+        <CategoryShowcase title={t('home.browseCategories')} categories={categories || []} />
+      )}
       <div className="mt-12 md:mt-16">
         <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
       </div>
