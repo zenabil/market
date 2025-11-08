@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -24,7 +25,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import Logo from '@/components/icons/logo';
+import Logo from '../icons/logo';
 import { ThemeSwitcher } from './theme-switcher';
 import CartIcon from '../cart/cart-icon';
 import CartSheet from '../cart/cart-sheet';
