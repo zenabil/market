@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle, Trash2, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, query, doc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -113,15 +113,15 @@ export default function ProductsPage() {
 
   if (isLoading || !isAdmin) {
       return (
-          <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+          <div className="container py-6 md:py-8 flex-grow flex items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
       );
   }
 
   return (
-    <div className="container py-8 md:py-12">
-        <div className="overflow-x-auto">
+    <div className="container py-6 md:py-8">
+        <div>
             <Card>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
@@ -168,60 +168,104 @@ export default function ProductsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('dashboard.discounts.product')}</TableHead>
-                      <TableHead>{t('dashboard.products.purchasePrice')}</TableHead>
-                      <TableHead>{t('dashboard.products.sellingPrice')}</TableHead>
-                      <TableHead>{t('dashboard.products.stock')}</TableHead>
-                      <TableHead>{t('dashboard.products.sold')}</TableHead>
-                      <TableHead>
-                        <span className="sr-only">{t('dashboard.common.actions')}</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t('dashboard.discounts.product')}</TableHead>
+                        <TableHead>{t('dashboard.products.purchasePrice')}</TableHead>
+                        <TableHead>{t('dashboard.products.sellingPrice')}</TableHead>
+                        <TableHead>{t('dashboard.products.stock')}</TableHead>
+                        <TableHead>{t('dashboard.products.sold')}</TableHead>
+                        <TableHead>
+                          <span className="sr-only">{t('dashboard.common.actions')}</span>
+                        </TableHead>
                       </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))}
+                      {filteredProducts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>{formatCurrency(product.purchasePrice)}</TableCell>
+                          <TableCell>{formatCurrency(product.price)}</TableCell>
+                          <TableCell>{product.stock}</TableCell>
+                          <TableCell>{product.sold}</TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">{t('dashboard.common.openMenu')}</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/dashboard/products/edit/${product.id}`}>{t('dashboard.products.edit')}</Link>
+                                </DropdownMenuItem>
+                                 <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
+                                   <Trash2 className="mr-2 h-4 w-4" />
+                                   {t('dashboard.products.delete')}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {areProductsLoading && Array.from({ length: 5 }).map((_, i) => (
+                        <Card key={i}><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
                     ))}
                     {filteredProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{formatCurrency(product.purchasePrice)}</TableCell>
-                        <TableCell>{formatCurrency(product.price)}</TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>{product.sold}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">{t('dashboard.common.openMenu')}</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/products/edit/${product.id}`}>{t('dashboard.products.edit')}</Link>
-                              </DropdownMenuItem>
-                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive">
-                                 <Trash2 className="mr-2 h-4 w-4" />
-                                 {t('dashboard.products.delete')}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
+                        <Card key={product.id}>
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <CardTitle className="text-base">{product.name}</CardTitle>
+                                     <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button aria-haspopup="true" size="icon" variant="ghost" className="-mt-2 -mr-2">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem asChild><Link href={`/dashboard/products/edit/${product.id}`}>{t('dashboard.products.edit')}</Link></DropdownMenuItem>
+                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openDeleteDialog(product); }} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />{t('dashboard.products.delete')}</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">{t('dashboard.products.sellingPrice')}</span>
+                                    <span className="font-medium">{formatCurrency(product.price)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">{t('dashboard.products.stock')}</span>
+                                    <span>{product.stock}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">{t('dashboard.products.sold')}</span>
+                                    <span>{product.sold}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
-                  </TableBody>
-                </Table>
+                </div>
+
                  {!areProductsLoading && filteredProducts.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
                         {products && products.length > 0
@@ -255,4 +299,7 @@ export default function ProductsPage() {
 }
     
     
+    
+
+
     

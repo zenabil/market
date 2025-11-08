@@ -167,7 +167,7 @@ function AdminSwitch({ user, onRoleChange }: { user: FirestoreUser, onRoleChange
             aria-label={t('dashboard.users.toggleAdminStatus').replace('{{name}}', user.name)}
             disabled={isLoading}
         />
-        <span>{isAdmin ? <Badge variant="secondary">{t('dashboard.users.role.admin')}</Badge> : t('dashboard.users.role.user')}</span>
+        <span className="hidden md:inline-block">{isAdmin ? <Badge variant="secondary">{t('dashboard.users.role.admin')}</Badge> : <Badge variant="outline">{t('dashboard.users.role.user')}</Badge>}</span>
     </div>
   );
 }
@@ -216,7 +216,7 @@ export default function UsersPage() {
 
   if (isLoading || !isAdmin) {
     return (
-        <div className="container py-8 md:py-12 flex-grow flex items-center justify-center">
+        <div className="container py-6 md:py-8 flex-grow flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
@@ -224,78 +224,131 @@ export default function UsersPage() {
 
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-6 md:py-8">
       <Card>
         <CardHeader>
           <CardTitle className='font-headline text-3xl'>{t('dashboard.layout.users')}</CardTitle>
           <CardDescription>{t('dashboard.users.description')}</CardDescription>
         </CardHeader>
         <CardContent>
-           <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('dashboard.users.user')}</TableHead>
-                  <TableHead>{t('dashboard.users.role.title')}</TableHead>
-                  <TableHead>{t('dashboard.users.registrationDate')}</TableHead>
-                  <TableHead>{t('dashboard.users.totalSpent')}</TableHead>
-                  <TableHead className="text-right">{t('dashboard.common.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {areUsersLoading && Array.from({ length: 5 }).map((_, i) => (
-                   <TableRow key={i}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-10 w-10 rounded-full" />
-                        <div className="space-y-1">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-3 w-32" />
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+           {/* Desktop Table View */}
+           <div className="hidden md:block">
+             <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('dashboard.users.user')}</TableHead>
+                    <TableHead>{t('dashboard.users.role.title')}</TableHead>
+                    <TableHead>{t('dashboard.users.registrationDate')}</TableHead>
+                    <TableHead>{t('dashboard.users.totalSpent')}</TableHead>
+                    <TableHead className="text-right">{t('dashboard.common.actions')}</TableHead>
                   </TableRow>
-                ))}
-                {!isLoading && users && users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="font-medium">
-                          <p>{user.name}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                </TableHeader>
+                <TableBody>
+                  {areUsersLoading && Array.from({ length: 5 }).map((_, i) => (
+                     <TableRow key={i}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-10 w-10 rounded-full" />
+                          <div className="space-y-1">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-32" />
+                          </div>
                         </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                  {!isLoading && users && users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={user.avatar} alt={user.name} />
+                            <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="font-medium">
+                            <p>{user.name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <AdminSwitch user={user} onRoleChange={handleUpdate} />
+                      </TableCell>
+                      <TableCell>{formatDate(user.registrationDate)}</TableCell>
+                      <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
+                       <TableCell className="text-right">
+                         <div className="flex items-center justify-end gap-2">
+                          <LoyaltyDialog user={user} onPointsUpdate={handleUpdate} />
+                          <AddressDialog 
+                            userDocRef={doc(firestore, 'users', user.id)} 
+                            firestoreUser={user}
+                            onAddressChange={handleUpdate}
+                          >
+                              <Button variant="ghost" size="icon" title={t('dashboard.users.editAddresses')}>
+                                  <Home className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                          </AddressDialog>
+                         </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {areUsersLoading && Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i}><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+              ))}
+              {!isLoading && users && users.map((user) => (
+                <Card key={user.id}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-base">{user.name}</CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
                       </div>
-                    </TableCell>
-                    <TableCell>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{t('dashboard.users.role.title')}</span>
                       <AdminSwitch user={user} onRoleChange={handleUpdate} />
-                    </TableCell>
-                    <TableCell>{formatDate(user.registrationDate)}</TableCell>
-                    <TableCell>{formatCurrency(user.totalSpent || 0)}</TableCell>
-                     <TableCell className="text-right">
-                       <div className="flex items-center justify-end gap-2">
+                    </div>
+                     <div className="flex justify-between">
+                      <span className="font-semibold">{t('dashboard.users.totalSpent')}</span>
+                      <span>{formatCurrency(user.totalSpent || 0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="font-semibold">{t('dashboard.profile.loyaltyPoints')}</span>
                         <LoyaltyDialog user={user} onPointsUpdate={handleUpdate} />
-                        <AddressDialog 
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="font-semibold">{t('dashboard.profile.manageAddressesTitle')}</span>
+                         <AddressDialog 
                           userDocRef={doc(firestore, 'users', user.id)} 
                           firestoreUser={user}
                           onAddressChange={handleUpdate}
                         >
-                            <Button variant="ghost" size="icon" title={t('dashboard.users.editAddresses')}>
-                                <Home className="h-4 w-4 text-muted-foreground" />
+                            <Button variant="outline" size="sm">
+                                <Home className="h-4 w-4 mr-2" />
+                                Gérer
                             </Button>
                         </AddressDialog>
-                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
             {!isLoading && users?.length === 0 && (
                 <div className="text-center p-8 text-muted-foreground">
                     {t('dashboard.users.noUsers')}
@@ -306,5 +359,8 @@ export default function UsersPage() {
     </div>
   );
 }
+
+    
+
 
     
