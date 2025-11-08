@@ -1,8 +1,12 @@
 
 import { Suspense } from 'react';
-import AboutPageClient from './about-client';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
+
+const AboutPageClient = dynamic(() => import('./about-client'), {
+    loading: () => <AboutPageSkeleton />,
+});
 
 export const metadata: Metadata = {
   title: 'À Propos',
