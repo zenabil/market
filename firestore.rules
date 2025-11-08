@@ -326,7 +326,7 @@ service cloud.firestore {
   function isFirstUser() {
     // This function checks if the 'roles_admin' collection is completely empty.
     // It is used to securely allow the very first person who signs up to become an admin.
-    return !exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.size == 0;
+    return !exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && get(/databases/$(database)/documents/roles_admin).size == 0;
   }
   
   function isUpdatingOwnData() {

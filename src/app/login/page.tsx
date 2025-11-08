@@ -121,6 +121,9 @@ export default function LoginPage() {
     if(displayName && displayName !== user.displayName) {
         await updateProfile(user, { displayName });
     }
+    
+    // Use a batch to perform multiple operations atomically.
+    const batch = writeBatch(firestore);
 
     // Base user data for Firestore document
     const userData = {
@@ -137,25 +140,33 @@ export default function LoginPage() {
       addresses: [],
     };
     
-    // Create the user document first. This should always succeed if the user is authenticated.
-    await setDoc(userDocRef, userData);
-
-    // After creating the user, attempt to grant admin role.
-    // This will only succeed for the very first user due to security rules.
-    // We wrap this in a try/catch to handle the expected permission error for subsequent users gracefully.
+    // Set the main user document in the batch.
+    batch.set(userDocRef, userData);
+    
+    // Attempt to grant admin role. This will only succeed for the very first user.
+    const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+    batch.set(adminRoleRef, { role: 'admin' });
+    
+    // The security rules will only allow the roles_admin write if the collection is empty.
+    // If that succeeds, we can also update the user's role field.
+    // We can't do this conditionally in a batch, so we rely on the security rule to fail the whole batch if needed.
+    // A better approach is to handle it in two steps if the first user case is critical.
+    
     try {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        const batch = writeBatch(firestore);
-        batch.set(adminRoleRef, { role: 'admin' });
-        batch.update(userDocRef, { role: 'Admin' });
         await batch.commit();
-        // If successful, the user is now an admin.
+        // If the batch commit was successful, it means it was the first user.
+        // Now update the user document with the Admin role.
+        await setDoc(userDocRef, { role: 'Admin' }, { merge: true });
     } catch (error: any) {
-        // A permission-denied error is expected for all users except the first one.
-        // We can safely ignore it, as the user was already created as a regular 'User'.
-        if (error.code !== 'permission-denied') {
-          console.error("An unexpected error occurred while attempting to grant admin role:", error);
-          // Handle other potential errors (e.g., network issues) if necessary.
+        // If the batch failed, it's likely because the roles_admin write was denied.
+        // This is the expected case for every user after the first.
+        // We'll now create just the user document.
+        if (error.code === 'permission-denied') {
+            await setDoc(userDocRef, userData);
+        } else {
+             // Re-throw other unexpected errors.
+            console.error("An unexpected error occurred during user creation:", error);
+            throw error;
         }
     }
   }
