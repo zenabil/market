@@ -1,8 +1,12 @@
+
+
+// IMPORTANT: Do not use this configuration client-side.
+// It is recommended to use environment variables for security.
 export const firebaseConfig = {
-  "projectId": "studio-348306126-eba01",
-  "appId": "1:31870417013:web:97661b130891085b22e03c",
-  "apiKey": "AIzaSyAfT_f-RsTLvL-81Olnh1NI9dj_L9SgTLY",
-  "authDomain": "studio-348306126-eba01.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "31870417013"
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
