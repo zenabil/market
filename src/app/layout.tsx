@@ -17,6 +17,7 @@ import ComparisonBar from '@/components/product/comparison-bar';
 import { LanguageProvider } from '@/contexts/language-provider';
 import { Cairo, Readex_Pro } from 'next/font/google';
 import { WithContext, WebSite, Organization } from 'schema-dts';
+import Script from 'next/script';
 
 // AI Flow imports
 import '@/ai/flows/generate-product-description.ts';
@@ -169,7 +170,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-muted/40', cairo.variable, readexPro.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
          <LanguageProvider>
