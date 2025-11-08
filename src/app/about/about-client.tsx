@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -141,7 +140,7 @@ export default function AboutPageClient() {
                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <h3 className="font-bold">{member.name}</h3>
-                        <p className="text-sm text-primary">{t(`teamRoles.${member.role}`)}</p>
+                        <p className="text-sm text-primary">{t(`teamRoles.${member.role}`, {defaultValue: member.role})}</p>
                     </div>
                 ))}
             </div>
