@@ -48,6 +48,18 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-provider';
 
+function slugify(text: string): string {
+    return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
+}
+
 
 function CategoryDialog({ category, onActionComplete }: { category?: Category | null, onActionComplete: () => void }) {
   const { t } = useLanguage();
@@ -91,6 +103,7 @@ function CategoryDialog({ category, onActionComplete }: { category?: Category | 
     const categoryData = {
         name: values.name,
         image: values.image,
+        slug: slugify(values.name),
     };
     
     const actionPromise = category 

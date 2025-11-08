@@ -2,12 +2,12 @@
 
 'use client';
 
-import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
+import { Suspense, useMemo, useEffect, useState } from 'react';
+import { notFound, useParams } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
 import { useCategories } from '@/hooks/use-categories';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, getDoc, getDocs, limit } from 'firebase/firestore';
 import type { Product, Category } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/language-provider';
@@ -34,16 +34,17 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   // We need a server-side instance of Firestore
   const db = getFirestore();
-  const categoryRef = doc(db, 'categories', params.slug);
-  const categorySnap = await getDoc(categoryRef);
+  const q = query(collection(db, 'categories'), where('slug', '==', params.slug), limit(1));
+  const categorySnap = await getDocs(q);
 
-  if (!categorySnap.exists()) {
+
+  if (categorySnap.empty) {
     return {
       title: 'Category Not Found',
     }
   }
 
-  const category = categorySnap.data() as Category;
+  const category = categorySnap.docs[0].data() as Category;
   // We can optionally resolve parent metadata to extend it
   const previousImages = (await parent).openGraph?.images || []
 
@@ -67,21 +68,43 @@ export async function generateMetadata(
 }
 
 
-function CategoryDetailsClient({ categoryId }: { categoryId: string }) {
+function CategoryDetailsClient() {
   const { t } = useLanguage();
   const firestore = useFirestore();
-  const { categories, areCategoriesLoading } = useCategories();
+  const params = useParams();
+  const slug = params.slug as string;
 
-  const category = useMemoFirebase(() => categories?.find(c => c.id === categoryId), [categories, categoryId]);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [isLoadingCategory, setIsLoadingCategory] = useState(true);
+
+  useEffect(() => {
+    if (!firestore || !slug) return;
+    
+    const fetchCategory = async () => {
+        setIsLoadingCategory(true);
+        const q = query(collection(firestore, 'categories'), where('slug', '==', slug), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            const doc = snap.docs[0];
+            setCategory({ id: doc.id, ...doc.data()} as Category);
+        } else {
+            setCategory(null);
+        }
+        setIsLoadingCategory(false);
+    }
+    fetchCategory();
+
+  }, [firestore, slug]);
+
 
   const productsQuery = useMemoFirebase(() => {
-    if (!firestore || !categoryId) return null;
-    return query(collection(firestore, 'products'), where('categoryId', '==', categoryId));
-  }, [firestore, categoryId]);
+    if (!firestore || !category) return null;
+    return query(collection(firestore, 'products'), where('categoryId', '==', category.id));
+  }, [firestore, category]);
   
   const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
 
-  const isLoading = areCategoriesLoading || areProductsLoading;
+  const isLoading = isLoadingCategory || areProductsLoading;
 
   if (!isLoading && !category) {
     notFound();
@@ -129,7 +152,7 @@ function CategoryPageSkeleton() {
 export default function CategoryPage({ params }: { params: { slug: string } }) {
     return (
         <Suspense fallback={<CategoryPageSkeleton />}>
-            <CategoryDetailsClient categoryId={params.slug} />
+            <CategoryDetailsClient />
         </Suspense>
     );
 }

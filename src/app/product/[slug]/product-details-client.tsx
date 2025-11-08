@@ -42,30 +42,29 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
 
-  useEffect(() => {
-    if (!firestore || !productSlug) return;
+  const fetchProduct = useCallback(async () => {
+      if (!firestore || !productSlug) return;
 
-    const fetchProduct = async () => {
-        setIsLoadingProduct(true);
-        const productsRef = collection(firestore, 'products');
-        const q = query(productsRef, where('slug', '==', productSlug), limit(1));
-        const querySnapshot = await getDocs(q);
+      setIsLoadingProduct(true);
+      const productsRef = collection(firestore, 'products');
+      const q = query(productsRef, where('slug', '==', productSlug), limit(1));
+      const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-            const productDoc = querySnapshot.docs[0];
-            setProduct({ id: productDoc.id, ...productDoc.data() } as Product);
-        } else {
-            setProduct(null);
-        }
-        setIsLoadingProduct(false);
-    };
-
-    fetchProduct();
+      if (!querySnapshot.empty) {
+          const productDoc = querySnapshot.docs[0];
+          setProduct({ id: productDoc.id, ...productDoc.data() } as Product);
+      } else {
+          setProduct(null);
+      }
+      setIsLoadingProduct(false);
   }, [firestore, productSlug]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
   
   const refetch = () => {
-      // This is a placeholder for a more robust refetch mechanism if needed
-      // For now, reviews changing average rating will be reflected on next load.
+      fetchProduct();
   }
 
   // Fetch details of bundled items if the product is a bundle

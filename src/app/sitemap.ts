@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const productRoutes = productsSnapshot.docs.map(doc => {
         const product = doc.data() as Product;
         return {
-            url: `${baseUrl}/product/${product.slug || doc.id}`,
+            url: `${baseUrl}/product/${product.slug}`,
             lastModified: product.createdAt ? new Date(product.createdAt).toISOString() : new Date().toISOString(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
@@ -50,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const categoryRoutes = categoriesSnapshot.docs.map(doc => {
         const category = doc.data() as Category;
         return {
-            url: `${baseUrl}/category/${category.slug || doc.id}`,
+            url: `${baseUrl}/category/${category.slug}`,
             lastModified: new Date().toISOString(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,

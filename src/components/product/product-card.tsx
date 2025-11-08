@@ -72,7 +72,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full">
-      <Link href={`/product/${product.slug || product.id}`} className="flex flex-col h-full">
+      <Link href={`/product/${product.slug}`} className="flex flex-col h-full">
         <CardContent className="p-0 flex-grow">
           <div className="aspect-square relative">
             <Image
