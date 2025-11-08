@@ -28,6 +28,17 @@ import { useRouter } from 'next/navigation';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { useLanguage } from '@/contexts/language-provider';
 
+function slugify(text: string): string {
+    return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-');
+}
 
 export default function NewProductPage() {
   const { t } = useLanguage();
@@ -68,6 +79,7 @@ export default function NewProductPage() {
     setIsSaving(true);
     const productData = {
         ...values,
+        slug: slugify(values.name),
         description: '',
         discount: 0,
         images: ['https://picsum.photos/seed/' + Date.now() + '/600/600'],
@@ -77,7 +89,7 @@ export default function NewProductPage() {
         averageRating: 0,
         reviewCount: 0,
         createdAt: new Date().toISOString(),
-        type: 'standard',
+        type: 'standard' as 'standard' | 'bundle',
         bundleItems: [],
     };
 
@@ -252,5 +264,3 @@ export default function NewProductPage() {
     </div>
   );
 }
-
-    

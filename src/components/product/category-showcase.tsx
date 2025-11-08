@@ -18,7 +18,7 @@ export default function CategoryShowcase({ title, categories }: CategoryShowcase
       <h2 className="font-headline text-3xl md:text-4xl text-center mb-8">{title}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
         {categories.map((category) => (
-          <Link href={`/category/${category.id}`} key={category.id} className="group">
+          <Link href={`/category/${category.slug || category.id}`} key={category.id} className="group">
             <Card className="overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
               <div className="aspect-square relative">
                 <Image

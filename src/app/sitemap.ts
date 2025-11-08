@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const productRoutes = productsSnapshot.docs.map(doc => {
         const product = doc.data() as Product;
         return {
-            url: `${baseUrl}/product/${doc.id}`,
+            url: `${baseUrl}/product/${product.slug || doc.id}`,
             lastModified: product.createdAt ? new Date(product.createdAt).toISOString() : new Date().toISOString(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
@@ -47,18 +47,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch dynamic category routes
     const categoriesSnapshot = await getDocs(query(collection(db, 'categories')));
-    const categoryRoutes = categoriesSnapshot.docs.map(doc => ({
-        url: `${baseUrl}/category/${doc.id}`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-    }));
+    const categoryRoutes = categoriesSnapshot.docs.map(doc => {
+        const category = doc.data() as Category;
+        return {
+            url: `${baseUrl}/category/${category.slug || doc.id}`,
+            lastModified: new Date().toISOString(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        };
+    });
 
     // Fetch dynamic recipe routes
     const recipesSnapshot = await getDocs(query(collection(db, 'recipes')));
     const recipeRoutes = recipesSnapshot.docs.map(doc => ({
-        url: `${baseUrl}/recipes/${doc.id}`,
-        lastModified: new Date().toISOString(), // Recipes don't have a createdAt yet
+        url: `${baseUrl}/recipes/${doc.id}`, // Recipes do not have slugs yet
+        lastModified: new Date().toISOString(), 
         changeFrequency: 'monthly' as const,
         priority: 0.7,
     }));

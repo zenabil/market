@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
@@ -14,7 +14,7 @@ import ProductGrid from '@/components/product/product-grid';
 import { ShoppingCart, Plus, Minus, Star, Heart, GitCompareArrows, Box } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, limit, documentId, getDoc } from 'firebase/firestore';
+import { doc, collection, query, where, limit, documentId, getDoc, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/placeholder-data';
 import { Skeleton } from '@/components/ui/skeleton';
 import StarRating from '@/components/product/star-rating';
@@ -30,7 +30,7 @@ const ReviewsSection = dynamic(() => import('@/components/shared/reviews-section
     loading: () => <div className="container py-12"><Skeleton className="h-64 w-full" /></div>
 });
 
-export default function ProductDetailsClient({ productId }: { productId: string }) {
+export default function ProductDetailsClient({ productSlug }: { productSlug: string }) {
   const { t } = useLanguage();
   const { addItem, updateQuantity: updateCartQuantity } = useCart();
   const { toast } = useToast();
@@ -38,12 +38,35 @@ export default function ProductDetailsClient({ productId }: { productId: string 
   const { user } = useUser();
   const { wishlist, toggleWishlist, isWishlistLoading } = useWishlist();
   const { items: comparisonItems, toggleComparison, MAX_COMPARISON_ITEMS } = useComparison();
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
 
-  const productRef = useMemoFirebase(() => {
-      if (!firestore || !productId) return null;
-      return doc(firestore, 'products', productId);
-  }, [firestore, productId]);
-  const { data: product, isLoading: isLoadingProduct, refetch } = useDoc<Product>(productRef);
+  useEffect(() => {
+    if (!firestore || !productSlug) return;
+
+    const fetchProduct = async () => {
+        setIsLoadingProduct(true);
+        const productsRef = collection(firestore, 'products');
+        const q = query(productsRef, where('slug', '==', productSlug), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const productDoc = querySnapshot.docs[0];
+            setProduct({ id: productDoc.id, ...productDoc.data() } as Product);
+        } else {
+            setProduct(null);
+        }
+        setIsLoadingProduct(false);
+    };
+
+    fetchProduct();
+  }, [firestore, productSlug]);
+  
+  const refetch = () => {
+      // This is a placeholder for a more robust refetch mechanism if needed
+      // For now, reviews changing average rating will be reflected on next load.
+  }
 
   // Fetch details of bundled items if the product is a bundle
   const bundledItemsQuery = useMemoFirebase(() => {
@@ -53,8 +76,8 @@ export default function ProductDetailsClient({ productId }: { productId: string 
   const { data: bundledItems, isLoading: areBundledItemsLoading } = useCollection<Product>(bundledItemsQuery);
 
 
-  const isWishlisted = !!wishlist?.find(item => item.id === productId);
-  const isComparing = !!comparisonItems.find(item => item.id === productId);
+  const isWishlisted = !!(product && wishlist?.find(item => item.id === product.id));
+  const isComparing = !!(product && comparisonItems.find(item => item.id === product.id));
 
   useEffect(() => {
     if (product) {
@@ -78,10 +101,10 @@ export default function ProductDetailsClient({ productId }: { productId: string 
     return query(
       collection(firestore, 'products'),
       where('categoryId', '==', product.categoryId),
-      where(documentId(), '!=', productId),
+      where('slug', '!=', product.slug),
       limit(4)
     );
-  }, [firestore, product, productId]);
+  }, [firestore, product]);
   
   const { data: relatedProducts, isLoading: isLoadingRelated } = useCollection<Product>(relatedProductsQuery);
 
@@ -120,7 +143,7 @@ export default function ProductDetailsClient({ productId }: { productId: string 
       });
       return;
     }
-    toggleWishlist(productId);
+    toggleWishlist(product.id);
   };
   
   const handleCompareToggle = () => {
@@ -257,7 +280,7 @@ export default function ProductDetailsClient({ productId }: { productId: string 
                 ) : (
                     <div className="divide-y">
                         {bundledItems?.map(item => (
-                            <Link key={item.id} href={`/product/${item.id}`} className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-6 px-6">
+                            <Link key={item.id} href={`/product/${item.slug || item.id}`} className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-6 px-6">
                                 <Image src={item.images[0]} alt={item.name} width={64} height={64} className="rounded-md border object-cover" />
                                 <div className="flex-grow">
                                     <p className="font-semibold">{item.name}</p>
@@ -278,7 +301,7 @@ export default function ProductDetailsClient({ productId }: { productId: string 
       )}
     </div>
     
-    <ReviewsSection targetId={productId} targetCollection="products" onReviewChange={refetch} />
+    <ReviewsSection targetId={product.id} targetCollection="products" onReviewChange={refetch} />
 
     {relatedProducts && relatedProducts.length > 0 && (
     <div className="container mt-16 md:mt-24 pb-12">

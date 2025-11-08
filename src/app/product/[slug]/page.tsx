@@ -5,10 +5,11 @@
 import { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Product } from '@/lib/placeholder-data';
 
 const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false });
 
@@ -26,16 +27,17 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const db = getFirestore();
-  const productRef = doc(db, 'products', params.slug);
-  const productSnap = await getDoc(productRef);
+  const productsRef = collection(db, 'products');
+  const q = query(productsRef, where('slug', '==', params.slug), limit(1));
+  const querySnapshot = await getDocs(q);
 
-  if (!productSnap.exists()) {
+  if (querySnapshot.empty) {
     return {
       title: 'Product Not Found',
     }
   }
 
-  const product = productSnap.data();
+  const product = querySnapshot.docs[0].data() as Product;
   const previousImages = (await parent).openGraph?.images || []
 
   return {
@@ -95,7 +97,7 @@ function ProductPageSkeleton() {
 export default function ProductPage({ params }: { params: { slug: string } }) {
     return (
         <Suspense fallback={<ProductPageSkeleton />}>
-            <ProductDetailsClient productId={params.slug} />
+            <ProductDetailsClient productSlug={params.slug} />
         </Suspense>
     );
 }

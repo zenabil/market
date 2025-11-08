@@ -3,6 +3,7 @@
 export type Product = {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   purchasePrice: number;
@@ -16,11 +17,14 @@ export type Product = {
   averageRating?: number;
   reviewCount?: number;
   createdAt: string; // ISO string
+  type: 'standard' | 'bundle';
+  bundleItems?: string[];
 };
 
 export type Category = {
   id: string; // This is the Firestore document ID
   name: string;
+  slug: string;
   image: string;
 };
 
