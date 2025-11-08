@@ -97,7 +97,7 @@ export default function GenerateRecipePage() {
     };
 
 
-    async function onSubmit(values: z.infer<typeof formSchema>>) {
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
         setGeneratedRecipe(null);
         try {
