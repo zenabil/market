@@ -73,7 +73,7 @@ function SearchCommandMenu() {
         const formData = new FormData(event.currentTarget);
         const searchQuery = formData.get('search') as string;
         if (searchQuery.trim()) {
-            router.push(`/search?q=${'\'\''}encodeURIComponent(searchQuery.trim())'\'\''}`);
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
             setOpen(false);
         }
     };
@@ -169,7 +169,7 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
                         )}
                     >
                        {link.icon && <link.icon className="h-5 w-5" />}
-                       {t(`header.${'\'\''}link.key'\'\''}`)}
+                       {t(`header.${link.key}`)}
                     </Link>
                   </SheetClose>
                 ))}
@@ -179,7 +179,7 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
                      <SheetClose asChild key={link.key}>
                         <Link href={link.href} className="text-lg font-medium text-foreground flex items-center gap-2 text-primary">
                             <link.icon className="h-5 w-5" />
-                            {t(`header.${'\'\''}link.key'\'\''}`)}
+                            {t(`header.${link.key}`)}
                         </Link>
                      </SheetClose>
                  ))}
@@ -195,7 +195,7 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
                 href={link.href}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                {t(`header.${'\'\''}link.key'\'\''}`)}
+                {t(`header.${link.key}`)}
                 </Link>
             ))}
              <DropdownMenu>
@@ -210,7 +210,7 @@ function NavLinks({ className, inSheet = false }: { className?: string, inSheet?
                         <DropdownMenuItem key={link.key} asChild>
                             <Link href={link.href}>
                                 <link.icon className="mr-2 h-4 w-4"/>
-                                {t(`header.${'\'\''}link.key'\'\''}`)}
+                                {t(`header.${link.key}`)}
                             </Link>
                         </DropdownMenuItem>
                     ))}
@@ -246,7 +246,7 @@ function NotificationBell() {
     const firestore = useFirestore();
     const notificationsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
-        return query(collection(firestore, `users/${'\'\''}user.uid'\'\''}/notifications`), orderBy('createdAt', 'desc'));
+        return query(collection(firestore, `users/${user.uid}/notifications`), orderBy('createdAt', 'desc'));
     }, [user, firestore]);
 
     const { data: notifications } = useCollection<Notification>(notificationsQuery);
@@ -258,7 +258,7 @@ function NotificationBell() {
         const batch = writeBatch(firestore);
         notifications.forEach(notif => {
             if (!notif.isRead) {
-                const notifRef = doc(firestore, `users/${'\'\''}user.uid'\'\''}/notifications`, notif.id);
+                const notifRef = doc(firestore, `users/${user.uid}/notifications`, notif.id);
                 batch.update(notifRef, { isRead: true });
             }
         });
@@ -355,29 +355,9 @@ function UserNav() {
 
   if (!authUser) {
      return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-             <Avatar className="h-9 w-9">
-              <AvatarFallback><User/></AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuItem asChild>
-            <Link href="/login">
-                <LogIn className="mr-2 h-4 w-4" />
-                <span>{t('login.tabs.login')}</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/login">
-                <UserPlus className="mr-2 h-4 w-4" />
-                <span>{t('login.tabs.signup')}</span>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        <Button variant="ghost" asChild>
+            <Link href="/login">{t('login.tabs.login')}</Link>
+        </Button>
     );
   }
 
@@ -386,7 +366,7 @@ function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={authUser.photoURL || `https://picsum.photos/seed/${'\'\''}authUser.uid'\'\''}/100/100`} alt={firestoreUser?.name || 'User'} />
+            <AvatarImage src={authUser.photoURL || `https://picsum.photos/seed/${authUser.uid}/100/100`} alt={firestoreUser?.name || 'User'} />
             <AvatarFallback>{firestoreUser?.name?.charAt(0).toUpperCase() || authUser.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
