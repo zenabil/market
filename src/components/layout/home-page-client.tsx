@@ -152,8 +152,19 @@ function WhyChooseUs() {
 
     const { data: features, isLoading } = useCollection<StoreFeature>(featuresQuery);
 
-    if (isLoading || !features || features.length === 0) {
-        return null; // Or a skeleton loader
+    if (isLoading) {
+        return (
+            <section className="mt-16 md:mt-24 text-center">
+                 <Skeleton className="h-10 w-1/3 mx-auto" />
+                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                     {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
+                 </div>
+            </section>
+        )
+    }
+    
+    if (!features || features.length === 0) {
+        return null;
     }
     
     return (
