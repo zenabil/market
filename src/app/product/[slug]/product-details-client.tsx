@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';

@@ -5,7 +5,7 @@
 import { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';

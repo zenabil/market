@@ -5,7 +5,6 @@
 import { Suspense, useMemo, useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import ProductGrid from '@/components/product/product-grid';
-import { useCategories } from '@/hooks/use-categories';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, doc, getDoc, getDocs, limit } from 'firebase/firestore';
 import type { Product, Category } from '@/lib/placeholder-data';
