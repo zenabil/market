@@ -309,5 +309,3 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
     </>
   );
 }
-
-    
