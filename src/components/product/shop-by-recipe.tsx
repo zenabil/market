@@ -27,7 +27,7 @@ export default function ShopByRecipe({ recipes }: ShopByRecipeProps) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {recipes.map((recipe) => (
-          <Link href={`/recipes/${recipe.id}`} key={recipe.id} className="group">
+          <Link href={`/recipes/${recipe.slug}`} key={recipe.id} className="group">
             <Card className="overflow-hidden h-full">
                 <CardContent className="p-0 relative">
                     <div className="aspect-square">
