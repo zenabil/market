@@ -39,19 +39,17 @@ service cloud.firestore {
 
     /**
      * @description Allows anyone to read product information, but restricts creation, updates, and deletion to admins.
-     * Calculated fields like averageRating and reviewCount should only be updated by backend functions.
-     * The `purchasePrice` field is restricted to admins only.
-     * Admins can create standard products or bundle products.
+     * The `purchasePrice` field is restricted to admins only. `bundle` type products do not require a purchasePrice on creation.
      * @path /products/{productId}
      * @allow get, list: if true;
-     * @allow create, delete: if isAdmin();
-     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields() && isProductTypeConsistent();
+     * @allow create: if isAdmin() && ( (request.resource.data.type == 'standard' && request.resource.data.purchasePrice != null) || request.resource.data.type == 'bundle' );
+     * @allow update: if isAdmin() && isNotUpdatingCalculatedFields();
+     * @allow delete: if isAdmin();
      * @principle Public read, admin write for products. Protect calculated fields and product type.
      */
     match /products/{productId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isAdmin() && request.resource.data.purchasePrice != null;
+      allow get, list: if true;
+      allow create: if isAdmin() && ( (request.resource.data.type == 'standard' && request.resource.data.purchasePrice != null) || request.resource.data.type == 'bundle' );
       allow update: if isAdmin() && isNotUpdatingCalculatedFields();
       allow delete: if isAdmin();
 
