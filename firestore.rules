@@ -358,3 +358,5 @@ service cloud.firestore {
             request.resource.data.sold == resource.data.sold);
   }
 }
+
+    

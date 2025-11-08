@@ -36,6 +36,7 @@ import {
   UserSquare,
   FileText,
   Image,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -96,6 +97,11 @@ const adminMenuItems = [
     key: 'discounts',
     href: '/dashboard/discounts',
     icon: Percent,
+  },
+  {
+    key: 'features',
+    href: '/dashboard/features',
+    icon: Sparkles,
   },
    {
     key: 'team',
@@ -229,3 +235,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    

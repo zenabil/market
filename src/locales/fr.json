@@ -508,6 +508,7 @@
             "team": "Équipe",
             "content": "Contenu",
             "images": "Images",
+            "features": "Fonctionnalités",
             "myOrders": "Mes commandes",
             "shoppingLists": "Listes de courses",
             "wishlist": "Liste de souhaits",
@@ -1146,3 +1147,5 @@
         "subtitle": "Découvrez pourquoi Tlemcen Smart Supermarket est votre meilleur choix pour les courses."
     }
 }
+
+    
