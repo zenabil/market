@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -108,13 +109,13 @@ function SearchCommandMenu() {
 }
 
 function LanguageSwitcher() {
-    const { locale, setLocale, t } = useLanguage();
+    const { locale, setLocale } = useLanguage();
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Globe className="h-6 w-6" />
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Globe className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -129,7 +130,7 @@ function LanguageSwitcher() {
     );
 }
 
-function NavLinks({ className }: { className?: string }) {
+function NavLinks({ className, inSheet = false }: { className?: string, inSheet?: boolean }) {
     const { t } = useLanguage();
     
     const navLinks = [
@@ -137,58 +138,24 @@ function NavLinks({ className }: { className?: string }) {
       { key: 'products', href: '/products' },
       { key: 'recipes', href: '/recipes' },
       { key: 'features', href: '/features' },
+    ];
+
+    const aiLinks = [
       { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
       { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },
+    ];
+    
+    const secondaryLinks = [
       { key: 'about', href: '/about' },
       { key: 'contact', href: '/contact' },
     ];
 
-    return (
-        <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
-        {navLinks.map((link) => (
-            <Link
-            key={link.key}
-            href={link.href}
-            className={cn(
-                "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2",
-                (link.icon) && "text-primary hover:text-primary/80 font-bold"
-                )}
-            >
-            {link.icon && <link.icon className="h-4 w-4" />}
-            {t(`header.${link.key}`)}
-            </Link>
-        ))}
-        </nav>
-    )
-}
+    const allLinks = [...navLinks, ...aiLinks, ...secondaryLinks];
 
-function MobileNav() {
-    const { t } = useLanguage();
-        const navLinks = [
-      { key: 'home', href: '/' },
-      { key: 'products', href: '/products' },
-      { key: 'recipes', href: '/recipes' },
-      { key: 'features', href: '/features' },
-      { key: 'generateRecipe', href: '/generate-recipe', icon: Wand2 },
-      { key: 'mealPlanner', href: '/meal-planner', icon: CalendarDays },
-      { key: 'about', href: '/about' },
-      { key: 'contact', href: '/contact' },
-    ];
-
-    return (
-        <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-4 md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">{t('chatbot.open')}</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <Link href="/" className="mb-8 block">
-                <Logo className="h-8" />
-              </Link>
-              <div className="flex flex-col gap-4">
-                {navLinks.map((link) => (
+    if (inSheet) {
+        return (
+            <div className="flex flex-col gap-4">
+                {allLinks.map((link) => (
                    <SheetClose asChild key={link.key}>
                     <Link
                       href={link.href}
@@ -202,7 +169,39 @@ function MobileNav() {
                     </Link>
                   </SheetClose>
                 ))}
-              </div>
+            </div>
+        )
+    }
+
+    return (
+        <nav className={cn('items-center gap-4 lg:gap-6', className)}>
+        {navLinks.map((link) => (
+            <Link
+            key={link.key}
+            href={link.href}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+            {t(`header.${link.key}`)}
+            </Link>
+        ))}
+        </nav>
+    )
+}
+
+function MobileNav() {
+    return (
+        <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Ouvrir le menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              <Link href="/" className="mb-8 block">
+                <Logo className="h-8" />
+              </Link>
+              <NavLinks inSheet={true} />
             </SheetContent>
         </Sheet>
     )
@@ -260,8 +259,8 @@ function NotificationBell() {
     return (
         <DropdownMenu onOpenChange={(open) => open && unreadCount > 0 && handleMarkAllAsRead()}>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-6 w-6" />
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
                             {unreadCount}
@@ -333,8 +332,8 @@ function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+          <Avatar className="h-9 w-9">
             <AvatarImage src={authUser.photoURL || `https://picsum.photos/seed/${authUser.uid}/100/100`} alt={firestoreUser?.name || 'User'} />
             <AvatarFallback>{firestoreUser?.name?.charAt(0).toUpperCase() || authUser.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
@@ -393,15 +392,30 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Top bar for secondary nav and controls */}
+      <div className="bg-muted/40">
+        <div className="container flex h-10 items-center justify-between">
+           <nav className="flex items-center gap-4 text-xs text-muted-foreground">
+                <Link href="/about" className="hover:text-foreground">{t('header.about')}</Link>
+                <Link href="/contact" className="hover:text-foreground">{t('header.contact')}</Link>
+           </nav>
+           <div className="flex items-center gap-2">
+                <LanguageSwitcher />
+                <ThemeSwitcher />
+           </div>
+        </div>
+      </div>
+      
+      {/* Main header */}
       <div className="container flex h-16 items-center">
         <MobileNav />
         
-        <Link href="/" className="mr-6 hidden md:flex">
+        <Link href="/" className="mr-8 hidden md:flex">
           <Logo className="h-8 w-auto" logoUrl={settings?.logoUrl} />
         </Link>
 
         <div className="hidden md:flex flex-1">
-            <NavLinks />
+            <NavLinks className="flex" />
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-1 md:space-x-2">
@@ -412,12 +426,11 @@ export default function Header() {
 
           <ImageSearchDialog>
             <Button variant="ghost" size="icon">
-                <Camera className="h-6 w-6" />
+                <Camera className="h-5 w-5" />
                 <span className="sr-only">Search by image</span>
             </Button>
           </ImageSearchDialog>
-          <LanguageSwitcher />
-          <ThemeSwitcher />
+          
           <NotificationBell />
           <UserNav />
           <CartIcon onClick={() => setIsCartOpen(true)} />
@@ -427,3 +440,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
