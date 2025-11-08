@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -153,7 +151,7 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!recipe) return;
     setIsSaving(true);
-    const recipeData: Partial<Recipe> = {
+    const recipeData: Partial<Omit<Recipe, 'id'>> = {
         title: values.title,
         description: values.description,
         image: values.image,
