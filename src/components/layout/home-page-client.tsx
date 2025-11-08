@@ -1,6 +1,6 @@
 "use client"
 
-import type { Category, Product } from "@/lib/placeholder-data";
+import type { Category, Product, Recipe } from "@/lib/placeholder-data";
 import dynamic from 'next/dynamic';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import React, { useEffect, useState, useMemo } from "react";
@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/language-provider";
 import { useCategories } from "@/hooks/use-categories";
 import { Award, Leaf, Truck, type LucideProps, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ShopByRecipe from "../product/shop-by-recipe";
 
 type StoreFeature = {
     id: string;
@@ -64,6 +65,7 @@ type HomePageClientProps = {
   bestSellers: Product[];
   exclusiveOffers: Product[];
   newArrivals: Product[];
+  recipes: Recipe[];
 };
 
 const useRecentProducts = () => {
@@ -178,7 +180,7 @@ function WhyChooseUs() {
 }
 
 
-export default function HomePageClient({ bestSellers, exclusiveOffers, newArrivals }: HomePageClientProps) {
+export default function HomePageClient({ bestSellers, exclusiveOffers, newArrivals, recipes }: HomePageClientProps) {
   const { t } = useLanguage();
   const { categories, areCategoriesLoading } = useCategories();
 
@@ -190,6 +192,11 @@ export default function HomePageClient({ bestSellers, exclusiveOffers, newArriva
         <CategoryShowcase title={t('home.browseCategories')} categories={categories || []} />
       )}
       <WhyChooseUs />
+      {recipes && recipes.length > 0 && (
+          <div className="mt-12 md:mt-16">
+            <ShopByRecipe recipes={recipes} />
+          </div>
+      )}
       <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
       <ProductGrid title={t('home.newArrivals')} products={newArrivals} />
       <ProductGrid title={t('home.exclusiveOffers')} products={exclusiveOffers} />
