@@ -1,13 +1,62 @@
 
+
 import { Suspense } from 'react';
 import ProductsPageClient from './products-client';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { initializeApp, getApps } from 'firebase/app';
+import { getFirestore, collection, query, getDocs } from 'firebase/firestore';
+import { firebaseConfig } from '@/firebase/config';
+import type { Product } from '@/lib/placeholder-data';
+import { WithContext, ItemList } from 'schema-dts';
 
-export const metadata: Metadata = {
-  title: 'Tous les produits',
-  description: 'Parcourez notre gamme complète de produits frais et de haute qualité chez Tlemcen Smart Supermarket.',
-};
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+export async function generateMetadata(
+  {},
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const db = getFirestore();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  const productsQuery = query(collection(db, 'products'));
+  const productsSnap = await getDocs(productsQuery);
+  const products = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  
+  const itemListJsonLd: WithContext<ItemList> = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: "Tous les produits",
+    description: "Parcourez notre gamme complète de produits frais et de haute qualité.",
+    itemListElement: products.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+            '@type': 'Product',
+            url: `${baseUrl}/product/${product.slug}`,
+            name: product.name,
+            image: product.images[0],
+            offers: {
+                '@type': 'Offer',
+                price: (product.price * (1 - (product.discount || 0) / 100)).toFixed(2),
+                priceCurrency: 'DZD',
+                availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            }
+        }
+    }))
+  };
+
+  return {
+    title: 'Tous les produits',
+    description: 'Parcourez notre gamme complète de produits frais et de haute qualité chez Tlemcen Smart Supermarket.',
+    other: {
+      jsonLd: JSON.stringify(itemListJsonLd)
+    }
+  };
+}
 
 
 export default function ProductsPage() {

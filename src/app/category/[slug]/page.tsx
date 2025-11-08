@@ -15,7 +15,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
 import { getFirestore } from 'firebase/firestore';
 import dynamic from 'next/dynamic';
-import { WithContext, BreadcrumbList } from 'schema-dts';
+import { WithContext, BreadcrumbList, ItemList } from 'schema-dts';
 
 // This needs to be outside the component to work on the server
 if (!getApps().length) {
@@ -42,7 +42,13 @@ export async function generateMetadata(
     }
   }
 
-  const category = categorySnap.docs[0].data() as Category;
+  const category = { id: categorySnap.docs[0].id, ...categorySnap.docs[0].data() } as Category;
+  
+  // Fetch products for ItemList schema
+  const productsQuery = query(collection(db, 'products'), where('categoryId', '==', category.id));
+  const productsSnap = await getDocs(productsQuery);
+  const products = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
   const previousImages = (await parent).openGraph?.images || []
   
   const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
@@ -53,6 +59,36 @@ export async function generateMetadata(
         { '@type': 'ListItem', position: 2, name: 'Produits', item: `${baseUrl}/products` },
         { '@type': 'ListItem', position: 3, name: category.name, item: `${baseUrl}/category/${category.slug}` }
     ]
+  };
+  
+  const itemListJsonLd: WithContext<ItemList> = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: category.name,
+    description: `Découvrez nos produits dans la catégorie ${category.name}`,
+    itemListElement: products.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+            '@type': 'Product',
+            url: `${baseUrl}/product/${product.slug}`,
+            name: product.name,
+            image: product.images[0],
+             ...(product.averageRating && product.reviewCount && {
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: product.averageRating.toString(),
+                    reviewCount: product.reviewCount.toString(),
+                },
+            }),
+            offers: {
+                '@type': 'Offer',
+                price: (product.price * (1 - (product.discount || 0) / 100)).toFixed(2),
+                priceCurrency: 'DZD',
+                availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            }
+        }
+    }))
   };
 
   return {
@@ -72,7 +108,7 @@ export async function generateMetadata(
       ],
     },
     other: {
-        jsonLd: JSON.stringify(breadcrumbJsonLd),
+        jsonLd: JSON.stringify([breadcrumbJsonLd, itemListJsonLd]),
     }
   }
 }
