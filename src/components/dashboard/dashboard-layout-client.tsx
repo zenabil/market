@@ -63,16 +63,6 @@ const adminMenuItems = [
     href: '/dashboard/products',
     icon: Package,
   },
-   {
-    key: 'content',
-    href: '/dashboard/content',
-    icon: FileText,
-  },
-  {
-    key: 'recipes',
-    href: '/dashboard/recipes',
-    icon: BookOpen,
-  },
   {
     key: 'categories',
     href: '/dashboard/categories',
@@ -83,10 +73,20 @@ const adminMenuItems = [
     href: '/dashboard/users',
     icon: Users,
   },
-    {
+  {
     key: 'messages',
     href: '/dashboard/messages',
     icon: Mail,
+  },
+  {
+    key: 'recipes',
+    href: '/dashboard/recipes',
+    icon: BookOpen,
+  },
+   {
+    key: 'content',
+    href: '/dashboard/content',
+    icon: FileText,
   },
   {
     key: 'coupons',
