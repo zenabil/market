@@ -1,5 +1,3 @@
-
-
 import { type MetadataRoute } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, getDocs, query } from 'firebase/firestore';
@@ -77,5 +75,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...recipeRoutes
     ];
 }
-
-    

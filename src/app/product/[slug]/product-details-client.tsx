@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
@@ -309,5 +308,3 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
     </>
   );
 }
-
-    
