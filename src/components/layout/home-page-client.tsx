@@ -1,8 +1,7 @@
 "use client"
 
 import type { Category, Product } from "@/lib/placeholder-data";
-import CategoryShowcase from "../product/category-showcase";
-import ProductGrid from "../product/product-grid";
+import dynamic from 'next/dynamic';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import React, { useEffect, useState, useMemo } from "react";
 import { getProductRecommendations } from "@/ai/flows/product-recommendations";
@@ -10,6 +9,36 @@ import { Skeleton } from "../ui/skeleton";
 import { collection, query, where, documentId } from "firebase/firestore";
 import { useLanguage } from "@/contexts/language-provider";
 import { useCategories } from "@/hooks/use-categories";
+
+const CategoryShowcase = dynamic(() => import('../product/category-showcase'), {
+  loading: () => <CategoryShowcaseSkeleton />,
+});
+const ProductGrid = dynamic(() => import('../product/product-grid'), {
+    loading: () => <ProductGridSkeleton />,
+});
+
+function CategoryShowcaseSkeleton() {
+    return (
+        <div className="mb-12 md:mb-16">
+            <Skeleton className="h-10 w-80 mx-auto mb-8" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+            </div>
+        </div>
+    );
+}
+
+function ProductGridSkeleton() {
+    return (
+        <div className="mt-12 md:mt-16">
+            <Skeleton className="h-10 w-64 mb-8" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
+            </div>
+        </div>
+    );
+}
+
 
 type HomePageClientProps = {
   bestSellers: Product[];
@@ -79,12 +108,7 @@ function RecommendedProducts() {
 
     if (finalIsLoading) {
          return (
-            <div className="mt-12 md:mt-16">
-                <h2 className="font-headline text-3xl md:text-4xl mb-8">{t('home.recommendedForYou')}</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
-                </div>
-            </div>
+            <ProductGridSkeleton />
         );
     }
 
@@ -102,24 +126,13 @@ export default function HomePageClient({ bestSellers, exclusiveOffers, newArriva
   return (
     <div className="container py-8 md:py-12">
       {areCategoriesLoading ? (
-        <div className="mb-12 md:mb-16">
-            <Skeleton className="h-10 w-80 mx-auto mb-8" />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-            </div>
-        </div>
+        <CategoryShowcaseSkeleton />
       ) : (
         <CategoryShowcase title={t('home.browseCategories')} categories={categories || []} />
       )}
-      <div className="mt-12 md:mt-16">
-        <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
-      </div>
-      <div className="mt-12 md:mt-16">
-        <ProductGrid title={t('home.newArrivals')} products={newArrivals} />
-      </div>
-       <div className="mt-12 md:mt-16">
-        <ProductGrid title={t('home.exclusiveOffers')} products={exclusiveOffers} />
-      </div>
+      <ProductGrid title={t('home.bestSellers')} products={bestSellers} />
+      <ProductGrid title={t('home.newArrivals')} products={newArrivals} />
+      <ProductGrid title={t('home.exclusiveOffers')} products={exclusiveOffers} />
       <RecommendedProducts />
     </div>
   );
