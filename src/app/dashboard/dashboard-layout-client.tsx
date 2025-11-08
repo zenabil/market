@@ -163,7 +163,7 @@ function DashboardSidebar() {
 
   return (
     <Sidebar
-      collapsible={isCollapsed ? 'icon' : 'offcanvas'}
+      collapsible="offcanvas"
       className={cn(isCollapsed && 'group-data-[collapsible=icon]:w-14')}
     >
       <SidebarHeader className={cn("p-4", isCollapsed && "p-2")}>

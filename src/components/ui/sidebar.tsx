@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelRight } from "lucide-react"
+import { PanelRight, X } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -175,7 +175,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -191,6 +191,8 @@ const Sidebar = React.forwardRef<
         </div>
       )
     }
+    
+    const Comp = isMobile ? Sheet : "div"
 
     if (isMobile) {
       return (
@@ -198,7 +200,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -251,6 +253,14 @@ const Sidebar = React.forwardRef<
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
             {children}
+             <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-3 right-3 h-6 w-6 group-data-[collapsible=icon]:hidden"
+                onClick={() => setOpen(false)}
+            >
+                <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
