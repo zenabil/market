@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
@@ -279,7 +278,7 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
                 ) : (
                     <div className="divide-y">
                         {bundledItems?.map(item => (
-                            <Link key={item.id} href={`/product/${item.slug || item.id}`} className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-6 px-6">
+                            <Link key={item.id} href={`/product/${item.slug}`} className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-6 px-6">
                                 <Image src={item.images[0]} alt={item.name} width={64} height={64} className="rounded-md border object-cover" />
                                 <div className="flex-grow">
                                     <p className="font-semibold">{item.name}</p>
@@ -310,3 +309,5 @@ export default function ProductDetailsClient({ productSlug }: { productSlug: str
     </>
   );
 }
+
+    

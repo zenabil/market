@@ -40,3 +40,5 @@ export default function CategoryShowcase({ title, categories }: CategoryShowcase
     </section>
   );
 }
+
+    
