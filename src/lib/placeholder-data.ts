@@ -92,6 +92,7 @@ export type WishlistItem = {
 export type Recipe = {
   id: string;
   title: string;
+  slug: string;
   description: string;
   image: string;
   prepTime: number;

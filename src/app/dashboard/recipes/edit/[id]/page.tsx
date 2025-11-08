@@ -81,9 +81,9 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
   const { t } = useLanguage();
   
   const formSchema = z.object({
-    title: z.string().min(2),
+    title: z.string().min(2, { message: t('dashboard.recipes.validation.title') }),
     description: z.string().optional(),
-    image: z.string().url(),
+    image: z.string().url({ message: t('dashboard.recipes.validation.imageUrl') }),
     prepTime: z.coerce.number().int().min(0),
     cookTime: z.coerce.number().int().min(0),
     servings: z.coerce.number().int().min(1),
@@ -166,12 +166,14 @@ function EditRecipeForm({ recipeId }: { recipeId: string }) {
         recipeData.slug = slugify(values.title);
     }
 
-    updateDoc(recipeRef, recipeData)
+    updateDoc(recipeRef, recipeData as any)
         .then(() => {
             toast({ title: t('dashboard.recipes.toast.updated') });
             refetch(); // Refetch data to ensure UI is in sync
             form.reset(form.getValues()); // Resets the 'dirty' state
             if (recipeData.slug) {
+                // If slug changed, router.replace will update the URL without a full page reload
+                // and without adding a new entry to the history stack.
                 router.replace(`/dashboard/recipes/edit/${recipe.id}`, { scroll: false });
             }
         })
