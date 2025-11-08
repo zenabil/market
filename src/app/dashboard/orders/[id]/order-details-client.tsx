@@ -193,10 +193,10 @@ export default function OrderDetailsClient() {
                                         <div key={item.productId} className="flex justify-between items-center">
                                             <div className='flex items-center gap-4'>
                                                  <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0 relative overflow-hidden">
-                                                    {product ? <Link href={`/product/${product.id}`}><Image src={product.images[0]} alt={product.name} fill className="object-cover" /></Link> : <div className="w-full h-full bg-muted" />}
+                                                    {product ? <Link href={`/product/${product.slug}`}><Image src={product.images[0]} alt={product.name} fill className="object-cover" /></Link> : <div className="w-full h-full bg-muted" />}
                                                 </div>
                                                 <div>
-                                                    <Link href={`/product/${item.productId}`} className="font-medium hover:underline">{item.productName}</Link>
+                                                    <Link href={`/product/${product?.slug}`} className="font-medium hover:underline">{item.productName}</Link>
                                                     <p className="text-sm text-muted-foreground">
                                                         {item.quantity} x {formatCurrency(item.price)}
                                                     </p>
