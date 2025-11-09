@@ -26,6 +26,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { useLanguage } from '@/contexts/language-provider';
+import type { Product } from '@/lib/placeholder-data';
 
 function slugify(text: string): string {
     return text
