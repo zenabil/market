@@ -41,83 +41,31 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser } from '@/firebase';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useLanguage } from '@/contexts/language-provider';
 
 const adminMenuItems = [
-  {
-    key: 'dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    key: 'orders',
-    href: '/dashboard/orders',
-    icon: ShoppingBasket,
-  },
-  {
-    key: 'products',
-    href: '/dashboard/products',
-    icon: Package,
-  },
-   {
-    key: 'content',
-    href: '/dashboard/content',
-    icon: FileText,
-  },
-  {
-    key: 'recipes',
-    href: '/dashboard/recipes',
-    icon: BookOpen,
-  },
-  {
-    key: 'categories',
-    href: '/dashboard/categories',
-    icon: LayoutGrid,
-  },
-  {
-    key: 'users',
-    href: '/dashboard/users',
-    icon: Users,
-  },
-    {
-    key: 'messages',
-    href: '/dashboard/messages',
-    icon: Mail,
-  },
-  {
-    key: 'coupons',
-    href: '/dashboard/coupons',
-    icon: Ticket,
-  },
-  {
-    key: 'discounts',
-    href: '/dashboard/discounts',
-    icon: Percent,
-  },
-  {
-    key: 'features',
-    href: '/dashboard/features',
-    icon: Sparkles,
-  },
-   {
-    key: 'team',
-    href: '/dashboard/team',
-    icon: UserSquare,
-  },
-  {
-    key: 'images',
-    href: '/dashboard/images',
-    icon: Image,
-  },
-  {
-    key: 'settings',
-    href: '/dashboard/settings',
-    icon: Settings,
-  },
+  // Core
+  { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'orders', href: '/dashboard/orders', icon: ShoppingBasket },
+  { key: 'products', href: '/dashboard/products', icon: Package },
+  { key: 'categories', href: '/dashboard/categories', icon: LayoutGrid },
+  { key: 'recipes', href: '/dashboard/recipes', icon: BookOpen },
+  { key: 'users', href: '/dashboard/users', icon: Users },
+  { key: 'messages', href: '/dashboard/messages', icon: Mail },
+  // Marketing
+  { key: 'coupons', href: '/dashboard/coupons', icon: Ticket },
+  { key: 'discounts', href: '/dashboard/discounts', icon: Percent },
+  // Content
+  { key: 'content', href: '/dashboard/content', icon: FileText },
+  { key: 'features', href: '/dashboard/features', icon: Sparkles },
+  { key: 'team', href: '/dashboard/team', icon: UserSquare },
+  { key: 'images', href: '/dashboard/images', icon: Image },
+  // System
+  { key: 'settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 const userMenuItems = [

@@ -1,7 +1,5 @@
 
 
-'use client';
-
 import { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
@@ -12,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Product, Category, Review } from '@/lib/placeholder-data';
 import { WithContext, Product as ProductSchema, BreadcrumbList, Review as ReviewSchema } from 'schema-dts';
 
-const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false });
+const ProductDetailsClient = dynamic(() => import('./product-details-client'), { ssr: false, loading: () => <ProductPageSkeleton /> });
 
 // Server-side metadata generation
 if (!getApps().length) {

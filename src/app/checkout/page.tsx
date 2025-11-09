@@ -1,4 +1,5 @@
 
+'use client';
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -7,17 +8,8 @@ import dynamic from 'next/dynamic';
 
 const CheckoutPageClient = dynamic(() => import('./checkout-client'), {
     ssr: false,
+    loading: () => <CheckoutPageSkeleton />
 });
-
-
-export const metadata: Metadata = {
-  title: 'Paiement',
-  description: 'Finalisez votre commande en toute sécurité.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 export default function CheckoutPage() {
     return (

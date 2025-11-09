@@ -1,21 +1,20 @@
 
 
-'use client';
-
-import { Suspense, useMemo, useEffect, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import ProductGrid from '@/components/product/product-grid';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, getDoc, getDocs, limit } from 'firebase/firestore';
-import type { Product, Category } from '@/lib/placeholder-data';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useLanguage } from '@/contexts/language-provider';
+import { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
+import { getFirestore, doc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
-import { getFirestore } from 'firebase/firestore';
 import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { Product, Category } from '@/lib/placeholder-data';
 import { WithContext, BreadcrumbList, ItemList } from 'schema-dts';
+
+const CategoryDetailsClient = dynamic(() => import('./category-client'), {
+    loading: () => <CategoryPageSkeleton />,
+    ssr: false,
+});
+
 
 // This needs to be outside the component to work on the server
 if (!getApps().length) {
@@ -113,72 +112,6 @@ export async function generateMetadata(
   }
 }
 
-
-function CategoryDetailsClient() {
-  const { t } = useLanguage();
-  const firestore = useFirestore();
-  const params = useParams();
-  const slug = params.slug as string;
-
-  const [category, setCategory] = useState<Category | null>(null);
-  const [isLoadingCategory, setIsLoadingCategory] = useState(true);
-
-  useEffect(() => {
-    if (!firestore || !slug) return;
-    
-    const fetchCategory = async () => {
-        setIsLoadingCategory(true);
-        const q = query(collection(firestore, 'categories'), where('slug', '==', slug), limit(1));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-            const doc = snap.docs[0];
-            setCategory({ id: doc.id, ...doc.data()} as Category);
-        } else {
-            setCategory(null);
-        }
-        setIsLoadingCategory(false);
-    }
-    fetchCategory();
-
-  }, [firestore, slug]);
-
-
-  const productsQuery = useMemoFirebase(() => {
-    if (!firestore || !category) return null;
-    return query(collection(firestore, 'products'), where('categoryId', '==', category.id));
-  }, [firestore, category]);
-  
-  const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
-
-  const isLoading = isLoadingCategory || areProductsLoading;
-
-  if (!isLoading && !category) {
-    notFound();
-  }
-
-  if (isLoading) {
-      return <CategoryPageSkeleton />;
-  }
-
-  return (
-    <div className="container py-6 md:py-8">
-      <div className="text-center mb-8">
-        <h1 className="font-headline text-4xl md:text-5xl">{category?.name}</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{t('category.subtitle', { name: category?.name || '' })}</p>
-      </div>
-      <>
-        {products && products.length > 0 ? (
-          <ProductGrid title="" products={products} />
-        ) : (
-            <div className="text-center p-8 text-muted-foreground">
-            {t('category.noProducts')}
-        </div>
-        )}
-      </>
-    </div>
-  );
-}
-
 function CategoryPageSkeleton() {
     return (
         <div className="container py-6 md:py-8">
@@ -195,10 +128,10 @@ function CategoryPageSkeleton() {
     );
 }
 
-export default function CategoryPage() {
+export default function CategoryPage({ params }: { params: { slug: string } }) {
     return (
         <Suspense fallback={<CategoryPageSkeleton />}>
-            <CategoryDetailsClient />
+            <CategoryDetailsClient slug={params.slug} />
         </Suspense>
     );
 }

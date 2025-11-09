@@ -1,7 +1,5 @@
 
 
-'use client';
-
 import React, { Suspense } from 'react';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { initializeApp, getApps } from 'firebase/app';
@@ -13,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import type { Recipe, Review } from '@/lib/placeholder-data';
 import { WithContext, Recipe as RecipeSchema, BreadcrumbList, Review as ReviewSchema } from 'schema-dts';
 
-const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false });
+const RecipeDetailsClient = dynamic(() => import('./recipe-details-client'), { ssr: false, loading: () => <RecipePageSkeleton /> });
 
 // Server-side metadata generation
 if (!getApps().length) {
