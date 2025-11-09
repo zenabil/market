@@ -117,7 +117,7 @@ export default function LoginPage() {
 
     const displayName = name || user.displayName;
 
-    // First, update the user's profile in Firebase Auth.
+    // First, update the user's profile in Firebase Auth if a name is provided and different.
     if(displayName && displayName !== user.displayName) {
         await updateProfile(user, { displayName });
     }
@@ -147,24 +147,13 @@ export default function LoginPage() {
     const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
     batch.set(adminRoleRef, { role: 'admin' });
     
-    // The security rules will only allow the roles_admin write if the collection is empty.
-    // If that succeeds, we can also update the user's role field.
-    // We can't do this conditionally in a batch, so we rely on the security rule to fail the whole batch if needed.
-    // A better approach is to handle it in two steps if the first user case is critical.
-    
     try {
         await batch.commit();
-        // If the batch commit was successful, it means it was the first user.
-        // Now update the user document with the Admin role.
         await setDoc(userDocRef, { role: 'Admin' }, { merge: true });
     } catch (error: any) {
-        // If the batch failed, it's likely because the roles_admin write was denied.
-        // This is the expected case for every user after the first.
-        // We'll now create just the user document.
         if (error.code === 'permission-denied') {
             await setDoc(userDocRef, userData);
         } else {
-             // Re-throw other unexpected errors.
             console.error("An unexpected error occurred during user creation:", error);
             throw error;
         }
@@ -469,3 +458,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
