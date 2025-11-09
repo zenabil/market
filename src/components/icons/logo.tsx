@@ -9,7 +9,7 @@ const Logo = ({ className, logoUrl }: { className?: string; logoUrl?: string | n
   return (
     <svg
       className={className}
-      viewBox="0 0 154 40"
+      viewBox="0 0 240 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Tlemcen Smart Supermarket Logo"
