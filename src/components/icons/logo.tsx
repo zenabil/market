@@ -13,6 +13,7 @@ const Logo = ({ className, logoUrl }: { className?: string; logoUrl?: string | n
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Tlemcen Smart Supermarket Logo"
+      dir="ltr"
     >
       <path
         d="M23.1167 33.6667C24.8885 33.6667 26.3333 32.2219 26.3333 30.45V11.2167H33V8H20.1167V11.2167H26.3333V27.4H20.1167V30.45C20.1167 32.2219 21.5615 33.6667 23.1167 33.6667Z"
