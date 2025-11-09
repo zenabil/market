@@ -12,7 +12,6 @@ import { WithContext, BreadcrumbList, ItemList } from 'schema-dts';
 
 const CategoryDetailsClient = dynamic(() => import('./category-client'), {
     loading: () => <CategoryPageSkeleton />,
-    ssr: false,
 });
 
 

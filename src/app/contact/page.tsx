@@ -1,4 +1,5 @@
 
+
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -6,7 +7,6 @@ import dynamic from 'next/dynamic';
 
 const ContactPageClient = dynamic(() => import('./contact-client'), {
     loading: () => <ContactPageSkeleton />,
-    ssr: false,
 });
 
 export const metadata: Metadata = {

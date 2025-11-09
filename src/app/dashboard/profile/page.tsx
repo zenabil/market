@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -116,7 +117,7 @@ export default function ProfilePage() {
   };
 
 
-  async function onProfileSubmit(values: z.infer<typeof profileFormSchema>>) {
+  async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
     if (!userDocRef || !authUser) return;
     setIsSaving(true);
     
@@ -153,7 +154,7 @@ export default function ProfilePage() {
     }
   }
 
-  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>>) {
+  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
       if (!authUser) return;
       setIsPasswordSaving(true);
       try {
