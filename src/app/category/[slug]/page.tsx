@@ -134,3 +134,5 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </Suspense>
     );
 }
+
+    

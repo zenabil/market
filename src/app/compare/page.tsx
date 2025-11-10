@@ -27,3 +27,5 @@ function ComparePageSkeleton() {
         </div>
     );
 }
+
+    

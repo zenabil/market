@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const PrivacyPageClient = dynamic(() => import('./privacy-client'), {
     loading: () => <PrivacyPageSkeleton />,
-    ssr: false,
 });
 
 
@@ -46,3 +45,5 @@ function PrivacyPageSkeleton() {
         </div>
     );
 }
+
+    

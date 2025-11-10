@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const TermsPageClient = dynamic(() => import('./terms-client'), {
     loading: () => <TermsPageSkeleton />,
-    ssr: false,
 });
 
 
@@ -45,3 +44,5 @@ function TermsPageSkeleton() {
         </div>
     );
 }
+
+    

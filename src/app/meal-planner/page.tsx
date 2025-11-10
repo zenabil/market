@@ -119,7 +119,7 @@ export default function MealPlannerPage() {
   };
 
 
-  async function onSubmit(values: z.infer<typeof formSchema>>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setMealPlan(null);
     toast({
@@ -297,3 +297,5 @@ export default function MealPlannerPage() {
     </div>
   );
 }
+
+    
