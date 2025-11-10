@@ -44,5 +44,4 @@ function TermsPageSkeleton() {
         </div>
     );
 }
-
     

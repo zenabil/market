@@ -152,5 +152,3 @@ export default function RecipePage({ params }: { params: { slug: string }}) {
         </Suspense>
     );
 }
-
-    
